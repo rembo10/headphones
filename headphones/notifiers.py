@@ -13,7 +13,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-from urllib import urlencode
+from urllib import urlencode, quote_plus
 import urllib
 import subprocess
 import json
@@ -148,7 +148,8 @@ class PROWL(object):
 
         http_handler.request("POST",
                              "/publicapi/add",
-                             headers={'Content-type': "application/x-www-form-urlencoded"},
+                             headers={
+                                 'Content-type': "application/x-www-form-urlencoded"},
                              body=urlencode(data))
         response = http_handler.getresponse()
         request_status = response.status
@@ -203,20 +204,25 @@ class XBMC(object):
         url = host + '/xbmcCmds/xbmcHttp/?' + url_command
 
         if self.password:
-            return request.request_content(url, auth=(self.username, self.password))
+            return request.request_content(url,
+                                           auth=(self.username, self.password))
         else:
             return request.request_content(url)
 
     def _sendjson(self, host, method, params={}):
-        data = [{'id': 0, 'jsonrpc': '2.0', 'method': method, 'params': params}]
+        data = [
+            {'id': 0, 'jsonrpc': '2.0', 'method': method, 'params': params}]
         headers = {'Content-Type': 'application/json'}
         url = host + '/jsonrpc'
 
         if self.password:
-            response = request.request_json(url, method="post", data=json.dumps(data),
-                                            headers=headers, auth=(self.username, self.password))
+            response = request.request_json(url, method="post",
+                                            data=json.dumps(data),
+                                            headers=headers, auth=(
+                    self.username, self.password))
         else:
-            response = request.request_json(url, method="post", data=json.dumps(data),
+            response = request.request_json(url, method="post",
+                                            data=json.dumps(data),
                                             headers=headers)
 
         if response:
@@ -247,7 +253,8 @@ class XBMC(object):
             logger.info('Sending notification command to XMBC @ ' + host)
             try:
                 version = self._sendjson(host, 'Application.GetProperties',
-                                         {'properties': ['version']})['version']['major']
+                                         {'properties': ['version']})[
+                    'version']['major']
 
                 if version < 12:  # Eden
                     notification = header + "," + message + "," + time + "," + albumartpath
@@ -256,9 +263,11 @@ class XBMC(object):
                     request = self._sendhttp(host, notifycommand)
 
                 else:  # Frodo
-                    params = {'title': header, 'message': message, 'displaytime': int(time),
+                    params = {'title': header, 'message': message,
+                              'displaytime': int(time),
                               'image': albumartpath}
-                    request = self._sendjson(host, 'GUI.ShowNotification', params)
+                    request = self._sendjson(host, 'GUI.ShowNotification',
+                                             params)
 
                 if not request:
                     raise Exception
@@ -323,22 +332,27 @@ class Plex(object):
         url = host + '/xbmcCmds/xbmcHttp/?' + command
 
         if self.password:
-            response = request.request_response(url, auth=(self.username, self.password))
+            response = request.request_response(url, auth=(
+                self.username, self.password))
         else:
             response = request.request_response(url)
 
         return response
 
     def _sendjson(self, host, method, params={}):
-        data = [{'id': 0, 'jsonrpc': '2.0', 'method': method, 'params': params}]
+        data = [
+            {'id': 0, 'jsonrpc': '2.0', 'method': method, 'params': params}]
         headers = {'Content-Type': 'application/json'}
         url = host + '/jsonrpc'
 
         if self.password:
-            response = request.request_json(url, method="post", data=json.dumps(data),
-                                            headers=headers, auth=(self.username, self.password))
+            response = request.request_json(url, method="post",
+                                            data=json.dumps(data),
+                                            headers=headers, auth=(
+                    self.username, self.password))
         else:
-            response = request.request_json(url, method="post", data=json.dumps(data),
+            response = request.request_json(url, method="post",
+                                            data=json.dumps(data),
                                             headers=headers)
 
         if response:
@@ -352,7 +366,8 @@ class Plex(object):
         hosts = [x.strip() for x in self.server_hosts.split(',')]
 
         for host in hosts:
-            logger.info('Sending library update command to Plex Media Server@ ' + host)
+            logger.info(
+                'Sending library update command to Plex Media Server@ ' + host)
             url = "%s/library/sections" % host
             if self.token:
                 params = {'X-Plex-Token': self.token}
@@ -369,7 +384,8 @@ class Plex(object):
 
             for s in sections:
                 if s.getAttribute('type') == "artist":
-                    url = "%s/library/sections/%s/refresh" % (host, s.getAttribute('key'))
+                    url = "%s/library/sections/%s/refresh" % (
+                        host, s.getAttribute('key'))
                     request.request_response(url, params=params)
 
     def notify(self, artist, album, albumartpath):
@@ -381,10 +397,12 @@ class Plex(object):
         time = "3000"  # in ms
 
         for host in hosts:
-            logger.info('Sending notification command to Plex client @ ' + host)
+            logger.info(
+                'Sending notification command to Plex client @ ' + host)
             try:
                 version = self._sendjson(host, 'Application.GetProperties',
-                                         {'properties': ['version']})['version']['major']
+                                         {'properties': ['version']})[
+                    'version']['major']
 
                 if version < 12:  # Eden
                     notification = header + "," + message + "," + time + "," + albumartpath
@@ -393,15 +411,18 @@ class Plex(object):
                     request = self._sendhttp(host, notifycommand)
 
                 else:  # Frodo
-                    params = {'title': header, 'message': message, 'displaytime': int(time),
+                    params = {'title': header, 'message': message,
+                              'displaytime': int(time),
                               'image': albumartpath}
-                    request = self._sendjson(host, 'GUI.ShowNotification', params)
+                    request = self._sendjson(host, 'GUI.ShowNotification',
+                                             params)
 
                 if not request:
                     raise Exception
 
             except Exception:
-                logger.error('Error sending notification request to Plex client @ ' + host)
+                logger.error(
+                    'Error sending notification request to Plex client @ ' + host)
 
 
 class NMA(object):
@@ -433,7 +454,8 @@ class NMA(object):
         if len(keys) > 1:
             batch = True
 
-        response = p.push(title, event, message, priority=nma_priority, batch_mode=batch)
+        response = p.push(title, event, message, priority=nma_priority,
+                          batch_mode=batch)
 
         if not response[api][u'code'] == u'200':
             logger.error(u'Could not send notification to NotifyMyAndroid')
@@ -463,7 +485,8 @@ class PUSHBULLET(object):
         headers = {'Content-type': "application/json",
                    'Authorization': 'Bearer ' + headphones.CONFIG.PUSHBULLET_APIKEY}
 
-        response = request.request_json(url, method="post", headers=headers, data=json.dumps(data))
+        response = request.request_json(url, method="post", headers=headers,
+                                        data=json.dumps(data))
 
         if response:
             logger.info(u"PushBullet notifications sent.")
@@ -492,7 +515,8 @@ class PUSHALOT(object):
 
         http_handler.request("POST",
                              "/api/sendmessage",
-                             headers={'Content-type': "application/x-www-form-urlencoded"},
+                             headers={
+                                 'Content-type': "application/x-www-form-urlencoded"},
                              body=urlencode(data))
         response = http_handler.getresponse()
         request_status = response.status
@@ -509,6 +533,49 @@ class PUSHALOT(object):
             return False
         else:
             logger.info(u"Pushalot notification failed.")
+            return False
+
+
+class JOIN(object):
+    def __init__(self):
+
+        self.enabled = headphones.CONFIG.JOIN_ENABLED
+        self.apikey = headphones.CONFIG.JOIN_APIKEY
+        self.deviceid = headphones.CONFIG.JOIN_DEVICEID
+        self.url = 'https://joinjoaomgcd.appspot.com/_ah/' \
+                   'api/messaging/v1/sendPush?apikey={apikey}' \
+                   '&title={title}&text={text}' \
+                   '&icon={icon}'
+
+    def notify(self, message, event):
+        if not headphones.CONFIG.JOIN_ENABLED or \
+                not headphones.CONFIG.JOIN_APIKEY:
+            return
+
+        icon = "https://cdn.rawgit.com/Headphones/" \
+               "headphones/develop/data/images/headphoneslogo.png"
+
+        if not self.deviceid:
+            self.deviceid = "group.all"
+        l = [x.strip() for x in self.deviceid.split(',')]
+        if len(l) > 1:
+            self.url += '&deviceIds={deviceid}'
+        else:
+            self.url += '&deviceId={deviceid}'
+
+        response = urllib2.urlopen(self.url.format(apikey=self.apikey,
+                                                   title=quote_plus(event),
+                                                   text=quote_plus(
+                                                       message.encode(
+                                                           "utf-8")),
+                                                   icon=icon,
+                                                   deviceid=self.deviceid))
+
+        if response:
+            logger.info(u"Join notifications sent.")
+            return True
+        else:
+            logger.error(u"Join notification failed.")
             return False
 
 
@@ -539,7 +606,8 @@ class Synoindex(object):
         cmd = [self.util_loc, cmd_arg, path]
         logger.info("Calling synoindex command: %s" % str(cmd))
         try:
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+            p = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                                 stderr=subprocess.STDOUT,
                                  cwd=headphones.PROG_DIR)
             out, error = p.communicate()
             # synoindex never returns any codes other than '0', highly irritating
@@ -580,7 +648,8 @@ class PUSHOVER(object):
 
         headers = {'Content-type': "application/x-www-form-urlencoded"}
 
-        response = request.request_response(url, method="POST", headers=headers, data=data)
+        response = request.request_response(url, method="POST",
+                                            headers=headers, data=data)
 
         if response:
             logger.info(u"Pushover notifications sent.")
@@ -614,7 +683,8 @@ class TwitterNotifier(object):
     def notify_snatch(self, title):
         if headphones.CONFIG.TWITTER_ONSNATCH:
             self._notifyTwitter(
-                common.notifyStrings[common.NOTIFY_SNATCH] + ': ' + title + ' at ' + helpers.now())
+                common.notifyStrings[
+                    common.NOTIFY_SNATCH] + ': ' + title + ' at ' + helpers.now())
 
     def notify_download(self, title):
         if headphones.CONFIG.TWITTER_ENABLED:
@@ -623,11 +693,13 @@ class TwitterNotifier(object):
 
     def test_notify(self):
         return self._notifyTwitter(
-            "This is a test notification from Headphones at " + helpers.now(), force=True)
+            "This is a test notification from Headphones at " + helpers.now(),
+            force=True)
 
     def _get_authorization(self):
 
-        oauth_consumer = oauth.Consumer(key=self.consumer_key, secret=self.consumer_secret)
+        oauth_consumer = oauth.Consumer(key=self.consumer_key,
+                                        secret=self.consumer_secret)
         oauth_client = oauth.Client(oauth_consumer)
 
         logger.info('Requesting temp token from Twitter')
@@ -635,32 +707,41 @@ class TwitterNotifier(object):
         resp, content = oauth_client.request(self.REQUEST_TOKEN_URL, 'GET')
 
         if resp['status'] != '200':
-            logger.info('Invalid respond from Twitter requesting temp token: %s' % resp['status'])
+            logger.info(
+                'Invalid respond from Twitter requesting temp token: %s' %
+                resp['status'])
         else:
             request_token = dict(parse_qsl(content))
 
             headphones.CONFIG.TWITTER_USERNAME = request_token['oauth_token']
-            headphones.CONFIG.TWITTER_PASSWORD = request_token['oauth_token_secret']
+            headphones.CONFIG.TWITTER_PASSWORD = request_token[
+                'oauth_token_secret']
 
-            return self.AUTHORIZATION_URL + "?oauth_token=" + request_token['oauth_token']
+            return self.AUTHORIZATION_URL + "?oauth_token=" + request_token[
+                'oauth_token']
 
     def _get_credentials(self, key):
         request_token = {}
 
         request_token['oauth_token'] = headphones.CONFIG.TWITTER_USERNAME
-        request_token['oauth_token_secret'] = headphones.CONFIG.TWITTER_PASSWORD
+        request_token[
+            'oauth_token_secret'] = headphones.CONFIG.TWITTER_PASSWORD
         request_token['oauth_callback_confirmed'] = 'true'
 
-        token = oauth.Token(request_token['oauth_token'], request_token['oauth_token_secret'])
+        token = oauth.Token(request_token['oauth_token'],
+                            request_token['oauth_token_secret'])
         token.set_verifier(key)
 
-        logger.info('Generating and signing request for an access token using key ' + key)
+        logger.info(
+            'Generating and signing request for an access token using key ' + key)
 
-        oauth_consumer = oauth.Consumer(key=self.consumer_key, secret=self.consumer_secret)
+        oauth_consumer = oauth.Consumer(key=self.consumer_key,
+                                        secret=self.consumer_secret)
         logger.info('oauth_consumer: ' + str(oauth_consumer))
         oauth_client = oauth.Client(oauth_consumer, token)
         logger.info('oauth_client: ' + str(oauth_client))
-        resp, content = oauth_client.request(self.ACCESS_TOKEN_URL, method='POST',
+        resp, content = oauth_client.request(self.ACCESS_TOKEN_URL,
+                                             method='POST',
                                              body='oauth_verifier=%s' % key)
         logger.info('resp, content: ' + str(resp) + ',' + str(content))
 
@@ -669,14 +750,18 @@ class TwitterNotifier(object):
 
         logger.info('resp[status] = ' + str(resp['status']))
         if resp['status'] != '200':
-            logger.info('The request for a token with did not succeed: ' + str(resp['status']),
+            logger.info('The request for a token with did not succeed: ' + str(
+                resp['status']),
                         logger.ERROR)
             return False
         else:
-            logger.info('Your Twitter Access Token key: %s' % access_token['oauth_token'])
-            logger.info('Access Token secret: %s' % access_token['oauth_token_secret'])
+            logger.info('Your Twitter Access Token key: %s' % access_token[
+                'oauth_token'])
+            logger.info(
+                'Access Token secret: %s' % access_token['oauth_token_secret'])
             headphones.CONFIG.TWITTER_USERNAME = access_token['oauth_token']
-            headphones.CONFIG.TWITTER_PASSWORD = access_token['oauth_token_secret']
+            headphones.CONFIG.TWITTER_PASSWORD = access_token[
+                'oauth_token_secret']
             return True
 
     def _send_tweet(self, message=None):
@@ -688,7 +773,8 @@ class TwitterNotifier(object):
 
         logger.info(u"Sending tweet: " + message)
 
-        api = twitter.Api(username, password, access_token_key, access_token_secret)
+        api = twitter.Api(username, password, access_token_key,
+                          access_token_secret)
 
         try:
             api.PostUpdate(message)
@@ -741,7 +827,8 @@ class OSX_NOTIFY(object):
             )
 
             NSUserNotification = self.objc.lookUpClass('NSUserNotification')
-            NSUserNotificationCenter = self.objc.lookUpClass('NSUserNotificationCenter')
+            NSUserNotificationCenter = self.objc.lookUpClass(
+                'NSUserNotificationCenter')
             NSAutoreleasePool = self.objc.lookUpClass('NSAutoreleasePool')
 
             if not NSUserNotification or not NSUserNotificationCenter:
@@ -756,9 +843,11 @@ class OSX_NOTIFY(object):
             if text:
                 notification.setInformativeText_(text)
             if sound:
-                notification.setSoundName_("NSUserNotificationDefaultSoundName")
+                notification.setSoundName_(
+                    "NSUserNotificationDefaultSoundName")
             if image:
-                source_img = self.AppKit.NSImage.alloc().initByReferencingFile_(image)
+                source_img = self.AppKit.NSImage.alloc().initByReferencingFile_(
+                    image)
                 notification.setContentImage_(source_img)
                 # notification.set_identityImage_(source_img)
             notification.setHasActionButton_(False)
@@ -818,8 +907,9 @@ class SubSonicNotifier(object):
             self.host = self.host + "/"
 
         # Invoke request
-        request.request_response(self.host + "musicFolderSettings.view?scanNow",
-                                 auth=(self.username, self.password))
+        request.request_response(
+            self.host + "musicFolderSettings.view?scanNow",
+            auth=(self.username, self.password))
 
 
 class Email(object):
@@ -827,13 +917,15 @@ class Email(object):
 
         message = MIMEText(message, 'plain', "utf-8")
         message['Subject'] = subject
-        message['From'] = email.utils.formataddr(('Headphones', headphones.CONFIG.EMAIL_FROM))
+        message['From'] = email.utils.formataddr(
+            ('Headphones', headphones.CONFIG.EMAIL_FROM))
         message['To'] = headphones.CONFIG.EMAIL_TO
 
         try:
             if headphones.CONFIG.EMAIL_SSL:
-                mailserver = smtplib.SMTP_SSL(headphones.CONFIG.EMAIL_SMTP_SERVER,
-                                              headphones.CONFIG.EMAIL_SMTP_PORT)
+                mailserver = smtplib.SMTP_SSL(
+                    headphones.CONFIG.EMAIL_SMTP_SERVER,
+                    headphones.CONFIG.EMAIL_SMTP_PORT)
             else:
                 mailserver = smtplib.SMTP(headphones.CONFIG.EMAIL_SMTP_SERVER,
                                           headphones.CONFIG.EMAIL_SMTP_PORT)
@@ -847,7 +939,8 @@ class Email(object):
                 mailserver.login(headphones.CONFIG.EMAIL_SMTP_USER,
                                  headphones.CONFIG.EMAIL_SMTP_PASSWORD)
 
-            mailserver.sendmail(headphones.CONFIG.EMAIL_FROM, headphones.CONFIG.EMAIL_TO,
+            mailserver.sendmail(headphones.CONFIG.EMAIL_FROM,
+                                headphones.CONFIG.EMAIL_TO,
                                 message.as_string())
             mailserver.quit()
             return True
@@ -858,7 +951,6 @@ class Email(object):
 
 
 class TELEGRAM(object):
-
     def notify(self, message, status):
         if not headphones.CONFIG.TELEGRAM_ENABLED:
             return
@@ -876,14 +968,17 @@ class TELEGRAM(object):
 
         # Send message to user using Telegram's Bot API
         try:
-            response = requests.post(TELEGRAM_API % (token, "sendMessage"), data=payload)
+            response = requests.post(TELEGRAM_API % (token, "sendMessage"),
+                                     data=payload)
         except Exception, e:
             logger.info(u'Telegram notify failed: ' + str(e))
 
         # Error logging
         sent_successfuly = True
         if not response.status_code == 200:
-            logger.info(u'Could not send notification to TelegramBot (token=%s). Response: [%s]', (token, response.text))
+            logger.info(
+                u'Could not send notification to TelegramBot (token=%s). Response: [%s]',
+                (token, response.text))
             sent_successfuly = False
 
         logger.info(u"Telegram notifications sent.")
@@ -891,7 +986,6 @@ class TELEGRAM(object):
 
 
 class SLACK(object):
-
     def notify(self, message, status):
         if not headphones.CONFIG.SLACK_ENABLED:
             return
@@ -902,7 +996,8 @@ class SLACK(object):
         channel = headphones.CONFIG.SLACK_CHANNEL
         emoji = headphones.CONFIG.SLACK_EMOJI
 
-        payload = {'channel': channel, 'text': status + ': ' + message, 'icon_emoji': emoji}
+        payload = {'channel': channel, 'text': status + ': ' + message,
+                   'icon_emoji': emoji}
 
         try:
             response = requests.post(SLACK_URL, json=payload)
@@ -911,7 +1006,9 @@ class SLACK(object):
 
         sent_successfuly = True
         if not response.status_code == 200:
-            logger.info(u'Could not send notification to Slack. Response: [%s]', (response.text))
+            logger.info(
+                u'Could not send notification to Slack. Response: [%s]',
+                (response.text))
             sent_successfuly = False
 
         logger.info(u"Slack notifications sent.")

@@ -574,6 +574,11 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
         pushbullet = notifiers.PUSHBULLET()
         pushbullet.notify(pushmessage, statusmessage)
 
+    if headphones.CONFIG.JOIN_ENABLED:
+        logger.info(u"Join request")
+        join = notifiers.JOIN()
+        join.notify(pushmessage, statusmessage)
+
     if headphones.CONFIG.TELEGRAM_ENABLED:
         logger.info(u"Telegram request")
         telegram = notifiers.TELEGRAM()

@@ -1372,6 +1372,23 @@
                                 </div>
                             </fieldset>
 
+                            <fieldset>
+                                <div class="row checkbox left">
+                                    <input type="checkbox" class="bigcheck" name="join_enabled" id="join" value="1" ${config['join_enabled']} /><label for="join"><span class="option">Join</span></label>
+                                </div>
+                                <div id="joinoptions">
+                                    <div class="row">
+                                        <label>Join API Key</label><input type="text" name="join_apikey" value="${config['join_apikey']}" size="50">
+                                    </div>
+                                    <div class="row">
+                                        <label>Device ID(s)</label><input type="text" name="join_deviceid" value="${config['join_deviceid']}" size="50"><small>Comma separated list.  Leave blank to send to all devices</small>
+                                    </div>
+                                    <div class="row checkbox">
+                                        <input type="checkbox" name="join_onsnatch" value="1" ${config['join_onsnatch']} /><label>Notify on snatch?</label>
+                                    </div>
+                                </div>
+                            </fieldset>
+
                         </td>
                     </tr>
                 </table>
@@ -2165,6 +2182,27 @@
                         else
                         {
                             $("#pushbulletoptions").slideUp();
+                        }
+                });
+
+                if ($("#join").is(":checked"))
+                        {
+                            $("#joinoptions").show();
+                        }
+                else
+                        {
+                            $("#joinoptions").hide();
+                        }
+
+
+                $("#join").click(function(){
+                        if ($("#join").is(":checked"))
+                        {
+                            $("#joinoptions").slideDown();
+                        }
+                        else
+                        {
+                            $("#joinoptions").slideUp();
                         }
                 });
 

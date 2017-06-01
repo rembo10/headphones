@@ -145,6 +145,10 @@ _CONFIG_DEFINITIONS = {
     'IGNORED_FILES': (list, 'Advanced', []),    # path
     'INCLUDE_EXTRAS': (int, 'General', 0),
     'INTERFACE': (str, 'General', 'default'),
+    'JOIN_APIKEY': (str, 'Join', ''),
+    'JOIN_DEVICEID': (str, 'Join', ''),
+    'JOIN_ENABLED': (int, 'Join', 0),
+    'JOIN_ONSNATCH': (int, 'Join', 0),
     'JOURNAL_MODE': (str, 'Advanced', 'wal'),
     'KAT': (int, 'Kat', 0),
     'KAT_PROXY_URL': (str, 'Kat', ''),
