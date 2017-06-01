@@ -149,7 +149,8 @@ class PROWL(object):
         http_handler.request("POST",
                              "/publicapi/add",
                              headers={
-                                 'Content-type': "application/x-www-form-urlencoded"},
+                                 'Content-type':
+                                     "application/x-www-form-urlencoded"},
                              body=urlencode(data))
         response = http_handler.getresponse()
         request_status = response.status
@@ -216,9 +217,10 @@ class XBMC(object):
         url = host + '/jsonrpc'
 
         if self.password:
-            response = request.request_json(url, method="post",
-                                            data=json.dumps(data),
-                                            headers=headers, auth=(
+            response = request.request_json(
+                url, method="post",
+                data=json.dumps(data),
+                headers=headers, auth=(
                     self.username, self.password))
         else:
             response = request.request_json(url, method="post",
@@ -229,8 +231,8 @@ class XBMC(object):
             return response[0]['result']
 
     def update(self):
-        # From what I read you can't update the music library on a per directory or per path basis
-        # so need to update the whole thing
+        # From what I read you can't update the music library on a per
+        # directory or per path basis so need to update the whole thing
 
         hosts = [x.strip() for x in self.hosts.split(',')]
 
@@ -257,9 +259,11 @@ class XBMC(object):
                     'version']['major']
 
                 if version < 12:  # Eden
-                    notification = header + "," + message + "," + time + "," + albumartpath
+                    notification = header + "," + message + "," + time + \
+                                   "," + albumartpath
                     notifycommand = {'command': 'ExecBuiltIn',
-                                     'parameter': 'Notification(' + notification + ')'}
+                                     'parameter': 'Notification(' +
+                                                  notification + ')'}
                     request = self._sendhttp(host, notifycommand)
 
                 else:  # Frodo
@@ -346,9 +350,10 @@ class Plex(object):
         url = host + '/jsonrpc'
 
         if self.password:
-            response = request.request_json(url, method="post",
-                                            data=json.dumps(data),
-                                            headers=headers, auth=(
+            response = request.request_json(
+                url, method="post",
+                data=json.dumps(data),
+                headers=headers, auth=(
                     self.username, self.password))
         else:
             response = request.request_json(url, method="post",
@@ -360,8 +365,8 @@ class Plex(object):
 
     def update(self):
 
-        # From what I read you can't update the music library on a per directory or per path basis
-        # so need to update the whole thing
+        # From what I read you can't update the music library on a per
+        # directory or per path basis so need to update the whole thing
 
         hosts = [x.strip() for x in self.server_hosts.split(',')]
 
@@ -405,9 +410,11 @@ class Plex(object):
                     'version']['major']
 
                 if version < 12:  # Eden
-                    notification = header + "," + message + "," + time + "," + albumartpath
+                    notification = header + "," + message + "," + time + \
+                                   "," + albumartpath
                     notifycommand = {'command': 'ExecBuiltIn',
-                                     'parameter': 'Notification(' + notification + ')'}
+                                     'parameter': 'Notification(' +
+                                                  notification + ')'}
                     request = self._sendhttp(host, notifycommand)
 
                 else:  # Frodo
@@ -422,7 +429,8 @@ class Plex(object):
 
             except Exception:
                 logger.error(
-                    'Error sending notification request to Plex client @ ' + host)
+                    'Error sending notification request to Plex client @ ' +
+                    host)
 
 
 class NMA(object):
@@ -440,7 +448,8 @@ class NMA(object):
             message = "Headphones has snatched: " + snatched
         else:
             event = artist + ' - ' + album + ' complete!'
-            message = "Headphones has downloaded and postprocessed: " + artist + ' [' + album + ']'
+            message = "Headphones has downloaded and postprocessed: " + \
+                      artist + ' [' + album + ']'
 
         logger.debug(u"NMA event: " + event)
         logger.debug(u"NMA message: " + message)
@@ -483,7 +492,8 @@ class PUSHBULLET(object):
             data['device_iden'] = self.deviceid
 
         headers = {'Content-type': "application/json",
-                   'Authorization': 'Bearer ' + headphones.CONFIG.PUSHBULLET_APIKEY}
+                   'Authorization': 'Bearer ' +
+                                    headphones.CONFIG.PUSHBULLET_APIKEY}
 
         response = request.request_json(url, method="post", headers=headers,
                                         data=json.dumps(data))
@@ -516,7 +526,8 @@ class PUSHALOT(object):
         http_handler.request("POST",
                              "/api/sendmessage",
                              headers={
-                                 'Content-type': "application/x-www-form-urlencoded"},
+                                 'Content-type':
+                                     "application/x-www-form-urlencoded"},
                              body=urlencode(data))
         response = http_handler.getresponse()
         request_status = response.status
@@ -591,7 +602,8 @@ class Synoindex(object):
 
         if not self.util_exists():
             logger.warn(
-                "Error sending notification: synoindex utility not found at %s" % self.util_loc)
+                "Error sending notification: synoindex utility "
+                "not found at %s" % self.util_loc)
             return
 
         if os.path.isfile(path):
@@ -600,7 +612,8 @@ class Synoindex(object):
             cmd_arg = '-A'
         else:
             logger.warn(
-                "Error sending notification: Path passed to synoindex was not a file or folder.")
+                "Error sending notification: Path passed to synoindex "
+                "was not a file or folder.")
             return
 
         cmd = [self.util_loc, cmd_arg, path]
@@ -610,7 +623,8 @@ class Synoindex(object):
                                  stderr=subprocess.STDOUT,
                                  cwd=headphones.PROG_DIR)
             out, error = p.communicate()
-            # synoindex never returns any codes other than '0', highly irritating
+            # synoindex never returns any codes other than '0',
+            #  highly irritating
         except OSError, e:
             logger.warn("Error sending notification: %s" % str(e))
 
@@ -684,12 +698,14 @@ class TwitterNotifier(object):
         if headphones.CONFIG.TWITTER_ONSNATCH:
             self._notifyTwitter(
                 common.notifyStrings[
-                    common.NOTIFY_SNATCH] + ': ' + title + ' at ' + helpers.now())
+                    common.NOTIFY_SNATCH] + ': ' + title + ' at ' +
+                helpers.now())
 
     def notify_download(self, title):
         if headphones.CONFIG.TWITTER_ENABLED:
             self._notifyTwitter(common.notifyStrings[
-                                    common.NOTIFY_DOWNLOAD] + ': ' + title + ' at ' + helpers.now())
+                                    common.NOTIFY_DOWNLOAD] + ': ' +
+                                title + ' at ' + helpers.now())
 
     def test_notify(self):
         return self._notifyTwitter(
@@ -733,7 +749,8 @@ class TwitterNotifier(object):
         token.set_verifier(key)
 
         logger.info(
-            'Generating and signing request for an access token using key ' + key)
+            'Generating and signing request for an access token using key '
+            + key)
 
         oauth_consumer = oauth.Consumer(key=self.consumer_key,
                                         secret=self.consumer_secret)
@@ -846,13 +863,14 @@ class OSX_NOTIFY(object):
                 notification.setSoundName_(
                     "NSUserNotificationDefaultSoundName")
             if image:
-                source_img = self.AppKit.NSImage.alloc().initByReferencingFile_(
-                    image)
+                source_img = self.AppKit.NSImage.alloc().\
+                    initByReferencingFile_(image)
                 notification.setContentImage_(source_img)
                 # notification.set_identityImage_(source_img)
             notification.setHasActionButton_(False)
 
-            notification_center = NSUserNotificationCenter.defaultUserNotificationCenter()
+            notification_center = NSUserNotificationCenter.\
+                defaultUserNotificationCenter()
             notification_center.deliverNotification_(notification)
 
             del pool
@@ -873,7 +891,8 @@ class BOXCAR(object):
     def notify(self, title, message, rgid=None):
         try:
             if rgid:
-                message += '<br></br><a href="http://musicbrainz.org/release-group/%s">MusicBrainz</a>' % rgid
+                message += '<br></br><a href="http://musicbrainz.org/' \
+                           'release-group/%s">MusicBrainz</a>' % rgid
 
             data = urllib.urlencode({
                 'user_credentials': headphones.CONFIG.BOXCAR_TOKEN,
@@ -977,7 +996,8 @@ class TELEGRAM(object):
         sent_successfuly = True
         if not response.status_code == 200:
             logger.info(
-                u'Could not send notification to TelegramBot (token=%s). Response: [%s]',
+                u'Could not send notification to TelegramBot '
+                u'(token=%s). Response: [%s]',
                 (token, response.text))
             sent_successfuly = False
 
