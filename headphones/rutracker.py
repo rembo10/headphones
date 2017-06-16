@@ -98,7 +98,11 @@ class Rutracker(object):
 
         # sort by size, descending.
         sort = '&o=7&s=2'
-        searchurl = "%s?nm=%s%s%s" % (self.search_referer, urllib.quote(searchterm), format, sort)
+        try:
+            searchurl = "%s?nm=%s%s%s" % (self.search_referer, urllib.quote(searchterm), format, sort)
+        except:
+            searchterm = searchterm.encode('utf-8')
+            searchurl = "%s?nm=%s%s%s" % (self.search_referer, urllib.quote(searchterm), format, sort)
         logger.info("Searching rutracker using term: %s", searchterm)
         return searchurl
 
