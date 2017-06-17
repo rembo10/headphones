@@ -790,7 +790,9 @@ class BOXCAR(object):
                 'user_credentials': headphones.CONFIG.BOXCAR_TOKEN,
                 'notification[title]': title.encode('utf-8'),
                 'notification[long_message]': message.encode('utf-8'),
-                'notification[sound]': "done"
+                'notification[sound]': "done",
+                'notification[icon_url]': "https://raw.githubusercontent.com/rembo10/headphones/master/data/images"
+                                          "/headphoneslogo.png"
             })
 
             req = urllib2.Request(self.url)
