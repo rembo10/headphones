@@ -147,7 +147,7 @@ class Api(object):
         album = self._dic_from_query(
             'SELECT * from albums WHERE AlbumID="' + self.id + '"')
         tracks = self._dic_from_query(
-            'SELECT * from tracks WHERE AlbumID="' + self.id + '"')
+            'SELECT * from tracks WHERE AlbumID="' + self.id + '" order by TrackNumber ASC')
         description = self._dic_from_query(
             'SELECT * from descriptions WHERE ReleaseGroupID="' + self.id + '"')
 
@@ -162,12 +162,12 @@ class Api(object):
 
     def _getUpcoming(self, **kwargs):
         self.data = self._dic_from_query(
-            "SELECT * from albums WHERE ReleaseDate > date('now') order by ReleaseDate DESC")
+            "SELECT * from albums WHERE ReleaseDate > date('now') order by ReleaseDate ASC")
         return
 
     def _getWanted(self, **kwargs):
         self.data = self._dic_from_query(
-            "SELECT * from albums WHERE Status='Wanted'")
+            "SELECT * from albums WHERE Status='Wanted' and ReleaseDate <= date ('now') order by ReleaseDate DESC")
         return
 
     def _getSnatched(self, **kwargs):
