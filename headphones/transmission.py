@@ -34,7 +34,7 @@ _session_id = None
 def addTorrent(link, data=None):
     method = 'torrent-add'
 
-    if link.endswith('.torrent') and not link.startswith('http') or data:
+    if link.endswith('.torrent') and not link.startswith(('http', 'magnet')) or data:
         if data:
             metainfo = str(base64.b64encode(data))
         else:

@@ -23,6 +23,10 @@ import sys
 import tempfile
 import glob
 
+from beets import logging as beetslogging
+import six
+from contextlib import contextmanager
+
 import fnmatch
 import re
 import os
@@ -257,6 +261,13 @@ _XLATE_SPECIAL = {
     u'&': ' and ',     # expand & to ' and '
 }
 
+_XLATE_MUSICBRAINZ = {
+    # Translation table for Musicbrainz.
+    u"…": '...',     # HORIZONTAL ELLIPSIS (U+2026)
+    u"’": "'",       # APOSTROPHE (U+0027)
+    u"‐": "-",       # EN DASH (U+2013)
+}
+
 
 def _translate(s, dictionary):
     # type: (basestring,Mapping[basestring,basestring])->basestring
@@ -322,7 +333,25 @@ def clean_name(s):
     # 6. trim
     u = u.strip()
     # 7. lowercase
+    u = u.lower()
     return u
+
+
+def clean_musicbrainz_name(s, return_as_string=True):
+    # type: (basestring)->unicode
+    """Substitute special Musicbrainz characters.
+    :param s: string to clean up, probably unicode.
+    :return: cleaned-up version of input string.
+    """
+    if not isinstance(s, unicode):
+        u = unicode(s, 'ascii', 'replace')
+    else:
+        u = s
+    u = _translate(u, _XLATE_MUSICBRAINZ)
+    if return_as_string:
+        return u.encode('utf-8')
+    else:
+        return u
 
 
 def cleanTitle(title):
@@ -951,3 +980,24 @@ def create_https_certificates(ssl_cert, ssl_key):
         return False
 
     return True
+
+
+class BeetsLogCapture(beetslogging.Handler):
+
+    def __init__(self):
+        beetslogging.Handler.__init__(self)
+        self.messages = []
+
+    def emit(self, record):
+        self.messages.append(six.text_type(record.msg))
+
+
+@contextmanager
+def capture_beets_log(logger='beets'):
+    capture = BeetsLogCapture()
+    log = beetslogging.getLogger(logger)
+    log.addHandler(capture)
+    try:
+        yield capture.messages
+    finally:
+        log.removeHandler(capture)

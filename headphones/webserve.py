@@ -252,7 +252,10 @@ class WebInterface(object):
         namecheck = myDB.select('SELECT ArtistName from artists where ArtistID=?', [ArtistID])
         for name in namecheck:
             artistname = name['ArtistName']
-        logger.info(u"Deleting all traces of artist: " + artistname)
+        try:
+            logger.info(u"Deleting all traces of artist: " + artistname)
+        except TypeError:
+            logger.info(u"Deleting all traces of artist: null")
         myDB.action('DELETE from artists WHERE ArtistID=?', [ArtistID])
 
         from headphones import cache
@@ -871,11 +874,19 @@ class WebInterface(object):
     def musicScan(self, path, scan=0, redirect=None, autoadd=0, libraryscan=0):
         headphones.CONFIG.LIBRARYSCAN = libraryscan
         headphones.CONFIG.AUTO_ADD_ARTISTS = autoadd
-        headphones.CONFIG.MUSIC_DIR = path
-        headphones.CONFIG.write()
+
+        try:
+            params = {}
+            headphones.CONFIG.MUSIC_DIR = path
+            headphones.CONFIG.write()
+        except Exception as e:
+            logger.warn("Cannot save scan directory to config: %s", e)
+            if scan:
+                params = {"dir": path}
+
         if scan:
             try:
-                threading.Thread(target=librarysync.libraryScan).start()
+                threading.Thread(target=librarysync.libraryScan, kwargs=params).start()
             except Exception as e:
                 logger.error('Unable to complete the scan: %s' % e)
         if redirect:
@@ -1229,6 +1240,7 @@ class WebInterface(object):
             "rutracker_user": headphones.CONFIG.RUTRACKER_USER,
             "rutracker_password": headphones.CONFIG.RUTRACKER_PASSWORD,
             "rutracker_ratio": headphones.CONFIG.RUTRACKER_RATIO,
+            "rutracker_cookie": headphones.CONFIG.RUTRACKER_COOKIE,
             "use_apollo": checked(headphones.CONFIG.APOLLO),
             "apollo_username": headphones.CONFIG.APOLLO_USERNAME,
             "apollo_password": headphones.CONFIG.APOLLO_PASSWORD,

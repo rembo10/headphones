@@ -39,14 +39,15 @@ def runGit(args):
 
         try:
             logger.debug('Trying to execute: "' + cmd + '" with shell in ' + headphones.PROG_DIR)
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True,
+            p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                 shell=True,
                                  cwd=headphones.PROG_DIR)
             output, err = p.communicate()
             output = output.strip()
 
             logger.debug('Git output: ' + output)
-        except OSError:
-            logger.debug('Command failed: %s', cmd)
+        except OSError as e:
+            logger.debug('Command failed: %s. Error: %s' % (cmd, e))
             continue
 
         if 'not found' in output or "not recognized as an internal or external command" in output:
