@@ -1412,7 +1412,11 @@ class WebInterface(object):
             "slack_url": headphones.CONFIG.SLACK_URL,
             "slack_channel": headphones.CONFIG.SLACK_CHANNEL,
             "slack_emoji": headphones.CONFIG.SLACK_EMOJI,
-            "slack_onsnatch": checked(headphones.CONFIG.SLACK_ONSNATCH)
+            "slack_onsnatch": checked(headphones.CONFIG.SLACK_ONSNATCH),
+            "join_enabled": checked(headphones.CONFIG.JOIN_ENABLED),
+            "join_onsnatch": checked(headphones.CONFIG.JOIN_ONSNATCH),
+            "join_apikey": headphones.CONFIG.JOIN_APIKEY,
+            "join_deviceid": headphones.CONFIG.JOIN_DEVICEID
         }
 
         for k, v in config.iteritems():
@@ -1480,7 +1484,8 @@ class WebInterface(object):
             "osx_notify_enabled", "osx_notify_onsnatch", "boxcar_enabled", "boxcar_onsnatch",
             "songkick_enabled", "songkick_filter_enabled",
             "mpc_enabled", "email_enabled", "email_ssl", "email_tls", "email_onsnatch",
-            "customauth", "idtag", "deluge_paused"
+            "customauth", "idtag", "deluge_paused",
+            "join_enabled", "join_onsnatch"
         ]
         for checked_config in checked_configs:
             if checked_config not in kwargs:
@@ -1748,6 +1753,12 @@ class WebInterface(object):
         logger.info("Testing Telegram notifications")
         telegram = notifiers.TELEGRAM()
         telegram.notify("it works!", "lazers pew pew")
+
+    @cherrypy.expose
+    def testJoin(self):
+        logger.info("Testing Join notifications")
+        join = notifiers.JOIN()
+        join.notify("it works!", "Test message")
 
 
 class Artwork(object):
