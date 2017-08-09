@@ -1569,7 +1569,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
         if apolloobj and apolloobj.logged_in():
             logger.info(u"Searching %s..." % provider)
             all_torrents = []
-            
+
             # Specify release types to filter by
             if album['Type'] == 'Album':
                 album_type = [gazellerelease_type.ALBUM]
@@ -1578,7 +1578,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
             if album['Type'] == 'EP':
                 album_type = [gazellerelease_type.EP]
             # No musicbrainz match for this type
-            #if album['Type'] == 'Anthology':
+            # if album['Type'] == 'Anthology':
             #   album_type = [gazellerelease_type.ANTHOLOGY]
             if album['Type'] == 'Compilation':
                 album_type = [gazellerelease_type.COMPILATION]
@@ -1596,7 +1596,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                 album_type = [gazellerelease_type.INTERVIEW]
             if album['Type'] == 'Mixtape/Street':
                 album_type = [gazellerelease_type.MIXTAPE]
-            
+
             for search_format in search_formats:
                 if usersearchterm:
                     all_torrents.extend(
