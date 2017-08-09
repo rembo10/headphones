@@ -621,8 +621,8 @@ def dbcheck():
         c.execute('UPDATE snatched SET TorrentHash = FolderName WHERE Status LIKE "Seed_%"')
 
     # One off script to set CleanName to lower case
-    clean_name_mixed = c.execute('SELECT CleanName FROM have ORDER BY Date Desc').fetchone()[0]
-    if clean_name_mixed != clean_name_mixed.lower():
+    clean_name_mixed = c.execute('SELECT CleanName FROM have ORDER BY Date Desc').fetchone()
+    if clean_name_mixed and clean_name_mixed[0] != clean_name_mixed[0].lower():
         logger.info("Updating track clean name, this could take some time...")
         c.execute('UPDATE tracks SET CleanName = LOWER(CleanName) WHERE LOWER(CleanName) != CleanName')
         c.execute('UPDATE alltracks SET CleanName = LOWER(CleanName) WHERE LOWER(CleanName) != CleanName')
