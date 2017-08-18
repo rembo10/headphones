@@ -43,7 +43,8 @@ from bencode import bencode, bdecode
 TORRENT_TO_MAGNET_SERVICES = [
     # 'https://zoink.it/torrent/%s.torrent',
     # 'http://torrage.com/torrent/%s.torrent',
-    'https://torcache.net/torrent/%s.torrent',
+    # 'https://torcache.net/torrent/%s.torrent',
+    'http://itorrents.org/torrent/%s.torrent',
 ]
 
 # Persistent Apollo.rip API object
@@ -878,12 +879,11 @@ def send_to_downloader(data, bestqual, album):
                     services = TORRENT_TO_MAGNET_SERVICES[:]
                     random.shuffle(services)
                     headers = {'User-Agent': USER_AGENT}
-                    headers['Referer'] = 'https://torcache.net/'
 
                     for service in services:
 
                         data = request.request_content(service % torrent_hash, headers=headers)
-                        if data and "torcache" in data:
+                        if data:
                             if not torrent_to_file(download_path, data):
                                 return
                             # Extract folder name from torrent
