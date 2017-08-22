@@ -55,7 +55,7 @@ def request_lastfm(method, **kwargs):
         return
 
     if "error" in data:
-        logger.error("Last.FM returned an error: %s", data["message"])
+        logger.debug("Last.FM returned an error: %s", data["message"])
         return
 
     return data

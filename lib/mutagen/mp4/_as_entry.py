@@ -2,12 +2,14 @@
 # Copyright (C) 2014 Christoph Reiter
 #
 # This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License version 2 as
-# published by the Free Software Foundation.
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
 
 from mutagen._compat import cBytesIO, xrange
 from mutagen.aac import ProgramConfigElement
-from mutagen._util import BitReader, BitReaderError, cdata, text_type
+from mutagen._util import BitReader, BitReaderError, cdata
+from mutagen._compat import text_type
 from ._util import parse_full_atom
 from ._atom import Atom, AtomError
 

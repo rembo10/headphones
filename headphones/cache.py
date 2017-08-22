@@ -16,7 +16,7 @@
 import os
 
 import headphones
-from headphones import db, helpers, logger, lastfm, request
+from headphones import db, helpers, logger, lastfm, request, mb
 
 LASTFM_API_KEY = "690e1ed3bc00bc91804cd8f7fe5ed6d4"
 
@@ -290,6 +290,14 @@ class Cache(object):
 
             data = lastfm.request_lastfm("artist.getinfo", mbid=self.id, api_key=LASTFM_API_KEY)
 
+            # Try with name if not found
+            if not data:
+                dbartist = myDB.action('SELECT ArtistName, Type FROM artists WHERE ArtistID=%s', [self.id]).fetchone()
+                if dbartist:
+                    data = lastfm.request_lastfm("artist.getinfo",
+                                                 artist=helpers.clean_musicbrainz_name(dbartist['ArtistName']),
+                                                 api_key=LASTFM_API_KEY)
+
             if not data:
                 return
 
@@ -315,18 +323,31 @@ class Cache(object):
 
         else:
             dbalbum = myDB.action(
-                'SELECT ArtistName, AlbumTitle, ReleaseID FROM albums WHERE AlbumID=%s',
+                'SELECT ArtistName, AlbumTitle, ReleaseID, Type FROM albums WHERE AlbumID=%S',
                 [self.id]).fetchone()
             if dbalbum['ReleaseID'] != self.id:
                 data = lastfm.request_lastfm("album.getinfo", mbid=dbalbum['ReleaseID'],
                                              api_key=LASTFM_API_KEY)
                 if not data:
-                    data = lastfm.request_lastfm("album.getinfo", artist=dbalbum['ArtistName'],
-                                                 album=dbalbum['AlbumTitle'],
+                    data = lastfm.request_lastfm("album.getinfo",
+                                                 artist=helpers.clean_musicbrainz_name(dbalbum['ArtistName']),
+                                                 album=helpers.clean_musicbrainz_name(dbalbum['AlbumTitle']),
                                                  api_key=LASTFM_API_KEY)
             else:
-                data = lastfm.request_lastfm("album.getinfo", artist=dbalbum['ArtistName'],
-                                             album=dbalbum['AlbumTitle'], api_key=LASTFM_API_KEY)
+                if dbalbum['Type'] != "part of":
+                    data = lastfm.request_lastfm("album.getinfo",
+                                                artist=helpers.clean_musicbrainz_name(dbalbum['ArtistName']),
+                                                album=helpers.clean_musicbrainz_name(dbalbum['AlbumTitle']),
+                                                api_key=LASTFM_API_KEY)
+                else:
+
+                    # Series, use actual artist for the release-group
+                    artist = mb.getArtistForReleaseGroup(self.id)
+                    if artist:
+                        data = lastfm.request_lastfm("album.getinfo",
+                                                     artist=helpers.clean_musicbrainz_name(artist),
+                                                     album=helpers.clean_musicbrainz_name(dbalbum['AlbumTitle']),
+                                                     api_key=LASTFM_API_KEY)
 
             if not data:
                 return

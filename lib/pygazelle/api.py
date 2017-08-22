@@ -11,6 +11,7 @@ import sys
 import json
 import time
 import requests as requests
+import headphones
 
 from .user import User
 from .artist import Artist
@@ -32,9 +33,7 @@ class GazelleAPI(object):
     default_headers = {
         'Connection': 'keep-alive',
         'Cache-Control': 'max-age=0',
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_3)'\
-                      'AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.79'\
-                      'Safari/535.11',
+        'User-Agent': 'Headphones/%s' % headphones.CURRENT_VERSION,
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9'\
                   ',*/*;q=0.8',
         'Accept-Encoding': 'gzip,deflate,sdch',
@@ -42,7 +41,7 @@ class GazelleAPI(object):
         'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3'}
 
 
-    def __init__(self, username=None, password=None):
+    def __init__(self, username=None, password=None, url=None):
         self.session = requests.session()
         self.session.headers = self.default_headers
         self.username = username
@@ -59,7 +58,7 @@ class GazelleAPI(object):
         self.cached_torrents = {}
         self.cached_requests = {}
         self.cached_categories = {}
-        self.site = "https://what.cd/"
+        self.site = url + "/"
         self.past_request_timestamps = []
 
     def wait_for_rate_limit(self):
@@ -95,7 +94,7 @@ class GazelleAPI(object):
 
         self.wait_for_rate_limit()
 
-        loginpage = 'https://what.cd/login.php'
+        loginpage = self.site + 'login.php'
         data = {'username': self.username,
                 'password': self.password,
                 'keeplogged': '1'}

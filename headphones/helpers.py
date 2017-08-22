@@ -20,6 +20,12 @@ import datetime
 import shutil
 import time
 import sys
+import tempfile
+import glob
+
+from beets import logging as beetslogging
+import six
+from contextlib import contextmanager
 
 import fnmatch
 import re
@@ -251,7 +257,15 @@ _XLATE_SPECIAL = {
     # Translation table.
     # Cover additional special characters processing normalization.
     u"'": '',         # replace apostrophe with nothing
+    u"’": '',         # replace musicbrainz style apostrophe with nothing
     u'&': ' and ',     # expand & to ' and '
+}
+
+_XLATE_MUSICBRAINZ = {
+    # Translation table for Musicbrainz.
+    u"…": '...',     # HORIZONTAL ELLIPSIS (U+2026)
+    u"’": "'",       # APOSTROPHE (U+0027)
+    u"‐": "-",       # EN DASH (U+2013)
 }
 
 
@@ -319,7 +333,25 @@ def clean_name(s):
     # 6. trim
     u = u.strip()
     # 7. lowercase
+    u = u.lower()
     return u
+
+
+def clean_musicbrainz_name(s, return_as_string=True):
+    # type: (basestring)->unicode
+    """Substitute special Musicbrainz characters.
+    :param s: string to clean up, probably unicode.
+    :return: cleaned-up version of input string.
+    """
+    if not isinstance(s, unicode):
+        u = unicode(s, 'ascii', 'replace')
+    else:
+        u = s
+    u = _translate(u, _XLATE_MUSICBRAINZ)
+    if return_as_string:
+        return u.encode('utf-8')
+    else:
+        return u
 
 
 def cleanTitle(title):
@@ -620,26 +652,68 @@ def get_downloaded_track_list(albumpath):
     return downloaded_track_list
 
 
-def preserve_torrent_directory(albumpath):
+def preserve_torrent_directory(albumpath, forced=False, single=False):
     """
-    Copy torrent directory to headphones-modified to keep files for seeding.
+    Copy torrent directory to temp headphones_ directory to keep files for seeding.
     """
     from headphones import logger
-    new_folder = os.path.join(albumpath,
-                              'headphones-modified'.encode(headphones.SYS_ENCODING, 'replace'))
-    logger.info(
-        "Copying files to 'headphones-modified' subfolder to preserve downloaded files for seeding")
+
+    # Create temp dir
+    if headphones.CONFIG.KEEP_TORRENT_FILES_DIR:
+        tempdir = headphones.CONFIG.KEEP_TORRENT_FILES_DIR
+    else:
+        tempdir = tempfile.gettempdir()
+
+    logger.info("Preparing to copy to a temporary directory for post processing: " + albumpath.decode(
+            headphones.SYS_ENCODING, 'replace'))
+
     try:
-        shutil.copytree(albumpath, new_folder)
-        return new_folder
+        file_name = os.path.basename(os.path.normpath(albumpath))
+        if not single:
+            prefix = "headphones_" + file_name + "_"
+        else:
+            prefix = "headphones_" + os.path.splitext(file_name)[0] + "_"
+        new_folder = tempfile.mkdtemp(prefix=prefix, dir=tempdir)
     except Exception as e:
-        logger.warn("Cannot copy/move files to temp folder: " +
-                    new_folder.decode(headphones.SYS_ENCODING, 'replace') +
-                    ". Not continuing. Error: " + str(e))
+        logger.error("Cannot create temp directory: " + tempdir.decode(
+            headphones.SYS_ENCODING, 'replace') + ". Error: " + str(e))
+        return None
+
+    # Attempt to stop multiple temp dirs being created for the same albumpath
+    if not forced:
+        try:
+            workdir = os.path.join(tempdir, prefix)
+            workdir = re.sub(r'\[', '[[]', workdir)
+            workdir = re.sub(r'(?<!\[)\]', '[]]', workdir)
+            if len(glob.glob(workdir + '*/')) >= 3:
+                logger.error(
+                    "Looks like a temp directory has previously been created for this albumpath, not continuing " + workdir.decode(
+                        headphones.SYS_ENCODING, 'replace'))
+                shutil.rmtree(new_folder)
+                return None
+        except Exception as e:
+            logger.warn("Cannot determine if already copied/processed, will copy anyway: Warning: " + str(e))
+
+    # Copy to temp dir
+    try:
+        subdir = os.path.join(new_folder, "headphones")
+        logger.info("Copying files to " + subdir.decode(headphones.SYS_ENCODING, 'replace'))
+        if not single:
+            shutil.copytree(albumpath, subdir)
+        else:
+            os.makedirs(subdir)
+            shutil.copy(albumpath, subdir)
+        # Update the album path with the new location
+        return subdir
+    except Exception as e:
+        logger.warn("Cannot copy/move files to temp directory: " + new_folder.decode(headphones.SYS_ENCODING,
+                                                                                  'replace') + ". Not continuing. Error: " + str(
+            e))
+        shutil.rmtree(new_folder)
         return None
 
 
-def cue_split(albumpath):
+def cue_split(albumpath, keep_original_folder=False):
     """
      Attempts to check and split audio files by a cue for the given directory.
      """
@@ -661,6 +735,15 @@ def cue_split(albumpath):
     # Split cue
     if cue_count and cue_count >= count and cue_dirs:
 
+        # Copy to temp directory
+        if keep_original_folder:
+            temppath = preserve_torrent_directory(albumpath)
+            if temppath:
+                cue_dirs = [cue_dir.replace(albumpath, temppath) for cue_dir in cue_dirs]
+                albumpath = temppath
+            else:
+                return None
+
         from headphones import logger, cuesplit
         logger.info("Attempting to split audio files by cue")
 
@@ -671,12 +754,12 @@ def cue_split(albumpath):
             except Exception as e:
                 os.chdir(cwd)
                 logger.warn("Cue not split: " + str(e))
-                return False
+                return None
 
         os.chdir(cwd)
-        return True
+        return albumpath
 
-    return False
+    return None
 
 
 def extract_logline(s):
@@ -897,3 +980,24 @@ def create_https_certificates(ssl_cert, ssl_key):
         return False
 
     return True
+
+
+class BeetsLogCapture(beetslogging.Handler):
+
+    def __init__(self):
+        beetslogging.Handler.__init__(self)
+        self.messages = []
+
+    def emit(self, record):
+        self.messages.append(six.text_type(record.msg))
+
+
+@contextmanager
+def capture_beets_log(logger='beets'):
+    capture = BeetsLogCapture()
+    log = beetslogging.getLogger(logger)
+    log.addHandler(capture)
+    try:
+        yield capture.messages
+    finally:
+        log.removeHandler(capture)

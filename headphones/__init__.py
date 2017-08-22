@@ -88,8 +88,8 @@ CURRENT_VERSION = None
 LATEST_VERSION = None
 COMMITS_BEHIND = None
 
-LOSSY_MEDIA_FORMATS = ["mp3", "aac", "ogg", "ape", "m4a", "asf", "wma"]
-LOSSLESS_MEDIA_FORMATS = ["flac", "aiff"]
+LOSSY_MEDIA_FORMATS = ["mp3", "aac", "ogg", "ape", "m4a", "asf", "wma", "opus"]
+LOSSLESS_MEDIA_FORMATS = ["flac", "aiff", "aif"]
 MEDIA_FORMATS = LOSSY_MEDIA_FORMATS + LOSSLESS_MEDIA_FORMATS
 
 MIRRORLIST = ["musicbrainz.org", "headphones", "custom"]
@@ -312,9 +312,10 @@ def initialize_scheduler():
                          minutes=minutes)
 
         # Remove Torrent + data if Post Processed and finished Seeding
-        minutes = CONFIG.TORRENT_REMOVAL_INTERVAL
-        schedule_job(torrentfinished.checkTorrentFinished, 'Torrent removal check', hours=0,
-                     minutes=minutes)
+        if headphones.CONFIG.TORRENT_DOWNLOADER != 0:
+            minutes = CONFIG.TORRENT_REMOVAL_INTERVAL
+            schedule_job(torrentfinished.checkTorrentFinished, 'Torrent removal check', hours=0,
+                         minutes=minutes)
 
         # Start scheduler
         if start_jobs and len(SCHED.get_jobs()):
@@ -654,7 +655,7 @@ def dbcheck():
     c.execute(
         'CREATE TABLE IF NOT EXISTS alltracks (ArtistID TEXT, ArtistName TEXT, AlbumTitle TEXT, AlbumASIN TEXT, AlbumID TEXT, TrackTitle TEXT, TrackDuration TEXT, TrackID TEXT, TrackNumber INTEGER, Location TEXT, BitRate INTEGER, CleanName TEXT, Format TEXT, ReleaseID TEXT)')
     c.execute(
-        'CREATE TABLE IF NOT EXISTS snatched (AlbumID TEXT, Title TEXT, Size INTEGER, URL TEXT, DateAdded TEXT, Status TEXT, FolderName TEXT, Kind TEXT)')
+        'CREATE TABLE IF NOT EXISTS snatched (AlbumID TEXT, Title TEXT, Size INTEGER, URL TEXT, DateAdded TEXT, Status TEXT, FolderName TEXT, Kind TEXT, TorrentHash TEXT)')
     # Matched is a temporary value used to see if there was a match found in
     # alltracks
     c.execute(
@@ -859,7 +860,7 @@ def dbcheck():
         for artist in artists:
             if artist[1]:
                 c.execute(
-                    'UPDATE artists SET Extras=? WHERE ArtistID=?', ("1,2,3,4,5,6,7,8", artist[0]))
+                    'UPDATE artists SET Extras=%s WHERE ArtistID=%s', ("1,2,3,4,5,6,7,8", artist[0]))
 
     try:
         c.execute('SELECT Kind from snatched')
@@ -890,6 +891,20 @@ def dbcheck():
         c.execute('SELECT MetaCritic from artists')
     except sqlite3.OperationalError:
         c.execute('ALTER TABLE artists ADD COLUMN MetaCritic TEXT DEFAULT NULL')
+
+    try:
+        c.execute('SELECT TorrentHash from snatched')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE snatched ADD COLUMN TorrentHash TEXT')
+        c.execute('UPDATE snatched SET TorrentHash = FolderName WHERE Status LIKE "Seed_%"')
+
+    # One off script to set CleanName to lower case
+    clean_name_mixed = c.execute('SELECT CleanName FROM have ORDER BY Date Desc').fetchone()
+    if clean_name_mixed and clean_name_mixed[0] != clean_name_mixed[0].lower():
+        logger.info("Updating track clean name, this could take some time...")
+        c.execute('UPDATE tracks SET CleanName = LOWER(CleanName) WHERE LOWER(CleanName) != CleanName')
+        c.execute('UPDATE alltracks SET CleanName = LOWER(CleanName) WHERE LOWER(CleanName) != CleanName')
+        c.execute('UPDATE have SET CleanName = LOWER(CleanName) WHERE LOWER(CleanName) != CleanName')
 
     conn.commit()
     c.close()

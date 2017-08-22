@@ -123,7 +123,7 @@ class DBConnection_sqlite:
     def upsert(self, tableName, valueDict, keyDict):
 
         def genParams(myDict):
-            return [x + " = ?" for x in myDict.keys()]
+            return [x + " = %s" for x in myDict.keys()]
 
         changesBefore = self.connection.total_changes
 
@@ -136,7 +136,7 @@ class DBConnection_sqlite:
             insert_query = (
                 "INSERT INTO " + tableName + " (" + ", ".join(
                     valueDict.keys() + keyDict.keys()) + ")" +
-                " VALUES (" + ", ".join(["?"] * len(valueDict.keys() + keyDict.keys())) + ")"
+                " VALUES (" + ", ".join(["%s"] * len(valueDict.keys() + keyDict.keys())) + ")"
             )
             try:
                 self.action(insert_query, valueDict.values() + keyDict.values())

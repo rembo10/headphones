@@ -27,8 +27,9 @@ def update(artistid, artist_name, release_groups):
     # cut down on api calls. If it's ineffective then we'll switch to search
 
     replacements = {" & ": " ", ".": ""}
+    mc_artist_name = helpers.clean_musicbrainz_name(artist_name, return_as_string=False)
+    mc_artist_name = mc_artist_name.replace("'", " ")
     mc_artist_name = helpers.replace_all(artist_name.lower(), replacements)
-
     mc_artist_name = mc_artist_name.replace(" ", "-")
 
     headers = {

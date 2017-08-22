@@ -13,12 +13,9 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-import threading
 
-from headphones import db, utorrent, transmission, logger
+from headphones import db, utorrent, transmission, deluge, qbittorrent, logger
 import headphones
-
-postprocessor_lock = threading.Lock()
 
 
 def checkTorrentFinished():
@@ -28,22 +25,26 @@ def checkTorrentFinished():
 
     logger.info("Checking if any torrents have finished seeding and can be removed")
 
-    with postprocessor_lock:
-        myDB = db.DBConnection()
-        results = myDB.select('SELECT * from snatched WHERE Status=%s', ['Seed_Processed'])
+    myDB = db.DBConnection()
+    results = myDB.select('SELECT * from snatched WHERE Status=%s', ['Seed_Processed'])
 
-        for album in results:
-            hash = album['FolderName']
-            albumid = album['AlbumID']
-            torrent_removed = False
-            if headphones.CONFIG.TORRENT_DOWNLOADER == 1:
-                torrent_removed = transmission.removeTorrent(hash, True)
-            else:
-                torrent_removed = utorrent.removeTorrent(hash, True)
+    for album in results:
+        hash = album['TorrentHash']
+        albumid = album['AlbumID']
+        torrent_removed = False
 
-            if torrent_removed:
-                myDB.action('DELETE from snatched WHERE status = %s and AlbumID=%s',
-                            ['Seed_Processed', albumid])
+        if headphones.CONFIG.TORRENT_DOWNLOADER == 1:
+            torrent_removed = transmission.removeTorrent(hash, True)
+        elif headphones.CONFIG.TORRENT_DOWNLOADER == 2:
+            torrent_removed = utorrent.removeTorrent(hash, True)
+        elif headphones.CONFIG.TORRENT_DOWNLOADER == 3:
+            torrent_removed = deluge.removeTorrent(hash, True)
+        else:
+            torrent_removed = qbittorrent.removeTorrent(hash, True)
+
+        if torrent_removed:
+            myDB.action('DELETE from snatched WHERE status = %s and AlbumID=%s',
+                        ['Seed_Processed', albumid])
 
     myDB.commit()
     logger.info("Checking finished torrents completed")
