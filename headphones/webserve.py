@@ -353,9 +353,13 @@ class WebInterface(object):
             if not os.path.isdir(artistfolder.encode(headphones.SYS_ENCODING)):
                 logger.debug("Cannot find directory: " + artistfolder)
                 continue
-            threading.Thread(target=librarysync.libraryScan,
-                             kwargs={"dir": artistfolder, "artistScan": True, "ArtistID": ArtistID,
-                                     "ArtistName": artist_name}).start()
+            try:
+                threading.Thread(target=librarysync.libraryScan,
+                                 kwargs={"dir": artistfolder, "artistScan": True, "ArtistID": ArtistID,
+                                         "ArtistName": artist_name}).start()
+            except Exception as e:
+                logger.error('Unable to complete the scan: %s' % e)
+
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
 
     @cherrypy.expose
