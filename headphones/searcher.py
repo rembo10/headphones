@@ -1318,7 +1318,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
             }
 
             data = request.request_feed(
-                url=torznab_host[0] + '/api?',
+                url=torznab_host[0],
                 params=params, headers=headers
             )
 
