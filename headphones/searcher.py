@@ -1307,7 +1307,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
 
             # Format Jackett provider
             if "api/v2.0/indexers" in torznab_host[0]:
-                provider = "Jackett_" + provider.split("/indexers/",1)[1].split('/',1)[0]
+                provider = "Jackett_" + provider.split("/indexers/", 1)[1].split('/', 1)[0]
 
             # Request results
             logger.info('Parsing results from %s using search term: %s' % (provider, term))
