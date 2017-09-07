@@ -1305,8 +1305,12 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
 
             provider = torznab_host[0]
 
+            # Format Jackett provider
+            if "api/v2.0/indexers" in torznab_host[0]:
+                provider = "Jackett_" + provider.split("/indexers/",1)[1].split('/',1)[0]
+
             # Request results
-            logger.info('Parsing results from %s using search term: %s' % (torznab_host[0], term))
+            logger.info('Parsing results from %s using search term: %s' % (provider, term))
 
             headers = {'User-Agent': USER_AGENT}
             params = {
@@ -1325,7 +1329,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
             # Process feed
             if data:
                 if not len(data.entries):
-                    logger.info(u"No results found from %s for %s", torznab_host[0], term)
+                    logger.info(u"No results found from %s for %s", provider, term)
                 else:
                     for item in data.entries:
                         try:
