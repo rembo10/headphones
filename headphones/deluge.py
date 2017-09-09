@@ -379,7 +379,8 @@ def _get_auth():
             return None
 
         delugeweb_hosts = json.loads(response.text)['result']
-        if len(delugeweb_hosts) == 0:
+        # Check if delugeweb_hosts is None before checking its length
+        if not delugeweb_hosts or len(delugeweb_hosts) == 0:
             logger.error('Deluge: WebUI does not contain daemons')
             return None
 
