@@ -471,7 +471,7 @@ def _add_torrent_file(result):
     try:
         # content is torrent file contents that needs to be encoded to base64
         post_data = json.dumps({"method": "core.add_torrent_file",
-                                "params": [result['name'].encode('utf8') + '.torrent',
+                                "params": [result['name'] + '.torrent',
                                 b64encode(result['content'].encode('utf8')), {}],
                                 "id": 2})
         response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth,
@@ -485,7 +485,7 @@ def _add_torrent_file(result):
             # this time let's try leaving the encoding as is
             logger.debug('Deluge: There was a decoding issue, let\'s try again')
             post_data = json.dumps({"method": "core.add_torrent_file",
-                                    "params": [result['name'] + '.torrent',
+                                    "params": [result['name'].decode('utf8') + '.torrent',
                                     b64encode(result['content']), {}],
                                     "id": 22})
             response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth,
