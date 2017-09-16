@@ -170,7 +170,10 @@ def addTorrent(link, data=None, name=None):
                     # remove '.torrent' suffix
                     if name[-len('.torrent'):] == '.torrent':
                         name = name[:-len('.torrent')]
-            logger.debug('Deluge: Sending Deluge torrent with name %s and content [%s...]' % (name, str(torrentfile)[:40]))
+            try:
+                logger.debug('Deluge: Sending Deluge torrent with name %s and content [%s...]' % (name, str(torrentfile)[:40]))
+            except UnicodeDecodeError:
+                logger.debug('Deluge: Sending Deluge torrent with name %s and content [%s...]' % (name.decode('utf-8'), str(torrentfile)[:40]))
             result = {'type': 'torrent',
                         'name': name,
                         'content': torrentfile}
