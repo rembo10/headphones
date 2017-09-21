@@ -170,7 +170,10 @@ def addTorrent(link, data=None, name=None):
                     # remove '.torrent' suffix
                     if name[-len('.torrent'):] == '.torrent':
                         name = name[:-len('.torrent')]
-            logger.debug('Deluge: Sending Deluge torrent with name %s and content [%s...]' % (name, str(torrentfile)[:40]))
+            try:
+                logger.debug('Deluge: Sending Deluge torrent with name %s and content [%s...]' % (name, str(torrentfile)[:40]))
+            except UnicodeDecodeError:
+                logger.debug('Deluge: Sending Deluge torrent with name %s and content [%s...]' % (name.decode('utf-8'), str(torrentfile)[:40]))
             result = {'type': 'torrent',
                         'name': name,
                         'content': torrentfile}
@@ -468,7 +471,8 @@ def _add_torrent_file(result):
     try:
         # content is torrent file contents that needs to be encoded to base64
         post_data = json.dumps({"method": "core.add_torrent_file",
-                                "params": [result['name'] + '.torrent', b64encode(result['content'].encode('utf8')), {}],
+                                "params": [result['name'] + '.torrent',
+                                b64encode(result['content'].encode('utf8')), {}],
                                 "id": 2})
         response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth,
             verify=deluge_verify_cert, headers=headers)
@@ -481,7 +485,8 @@ def _add_torrent_file(result):
             # this time let's try leaving the encoding as is
             logger.debug('Deluge: There was a decoding issue, let\'s try again')
             post_data = json.dumps({"method": "core.add_torrent_file",
-                                    "params": [result['name'] + '.torrent', b64encode(result['content']), {}],
+                                    "params": [result['name'].decode('utf8') + '.torrent',
+                                    b64encode(result['content']), {}],
                                     "id": 22})
             response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth,
                 verify=deluge_verify_cert, headers=headers)
