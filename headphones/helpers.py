@@ -22,6 +22,7 @@ import time
 import sys
 import tempfile
 import glob
+from unidecode import unidecode
 
 from beets import logging as beetslogging
 import six
@@ -223,7 +224,11 @@ def replace_illegal_chars(string, type="file"):
     if type == "file":
         string = re.sub('[\?"*:|<>/]', '_', string)
     if type == "folder":
-        string = re.sub('[:\?<>"|]', '_', string)
+        string = re.sub('[:\?<>"|*]', '_', string)
+
+    # Asciify windows file/folder names
+    if sys.platform == "win32":
+        string = unidecode(string)
 
     return string
 
