@@ -14,7 +14,7 @@
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from headphones import db, utorrent, transmission, deluge, qbittorrent, logger
+from headphones import db, utorrent, transmission, deluge, qbittorrent, realdebrid, logger
 import headphones
 
 
@@ -39,6 +39,8 @@ def checkTorrentFinished():
             torrent_removed = utorrent.removeTorrent(hash, True)
         elif headphones.CONFIG.TORRENT_DOWNLOADER == 3:
             torrent_removed = deluge.removeTorrent(hash, True)
+        elif headphones.CONFIG.TORRENT_DOWNLOADER == 5:
+            torrent_removed = realdebrid.removeTorrent(hash)
         else:
             torrent_removed = qbittorrent.removeTorrent(hash, True)
 

@@ -1021,13 +1021,22 @@ def send_to_downloader(data, bestqual, album):
             if bestqual[3] == 'rutracker.org':
                 ruobj.realdebrid_add_file(data)
             else:
-                realdebrid.addTorrent(bestqual[2])
+                try:
+                    realdebrid.addTorrent(bestqual[2])
+                except ValueError as err:
+                    logger.error('Torrent could not be added: ' + str(err))
 
             # Get hash
             torrentid = calculate_torrent_hash(bestqual[2], data)
             if not torrentid:
                 logger.error('Torrent id could not be determined')
                 return
+
+            if bestqual[3] != 'rutracker.org':
+                try:
+                    realdebrid.selectFiles(torrentid)
+                except ValueError as err:
+                    logger.error('Torrent files could not be selected: ' + str(err))
 
             # Get folder
             folder_name = realdebrid.getFolder(torrentid)

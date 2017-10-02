@@ -20,7 +20,8 @@ from collections import namedtuple
 import urllib2
 import urlparse
 import cookielib
-from pyunpack import Archive
+import patoolib
+import cloudconvert
 
 import re
 import os
@@ -67,7 +68,7 @@ class realdebridclient(object):
         }
 
         data = urllib.urlencode(data)
-        return self._action(params)
+        return self._action(params, data)
 
     def remove(self, id):
         params = '/torrents/delete/' + id
@@ -84,34 +85,51 @@ class realdebridclient(object):
 
     def download_and_extract(self, url, id):
         """Need to get torrent, determine # of files, then download accordingly"""
-        torrent = self.get_torrent(id)
-        filename = id + '.rar'
-        israr = true
+        status, torrent = self.get_torrent(id)
 
-        if len(torrent.files) == 1:
-            filename = torrent.files[0].path[1:]
-            israr = false
+        if status != 200:
+            raise ValueError('Http error occured when getting torrent: ' + status)
 
         try:
-            urllib.urlretrieve(url, os.path.join(headphones.CONFIG.DOWNLOAD_TORRENT_DIR, filename))
+            status, unrestricted_link = self._unrestrict_link(url)
 
-            if israr:
-                # Got rar file from real-debrid, so we'll unrar it first
-                try:
-                    Archive(
-                        os.path.join(headphones.CONFIG.DOWNLOAD_TORRENT_DIR, filename)).extractall(
-                            os.path.join(headphones.CONFIG.DOWNLOAD_TORRENT_DIR, torrent.original_filename))
-                except Exception as err:
-                    logger.debug('Extracting Real-Debrid rar failed: ' + str(err))
+            if status != 200:
+                raise ValueError('Http error occured when unrestricting real-debrid link: ' + status)
 
-            return filename
+            download_url = unrestricted_link['download']
+
+            filename = torrent['original_filename']
+            if unrestricted_link['mimeType'] == 'application/x-rar-compressed':
+                filename += '.rar'
+
+            logger.info('Downloading file from real-debrid: ' + download_url)
+            urllib.urlretrieve(download_url, os.path.join(headphones.CONFIG.DOWNLOAD_TORRENT_DIR, filename))
+            logger.info('Real-Debrid download complete!')
+
+            if len(torrent['files']) == 1:
+                filename = torrent['filename']
+                return filename
+
+            # Got rar file from real-debrid, so we'll unrar it first
+            try:
+                archivename = os.path.join(headphones.CONFIG.DOWNLOAD_TORRENT_DIR, filename)
+                foldername = os.path.join(headphones.CONFIG.DOWNLOAD_TORRENT_DIR, torrent['original_filename'])
+                logger.info('Extracting rar: ' + archivename)
+                patoolib.extract_archive(archivename, outdir=foldername)
+                os.remove(archivename)
+                logger.info('Extract complete!')
+                return foldername
+            except Exception as err:
+                logger.error('Extracting Real-Debrid rar failed: ' + str(err))
+                raise ValueError('Could not extract rar file, do you have patool set up properly?')
+
         except urllib2.HTTPError as err:
             logger.debug('URL: ' + str(url))
             logger.debug('Real-Debrid raised the following error: ' + str(err))
 
     def _action(self, action, body=None, content_type=None, method=None):
 
-        url = self.base_url + action + '?auth_token=' + urllib.urlencode(self.apikey)
+        url = self.base_url + action + '?auth_token=' + self.apikey
         request = urllib2.Request(url)
 
         if body:
@@ -124,6 +142,10 @@ class realdebridclient(object):
 
         try:
             response = self.opener.open(request)
+
+            if response.code == 201 or response.code == 204:
+                return response.code, None
+
             return response.code, json.loads(response.read())
         except urllib2.HTTPError as err:
             logger.debug('URL: ' + str(url))
@@ -132,11 +154,11 @@ class realdebridclient(object):
 
 def removeTorrent(hash):
     RealDebridClient = realdebridclient()
-    torrents = RealDebridClient.list()
+    status, torrents = RealDebridClient.list()
 
     for torrent in torrents:
-        if torrent.hash.upper() == hash.upper():
-            status, data = RealDebridClient.remove(torrent.id)
+        if torrent['hash'].upper() == hash.upper():
+            status, data = RealDebridClient.remove(torrent['id'])
             if status == 204:
                 return True
 
@@ -144,28 +166,76 @@ def removeTorrent(hash):
 
 def addTorrent(link):
     RealDebridClient = realdebridclient()
-    RealDebridClient.add_url(link)
+    status, data = RealDebridClient.add_url(link)
 
-def getFolder(hash, check_progress=False):
+    if status != 201:
+        raise ValueError('Http error occured when adding magnet: ' + status)
+
+
+def selectFiles(hash):
     RealDebridClient = realdebridclient()
     status, torrents = RealDebridClient.list()
 
     if status != 200:
-        return None
+        raise ValueError('Http error occured when getting torrents: ' + status)
 
     for torrent in torrents:
-        if torrent.hash.upper() == hash.upper():
-            single = False
-            if torrent.filename != "":
-                single = True
+        if torrent['hash'].upper() == hash.upper():
+            status, data = RealDebridClient.select_files(torrent['id'])
 
-            if check_progress and torrent.progress == 100:
-                return RealDebridClient.download_and_extract(torrent.links[0], torrent.id), single
+            if status != 204:
+                raise ValueError('Http error occured when selecting files: ' + status)
 
-            status, torrent_info = RealDebridClient.get_torrent(torrent.id)
+def getFolder(hash):
+    RealDebridClient = realdebridclient()
+    status, torrents = RealDebridClient.list()
+
+    if status != 200:
+        raise ValueError('Http error occured when getting folder: ' + status)
+
+    for torrent in torrents:
+        if torrent['hash'].upper() == hash.upper():
+
+            status, torrent_info = RealDebridClient.get_torrent(torrent['id'])
             if status != 200:
                 return None
 
-            return os.path.join(headphones.CONFIG.DOWNLOAD_TORRENT_DIR, torrent_info.original_filename), single
+            if torrent_info['filename'] != "" or len(torrent_info['files']) == 1:
+                return headphones.CONFIG.DOWNLOAD_TORRENT_DIR
+
+            directory = os.path.join(headphones.CONFIG.DOWNLOAD_TORRENT_DIR, torrent_info['original_filename'])
+            if not os.path.exists(directory):
+                os.makedirs(directory)
+
+            return torrent_info['original_filename']
 
     return None
+
+def checkStatus(hash):
+    RealDebridClient = realdebridclient()
+    status, torrents = RealDebridClient.list()
+
+    if status != 200:
+        raise ValueError('Http error occured when getting folder: ' + status)
+
+    for torrent in torrents:
+        if torrent['hash'].upper() == hash.upper():
+            if torrent['progress'] == 100:
+                RealDebridClient.download_and_extract(torrent['links'][0], torrent['id'])
+                return True
+            elif torrent['status'] == "waiting_files_selection":
+                RealDebridClient.select_files(torrent['id'])
+                return False
+            elif torrent['status'] == "error":
+                logger.error('Torrent status is error, removing...')
+                foldername = getFolder(hash)
+                directory = os.path.join(headphones.CONFIG.DOWNLOAD_TORRENT_DIR, foldername)
+                if os.path.exists(directory):
+                    os.removedirs(directory)
+                RealDebridClient.remove(torrent['id'])
+                raise LookupError()
+            else:
+                return False
+
+    logger.info('Hash ' + hash.upper() + ' not found on Real-Debrid')
+    raise LookupError()
