@@ -27,7 +27,7 @@ from beets import config as beetsconfig
 from beets import logging as beetslogging
 from beets.mediafile import MediaFile, FileTypeError, UnreadableFileError
 from beetsplug import lyrics as beetslyrics
-from headphones import notifiers, utorrent, transmission, deluge, qbittorrent
+from headphones import notifiers, utorrent, transmission, deluge, qbittorrent, realdebrid
 from headphones import db, albumart, librarysync
 from headphones import logger, helpers, mb, music_encoder
 from headphones import metadata
@@ -61,6 +61,8 @@ def checkFolder():
                             torrent_folder_name, single = transmission.getFolder(album['TorrentHash'])
                         elif headphones.CONFIG.TORRENT_DOWNLOADER == 4:
                             torrent_folder_name, single = qbittorrent.getFolder(album['TorrentHash'])
+                        elif headphones.CONFIG.TORRENT_DOWNLOADER == 5:
+                            torrent_folder_name, single = realdebrid.getFolder(album['TorrentHash'], True)
                         if torrent_folder_name:
                             folder_name = torrent_folder_name
 
@@ -495,6 +497,8 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
                 torrent_removed = deluge.removeTorrent(hash, True)
             elif headphones.CONFIG.TORRENT_DOWNLOADER == 2:
                 torrent_removed = utorrent.removeTorrent(hash, True)
+            elif headphones.CONFIG.TORRENT_DOWNLOADER == 5:
+                torrent_removed = realdebrid.removeTorrent(hash)
             else:
                 torrent_removed = qbittorrent.removeTorrent(hash, True)
 
