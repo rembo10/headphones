@@ -20,7 +20,7 @@ from collections import namedtuple
 import urllib2
 import urlparse
 import cookielib
-from unrar import rarfile
+from pyunpack import Archive
 
 import re
 import os
@@ -98,8 +98,9 @@ class realdebridclient(object):
             if israr:
                 # Got rar file from real-debrid, so we'll unrar it first
                 try:
-                    rar = rarfile.RarFile(os.path.join(headphones.CONFIG.DOWNLOAD_TORRENT_DIR, filename))
-                    rar.extractall(os.path.join(headphones.CONFIG.DOWNLOAD_TORRENT_DIR, torrent.original_filename))
+                    Archive(
+                        os.path.join(headphones.CONFIG.DOWNLOAD_TORRENT_DIR, filename)).extractall(
+                            os.path.join(headphones.CONFIG.DOWNLOAD_TORRENT_DIR, torrent.original_filename))
                 except Exception as err:
                     logger.debug('Extracting Real-Debrid rar failed: ' + str(err))
 
