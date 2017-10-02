@@ -306,6 +306,7 @@ _CONFIG_DEFINITIONS = {
     'UTORRENT_PASSWORD': (str, 'uTorrent', ''),
     'UTORRENT_USERNAME': (str, 'uTorrent', ''),
     'VERIFY_SSL_CERT': (bool_int, 'Advanced', 1),
+    'REALDEBRID_APIKEY': (str, 'Real-Debrid', ''),
     'WAIT_UNTIL_RELEASE_DATE': (int, 'General', 0),
     'WAFFLES': (int, 'Waffles', 0),
     'WAFFLES_PASSKEY': (str, 'Waffles', ''),
