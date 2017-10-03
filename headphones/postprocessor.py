@@ -215,10 +215,10 @@ def verify(albumid, albumpath, Kind=None, forced=False, keep_original_folder=Fal
         snatched = myDB.action('SELECT * from snatched WHERE AlbumID=? and FolderName=?', [albumid, os.path.basename(albumpath)]).fetchone()
         try:
             done = realdebrid.checkStatus(snatched['TorrentHash'])
-        except LookupError as err:
+        except LookupError:
             myDB.action('DELETE FROM snatched WHERE TorrentHash=?', [snatched['TorrentHash']])
 
-        if done != True:
+        if not done:
             logger.info(
                     "Looks like " + os.path.basename(albumpath).decode(headphones.SYS_ENCODING,
                                                                        'replace') + " isn't complete yet. Will try again on the next run")
