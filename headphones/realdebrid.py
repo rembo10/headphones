@@ -17,7 +17,6 @@ import os
 import urllib
 import json
 import urllib2
-import cookielib
 import patoolib
 
 import headphones
