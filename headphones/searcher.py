@@ -1014,7 +1014,7 @@ def send_to_downloader(data, bestqual, album):
             seed_ratio = get_seed_ratio(bestqual[3])
             if seed_ratio is not None:
                 utorrent.setSeedRatio(torrentid, seed_ratio)
-        elif headphones.CONFIG.TORRENT_DOWNLOADER == 5: # real-debrid
+        elif headphones.CONFIG.TORRENT_DOWNLOADER == 5:  # real-debrid
             logger.info("Sending torrent to Real-Debrid")
 
             # Add torrent

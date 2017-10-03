@@ -13,18 +13,13 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
 import urllib
 import json
-import time
-from collections import namedtuple
 import urllib2
-import urlparse
 import cookielib
 import patoolib
-import cloudconvert
 
-import re
-import os
 import headphones
 from headphones import logger
 
@@ -164,6 +159,7 @@ def removeTorrent(hash):
 
     return False
 
+
 def addTorrent(link):
     RealDebridClient = realdebridclient()
     status, data = RealDebridClient.add_url(link)
@@ -185,6 +181,7 @@ def selectFiles(hash):
 
             if status != 204:
                 raise ValueError('Http error occured when selecting files: ' + status)
+
 
 def getFolder(hash):
     RealDebridClient = realdebridclient()
@@ -210,6 +207,7 @@ def getFolder(hash):
             return torrent_info['original_filename']
 
     return None
+
 
 def checkStatus(hash):
     RealDebridClient = realdebridclient()
