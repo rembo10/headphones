@@ -54,7 +54,10 @@ def main():
 
     try:
         locale.setlocale(locale.LC_ALL, "")
-        headphones.SYS_ENCODING = locale.getpreferredencoding()
+        if headphones.SYS_PLATFORM == 'win32':
+            headphones.SYS_ENCODING = sys.getdefaultencoding().upper()
+        else:
+            headphones.SYS_ENCODING = locale.getpreferredencoding()
     except (locale.Error, IOError):
         pass
 
