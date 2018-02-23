@@ -17,6 +17,7 @@ import time
 import json
 import base64
 import urlparse
+import os
 
 from headphones import logger, request
 import headphones
@@ -33,7 +34,7 @@ _session_id = None
 def addTorrent(link, data=None):
     method = 'torrent-add'
 
-    if link.endswith('.torrent') and not link.startswith('http') or data:
+    if link.endswith('.torrent') and not link.startswith(('http', 'magnet')) or data:
         if data:
             metainfo = str(base64.b64encode(data))
         else:
@@ -64,7 +65,31 @@ def addTorrent(link, data=None):
         return False
 
 
-def getTorrentFolder(torrentid):
+def getFolder(torrentid):
+    torrent_folder = None
+    single_file = False
+    method = 'torrent-get'
+    arguments = {'ids': torrentid, 'fields': ['files']}
+
+    response = torrentAction(method, arguments)
+
+    try:
+        torrent_files = response['arguments']['torrents'][0]['files']
+        if torrent_files:
+            if len(torrent_files) == 1:
+                torrent_folder = torrent_files[0]['name']
+                single_file = True
+            else:
+                torrent_folder = os.path.split(torrent_files[0]['name'])[0]
+                single_file = False
+    except:
+        torrent_folder = None
+        single_file = False
+
+    return torrent_folder, single_file
+
+
+def getName(torrentid):
     method = 'torrent-get'
     arguments = {'ids': torrentid, 'fields': ['name', 'percentDone']}
 

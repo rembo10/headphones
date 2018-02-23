@@ -99,10 +99,12 @@ DEFAULT_BUFFER_SIZE = -1
 
 
 class FauxSocket(object):
-
     """Faux socket with the minimal interface required by pypy"""
 
     def _reuse(self):
+        pass
+
+    def _drop(self):
         pass
 
 _fileobject_uses_str_type = isinstance(

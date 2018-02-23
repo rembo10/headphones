@@ -1,21 +1,26 @@
+# -*- coding: utf-8 -*-
 # Copyright (C) 2005  Michael Urman
 #
 # This program is free software; you can redistribute it and/or modify
-# it under the terms of version 2 of the GNU General Public License as
-# published by the Free Software Foundation.
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
 
 import warnings
 
-from mutagen._util import DictMixin
+from mutagen._util import DictMixin, loadfile
+from mutagen._compat import izip
 
 
 class FileType(DictMixin):
-    """An abstract object wrapping tags and audio stream information.
+    """FileType(filething, **kwargs)
 
-    Attributes:
+    Args:
+        filething (filething): A filename or a file-like object
 
-    * info -- stream information (length, bitrate, sample rate)
-    * tags -- metadata tags, if any
+    Subclasses might take further options via keyword arguments.
+
+    An abstract object wrapping tags and audio stream information.
 
     Each file format has different potential tags and stream
     information.
@@ -23,6 +28,10 @@ class FileType(DictMixin):
     FileTypes implement an interface very similar to Metadata; the
     dict interface, save, load, and delete calls on a FileType call
     the appropriate methods on its tag data.
+
+    Attributes:
+        info (`StreamInfo`): contains length, bitrate, sample rate
+        tags (`Tags`): metadata tags, if any, otherwise `None`
     """
 
     __module__ = "mutagen"
@@ -32,14 +41,15 @@ class FileType(DictMixin):
     filename = None
     _mimes = ["application/octet-stream"]
 
-    def __init__(self, filename=None, *args, **kwargs):
-        if filename is None:
+    def __init__(self, *args, **kwargs):
+        if not args and not kwargs:
             warnings.warn("FileType constructor requires a filename",
                           DeprecationWarning)
         else:
-            self.load(filename, *args, **kwargs)
+            self.load(*args, **kwargs)
 
-    def load(self, filename, *args, **kwargs):
+    @loadfile()
+    def load(self, filething, *args, **kwargs):
         raise NotImplementedError
 
     def __getitem__(self, key):
@@ -86,34 +96,47 @@ class FileType(DictMixin):
         else:
             return self.tags.keys()
 
-    def delete(self, filename=None):
-        """Remove tags from a file."""
+    @loadfile(writable=True)
+    def delete(self, filething):
+        """delete(filething=None)
+
+        Remove tags from a file.
+
+        In cases where the tagging format is independent of the file type
+        (for example `mutagen.id3.ID3`) all traces of the tagging format will
+        be removed.
+        In cases where the tag is part of the file type, all tags and
+        padding will be removed.
+
+        The tags attribute will be cleared as well if there is one.
+
+        Does nothing if the file has no tags.
+
+        Raises:
+            MutagenError: if deleting wasn't possible
+        """
 
         if self.tags is not None:
-            if filename is None:
-                filename = self.filename
-            else:
-                warnings.warn(
-                    "delete(filename=...) is deprecated, reload the file",
-                    DeprecationWarning)
-            return self.tags.delete(filename)
+            return self.tags.delete(filething)
 
-    def save(self, filename=None, **kwargs):
-        """Save metadata tags."""
+    @loadfile(writable=True)
+    def save(self, filething, **kwargs):
+        """save(filething=None, **kwargs)
 
-        if filename is None:
-            filename = self.filename
-        else:
-            warnings.warn(
-                "save(filename=...) is deprecated, reload the file",
-                DeprecationWarning)
+        Save metadata tags.
+
+        Raises:
+            MutagenError: if saving wasn't possible
+        """
+
         if self.tags is not None:
-            return self.tags.save(filename, **kwargs)
-        else:
-            raise ValueError("no tags in file")
+            return self.tags.save(filething, **kwargs)
 
     def pprint(self):
-        """Print stream information and comment key=value pairs."""
+        """
+        Returns:
+            text: stream information and comment key=value pairs.
+        """
 
         stream = "%s (%s)" % (self.info.pprint(), self.mime[0])
         try:
@@ -126,14 +149,15 @@ class FileType(DictMixin):
     def add_tags(self):
         """Adds new tags to the file.
 
-        Raises if tags already exist.
+        Raises:
+            MutagenError: if tags already exist or adding is not possible.
         """
 
         raise NotImplementedError
 
     @property
     def mime(self):
-        """A list of mime types"""
+        """A list of mime types (`text`)"""
 
         mimes = []
         for Kind in type(self).__mro__:
@@ -144,6 +168,20 @@ class FileType(DictMixin):
 
     @staticmethod
     def score(filename, fileobj, header):
+        """Returns a score for how likely the file can be parsed by this type.
+
+        Args:
+            filename (path): a file path
+            fileobj (fileobj): a file object open in rb mode. Position is
+                undefined
+            header (bytes): data of undefined length, starts with the start of
+                the file.
+
+        Returns:
+            int: negative if definitely not a matching type, otherwise a score,
+                the bigger the more certain that the file can be loaded.
+        """
+
         raise NotImplementedError
 
 
@@ -158,13 +196,19 @@ class StreamInfo(object):
     __module__ = "mutagen"
 
     def pprint(self):
-        """Print stream information"""
+        """
+        Returns:
+            text: Print stream information
+        """
 
         raise NotImplementedError
 
 
-def File(filename, options=None, easy=False):
-    """Guess the type of the file and try to open it.
+@loadfile(method=False)
+def File(filething, options=None, easy=False):
+    """File(filething, options=None, easy=False)
+
+    Guess the type of the file and try to open it.
 
     The file type is decided by several things, such as the first 128
     bytes (which usually contains a file type identifier), the
@@ -172,12 +216,20 @@ def File(filename, options=None, easy=False):
 
     If no appropriate type could be found, None is returned.
 
-    :param options: Sequence of :class:`FileType` implementations, defaults to
-                    all included ones.
+    Args:
+        filething (filething)
+        options: Sequence of :class:`FileType` implementations,
+            defaults to all included ones.
+        easy (bool):  If the easy wrappers should be returnd if available.
+            For example :class:`EasyMP3 <mp3.EasyMP3>` instead of
+            :class:`MP3 <mp3.MP3>`.
 
-    :param easy: If the easy wrappers should be returnd if available.
-                 For example :class:`EasyMP3 <mp3.EasyMP3>` instead
-                 of :class:`MP3 <mp3.MP3>`.
+    Returns:
+        FileType: A FileType instance for the detected type or `None` in case
+            the type couln't be determined.
+
+    Raises:
+        MutagenError: in case the detected type fails to load the file.
     """
 
     if options is None:
@@ -211,27 +263,37 @@ def File(filename, options=None, easy=False):
         from mutagen.optimfrog import OptimFROG
         from mutagen.aiff import AIFF
         from mutagen.aac import AAC
+        from mutagen.smf import SMF
+        from mutagen.dsf import DSF
         options = [MP3, TrueAudio, OggTheora, OggSpeex, OggVorbis, OggFLAC,
                    FLAC, AIFF, APEv2File, MP4, ID3FileType, WavPack,
-                   Musepack, MonkeysAudio, OptimFROG, ASF, OggOpus, AAC]
+                   Musepack, MonkeysAudio, OptimFROG, ASF, OggOpus, AAC,
+                   SMF, DSF]
 
     if not options:
         return None
 
-    fileobj = open(filename, "rb")
+    fileobj = filething.fileobj
+
     try:
         header = fileobj.read(128)
-        # Sort by name after score. Otherwise import order affects
-        # Kind sort order, which affects treatment of things with
-        # equals scores.
-        results = [(Kind.score(filename, fileobj, header), Kind.__name__)
-                   for Kind in options]
-    finally:
-        fileobj.close()
-    results = list(zip(results, options))
+    except IOError:
+        header = b""
+
+    # Sort by name after score. Otherwise import order affects
+    # Kind sort order, which affects treatment of things with
+    # equals scores.
+    results = [(Kind.score(filething.name, fileobj, header), Kind.__name__)
+               for Kind in options]
+
+    results = list(izip(results, options))
     results.sort()
     (score, name), Kind = results[-1]
     if score > 0:
-        return Kind(filename)
+        try:
+            fileobj.seek(0, 0)
+        except IOError:
+            pass
+        return Kind(fileobj, filename=filething.filename)
     else:
         return None

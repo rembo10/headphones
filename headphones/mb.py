@@ -91,10 +91,6 @@ def findArtist(name, limit=1):
     artistlist = []
     artistResults = None
 
-    chars = set('!?*-')
-    if any((c in chars) for c in name):
-        name = '"' + name + '"'
-
     criteria = {'artist': name.lower()}
 
     with mb_lock:
@@ -156,16 +152,13 @@ def findRelease(name, limit=1, artist=None):
     if not artist and ':' in name:
         name, artist = name.rsplit(":", 1)
 
-    chars = set('!?*-')
-    if any((c in chars) for c in name):
-        name = '"' + name + '"'
-    if artist and any((c in chars) for c in artist):
-        artist = '"' + artist + '"'
+    criteria = {'release': name.lower()}
+    if artist:
+        criteria['artist'] = artist.lower()
 
     with mb_lock:
         try:
-            releaseResults = musicbrainzngs.search_releases(query=name, limit=limit, artist=artist)[
-                'release-list']
+            releaseResults = musicbrainzngs.search_releases(limit=limit, **criteria)['release-list']
         except musicbrainzngs.WebServiceError as e:  # need to update exceptions
             logger.warn('Attempt to query MusicBrainz for "%s" failed: %s' % (name, str(e)))
             mb_lock.snooze(5)
@@ -233,10 +226,6 @@ def findRelease(name, limit=1, artist=None):
 def findSeries(name, limit=1):
     serieslist = []
     seriesResults = None
-
-    chars = set('!?*-')
-    if any((c in chars) for c in name):
-        name = '"' + name + '"'
 
     criteria = {'series': name.lower()}
 
@@ -759,19 +748,12 @@ def findArtistbyAlbum(name):
 
 def findAlbumID(artist=None, album=None):
     results = None
-    chars = set('!?*-')
 
     try:
         if album and artist:
-            if any((c in chars) for c in album):
-                album = '"' + album + '"'
-            if any((c in chars) for c in artist):
-                artist = '"' + artist + '"'
             criteria = {'release': album.lower()}
             criteria['artist'] = artist.lower()
         else:
-            if any((c in chars) for c in album):
-                album = '"' + album + '"'
             criteria = {'release': album.lower()}
         with mb_lock:
             results = musicbrainzngs.search_release_groups(limit=1, **criteria).get(
@@ -788,3 +770,26 @@ def findAlbumID(artist=None, album=None):
         return False
     rgid = unicode(results[0]['id'])
     return rgid
+
+
+def getArtistForReleaseGroup(rgid):
+    """
+    Returns artist name for a release group
+    Used for series where we store the series instead of the artist
+    """
+    releaseGroup = None
+    try:
+        with mb_lock:
+            releaseGroup = musicbrainzngs.get_release_group_by_id(
+                rgid, ["artists"])
+            releaseGroup = releaseGroup['release-group']
+    except musicbrainzngs.WebServiceError as e:
+        logger.warn(
+            'Attempt to retrieve information from MusicBrainz for release group "%s" failed (%s)' % (
+                rgid, str(e)))
+        mb_lock.snooze(5)
+
+    if not releaseGroup:
+        return False
+    else:
+        return releaseGroup['artist-credit'][0]['artist']['name']

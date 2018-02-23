@@ -1,7 +1,8 @@
 #!/bin/sh
 #
 # PROVIDE: headphones
-# REQUIRE: DAEMON sabnzbd
+# REQUIRE: DAEMON
+# BEFORE:  LOGIN
 # KEYWORD: shutdown
 #
 # Add the following lines to /etc/rc.conf.local or /etc/rc.conf
@@ -15,56 +16,35 @@
 #           as root.
 # headphones_dir:   Directory where Headphones lives.
 #           Default: /usr/local/headphones
-# headphones_chdir:  Change to this directory before running Headphones.
-#     Default is same as headphones_dir.
 # headphones_pid:  The name of the pidfile to create.
 #     Default is headphones.pid in headphones_dir.
-PATH="/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin"
 
 . /etc/rc.subr
 
 name="headphones"
 rcvar=${name}_enable
-
 load_rc_config ${name}
 
 : "${headphones_enable:="NO"}"
 : "${headphones_user:="_sabnzbd"}"
 : "${headphones_dir:="/usr/local/headphones"}"
-: "${headphones_chdir:="${headphones_dir}"}"
-: "${headphones_pid:="${headphones_dir}/headphones.pid"}"
+: "${headphones_conf:="/usr/local/headphones/config.ini"}"
 
-status_cmd="${name}_status"
-stop_cmd="${name}_stop"
+command="${headphones_dir}/Headphones.py"
+command_interpreter="/usr/local/bin/python"
+pidfile="/var/run/headphones/headphones.pid"
+start_precmd="headphones_start_precmd"
+headphones_flags="--daemon --nolaunch --pidfile $pidfile --config $headphones_conf $headphones_flags"
 
-command="/usr/sbin/daemon"
-command_args="-f -p ${headphones_pid} python ${headphones_dir}/Headphones.py ${headphones_flags} --quiet --nolaunch"
+headphones_start_precmd() {
+        if [ $($ID -u) != 0 ]; then
+                err 1 "Must be root."
+        fi
 
-# Ensure user is root when running this script.
-if [ "$(id -u)" != "0" ]; then
-  echo "Oops, you should be root before running this!"
-  exit 1
-fi
-
-verify_headphones_pid() {
-    # Make sure the pid corresponds to the Headphones process.
-    pid=$(cat "${headphones_pid}" 2>/dev/null)
-    pgrep -F "${headphones_pid}" -q "python ${headphones_dir}/Headphones.py"
-    return $?
+	if [ ! -d /var/run/headphones ]; then
+		install -do $headphones_user /var/run/headphones
+	fi
 }
 
-# Try to stop Headphones cleanly by calling shutdown over http.
-headphones_stop() {
-    echo "Stopping $name"
-    verify_headphones_pid
-    if [ -n "${pid}" ]; then
-      wait_for_pids "${pid}"
-      echo "Stopped"
-    fi
-}
-
-headphones_status() {
-    verify_headphones_pid && echo "$name is running as ${pid}" || echo "$name is not running"
-}
-
+load_rc_config ${name}
 run_rc_command "$1"

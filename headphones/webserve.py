@@ -14,6 +14,7 @@
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
 # NZBGet support added by CurlyMo <curlymoo1@gmail.com> as a part of XBian - XBMC on the Raspberry Pi
+# t411 support added by a1ex, @likeitneverwentaway on github for maintenance
 
 from operator import itemgetter
 import threading
@@ -28,7 +29,7 @@ import urllib2
 
 import os
 import re
-from headphones import logger, searcher, db, importer, mb, lastfm, librarysync, helpers, notifiers
+from headphones import logger, searcher, db, importer, mb, lastfm, librarysync, helpers, notifiers, crier
 from headphones.helpers import checked, radio, today, clean_name
 from mako.lookup import TemplateLookup
 from mako import exceptions
@@ -68,6 +69,11 @@ class WebInterface(object):
         myDB = db.DBConnection()
         artists = myDB.select('SELECT * from artists order by ArtistSortName COLLATE NOCASE')
         return serve_template(templatename="index.html", title="Home", artists=artists)
+
+    @cherrypy.expose
+    def threads(self):
+        crier.cry()
+        raise cherrypy.HTTPRedirect("home")
 
     @cherrypy.expose
     def artistPage(self, ArtistID):
@@ -246,7 +252,10 @@ class WebInterface(object):
         namecheck = myDB.select('SELECT ArtistName from artists where ArtistID=?', [ArtistID])
         for name in namecheck:
             artistname = name['ArtistName']
-        logger.info(u"Deleting all traces of artist: " + artistname)
+        try:
+            logger.info(u"Deleting all traces of artist: " + artistname)
+        except TypeError:
+            logger.info(u"Deleting all traces of artist: null")
         myDB.action('DELETE from artists WHERE ArtistID=?', [ArtistID])
 
         from headphones import cache
@@ -339,14 +348,18 @@ class WebInterface(object):
 
         dirs = set(dirs)
 
-        for dir in dirs:
-            artistfolder = os.path.join(dir, folder)
-            if not os.path.isdir(artistfolder.encode(headphones.SYS_ENCODING)):
-                logger.debug("Cannot find directory: " + artistfolder)
-                continue
-            threading.Thread(target=librarysync.libraryScan,
-                             kwargs={"dir": artistfolder, "artistScan": True, "ArtistID": ArtistID,
-                                     "ArtistName": artist_name}).start()
+        try:
+            for dir in dirs:
+                artistfolder = os.path.join(dir, folder)
+                if not os.path.isdir(artistfolder.encode(headphones.SYS_ENCODING)):
+                    logger.debug("Cannot find directory: " + artistfolder)
+                    continue
+                threading.Thread(target=librarysync.libraryScan,
+                                 kwargs={"dir": artistfolder, "artistScan": True, "ArtistID": ArtistID,
+                                         "ArtistName": artist_name}).start()
+        except Exception as e:
+            logger.error('Unable to complete the scan: %s' % e)
+
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
 
     @cherrypy.expose
@@ -528,7 +541,7 @@ class WebInterface(object):
         myDB = db.DBConnection()
         upcoming = myDB.select(
             "SELECT * from albums WHERE ReleaseDate > date('now') order by ReleaseDate ASC")
-        wanted = myDB.select("SELECT * from albums WHERE Status='Wanted'")
+        wanted = myDB.select("SELECT * from albums WHERE Status='Wanted' order by ReleaseDate ASC")
         return serve_template(templatename="upcoming.html", title="Upcoming", upcoming=upcoming,
                               wanted=wanted)
 
@@ -865,11 +878,19 @@ class WebInterface(object):
     def musicScan(self, path, scan=0, redirect=None, autoadd=0, libraryscan=0):
         headphones.CONFIG.LIBRARYSCAN = libraryscan
         headphones.CONFIG.AUTO_ADD_ARTISTS = autoadd
-        headphones.CONFIG.MUSIC_DIR = path
-        headphones.CONFIG.write()
+
+        try:
+            params = {}
+            headphones.CONFIG.MUSIC_DIR = path
+            headphones.CONFIG.write()
+        except Exception as e:
+            logger.warn("Cannot save scan directory to config: %s", e)
+            if scan:
+                params = {"dir": path}
+
         if scan:
             try:
-                threading.Thread(target=librarysync.libraryScan).start()
+                threading.Thread(target=librarysync.libraryScan, kwargs=params).start()
             except Exception as e:
                 logger.error('Unable to complete the scan: %s' % e)
         if redirect:
@@ -1152,6 +1173,10 @@ class WebInterface(object):
             "nzbget_password": headphones.CONFIG.NZBGET_PASSWORD,
             "nzbget_category": headphones.CONFIG.NZBGET_CATEGORY,
             "nzbget_priority": headphones.CONFIG.NZBGET_PRIORITY,
+            "qbittorrent_host": headphones.CONFIG.QBITTORRENT_HOST,
+            "qbittorrent_username": headphones.CONFIG.QBITTORRENT_USERNAME,
+            "qbittorrent_password": headphones.CONFIG.QBITTORRENT_PASSWORD,
+            "qbittorrent_label": headphones.CONFIG.QBITTORRENT_LABEL,
             "transmission_host": headphones.CONFIG.TRANSMISSION_HOST,
             "transmission_username": headphones.CONFIG.TRANSMISSION_USERNAME,
             "transmission_password": headphones.CONFIG.TRANSMISSION_PASSWORD,
@@ -1172,6 +1197,7 @@ class WebInterface(object):
             "torrent_downloader_transmission": radio(headphones.CONFIG.TORRENT_DOWNLOADER, 1),
             "torrent_downloader_utorrent": radio(headphones.CONFIG.TORRENT_DOWNLOADER, 2),
             "torrent_downloader_deluge": radio(headphones.CONFIG.TORRENT_DOWNLOADER, 3),
+            "torrent_downloader_qbittorrent": radio(headphones.CONFIG.TORRENT_DOWNLOADER, 4),
             "download_dir": headphones.CONFIG.DOWNLOAD_DIR,
             "use_blackhole": checked(headphones.CONFIG.BLACKHOLE),
             "blackhole_dir": headphones.CONFIG.BLACKHOLE_DIR,
@@ -1219,12 +1245,21 @@ class WebInterface(object):
             "rutracker_user": headphones.CONFIG.RUTRACKER_USER,
             "rutracker_password": headphones.CONFIG.RUTRACKER_PASSWORD,
             "rutracker_ratio": headphones.CONFIG.RUTRACKER_RATIO,
-            "use_whatcd": checked(headphones.CONFIG.WHATCD),
-            "whatcd_username": headphones.CONFIG.WHATCD_USERNAME,
-            "whatcd_password": headphones.CONFIG.WHATCD_PASSWORD,
-            "whatcd_ratio": headphones.CONFIG.WHATCD_RATIO,
+            "rutracker_cookie": headphones.CONFIG.RUTRACKER_COOKIE,
+            "use_apollo": checked(headphones.CONFIG.APOLLO),
+            "apollo_username": headphones.CONFIG.APOLLO_USERNAME,
+            "apollo_password": headphones.CONFIG.APOLLO_PASSWORD,
+            "apollo_ratio": headphones.CONFIG.APOLLO_RATIO,
+            "apollo_url": headphones.CONFIG.APOLLO_URL,
+            "use_redacted": checked(headphones.CONFIG.REDACTED),
+            "redacted_username": headphones.CONFIG.REDACTED_USERNAME,
+            "redacted_password": headphones.CONFIG.REDACTED_PASSWORD,
+            "redacted_ratio": headphones.CONFIG.REDACTED_RATIO,
             "use_strike": checked(headphones.CONFIG.STRIKE),
             "strike_ratio": headphones.CONFIG.STRIKE_RATIO,
+            "use_tquattrecentonze": checked(headphones.CONFIG.TQUATTRECENTONZE),
+            "tquattrecentonze_user": headphones.CONFIG.TQUATTRECENTONZE_USER,
+            "tquattrecentonze_password": headphones.CONFIG.TQUATTRECENTONZE_PASSWORD,
             "pref_qual_0": radio(headphones.CONFIG.PREFERRED_QUALITY, 0),
             "pref_qual_1": radio(headphones.CONFIG.PREFERRED_QUALITY, 1),
             "pref_qual_2": radio(headphones.CONFIG.PREFERRED_QUALITY, 2),
@@ -1248,6 +1283,8 @@ class WebInterface(object):
             "keep_nfo": checked(headphones.CONFIG.KEEP_NFO),
             "add_album_art": checked(headphones.CONFIG.ADD_ALBUM_ART),
             "album_art_format": headphones.CONFIG.ALBUM_ART_FORMAT,
+            "album_art_min_width": headphones.CONFIG.ALBUM_ART_MIN_WIDTH,
+            "album_art_max_width": headphones.CONFIG.ALBUM_ART_MAX_WIDTH,
             "embed_album_art": checked(headphones.CONFIG.EMBED_ALBUM_ART),
             "embed_lyrics": checked(headphones.CONFIG.EMBED_LYRICS),
             "replace_existing_folders": checked(headphones.CONFIG.REPLACE_EXISTING_FOLDERS),
@@ -1274,6 +1311,7 @@ class WebInterface(object):
             "magnet_links_3": radio(headphones.CONFIG.MAGNET_LINKS, 3),
             "log_dir": headphones.CONFIG.LOG_DIR,
             "cache_dir": headphones.CONFIG.CACHE_DIR,
+            "keep_torrent_files_dir": headphones.CONFIG.KEEP_TORRENT_FILES_DIR,
             "interface_list": interface_list,
             "music_encoder": checked(headphones.CONFIG.MUSIC_ENCODER),
             "encoder": headphones.CONFIG.ENCODER,
@@ -1374,7 +1412,16 @@ class WebInterface(object):
             "email_ssl": checked(headphones.CONFIG.EMAIL_SSL),
             "email_tls": checked(headphones.CONFIG.EMAIL_TLS),
             "email_onsnatch": checked(headphones.CONFIG.EMAIL_ONSNATCH),
-            "idtag": checked(headphones.CONFIG.IDTAG)
+            "idtag": checked(headphones.CONFIG.IDTAG),
+            "slack_enabled": checked(headphones.CONFIG.SLACK_ENABLED),
+            "slack_url": headphones.CONFIG.SLACK_URL,
+            "slack_channel": headphones.CONFIG.SLACK_CHANNEL,
+            "slack_emoji": headphones.CONFIG.SLACK_EMOJI,
+            "slack_onsnatch": checked(headphones.CONFIG.SLACK_ONSNATCH),
+            "join_enabled": checked(headphones.CONFIG.JOIN_ENABLED),
+            "join_onsnatch": checked(headphones.CONFIG.JOIN_ONSNATCH),
+            "join_apikey": headphones.CONFIG.JOIN_APIKEY,
+            "join_deviceid": headphones.CONFIG.JOIN_DEVICEID
         }
 
         for k, v in config.iteritems():
@@ -1421,8 +1468,8 @@ class WebInterface(object):
             "use_newznab", "newznab_enabled", "use_torznab", "torznab_enabled",
             "use_nzbsorg", "use_omgwtfnzbs", "use_kat", "use_piratebay", "use_oldpiratebay",
             "use_mininova", "use_waffles", "use_rutracker",
-            "use_whatcd", "use_strike", "preferred_bitrate_allow_lossless", "detect_bitrate",
-            "ignore_clean_releases", "freeze_db", "cue_split", "move_files",
+            "use_apollo", "use_redacted", "use_strike", "use_tquattrecentonze", "preferred_bitrate_allow_lossless",
+            "detect_bitrate", "ignore_clean_releases", "freeze_db", "cue_split", "move_files",
             "rename_files", "correct_metadata", "cleanup_files", "keep_nfo", "add_album_art",
             "embed_album_art", "embed_lyrics",
             "replace_existing_folders", "keep_original_folder", "file_underscores",
@@ -1442,7 +1489,8 @@ class WebInterface(object):
             "osx_notify_enabled", "osx_notify_onsnatch", "boxcar_enabled", "boxcar_onsnatch",
             "songkick_enabled", "songkick_filter_enabled",
             "mpc_enabled", "email_enabled", "email_ssl", "email_tls", "email_onsnatch",
-            "customauth", "idtag", "deluge_paused"
+            "customauth", "idtag", "deluge_paused",
+            "join_enabled", "join_onsnatch"
         ]
         for checked_config in checked_configs:
             if checked_config not in kwargs:
@@ -1710,6 +1758,12 @@ class WebInterface(object):
         logger.info("Testing Telegram notifications")
         telegram = notifiers.TELEGRAM()
         telegram.notify("it works!", "lazers pew pew")
+
+    @cherrypy.expose
+    def testJoin(self):
+        logger.info("Testing Join notifications")
+        join = notifiers.JOIN()
+        join.notify("it works!", "Test message")
 
 
 class Artwork(object):

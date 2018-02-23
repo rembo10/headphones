@@ -55,7 +55,7 @@ def request_lastfm(method, **kwargs):
         return
 
     if "error" in data:
-        logger.error("Last.FM returned an error: %s", data["message"])
+        logger.debug("Last.FM returned an error: %s", data["message"])
         return
 
     return data
@@ -149,7 +149,10 @@ def getTagTopArtists(tag, limit=50):
         logger.debug("Fetched %d artists from Last.FM", len(artists))
 
         for artist in artists:
-            artist_mbid = artist["mbid"]
+            try:
+                artist_mbid = artist["mbid"]
+            except KeyError:
+                continue
 
             if not any(artist_mbid in x for x in results):
                 artistlist.append(artist_mbid)

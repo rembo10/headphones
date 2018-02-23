@@ -14,6 +14,7 @@
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
 # NZBGet support added by CurlyMo <curlymoo1@gmail.com> as a part of XBian - XBMC on the Raspberry Pi
+# t411 support added by a1ex, @likeitneverwentaway on github for maintenance
 
 from base64 import b16encode, b32decode
 from hashlib import sha1
@@ -24,29 +25,33 @@ import datetime
 import subprocess
 import unicodedata
 import urlparse
+from json import loads
 
 import os
 import re
 from pygazelle import api as gazelleapi
 from pygazelle import encoding as gazelleencoding
 from pygazelle import format as gazelleformat
+from pygazelle import release_type as gazellerelease_type
 import headphones
 from headphones.common import USER_AGENT
 from headphones import logger, db, helpers, classes, sab, nzbget, request
-from headphones import utorrent, transmission, notifiers, rutracker, deluge
+from headphones import utorrent, transmission, notifiers, rutracker, deluge, qbittorrent
 from bencode import bencode, bdecode
-
 
 # Magnet to torrent services, for Black hole. Stolen from CouchPotato.
 TORRENT_TO_MAGNET_SERVICES = [
     # 'https://zoink.it/torrent/%s.torrent',
     # 'http://torrage.com/torrent/%s.torrent',
-    'https://torcache.net/torrent/%s.torrent',
+    # 'https://torcache.net/torrent/%s.torrent',
+    'http://itorrents.org/torrent/%s.torrent',
 ]
 
-# Persistent What.cd API object
-gazelle = None
+# Persistent Apollo.rip API object
+apolloobj = None
 ruobj = None
+# Persistent RED API object
+redobj = None
 
 
 def fix_url(s, charset="utf-8"):
@@ -159,8 +164,10 @@ def get_seed_ratio(provider):
         seed_ratio = headphones.CONFIG.RUTRACKER_RATIO
     elif provider == 'Kick Ass Torrents':
         seed_ratio = headphones.CONFIG.KAT_RATIO
-    elif provider == 'What.cd':
-        seed_ratio = headphones.CONFIG.WHATCD_RATIO
+    elif provider == 'Apollo.rip':
+        seed_ratio = headphones.CONFIG.APOLLO_RATIO
+    elif provider == 'Redacted':
+        seed_ratio = headphones.CONFIG.REDACTED_RATIO
     elif provider == 'The Pirate Bay':
         seed_ratio = headphones.CONFIG.PIRATEBAY_RATIO
     elif provider == 'Old Pirate Bay':
@@ -199,14 +206,13 @@ def searchforalbum(albumid=None, new=False, losslessOnly=False,
                 continue
 
             if headphones.CONFIG.WAIT_UNTIL_RELEASE_DATE and album['ReleaseDate']:
-                try:
-                    release_date = datetime.datetime.strptime(album['ReleaseDate'], "%Y-%m-%d")
-                except:
-                    logger.warn(
-                        "No valid date for: %s. Skipping automatic search" % album['AlbumTitle'])
+                release_date = strptime_musicbrainz(album['ReleaseDate'])
+                if not release_date:
+                    logger.warn("No valid date for: %s. Skipping automatic search" %
+                                album['AlbumTitle'])
                     continue
 
-                if release_date > datetime.datetime.today():
+                elif release_date > datetime.datetime.today():
                     logger.info("Skipping: %s. Waiting for release date of: %s" % (
                         album['AlbumTitle'], album['ReleaseDate']))
                     continue
@@ -235,6 +241,26 @@ def searchforalbum(albumid=None, new=False, losslessOnly=False,
     logger.info('Search for wanted albums complete')
 
 
+def strptime_musicbrainz(date_str):
+    """
+    Release date as returned by Musicbrainz may contain the full date (Year-Month-Day)
+    but it may as well be just Year-Month or even just the year.
+
+    Args:
+        date_str: the date as a string (ex: "2003-05-01", "2003-03", "2003")
+
+    Returns:
+        The more accurate datetime object we can create or None if parse failed
+    """
+    acceptable_formats = ('%Y-%m-%d', '%Y-%m', '%Y')
+    for date_format in acceptable_formats:
+        try:
+            return datetime.datetime.strptime(date_str, date_format)
+        except:
+            pass
+    return None
+
+
 def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
     NZB_PROVIDERS = (headphones.CONFIG.HEADPHONES_INDEXER or
                      headphones.CONFIG.NEWZNAB or
@@ -252,8 +278,10 @@ def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
                          headphones.CONFIG.MININOVA or
                          headphones.CONFIG.WAFFLES or
                          headphones.CONFIG.RUTRACKER or
-                         headphones.CONFIG.WHATCD or
-                         headphones.CONFIG.STRIKE)
+                         headphones.CONFIG.APOLLO or
+                         headphones.CONFIG.REDACTED or
+                         headphones.CONFIG.STRIKE or
+                         headphones.CONFIG.TQUATTRECENTONZE)
 
     results = []
     myDB = db.DBConnection()
@@ -714,7 +742,7 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None,
         }
 
         data = request.request_json(
-            url='http://api.omgwtfnzbs.org/json/',
+            url='http://api.omgwtfnzbs.me/json/',
             params=params, headers=headers
         )
 
@@ -813,6 +841,19 @@ def send_to_downloader(data, bestqual, album):
             torrent_name = helpers.replace_illegal_chars(folder_name) + '.torrent'
             download_path = os.path.join(headphones.CONFIG.TORRENTBLACKHOLE_DIR, torrent_name)
 
+            # Blackhole for t411
+            if bestqual[2].lower().startswith("http://api.t411"):
+                if headphones.CONFIG.MAGNET_LINKS == 2:
+                    try:
+                        url = bestqual[2].split('TOKEN')[0]
+                        token = bestqual[2].split('TOKEN')[1]
+                        data = request.request_content(url, headers={'Authorization': token})
+                        torrent_to_file(download_path, data)
+                        logger.info('Successfully converted magnet to torrent file')
+                    except Exception as e:
+                        logger.error("Error converting magnet link: %s" % str(e))
+                        return
+
             if bestqual[2].lower().startswith("magnet:"):
                 if headphones.CONFIG.MAGNET_LINKS == 1:
                     try:
@@ -838,12 +879,11 @@ def send_to_downloader(data, bestqual, album):
                     services = TORRENT_TO_MAGNET_SERVICES[:]
                     random.shuffle(services)
                     headers = {'User-Agent': USER_AGENT}
-                    headers['Referer'] = 'https://torcache.net/'
 
                     for service in services:
 
                         data = request.request_content(service % torrent_hash, headers=headers)
-                        if data and "torcache" in data:
+                        if data:
                             if not torrent_to_file(download_path, data):
                                 return
                             # Extract folder name from torrent
@@ -889,11 +929,11 @@ def send_to_downloader(data, bestqual, album):
                 logger.error("Error sending torrent to Transmission. Are you sure it's running?")
                 return
 
-            folder_name = transmission.getTorrentFolder(torrentid)
+            folder_name = transmission.getName(torrentid)
             if folder_name:
-                logger.info('Torrent folder name: %s' % folder_name)
+                logger.info('Torrent name: %s' % folder_name)
             else:
-                logger.error('Torrent folder name could not be determined')
+                logger.error('Torrent name could not be determined')
                 return
 
             # Set Seed Ratio
@@ -943,7 +983,7 @@ def send_to_downloader(data, bestqual, album):
             except Exception as e:
                 logger.error('Error sending torrent to Deluge: %s' % str(e))
 
-        else:  # if headphones.CONFIG.TORRENT_DOWNLOADER == 2:
+        elif headphones.CONFIG.TORRENT_DOWNLOADER == 2:
             logger.info("Sending torrent to uTorrent")
 
             # Add torrent
@@ -974,19 +1014,42 @@ def send_to_downloader(data, bestqual, album):
             seed_ratio = get_seed_ratio(bestqual[3])
             if seed_ratio is not None:
                 utorrent.setSeedRatio(torrentid, seed_ratio)
+        else:  # if headphones.CONFIG.TORRENT_DOWNLOADER == 4:
+            logger.info("Sending torrent to QBiTorrent")
+
+            # Add torrent
+            if bestqual[3] == 'rutracker.org':
+                ruobj.qbittorrent_add_file(data)
+            else:
+                qbittorrent.addTorrent(bestqual[2])
+
+            # Get hash
+            torrentid = calculate_torrent_hash(bestqual[2], data)
+            torrentid = torrentid.lower()
+            if not torrentid:
+                logger.error('Torrent id could not be determined')
+                return
+
+            # Get name
+            folder_name = qbittorrent.getName(torrentid)
+            if folder_name:
+                logger.info('Torrent name: %s' % folder_name)
+            else:
+                logger.error('Torrent name could not be determined')
+                return
 
     myDB = db.DBConnection()
     myDB.action('UPDATE albums SET status = "Snatched" WHERE AlbumID=?', [album['AlbumID']])
-    myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?, ?, ?)',
+    myDB.action('INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?, ?, ?, ?)',
                 [album['AlbumID'], bestqual[0], bestqual[1], bestqual[2], "Snatched", folder_name,
-                 kind])
+                 kind, torrentid])
 
     # Store the torrent id so we can check later if it's finished seeding and can be removed
     if seed_ratio is not None and seed_ratio != 0 and torrentid:
         myDB.action(
-            'INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?, ?, ?)',
-            [album['AlbumID'], bestqual[0], bestqual[1], bestqual[2], "Seed_Snatched", torrentid,
-             kind])
+            'INSERT INTO snatched VALUES( ?, ?, ?, ?, DATETIME("NOW", "localtime"), ?, ?, ?, ?)',
+            [album['AlbumID'], bestqual[0], bestqual[1], bestqual[2], "Seed_Snatched", folder_name,
+             kind, torrentid])
 
     # notify
     artist = album[1]
@@ -1014,6 +1077,14 @@ def send_to_downloader(data, bestqual, album):
         logger.info(u"Sending PushBullet notification")
         pushbullet = notifiers.PUSHBULLET()
         pushbullet.notify(name, "Download started")
+    if headphones.CONFIG.JOIN_ENABLED and headphones.CONFIG.JOIN_ONSNATCH:
+        logger.info(u"Sending Join notification")
+        join = notifiers.JOIN()
+        join.notify(name, "Download started")
+    if headphones.CONFIG.SLACK_ENABLED and headphones.CONFIG.SLACK_ONSNATCH:
+        logger.info(u"Sending Slack notification")
+        slack = notifiers.SLACK()
+        slack.notify(name, "Download started")
     if headphones.CONFIG.TELEGRAM_ENABLED and headphones.CONFIG.TELEGRAM_ONSNATCH:
         logger.info(u"Sending Telegram notification")
         telegram = notifiers.TELEGRAM()
@@ -1140,7 +1211,8 @@ def verifyresult(title, artistterm, term, lossless):
 
 def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                   choose_specific_download=False):
-    global gazelle  # persistent what.cd api object to reduce number of login attempts
+    global apolloobj  # persistent apollo.rip api object to reduce number of login attempts
+    global redobj  # persistent redacted api object to reduce number of login attempts
     global ruobj  # and rutracker
 
     reldate = album['ReleaseDate']
@@ -1221,9 +1293,9 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
         if headphones.CONFIG.PREFERRED_QUALITY == 3 or losslessOnly:
             categories = "3040"
         elif headphones.CONFIG.PREFERRED_QUALITY == 1 or allow_lossless:
-            categories = "3040,3010"
+            categories = "3040,3010,3050"
         else:
-            categories = "3010"
+            categories = "3010,3050"
 
         if album['Type'] == 'Other':
             categories = "3030"
@@ -1233,8 +1305,12 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
 
             provider = torznab_host[0]
 
+            # Format Jackett provider
+            if "api/v2.0/indexers" in torznab_host[0]:
+                provider = "Jackett_" + provider.split("/indexers/", 1)[1].split('/', 1)[0]
+
             # Request results
-            logger.info('Parsing results from %s using search term: %s' % (torznab_host[0], term))
+            logger.info('Parsing results from %s using search term: %s' % (provider, term))
 
             headers = {'User-Agent': USER_AGENT}
             params = {
@@ -1246,20 +1322,35 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
             }
 
             data = request.request_feed(
-                url=torznab_host[0] + '/api?',
+                url=torznab_host[0],
                 params=params, headers=headers
             )
 
             # Process feed
             if data:
                 if not len(data.entries):
-                    logger.info(u"No results found from %s for %s", torznab_host[0], term)
+                    logger.info(u"No results found from %s for %s", provider, term)
                 else:
                     for item in data.entries:
                         try:
                             url = item.link
                             title = item.title
-                            size = int(item.links[1]['length'])
+
+                            # Torrentech hack - size currently not returned, make it up
+                            if 'torrentech' in torznab_host[0]:
+                                if albumlength:
+                                    if 'Lossless' in title:
+                                        size = albumlength / 1000 * 800 * 128
+                                    elif 'MP3' in title:
+                                        size = albumlength / 1000 * 320 * 128
+                                    else:
+                                        size = albumlength / 1000 * 256 * 128
+                                else:
+                                    logger.info('Skipping %s, could not determine size' % title)
+                                    continue
+                            else:
+                                size = int(item.links[1]['length'])
+
                             if all(word.lower() in title.lower() for word in term.split()):
                                 logger.info(
                                     'Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
@@ -1279,7 +1370,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
         if headphones.CONFIG.KAT_PROXY_URL:
             providerurl = fix_url(set_proxy(headphones.CONFIG.KAT_PROXY_URL))
         else:
-            providerurl = fix_url("https://kat.cr")
+            providerurl = fix_url("https://katcr.co/new/")
 
         # Build URL
         providerurl = providerurl + "/usearch/" + ka_term
@@ -1355,8 +1446,9 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
             query_items = [usersearchterm]
 
         query_items.extend(['format:(%s)' % format,
-                            'size:[0 TO %d]' % maxsize,
-                            '-seeders:0'])  # cut out dead torrents
+                            'size:[0 TO %d]' % maxsize])
+        # (25/03/2017 Waffles back up after 5 months, all torrents currently have no seeders, remove for now)
+        # '-seeders:0'])  cut out dead torrents
 
         if bitrate:
             query_items.append('bitrate:"%s"' % bitrate)
@@ -1432,9 +1524,9 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                 if rulist:
                     resultlist.extend(rulist)
 
-    if headphones.CONFIG.WHATCD:
-        provider = "What.cd"
-        providerurl = "http://what.cd/"
+    if headphones.CONFIG.APOLLO:
+        provider = "Apollo.rip"
+        providerurl = "http://apollo.rip/"
 
         bitrate = None
         bitrate_string = bitrate
@@ -1457,7 +1549,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                         bitrate_string = encoding_string
                 if bitrate_string not in gazelleencoding.ALL_ENCODINGS:
                     logger.info(
-                        u"Your preferred bitrate is not one of the available What.cd filters, so not using it as a search parameter.")
+                        u"Your preferred bitrate is not one of the available Apollo.rip filters, so not using it as a search parameter.")
             maxsize = 10000000000
         elif headphones.CONFIG.PREFERRED_QUALITY == 1 or allow_lossless:  # Highest quality including lossless
             search_formats = [gazelleformat.FLAC, gazelleformat.MP3]
@@ -1466,27 +1558,157 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
             search_formats = [gazelleformat.MP3]
             maxsize = 300000000
 
-        if not gazelle or not gazelle.logged_in():
+        if not apolloobj or not apolloobj.logged_in():
             try:
-                logger.info(u"Attempting to log in to What.cd...")
-                gazelle = gazelleapi.GazelleAPI(headphones.CONFIG.WHATCD_USERNAME,
-                                                headphones.CONFIG.WHATCD_PASSWORD)
-                gazelle._login()
+                logger.info(u"Attempting to log in to Apollo.rip...")
+                apolloobj = gazelleapi.GazelleAPI(headphones.CONFIG.APOLLO_USERNAME,
+                                                headphones.CONFIG.APOLLO_PASSWORD,
+                                                headphones.CONFIG.APOLLO_URL)
+                apolloobj._login()
             except Exception as e:
-                gazelle = None
-                logger.error(u"What.cd credentials incorrect or site is down. Error: %s %s" % (
+                apolloobj = None
+                logger.error(u"Apollo.rip credentials incorrect or site is down. Error: %s %s" % (
                     e.__class__.__name__, str(e)))
 
-        if gazelle and gazelle.logged_in():
+        if apolloobj and apolloobj.logged_in():
+            logger.info(u"Searching %s..." % provider)
+            all_torrents = []
+
+            # Specify release types to filter by
+            if album['Type'] == 'Album':
+                album_type = [gazellerelease_type.ALBUM]
+            if album['Type'] == 'Soundtrack':
+                album_type = [gazellerelease_type.SOUNDTRACK]
+            if album['Type'] == 'EP':
+                album_type = [gazellerelease_type.EP]
+            # No musicbrainz match for this type
+            # if album['Type'] == 'Anthology':
+            #   album_type = [gazellerelease_type.ANTHOLOGY]
+            if album['Type'] == 'Compilation':
+                album_type = [gazellerelease_type.COMPILATION]
+            if album['Type'] == 'DJ-mix':
+                album_type = [gazellerelease_type.DJ_MIX]
+            if album['Type'] == 'Single':
+                album_type = [gazellerelease_type.SINGLE]
+            if album['Type'] == 'Live':
+                album_type = [gazellerelease_type.LIVE_ALBUM]
+            if album['Type'] == 'Remix':
+                album_type = [gazellerelease_type.REMIX]
+            if album['Type'] == 'Bootleg':
+                album_type = [gazellerelease_type.BOOTLEG]
+            if album['Type'] == 'Interview':
+                album_type = [gazellerelease_type.INTERVIEW]
+            if album['Type'] == 'Mixtape/Street':
+                album_type = [gazellerelease_type.MIXTAPE]
+
+            for search_format in search_formats:
+                if usersearchterm:
+                    all_torrents.extend(
+                        apolloobj.search_torrents(searchstr=usersearchterm, format=search_format,
+                                                encoding=bitrate_string, releasetype=album_type)['results'])
+                else:
+                    all_torrents.extend(apolloobj.search_torrents(artistname=semi_clean_artist_term,
+                                                                groupname=semi_clean_album_term,
+                                                                format=search_format,
+                                                                encoding=bitrate_string,
+                                                                releasetype=album_type)['results'])
+
+            # filter on format, size, and num seeders
+            logger.info(u"Filtering torrents by format, maximum size, and minimum seeders...")
+            match_torrents = [t for t in all_torrents if
+                              t.size <= maxsize and t.seeders >= minimumseeders]
+
+            logger.info(
+                u"Remaining torrents: %s" % ", ".join(repr(torrent) for torrent in match_torrents))
+
+            # sort by times d/l'd
+            if not len(match_torrents):
+                logger.info(u"No results found from %s for %s after filtering" % (provider, term))
+            elif len(match_torrents) > 1:
+                logger.info(u"Found %d matching releases from %s for %s - %s after filtering" %
+                            (len(match_torrents), provider, artistterm, albumterm))
+                logger.info(
+                    "Sorting torrents by times snatched and preferred bitrate %s..." % bitrate_string)
+                match_torrents.sort(key=lambda x: int(x.snatched), reverse=True)
+                if gazelleformat.MP3 in search_formats:
+                    # sort by size after rounding to nearest 10MB...hacky, but will favor highest quality
+                    match_torrents.sort(key=lambda x: int(10 * round(x.size / 1024. / 1024. / 10.)),
+                                        reverse=True)
+                if search_formats and None not in search_formats:
+                    match_torrents.sort(
+                        key=lambda x: int(search_formats.index(x.format)))  # prefer lossless
+                #                if bitrate:
+                #                    match_torrents.sort(key=lambda x: re.match("mp3", x.getTorrentDetails(), flags=re.I), reverse=True)
+                #                    match_torrents.sort(key=lambda x: str(bitrate) in x.getTorrentFolderName(), reverse=True)
+                logger.info(
+                    u"New order: %s" % ", ".join(repr(torrent) for torrent in match_torrents))
+
+            for torrent in match_torrents:
+                if not torrent.file_path:
+                    torrent.group.update_group_data()  # will load the file_path for the individual torrents
+                resultlist.append((torrent.file_path,
+                                   torrent.size,
+                                   apolloobj.generate_torrent_link(torrent.id),
+                                   provider,
+                                   'torrent', True))
+
+    # Redacted - Using same logic as What.CD as it's also Gazelle, so should really make this into something reusable
+    if headphones.CONFIG.REDACTED:
+        provider = "Redacted"
+        providerurl = "https://redacted.ch"
+
+        bitrate = None
+        bitrate_string = bitrate
+
+        if headphones.CONFIG.PREFERRED_QUALITY == 3 or losslessOnly:  # Lossless Only mode
+            search_formats = [gazelleformat.FLAC]
+            maxsize = 10000000000
+        elif headphones.CONFIG.PREFERRED_QUALITY == 2:  # Preferred quality mode
+            search_formats = [None]  # should return all
+            bitrate = headphones.CONFIG.PREFERRED_BITRATE
+            if bitrate:
+                if 225 <= int(bitrate) < 256:
+                    bitrate = 'V0'
+                elif 200 <= int(bitrate) < 225:
+                    bitrate = 'V1'
+                elif 175 <= int(bitrate) < 200:
+                    bitrate = 'V2'
+                for encoding_string in gazelleencoding.ALL_ENCODINGS:
+                    if re.search(bitrate, encoding_string, flags=re.I):
+                        bitrate_string = encoding_string
+                if bitrate_string not in gazelleencoding.ALL_ENCODINGS:
+                    logger.info(
+                        u"Your preferred bitrate is not one of the available RED filters, so not using it as a search parameter.")
+            maxsize = 10000000000
+        elif headphones.CONFIG.PREFERRED_QUALITY == 1 or allow_lossless:  # Highest quality including lossless
+            search_formats = [gazelleformat.FLAC, gazelleformat.MP3]
+            maxsize = 10000000000
+        else:  # Highest quality excluding lossless
+            search_formats = [gazelleformat.MP3]
+            maxsize = 300000000
+
+        if not redobj or not redobj.logged_in():
+            try:
+                logger.info(u"Attempting to log in to Redacted...")
+                redobj = gazelleapi.GazelleAPI(headphones.CONFIG.REDACTED_USERNAME,
+                                                headphones.CONFIG.REDACTED_PASSWORD,
+                                                providerurl)
+                redobj._login()
+            except Exception as e:
+                redobj = None
+                logger.error(u"Redacted credentials incorrect or site is down. Error: %s %s" % (
+                    e.__class__.__name__, str(e)))
+
+        if redobj and redobj.logged_in():
             logger.info(u"Searching %s..." % provider)
             all_torrents = []
             for search_format in search_formats:
                 if usersearchterm:
                     all_torrents.extend(
-                        gazelle.search_torrents(searchstr=usersearchterm, format=search_format,
+                        redobj.search_torrents(searchstr=usersearchterm, format=search_format,
                                                 encoding=bitrate_string)['results'])
                 else:
-                    all_torrents.extend(gazelle.search_torrents(artistname=semi_clean_artist_term,
+                    all_torrents.extend(redobj.search_torrents(artistname=semi_clean_artist_term,
                                                                 groupname=semi_clean_album_term,
                                                                 format=search_format,
                                                                 encoding=bitrate_string)['results'])
@@ -1526,20 +1748,20 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                     torrent.group.update_group_data()  # will load the file_path for the individual torrents
                 resultlist.append((torrent.file_path,
                                    torrent.size,
-                                   gazelle.generate_torrent_link(torrent.id),
+                                   redobj.generate_torrent_link(torrent.id),
                                    provider,
                                    'torrent', True))
 
     # Pirate Bay
     if headphones.CONFIG.PIRATEBAY:
         provider = "The Pirate Bay"
-        tpb_term = term.replace("!", "")
+        tpb_term = term.replace("!", "").replace("'", " ")
 
         # Use proxy if specified
         if headphones.CONFIG.PIRATEBAY_PROXY_URL:
             providerurl = fix_url(set_proxy(headphones.CONFIG.PIRATEBAY_PROXY_URL))
         else:
-            providerurl = fix_url("https://thepiratebay.se")
+            providerurl = fix_url("https://thepiratebay.org")
 
         # Build URL
         providerurl = providerurl + "/search/" + tpb_term + "/0/7/"  # 7 is sort by seeders
@@ -1763,6 +1985,77 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                         resultlist.append((title, size, url, provider, 'torrent', match))
                     except Exception as e:
                         logger.exception("Unhandled exception in Mininova Parser")
+    # t411
+    if headphones.CONFIG.TQUATTRECENTONZE:
+        username = headphones.CONFIG.TQUATTRECENTONZE_USER
+        password = headphones.CONFIG.TQUATTRECENTONZE_PASSWORD
+        API_URL = "http://api.t411.ai"
+        AUTH_URL = API_URL + '/auth'
+        DL_URL = API_URL + '/torrents/download/'
+        provider = "t411"
+        t411_term = term.replace(" ", "%20")
+        SEARCH_URL = API_URL + '/torrents/search/' + t411_term + "?limit=15&cid=395&subcat=623"
+        headers_login = {'username': username, 'password': password}
+
+        # Requesting content
+        logger.info('Parsing results from t411 using search term: %s' % term)
+        req = request.request_content(AUTH_URL, method='post', data=headers_login)
+
+        if len(req.split('"')) == 9:
+            token = req.split('"')[7]
+            headers_auth = {'Authorization': token}
+            logger.info('t411 - User %s logged in' % username)
+        else:
+            logger.info('t411 - Login error : %s' % req.split('"')[3])
+
+        # Quality
+        if headphones.CONFIG.PREFERRED_QUALITY == 3 or losslessOnly:
+            providerurl = fix_url(SEARCH_URL + "&term[16][]=529&term[16][]=1184")
+        elif headphones.CONFIG.PREFERRED_QUALITY == 1 or allow_lossless:
+            providerurl = fix_url(SEARCH_URL + "&term[16][]=685&term[16][]=527&term[16][]=1070&term[16][]=528&term[16][]=1167&term[16][]=1166&term[16][]=530&term[16][]=529&term[16][]=1184&term[16][]=532&term[16][]=533&term[16][]=1085&term[16][]=534&term[16][]=535&term[16][]=1069&term[16][]=537&term[16][]=538")
+        elif headphones.CONFIG.PREFERRED_QUALITY == 0:
+            providerurl = fix_url(SEARCH_URL + "&term[16][]=685&term[16][]=527&term[16][]=1070&term[16][]=528&term[16][]=1167&term[16][]=1166&term[16][]=530&term[16][]=532&term[16][]=533&term[16][]=1085&term[16][]=534&term[16][]=535&term[16][]=1069&term[16][]=537&term[16][]=538")
+        else:
+            providerurl = fix_url(SEARCH_URL)
+
+        # Tracker search
+        req = request.request_content(providerurl, headers=headers_auth)
+        req = loads(req)
+        total = req['total']
+
+        # Process feed
+        if total == '0':
+            logger.info("No results found from t411 for %s" % term)
+        else:
+            logger.info('Found %s results from t411' % total)
+            torrents = req['torrents']
+            for torrent in torrents:
+                try:
+                    title = torrent['name']
+                    if torrent['seeders'] < minimumseeders:
+                        logger.info('Skipping torrent %s : seeders below minimum set' % title)
+                        continue
+                    id = torrent['id']
+                    size = int(torrent['size'])
+                    data = request.request_content(DL_URL + id, headers=headers_auth)
+
+                    # Blackhole
+                    if headphones.CONFIG.TORRENT_DOWNLOADER == 0 and headphones.CONFIG.MAGNET_LINKS == 2:
+                        url = DL_URL + id + 'TOKEN' + token
+                        resultlist.append((title, size, url, provider, 'torrent', True))
+
+                    # Build magnet
+                    else:
+                        metadata = bdecode(data)
+                        hashcontents = bencode(metadata['info'])
+                        digest = sha1(hashcontents).hexdigest()
+                        trackers = [metadata["announce"]][0]
+                        url = 'magnet:?xt=urn:btih:%s&tr=%s' % (digest, trackers)
+                        resultlist.append((title, size, url, provider, 'torrent', True))
+
+                except Exception as e:
+                    logger.error("Error converting magnet link: %s" % str(e))
+                    return
 
     # attempt to verify that this isn't a substring result
     # when looking for "Foo - Foo" we don't want "Foobar"
@@ -1800,7 +2093,9 @@ def preprocess(resultlist):
             if result[3] == 'Kick Ass Torrents':
                 headers['Referer'] = 'https://torcache.net/'
                 headers['User-Agent'] = USER_AGENT
-            elif result[3] == 'What.cd':
+            elif result[3] == 'Apollo.rip':
+                headers['User-Agent'] = 'Headphones'
+            elif result[3] == 'Redacted':
                 headers['User-Agent'] = 'Headphones'
             elif result[3] == "The Pirate Bay" or result[3] == "Old Pirate Bay":
                 headers[

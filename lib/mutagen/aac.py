@@ -2,8 +2,9 @@
 # Copyright (C) 2014 Christoph Reiter
 #
 # This program is free software; you can redistribute it and/or modify
-# it under the terms of version 2 of the GNU General Public License as
-# published by the Free Software Foundation.
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
 
 """
 * ADTS - Audio Data Transport Stream
@@ -13,7 +14,9 @@
 
 from mutagen import StreamInfo
 from mutagen._file import FileType
-from mutagen._util import BitReader, BitReaderError, MutagenError
+from mutagen._util import BitReader, BitReaderError, MutagenError, loadfile, \
+    convert_error
+from mutagen.id3._util import BitPaddedInt
 from mutagen._compat import endswith, xrange
 
 
@@ -262,16 +265,16 @@ class AACError(MutagenError):
 
 
 class AACInfo(StreamInfo):
-    """AAC stream information.
+    """AACInfo()
+
+    AAC stream information.
+    The length of the stream is just a guess and might not be correct.
 
     Attributes:
-
-    * channels -- number of audio channels
-    * length -- file length in seconds, as a float
-    * sample_rate -- audio sampling rate in Hz
-    * bitrate -- audio bitrate, in bits per second
-
-    The length of the stream is just a guess and might not be correct.
+        channels (`int`): number of audio channels
+        length (`float`): file length in seconds, as a float
+        sample_rate (`int`): audio sampling rate in Hz
+        bitrate (`int`): audio bitrate, in bits per second
     """
 
     channels = 0
@@ -279,11 +282,13 @@ class AACInfo(StreamInfo):
     sample_rate = 0
     bitrate = 0
 
+    @convert_error(IOError, AACError)
     def __init__(self, fileobj):
+        """Raises AACError"""
+
         # skip id3v2 header
         start_offset = 0
         header = fileobj.read(10)
-        from mutagen.id3 import BitPaddedInt
         if header.startswith(b"ID3"):
             size = BitPaddedInt(header[6:])
             start_offset = size + 10
@@ -373,24 +378,34 @@ class AACInfo(StreamInfo):
         self.length = float(s.samples * stream_size) / (s.size * s.frequency)
 
     def pprint(self):
-        return "AAC (%s), %d Hz, %.2f seconds, %d channel(s), %d bps" % (
+        return u"AAC (%s), %d Hz, %.2f seconds, %d channel(s), %d bps" % (
             self._type, self.sample_rate, self.length, self.channels,
             self.bitrate)
 
 
 class AAC(FileType):
-    """Load ADTS or ADIF streams containing AAC.
+    """AAC(filething)
+
+    Arguments:
+        filething (filething)
+
+    Load ADTS or ADIF streams containing AAC.
 
     Tagging is not supported.
     Use the ID3/APEv2 classes directly instead.
+
+    Attributes:
+        info (`AACInfo`)
     """
 
     _mimes = ["audio/x-aac"]
 
-    def load(self, filename):
-        self.filename = filename
-        with open(filename, "rb") as h:
-            self.info = AACInfo(h)
+    @loadfile()
+    def load(self, filething):
+        self.info = AACInfo(filething.fileobj)
+
+    def add_tags(self):
+        raise AACError("doesn't support tags")
 
     @staticmethod
     def score(filename, fileobj, header):

@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-
 # Copyright (C) 2009  Joe Wreschnig
 #
 # This program is free software; you can redistribute it and/or modify
-# it under the terms of version 2 of the GNU General Public License as
-# published by the Free Software Foundation.
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
 
-from mutagen import Metadata
+from mutagen import Tags
 from mutagen._util import DictMixin, dict_match
 from mutagen.mp4 import MP4, MP4Tags, error, delete
 from ._compat import PY2, text_type, PY3
@@ -19,8 +19,10 @@ class EasyMP4KeyError(error, KeyError, ValueError):
     pass
 
 
-class EasyMP4Tags(DictMixin, Metadata):
-    """A file with MPEG-4 iTunes metadata.
+class EasyMP4Tags(DictMixin, Tags):
+    """EasyMP4Tags()
+
+    A file with MPEG-4 iTunes metadata.
 
     Like Vorbis comments, EasyMP4Tags keys are case-insensitive ASCII
     strings, and values are a list of Unicode strings (and these lists
@@ -40,6 +42,7 @@ class EasyMP4Tags(DictMixin, Metadata):
         self.load = self.__mp4.load
         self.save = self.__mp4.save
         self.delete = self.__mp4.delete
+        self._padding = self.__mp4._padding
 
     filename = property(lambda s: s.__mp4.filename,
                         lambda s, fn: setattr(s.__mp4, 'filename', fn))
@@ -267,11 +270,14 @@ for name, key in {
 
 
 class EasyMP4(MP4):
-    """Like :class:`MP4 <mutagen.mp4.MP4>`,
-    but uses :class:`EasyMP4Tags` for tags.
+    """EasyMP4(filelike)
 
-    :ivar info: :class:`MP4Info <mutagen.mp4.MP4Info>`
-    :ivar tags: :class:`EasyMP4Tags`
+    Like :class:`MP4 <mutagen.mp4.MP4>`, but uses :class:`EasyMP4Tags` for
+    tags.
+
+    Attributes:
+        info (`mutagen.mp4.MP4Info`)
+        tags (`EasyMP4Tags`)
     """
 
     MP4Tags = EasyMP4Tags

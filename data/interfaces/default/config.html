@@ -56,7 +56,7 @@
                                     <label title="Password for web server authentication. Leave empty to disable.">
                                         HTTP Password
                                     </label>
-                                    <input type="password" name="http_password" value="${config['http_password']}" size="30">
+                                    <input type="password" name="http_password" value="${config['http_password'] | h}" size="30">
                                 </div>
                                 <div class="row checkbox">
                                     <input type="checkbox" name="launch_browser" value="1" ${config['launch_browser']} />
@@ -179,7 +179,7 @@
                                     <label title="SABnzbd password. Leave empty if not applicable.">
                                         SABnzbd Password
                                     </label>
-                                    <input type="password" name="sab_password" value="${config['sab_password']}" size="20">
+                                    <input type="password" name="sab_password" value="${config['sab_password'] | h}" size="20">
                                 </div>
                                 <div class="row">
                                     <label title="SABnzbd API key. Can be found in SABnzbd settings.">
@@ -213,7 +213,7 @@
                                     <label title="NZBGet password. Leave empty if not applicable">
                                         NZBget Password
                                     </label>
-                                    <input type="password" name="nzbget_password" value="${config['nzbget_password']}" size="20">
+                                    <input type="password" name="nzbget_password" value="${config['nzbget_password'] | h}" size="20">
                                 </div>
                                 <div class="row">
                                     <label title="Name of NZBget category to add downloads to.">
@@ -318,6 +318,7 @@
                                 <input type="radio" name="torrent_downloader" id="torrent_downloader_transmission" value="1" ${config['torrent_downloader_transmission']}> Transmission
                                 <input type="radio" name="torrent_downloader" id="torrent_downloader_utorrent" value="2" ${config['torrent_downloader_utorrent']}> uTorrent (Beta)
                                 <input type="radio" name="torrent_downloader" id="torrent_downloader_deluge" value="3" ${config['torrent_downloader_deluge']}> Deluge (Beta)
+                                <input type="radio" name="torrent_downloader" id="torrent_downloader_qbittorrent" value="4" ${config['torrent_downloader_qbittorrent']}> QBitTorrent
                             </fieldset>
                             <fieldset id="torrent_blackhole_options">
                                 <div class="row">
@@ -365,7 +366,7 @@
                                 </div>
                                 <div class="row">
                                     <label>Transmission Password</label>
-                                    <input type="password" name="transmission_password" value="${config['transmission_password']}" size="30">
+                                    <input type="password" name="transmission_password" value="${config['transmission_password'] | h}" size="30">
                                 </div>
                                 <div class="row">
                                     <small>Note: With Transmission, you can specify a different download directory for downloads sent from Headphones.
@@ -385,12 +386,32 @@
                                 </div>
                                 <div class="row">
                                     <label>uTorrent Password</label>
-                                    <input type="password" name="utorrent_password" value="${config['utorrent_password']}" size="30">
+                                    <input type="password" name="utorrent_password" value="${config['utorrent_password'] | h}" size="30">
                                 </div>
                                 <div class="row">
                                     <label>uTorrent Label</label>
                                     <input type="text" name="utorrent_label" value="${config['utorrent_label']}" size="30">
                                 </div>
+                            </fieldset>
+                            <fieldset id="qbittorrent_options">
+                                <small class="heading"><i class="fa fa-info-circle"></i> Note: Works with WebAPI Rev 11 and later (QBitTorrent 3.4.0 and later) </small>
+                                <div class="row">
+                                    <label>QBitTorrent Host</label>
+                                    <input type="text" name="qbittorrent_host" value="${config['qbittorrent_host']}" size="30">
+                                    <small>usually http://localhost:8081</small>
+                                </div>
+                                <div class="row">
+                                    <label>QBitTorrent Username</label>
+                                    <input type="text" name="qbittorrent_username" value="${config['qbittorrent_username']}" size="30">
+                                </div>
+                                <div class="row">
+                                    <label>QBitTorrent Password</label>
+                                    <input type="password" name="qbittorrent_password" value="${config['qbittorrent_password']}" size="30">
+                                </div>
+                                <div class="row">
+                                    <label>QBitTorrent Label</label>
+                                    <input type="text" name="qbittorrent_label" value="${config['qbittorrent_label']}" size="30">
+				</div>
                             </fieldset>
                             <fieldset id="deluge_options">
                                 <div class="row">
@@ -406,7 +427,7 @@
                                 </div>
                                 <div class="row">
                                     <label>Deluge Password</label>
-                                    <input type="password" name="deluge_password" value="${config['deluge_password']}" size="30">
+                                    <input type="password" name="deluge_password" value="${config['deluge_password'] | h}" size="30">
                                 </div>
                                 <div class="row">
                                     <small>Note: With Deluge, you can specify a different download directory for downloads sent from Headphones.
@@ -472,7 +493,7 @@
                                     </div>
                                     <div class="row">
                                         <label>Password</label>
-                                        <input class="hppass" type="password" value="${config['hppass']}" size="20">
+                                        <input class="hppass" type="password" value="${config['hppass'] | h}" size="20">
                                     </div>
                                     <div class="row">
                                         <a href="https://headphones.codeshy.com/vip" id="vipserver" target="_blank">Don't have an account? Sign up!</a>
@@ -628,31 +649,59 @@
                                         </div>
                                         <div class="row">
                                             <label>Password</label>
-                                            <input type="password" name="rutracker_password" value="${config['rutracker_password']}" size="36">
+                                            <input type="password" name="rutracker_password" value="${config['rutracker_password'] | h}" size="36">
                                         </div>
                                         <div class="row">
                                             <label>Seed Ratio</label>
                                             <input type="text" class="override-float" name="rutracker_ratio" value="${config['rutracker_ratio']}" size="10" title="Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove torrent when post processed and finished seeding">
+                                        </div>
+                                        <div class="row">
+                                            <label>Session Cookie (Optional - Advanced)</label>
+                                            <input type="text" class="override-float" name="rutracker_cookie" value="${config['rutracker_cookie']}" size="10" title="bb_session cookie (Advanced)">
                                         </div>
                                     </div>
                                 </fieldset>
 
                                 <fieldset>
                                     <div class="row checkbox left">
-                                        <input id="use_whatcd" type="checkbox" class="bigcheck" name="use_whatcd" value="1" ${config['use_whatcd']} /><label for="use_whatcd"><span class="option">What.cd</span></label>
+                                        <input id="use_apollo" type="checkbox" class="bigcheck" name="use_apollo" value="1" ${config['use_apollo']} /><label for="use_apollo"><span class="option">Apollo.rip</span></label>
                                     </div>
                                     <div class="config">
                                         <div class="row">
                                             <label>Username</label>
-                                            <input type="text" name="whatcd_username" value="${config['whatcd_username']}" size="36">
+                                            <input type="text" name="apollo_username" value="${config['apollo_username']}" size="36">
                                         </div>
                                         <div class="row">
                                             <label>Password</label>
-                                            <input type="password" name="whatcd_password" value="${config['whatcd_password']}" size="36">
+                                            <input type="password" name="apollo_password" value="${config['apollo_password'] | h}" size="36">
+                                        </div>
+                                        <div class="row">
+                                            <label>URL</label>
+                                            <input type="text" name="apollo_url" value="${config['apollo_url']}" size="36">
                                         </div>
                                         <div class="row">
                                             <label>Seed Ratio</label>
-                                            <input type="text" class="override-float" name="whatcd_ratio" value="${config['whatcd_ratio']}" size="10" title="Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove torrent when post processed and finished seeding">
+                                            <input type="text" class="override-float" name="apollo_ratio" value="${config['apollo_ratio']}" size="10" title="Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove torrent when post processed and finished seeding">
+                                        </div>
+                                    </div>
+                                </fieldset>
+
+                                <fieldset>
+                                    <div class="row checkbox left">
+                                        <input id="use_redacted" type="checkbox" class="bigcheck" name="use_redacted" value="1" ${config['use_redacted']} /><label for="use_redacted"><span class="option">Redacted</span></label>
+                                    </div>
+                                    <div class="config">
+                                        <div class="row">
+                                            <label>Username</label>
+                                            <input type="text" name="redacted_username" value="${config['redacted_username']}" size="36">
+                                        </div>
+                                        <div class="row">
+                                            <label>Password</label>
+                                            <input type="password" name="redacted_password" value="${config['redacted_password'] | h}" size="36">
+                                        </div>
+                                        <div class="row">
+                                            <label>Seed Ratio</label>
+                                            <input type="text" class="override-float" name="redacted_ratio" value="${config['redacted_ratio']}" size="10" title="Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove torrent when post processed and finished seeding">
                                         </div>
                                     </div>
                                 </fieldset>
@@ -677,8 +726,8 @@
                                         <div class="config" id="torznab1">
                                             <div class="row">
                                                 <label>Torznab Host</label>
-                                                <input type="text" name="torznab_host" value="${config['torznab_host']}" size="30">
-                                                <small>e.g. http://localhost:9117/torznab/iptorrents</small>
+                                                <input type="text" name="torznab_host" value="${config['torznab_host']}" size="36">
+                                                <small>e.g. http://localhost:9117/api/v2.0/indexers/demonoid/results/torznab/</small>
                                             </div>
                                             <div class="row">
                                                 <label>Torznab API</label>
@@ -701,7 +750,7 @@
                                             <div class="config" id="torznab${torznab_number}">
                                                 <div class="row">
                                                     <label>Torznab Host</label>
-                                                    <input type="text" name="torznab_host${torznab_number}" value="${torznab[0]}" size="30">
+                                                    <input type="text" name="torznab_host${torznab_number}" value="${torznab[0]}" size="36">
                                                 </div>
                                                 <div class="row">
                                                     <label>Torznab API</label>
@@ -746,6 +795,22 @@
                                         <div class="row">
                                             <label>Seed Ratio</label>
                                             <input type="text" class="override-float" name="mininova_ratio" value="${config['mininova_ratio']}" size="10" title="Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove torrent when post processed and finished seeding">
+                                        </div>
+                                    </div>
+                                </fieldset>
+								
+                                <fieldset>
+                                    <div class="row checkbox left">
+                                        <input id="use_tquattrecentonze" type="checkbox" class="bigcheck" name="use_tquattrecentonze" value="1" ${config['use_tquattrecentonze']} /><label for="use_tquattrecentonze"><span class="option">t411</span></label>
+                                    </div>
+                                    <div class="config">
+                                        <div class="row">
+                                            <label>Username</label>
+                                            <input type="text" name="tquattrecentonze_user" value="${config['tquattrecentonze_user']}" size="36">
+                                        </div>
+                                        <div class="row">
+                                            <label>Password</label>
+                                            <input type="password" name="tquattrecentonze_password" value="${config['tquattrecentonze_password'] | h}" size="36">
                                         </div>
                                     </div>
                                 </fieldset>
@@ -892,28 +957,40 @@
                                 </div>
                                 <div class="row checkbox left clearfix nopad">
                                     <label>
+                                        Embed lyrics
+                                        <input type="checkbox" name="embed_lyrics" value="1" ${config['embed_lyrics']}>
+                                    </label>
+                                </div>
+
+
+                                <div class="row checkbox left clearfix nopad">
+                                    <label>
+                                        Embed album art in each file
+                                        <input type="checkbox" name="embed_album_art" id="embed_album_art" value="1" ${config['embed_album_art']}>
+                                    </label>
+                                </div>
+
+                                <div class="row checkbox left clearfix nopad">
+                                    <label>
                                         Add album art jpeg to album folder
                                         <input type="checkbox" name="add_album_art" id="add_album_art" value="1" ${config['add_album_art']}>
                                     </label>
                                 </div>
+
                                 <div id="album_art_options" style="padding-left: 20px">
                                     <div class="row">
                                         as <input type="text" class="override-float" name="album_art_format" value="${config['album_art_format']}" size="10">.jpg
                                     </div>
                                     <small>Use $Artist/$artist, $Album/$album, $Year/$year, put optional variables in curly braces, use single-quote marks to escape curly braces literally ('{', '}').</small>
                                 </div>
-                                <div class="row checkbox left clearfix nopad">
-                                    <label>
-                                        Embed album art in each file
-                                        <input type="checkbox" name="embed_album_art" value="1" ${config['embed_album_art']}>
-                                    </label>
+
+                                <div id="album_art_size_options" style="padding-left: 20px">
+                                    <div class="row">
+                                        Album art min width <input type="text" class="override-float" name="album_art_min_width" value="${config['album_art_min_width']}" size="4" title="Only images with a pixel width greater or equal are considered as valid album art candidates. Default: 0.">\
+                                        Album art max width <input type="text" class="override-float" name="album_art_max_width" value="${config['album_art_max_width']}" size="4" title="A maximum image width to downscale fetched images if they are too big.">
+                                    </div>
                                 </div>
-                                <div class="row checkbox left clearfix nopad">
-                                    <label>
-                                        Embed lyrics
-                                        <input type="checkbox" name="embed_lyrics" value="1" ${config['embed_lyrics']}>
-                                    </label>
-                                </div>
+
                                 <div class="row">
                                     <label>
                                         Destination Directory:
@@ -970,7 +1047,7 @@
                                         <label>SMTP User</label><input type="text" name="email_smtp_user" value="${config['email_smtp_user']}" size="254">
                                     </div>
                                     <div class="row">
-                                        <label>SMTP Password</label><input type="password" name="email_smtp_password" value="${config['email_smtp_password']}" size="50">
+                                        <label>SMTP Password</label><input type="password" name="email_smtp_password" value="${config['email_smtp_password'] | h}" size="50">
                                     </div>
                                     <div class="row checkbox">
                                         <input type="text" class="override-float" name="email_smtp_port" value="${config['email_smtp_port']}" size="4"><label>SMTP Port</label>
@@ -996,7 +1073,7 @@
                                         <label>Growl Host:Port</label><input type="text" name="growl_host" value="${config['growl_host']}" size="30">
                                     </div>
                                     <div class="row">
-                                        <label>Growl Password</label><input type="password" name="growl_password" value="${config['growl_password']}" size="30">
+                                        <label>Growl Password</label><input type="password" name="growl_password" value="${config['growl_password'] | h}" size="30">
                                     </div>
                                     <div class="row checkbox">
                                         <input type="checkbox" name="growl_onsnatch" value="1" ${config['growl_onsnatch']} /><label>Notify on snatch?</label>
@@ -1018,7 +1095,7 @@
                                         <label>Username</label><input type="text" name="xbmc_username" value="${config['xbmc_username']}" size="30">
                                     </div>
                                     <div class="row">
-                                        <label>Password</label><input type="password" name="xbmc_password" value="${config['xbmc_password']}" size="30">
+                                        <label>Password</label><input type="password" name="xbmc_password" value="${config['xbmc_password'] | h}" size="30">
                                     </div>
                                     <div class="checkbox row">
                                         <input type="checkbox" name="xbmc_update" value="1" ${config['xbmc_update']} /><label>Update Library</label>
@@ -1132,7 +1209,7 @@
                                         <small>Username of your Plex client API (blank for none)</small>
                                     </div>
                                     <div class="row">
-                                        <label>Plex Password</label><input type="password" name="plex_password" value="${config['plex_password']}" size="30">
+                                        <label>Plex Password</label><input type="password" name="plex_password" value="${config['plex_password'] | h}" size="30">
                                         <small>Password of your Plex client API (blank for none)</small>
                                     </div>
                                     <div class="row">
@@ -1232,7 +1309,7 @@
                                         <label>Subsonic Username</label><input type="text" name="subsonic_username" value="${config['subsonic_username']}" size="30">
                                     </div>
                                     <div class="row">
-                                        <label>Subsonic Password</label><input type="password" name="subsonic_password" value="${config['subsonic_password']}" size="30">
+                                        <label>Subsonic Password</label><input type="password" name="subsonic_password" value="${config['subsonic_password'] | h}" size="30">
                                     </div>
                                 </div>
                             </fieldset>
@@ -1266,6 +1343,26 @@
 
                             <fieldset>
                                 <div class="row checkbox left">
+                                    <input type="checkbox" class="bigcheck" name="slack_enabled" id="slack" value="1" ${config['slack_enabled']} /><label for="slack"><span class="option">Slack</span></label>
+                                </div>
+                                <div id="slackoptions">
+                                    <div class="row">
+                                        <label>Slack Webhook</label><input type="text" name="slack_url" value="${config['slack_url']}" size="50">
+                                    </div>
+                                    <div class="row">
+                                        <label>Channel</label><input type="text" name="slack_channel" value="${config['slack_channel']}" size="50">
+                                    </div>
+                                    <div class="row checkbox">
+                                        <label>Emoji</label><input type="text" name="slack_emoji" value="${config['slack_emoji']}" size="50">
+                                    </div>
+                                    <div class="row checkbox">
+                                        <input type="checkbox" name="slack_onsnatch" value="1" ${config['slack_onsnatch']} /><label>Notify on snatch?</label>
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <fieldset>
+                                <div class="row checkbox left">
                                     <input type="checkbox" class="bigcheck" name="telegram_enabled" id="telegram" value="1" ${config['telegram_enabled']} /><label for="telegram"><span class="option">Telegram</span></label>
                                 </div>
                                 <div id="telegramoptions">
@@ -1277,6 +1374,23 @@
                                     </div>
                                     <div class="row checkbox">
                                         <input type="checkbox" name="telegram_onsnatch" value="1" ${config['telegram_onsnatch']} /><label>Notify on snatch?</label>
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <fieldset>
+                                <div class="row checkbox left">
+                                    <input type="checkbox" class="bigcheck" name="join_enabled" id="join" value="1" ${config['join_enabled']} /><label for="join"><span class="option">Join</span></label>
+                                </div>
+                                <div id="joinoptions">
+                                    <div class="row">
+                                        <label>Join API Key</label><input type="text" name="join_apikey" value="${config['join_apikey']}" size="50">
+                                    </div>
+                                    <div class="row">
+                                        <label>Device ID(s)</label><input type="text" name="join_deviceid" value="${config['join_deviceid']}" size="50"><small>Comma separated list.  Leave blank to send to all devices</small>
+                                    </div>
+                                    <div class="row checkbox">
+                                        <input type="checkbox" name="join_onsnatch" value="1" ${config['join_onsnatch']} /><label>Notify on snatch?</label>
                                     </div>
                                 </div>
                             </fieldset>
@@ -1576,6 +1690,10 @@
                                     <label>Cache Directory</label>
                                     <input type="text" name="cache_dir" value="${config['cache_dir']}" size="50">
                                 </div>
+                                <div class="row">
+                                    <label>Post Processing Temporary Directory</label>
+                                    <input type="text" name="keep_torrent_files_dir" value="${config['keep_torrent_files_dir']}" size="50" title="Enter the directory to preserve files for seeding, default is system temp directory">
+                                </div>
                             </fieldset>
 
                             <fieldset>
@@ -1632,7 +1750,7 @@
                                             <label>Username</label><input type="text" class="customuser" name="customuser" value="${config['customuser']}" size="20">
                                         </div>
                                         <div class="row">
-                                            <label>Password</label><input type="password" class="custompass" name="custompass" value="${config['custompass']}" size="15"><br>
+                                            <label>Password</label><input type="password" class="custompass" name="custompass" value="${config['custompass'] | h}" size="15"><br>
                                         </div>
                                     </div>
                                     <div class="row">
@@ -1645,7 +1763,7 @@
                                         <label>Username</label><input type="text" class="hpuser" name="hpuser" value="${config['hpuser']}" size="20">
                                     </div>
                                     <div class="row">
-                                        <label>Password</label><input type="password" class="hppass" name="hppass" value="${config['hppass']}" size="20"><br>
+                                        <label>Password</label><input type="password" class="hppass" name="hppass" value="${config['hppass'] | h}" size="20"><br>
                                         <a href="https://headphones.codeshy.com/vip" id="vipserver" target="_blank">Get an Account!</a>
                                     </div>
                                 </div>
@@ -1820,9 +1938,36 @@
                         }
                 });
 
+                if ($("#embed_album_art").is(":checked"))
+                        {
+                            $("#album_art_size_options").show();
+                        }
+                        else
+                        {
+                            if (!$("#add_album_art").is(":checked"))
+                            {
+                                $("#album_art_size_options").hide();
+                              }
+                        }
+
+                $("#embed_album_art").click(function(){
+                        if ($("#embed_album_art").is(":checked"))
+                        {
+                            $("#album_art_size_options").slideDown();
+                        }
+                        else
+                        {
+                            if (!$("#add_album_art").is(":checked"))
+                            {
+                                $("#album_art_size_options").slideUp();
+                            }
+                        }
+                });
+
                 if ($("#add_album_art").is(":checked"))
                         {
                             $("#album_art_options").show();
+                            $("#album_art_size_options").show();
                         }
                 else
                         {
@@ -1833,10 +1978,15 @@
                         if ($("#add_album_art").is(":checked"))
                         {
                             $("#album_art_options").slideDown();
+                            $("#album_art_size_options").slideDown();
                         }
                         else
                         {
                             $("#album_art_options").slideUp();
+                            if (!$("#embed_album_art").is(":checked"))
+                            {
+                                $("#album_art_size_options").slideUp();
+                            }
                         }
                 });
 
@@ -2041,6 +2191,27 @@
                         }
                 });
 
+                if ($("#join").is(":checked"))
+                        {
+                            $("#joinoptions").show();
+                        }
+                else
+                        {
+                            $("#joinoptions").hide();
+                        }
+
+
+                $("#join").click(function(){
+                        if ($("#join").is(":checked"))
+                        {
+                            $("#joinoptions").slideDown();
+                        }
+                        else
+                        {
+                            $("#joinoptions").slideUp();
+                        }
+                });
+
                 if ($("#twitter").is(":checked"))
                         {
                             $("#twitteroptions").show();
@@ -2060,6 +2231,27 @@
                             $("#twitteroptions").slideUp();
                         }
                 });
+
+                if ($("#slack").is(":checked"))
+                        {
+                            $("#slackoptions").show();
+                        }
+                else
+                        {
+                            $("#slackoptions").hide();
+                        }
+
+                $("#slack").click(function(){
+                        if ($("#slack").is(":checked"))
+                        {
+                            $("#slackoptions").slideDown();
+                        }
+                        else
+                        {
+                            $("#slackoptions").slideUp();
+                        }
+                });
+
 
                 if ($("#telegram").is(":checked"))
                         {
@@ -2237,25 +2429,29 @@
 
                 if ($("#torrent_downloader_blackhole").is(":checked"))
                         {
-                            $("#transmission_options,#utorrent_options,#deluge_options").hide();
+                            $("#transmission_options,#utorrent_options,#deluge_options,#qbittorrent_options").hide();
                             $("#torrent_blackhole_options").show();
                         }
                 if ($("#torrent_downloader_transmission").is(":checked"))
                         {
-                            $("#torrent_blackhole_options,#utorrent_options,#deluge_options").hide();
+                            $("#torrent_blackhole_options,#utorrent_options,#deluge_options,#qbittorrent_options").hide();
                             $("#transmission_options").show();
                         }
                 if ($("#torrent_downloader_utorrent").is(":checked"))
                         {
-                            $("#torrent_blackhole_options,#transmission_options,#deluge_options").hide();
+                            $("#torrent_blackhole_options,#transmission_options,#deluge_options,#qbittorrent_options").hide();
                             $("#utorrent_options").show();
+                        }
+                if ($("#torrent_downloader_qbittorrent").is(":checked"))
+                        {
+                            $("#torrent_blackhole_options,#transmission_options,#utorrent_options,#deluge_options").hide();
+                            $("#qbittorrent_options").show();
                         }
                 if ($("#torrent_downloader_deluge").is(":checked"))
                         {
-                            $("#torrent_blackhole_options,#transmission_options,#utorrent_options").hide();
+                            $("#torrent_blackhole_options,#transmission_options,#utorrent_options,#qbittorrent_options").hide();
                             $("#deluge_options").show();
                         }
-
 
                 $('input[type=radio]').change(function(){
                         if ($("#preferred_bitrate").is(":checked"))
@@ -2292,19 +2488,23 @@
                         }
                         if ($("#torrent_downloader_blackhole").is(":checked"))
                         {
-                            $("#transmission_options,#utorrent_options,#deluge_options").fadeOut("fast", function() { $("#torrent_blackhole_options").fadeIn() });
+                            $("#transmission_options,#utorrent_options,#deluge_options,#qbittorrent_options").fadeOut("fast", function() { $("#torrent_blackhole_options").fadeIn() });
                         }
                         if ($("#torrent_downloader_transmission").is(":checked"))
                         {
-                            $("#torrent_blackhole_options,#utorrent_options,#deluge_options").fadeOut("fast", function() { $("#transmission_options").fadeIn() });
+                            $("#torrent_blackhole_options,#utorrent_options,#deluge_options,#qbittorrent_options").fadeOut("fast", function() { $("#transmission_options").fadeIn() });
                         }
                         if ($("#torrent_downloader_utorrent").is(":checked"))
                         {
-                            $("#torrent_blackhole_options,#transmission_options,#deluge_options").fadeOut("fast", function() { $("#utorrent_options").fadeIn() });
+                            $("#torrent_blackhole_options,#transmission_options,#deluge_options,#qbittorrent_options").fadeOut("fast", function() { $("#utorrent_options").fadeIn() });
                         }
+                        if ($("#torrent_downloader_qbittorrent").is(":checked"))
+                        {
+                            $("#torrent_blackhole_options,#transmission_options,#utorrent_options,#deluge_options").fadeOut("fast", function() { $("#qbittorrent_options").fadeIn() });
+			}
                         if ($("#torrent_downloader_deluge").is(":checked"))
                         {
-                            $("#torrent_blackhole_options,#utorrent_options,#transmission_options").fadeOut("fast", function() { $("#deluge_options").fadeIn() });
+                            $("#torrent_blackhole_options,#utorrent_options,#transmission_options,#qbittorrent_options").fadeOut("fast", function() { $("#deluge_options").fadeIn() });
                         }
                 });
 
@@ -2401,13 +2601,14 @@
                 initConfigCheckbox("#use_mininova");
                 initConfigCheckbox("#use_waffles");
                 initConfigCheckbox("#use_rutracker");
-                initConfigCheckbox("#use_whatcd");
+                initConfigCheckbox("#use_apollo");
+                initConfigCheckbox("#use_redacted");
                 initConfigCheckbox("#use_strike");
                 initConfigCheckbox("#api_enabled");
                 initConfigCheckbox("#enable_https");
                 initConfigCheckbox("#customauth");
                 initConfigCheckbox("#mb_ignore_age_missing");
-
+                initConfigCheckbox("#use_tquattrecentonze");
 
                 $('#twitterStep1').click(function () {
                     $.get("/twitterStep1", function (data) {window.open(data); })

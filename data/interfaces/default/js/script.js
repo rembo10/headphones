@@ -312,6 +312,7 @@ function doAjaxCall(url,elem,reload,form) {
 	$.ajax({
 	  url: url,
 	  data: dataString,
+	  type: 'POST',
 	  beforeSend: function(jqXHR, settings) {
 	  	// Start loader etc.
 	  	feedback.prepend(loader);

@@ -1,5 +1,6 @@
-# This file is part of Confit.
-# Copyright 2014, Adrian Sampson.
+# -*- coding: utf-8 -*-
+# This file is part of Confuse.
+# Copyright 2016, Adrian Sampson.
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -14,19 +15,16 @@
 
 """Worry-free YAML configuration files.
 """
-from __future__ import unicode_literals
+from __future__ import division, absolute_import, print_function
+
 import platform
 import os
 import pkgutil
 import sys
 import yaml
-import types
 import collections
 import re
-try:
-    from collections import OrderedDict
-except ImportError:
-    from ordereddict import OrderedDict
+from collections import OrderedDict
 
 UNIX_DIR_VAR = 'XDG_CONFIG_HOME'
 UNIX_DIR_FALLBACK = '~/.config'
@@ -40,14 +38,15 @@ ROOT_NAME = 'root'
 
 YAML_TAB_PROBLEM = "found character '\\t' that cannot start any token"
 
+REDACTED_TOMBSTONE = 'REDACTED'
+
 
 # Utilities.
 
 PY3 = sys.version_info[0] == 3
-STRING = str if PY3 else unicode
-BASESTRING = str if PY3 else basestring
-NUMERIC_TYPES = (int, float) if PY3 else (int, float, long)
-TYPE_TYPES = (type,) if PY3 else (type, types.ClassType)
+STRING = str if PY3 else unicode  # noqa: F821
+BASESTRING = str if PY3 else basestring  # noqa: F821
+NUMERIC_TYPES = (int, float) if PY3 else (int, float, long)  # noqa: F821
 
 
 def iter_first(sequence):
@@ -56,10 +55,7 @@ def iter_first(sequence):
     """
     it = iter(sequence)
     try:
-        if PY3:
-            return next(it)
-        else:
-            return it.next()
+        return next(it)
     except StopIteration:
         raise ValueError()
 
@@ -96,17 +92,17 @@ class ConfigReadError(ConfigError):
         self.filename = filename
         self.reason = reason
 
-        message = 'file {0} could not be read'.format(filename)
+        message = u'file {0} could not be read'.format(filename)
         if isinstance(reason, yaml.scanner.ScannerError) and \
                 reason.problem == YAML_TAB_PROBLEM:
             # Special-case error message for tab indentation in YAML markup.
-            message += ': found tab character at line {0}, column {1}'.format(
+            message += u': found tab character at line {0}, column {1}'.format(
                 reason.problem_mark.line + 1,
                 reason.problem_mark.column + 1,
             )
         elif reason:
             # Generic error message uses exception's message.
-            message += ': {0}'.format(reason)
+            message += u': {0}'.format(reason)
 
         super(ConfigReadError, self).__init__(message)
 
@@ -120,19 +116,19 @@ class ConfigSource(dict):
     def __init__(self, value, filename=None, default=False):
         super(ConfigSource, self).__init__(value)
         if filename is not None and not isinstance(filename, BASESTRING):
-            raise TypeError('filename must be a string or None')
+            raise TypeError(u'filename must be a string or None')
         self.filename = filename
         self.default = default
 
     def __repr__(self):
-        return 'ConfigSource({0}, {1}, {2})'.format(
-            super(ConfigSource, self).__repr__(),
-            repr(self.filename),
-            repr(self.default)
+        return 'ConfigSource({0!r}, {1!r}, {2!r})'.format(
+            super(ConfigSource, self),
+            self.filename,
+            self.default,
         )
 
     @classmethod
-    def of(self, value):
+    def of(cls, value):
         """Given either a dictionary or a `ConfigSource` object, return
         a `ConfigSource` object. This lets a function accept either type
         of object as an argument.
@@ -142,7 +138,7 @@ class ConfigSource(dict):
         elif isinstance(value, dict):
             return ConfigSource(value)
         else:
-            raise TypeError('source value must be a dict')
+            raise TypeError(u'source value must be a dict')
 
 
 class ConfigView(object):
@@ -177,7 +173,7 @@ class ConfigView(object):
         try:
             return iter_first(pairs)
         except ValueError:
-            raise NotFoundError("{0} not found".format(self.name))
+            raise NotFoundError(u"{0} not found".format(self.name))
 
     def exists(self):
         """Determine whether the view has a setting in any source.
@@ -208,7 +204,31 @@ class ConfigView(object):
         raise NotImplementedError
 
     def __repr__(self):
-        return '<ConfigView: %s>' % self.name
+        return '<{}: {}>'.format(self.__class__.__name__, self.name)
+
+    def __iter__(self):
+        """Iterate over the keys of a dictionary view or the *subviews*
+        of a list view.
+        """
+        # Try getting the keys, if this is a dictionary view.
+        try:
+            keys = self.keys()
+            for key in keys:
+                yield key
+
+        except ConfigTypeError:
+            # Otherwise, try iterating over a list.
+            collection = self.get()
+            if not isinstance(collection, (list, tuple)):
+                raise ConfigTypeError(
+                    u'{0} must be a dictionary or a list, not {1}'.format(
+                        self.name, type(collection).__name__
+                    )
+                )
+
+            # Yield all the indices in the list.
+            for index in range(len(collection)):
+                yield self[index]
 
     def __getitem__(self, key):
         """Get a subview of this view."""
@@ -225,10 +245,15 @@ class ConfigView(object):
 
     def set_args(self, namespace):
         """Overlay parsed command-line arguments, generated by a library
-        like argparse or optparse, onto this view's value.
+        like argparse or optparse, onto this view's value. ``namespace``
+        can be a ``dict`` or namespace object.
         """
         args = {}
-        for key, value in namespace.__dict__.items():
+        if isinstance(namespace, dict):
+            items = namespace.items()
+        else:
+            items = namespace.__dict__.items()
+        for key, value in items:
             if value is not None:  # Avoid unset options.
                 args[key] = value
         self.set(args)
@@ -239,14 +264,17 @@ class ConfigView(object):
     # just say ``bool(view)`` or use ``view`` in a conditional.
 
     def __str__(self):
-        """Gets the value for this view as a byte string."""
-        return str(self.get())
+        """Get the value for this view as a bytestring.
+        """
+        if PY3:
+            return self.__unicode__()
+        else:
+            return bytes(self.get())
 
     def __unicode__(self):
-        """Gets the value for this view as a unicode string. (Python 2
-        only.)
+        """Get the value for this view as a Unicode string.
         """
-        return unicode(self.get())
+        return STRING(self.get())
 
     def __nonzero__(self):
         """Gets the value for this view as a boolean. (Python 2 only.)
@@ -276,7 +304,7 @@ class ConfigView(object):
                 cur_keys = dic.keys()
             except AttributeError:
                 raise ConfigTypeError(
-                    '{0} must be a dict, not {1}'.format(
+                    u'{0} must be a dict, not {1}'.format(
                         self.name, type(dic).__name__
                     )
                 )
@@ -317,7 +345,7 @@ class ConfigView(object):
                 it = iter(collection)
             except TypeError:
                 raise ConfigTypeError(
-                    '{0} must be an iterable, not {1}'.format(
+                    u'{0} must be an iterable, not {1}'.format(
                         self.name, type(collection).__name__
                     )
                 )
@@ -326,17 +354,23 @@ class ConfigView(object):
 
     # Validation and conversion.
 
-    def flatten(self):
+    def flatten(self, redact=False):
         """Create a hierarchy of OrderedDicts containing the data from
         this view, recursively reifying all views to get their
         represented values.
+
+        If `redact` is set, then sensitive values are replaced with
+        the string "REDACTED".
         """
         od = OrderedDict()
         for key, view in self.items():
-            try:
-                od[key] = view.flatten()
-            except ConfigTypeError:
-                od[key] = view.get()
+            if redact and view.redact:
+                od[key] = REDACTED_TOMBSTONE
+            else:
+                try:
+                    od[key] = view.flatten(redact=redact)
+                except ConfigTypeError:
+                    od[key] = view.get()
         return od
 
     def get(self, template=None):
@@ -354,19 +388,60 @@ class ConfigView(object):
         """
         return as_template(template).value(self, template)
 
-    # Old validation methods (deprecated).
+    # Shortcuts for common templates.
 
     def as_filename(self):
+        """Get the value as a path. Equivalent to `get(Filename())`.
+        """
         return self.get(Filename())
 
     def as_choice(self, choices):
+        """Get the value from a list of choices. Equivalent to
+        `get(Choice(choices))`.
+        """
         return self.get(Choice(choices))
 
     def as_number(self):
+        """Get the value as any number type: int or float. Equivalent to
+        `get(Number())`.
+        """
         return self.get(Number())
 
-    def as_str_seq(self):
-        return self.get(StrSeq())
+    def as_str_seq(self, split=True):
+        """Get the value as a sequence of strings. Equivalent to
+        `get(StrSeq())`.
+        """
+        return self.get(StrSeq(split=split))
+
+    def as_str(self):
+        """Get the value as a (Unicode) string. Equivalent to
+        `get(unicode)` on Python 2 and `get(str)` on Python 3.
+        """
+        return self.get(String())
+
+    # Redaction.
+
+    @property
+    def redact(self):
+        """Whether the view contains sensitive information and should be
+        redacted from output.
+        """
+        return () in self.get_redactions()
+
+    @redact.setter
+    def redact(self, flag):
+        self.set_redaction((), flag)
+
+    def set_redaction(self, path, flag):
+        """Add or remove a redaction for a key path, which should be an
+        iterable of keys.
+        """
+        raise NotImplementedError()
+
+    def get_redactions(self):
+        """Get the set of currently-redacted sub-key-paths at this view.
+        """
+        raise NotImplementedError()
 
 
 class RootView(ConfigView):
@@ -380,6 +455,7 @@ class RootView(ConfigView):
         """
         self.sources = list(sources)
         self.name = ROOT_NAME
+        self.redactions = set()
 
     def add(self, obj):
         self.sources.append(ConfigSource.of(obj))
@@ -391,11 +467,23 @@ class RootView(ConfigView):
         return ((dict(s), s) for s in self.sources)
 
     def clear(self):
-        """Remove all sources from this configuration."""
+        """Remove all sources (and redactions) from this
+        configuration.
+        """
         del self.sources[:]
+        self.redactions.clear()
 
     def root(self):
         return self
+
+    def set_redaction(self, path, flag):
+        if flag:
+            self.redactions.add(path)
+        elif path in self.redactions:
+            self.redactions.remove(path)
+
+    def get_redactions(self):
+        return self.redactions
 
 
 class Subview(ConfigView):
@@ -414,11 +502,13 @@ class Subview(ConfigView):
             if not isinstance(self.key, int):
                 self.name += '.'
         if isinstance(self.key, int):
-            self.name += '#{0}'.format(self.key)
-        elif isinstance(self.key, BASESTRING):
-            self.name += '{0}'.format(self.key)
+            self.name += u'#{0}'.format(self.key)
+        elif isinstance(self.key, bytes):
+            self.name += self.key.decode('utf-8')
+        elif isinstance(self.key, STRING):
+            self.name += self.key
         else:
-            self.name += '{0}'.format(repr(self.key))
+            self.name += repr(self.key)
 
     def resolve(self):
         for collection, source in self.parent.resolve():
@@ -433,7 +523,7 @@ class Subview(ConfigView):
             except TypeError:
                 # Not subscriptable.
                 raise ConfigTypeError(
-                    "{0} must be a collection, not {1}".format(
+                    u"{0} must be a collection, not {1}".format(
                         self.parent.name, type(collection).__name__
                     )
                 )
@@ -447,6 +537,13 @@ class Subview(ConfigView):
 
     def root(self):
         return self.parent.root()
+
+    def set_redaction(self, path, flag):
+        self.parent.set_redaction((self.key,) + path, flag)
+
+    def get_redactions(self):
+        return (kp[1:] for kp in self.parent.get_redactions()
+                if kp and kp[0] == self.key)
 
 
 # Config file paths, including platform-specific paths and in-package
@@ -536,7 +633,7 @@ class Loader(yaml.SafeLoader):
         else:
             raise yaml.constructor.ConstructorError(
                 None, None,
-                'expected a mapping node, but found %s' % node.id,
+                u'expected a mapping node, but found %s' % node.id,
                 node.start_mark
             )
 
@@ -547,7 +644,7 @@ class Loader(yaml.SafeLoader):
                 hash(key)
             except TypeError as exc:
                 raise yaml.constructor.ConstructorError(
-                    'while constructing a mapping',
+                    u'while constructing a mapping',
                     node.start_mark, 'found unacceptable key (%s)' % exc,
                     key_node.start_mark
                 )
@@ -595,11 +692,11 @@ class Dumper(yaml.SafeDumper):
         for item_key, item_value in mapping:
             node_key = self.represent_data(item_key)
             node_value = self.represent_data(item_value)
-            if not (isinstance(node_key, yaml.ScalarNode)
-                    and not node_key.style):
+            if not (isinstance(node_key, yaml.ScalarNode) and
+                    not node_key.style):
                 best_style = False
-            if not (isinstance(node_value, yaml.ScalarNode)
-                    and not node_value.style):
+            if not (isinstance(node_value, yaml.ScalarNode) and
+                    not node_value.style):
                 best_style = False
             value.append((node_key, node_value))
         if flow_style is None:
@@ -625,9 +722,9 @@ class Dumper(yaml.SafeDumper):
         """Represent bool as 'yes' or 'no' instead of 'true' or 'false'.
         """
         if data:
-            value = 'yes'
+            value = u'yes'
         else:
-            value = 'no'
+            value = u'no'
         return self.represent_scalar('tag:yaml.org,2002:bool', value)
 
     def represent_none(self, data):
@@ -752,7 +849,7 @@ class Configuration(RootView):
             appdir = os.environ[self._env_var]
             appdir = os.path.abspath(os.path.expanduser(appdir))
             if os.path.isfile(appdir):
-                raise ConfigError('{0} must be a directory'.format(
+                raise ConfigError(u'{0} must be a directory'.format(
                     self._env_var
                 ))
 
@@ -776,7 +873,7 @@ class Configuration(RootView):
         filename = os.path.abspath(filename)
         self.set(ConfigSource(load_yaml(filename), filename))
 
-    def dump(self, full=True):
+    def dump(self, full=True, redact=False):
         """Dump the Configuration object to a YAML file.
 
         The order of the keys is determined from the default
@@ -788,13 +885,17 @@ class Configuration(RootView):
         :type filename:   unicode
         :param full:      Dump settings that don't differ from the defaults
                           as well
+        :param redact:    Remove sensitive information (views with the `redact`
+                          flag set) from the output
         """
         if full:
-            out_dict = self.flatten()
+            out_dict = self.flatten(redact=redact)
         else:
             # Exclude defaults when flattening.
             sources = [s for s in self.sources if not s.default]
-            out_dict = RootView(sources).flatten()
+            temp_root = RootView(sources)
+            temp_root.redactions = self.redactions
+            out_dict = temp_root.flatten(redact=redact)
 
         yaml_out = yaml.dump(out_dict, Dumper=Dumper,
                              default_flow_style=None, indent=4,
@@ -806,7 +907,7 @@ class Configuration(RootView):
             if source.default:
                 default_source = source
                 break
-        if default_source:
+        if default_source and default_source.filename:
             with open(default_source.filename, 'r') as fp:
                 default_data = fp.read()
             yaml_out = restore_yaml_comments(yaml_out, default_data)
@@ -853,7 +954,7 @@ class LazyConfig(Configuration):
 
     def clear(self):
         """Remove all sources from this configuration."""
-        del self.sources[:]
+        super(LazyConfig, self).clear()
         self._lazy_suffix = []
         self._lazy_prefix = []
 
@@ -870,7 +971,7 @@ should be raised when the value is missing.
 class Template(object):
     """A value template for configuration fields.
 
-    The template works like a type and instructs Confit about how to
+    The template works like a type and instructs Confuse about how to
     interpret a deserialized YAML value. This includes type conversions,
     providing a default value, and validating for errors. For example, a
     filepath type might expand tildes and check that the file exists.
@@ -901,7 +1002,7 @@ class Template(object):
             return self.convert(value, view)
         elif self.default is REQUIRED:
             # Missing required value. This is an error.
-            raise NotFoundError("{0} not found".format(view.name))
+            raise NotFoundError(u"{0} not found".format(view.name))
         else:
             # Missing value, but not required.
             return self.default
@@ -926,7 +1027,7 @@ class Template(object):
         """
         exc_class = ConfigTypeError if type_error else ConfigValueError
         raise exc_class(
-            '{0}: {1}'.format(view.name, message)
+            u'{0}: {1}'.format(view.name, message)
         )
 
     def __repr__(self):
@@ -947,7 +1048,7 @@ class Integer(Template):
         elif isinstance(value, float):
             return int(value)
         else:
-            self.fail('must be a number', view, True)
+            self.fail(u'must be a number', view, True)
 
 
 class Number(Template):
@@ -960,7 +1061,7 @@ class Number(Template):
             return value
         else:
             self.fail(
-                'must be numeric, not {0}'.format(type(value).__name__),
+                u'must be numeric, not {0}'.format(type(value).__name__),
                 view,
                 True
             )
@@ -1005,18 +1106,29 @@ class String(Template):
         if pattern:
             self.regex = re.compile(pattern)
 
+    def __repr__(self):
+        args = []
+
+        if self.default is not REQUIRED:
+            args.append(repr(self.default))
+
+        if self.pattern is not None:
+            args.append('pattern=' + repr(self.pattern))
+
+        return 'String({0})'.format(', '.join(args))
+
     def convert(self, value, view):
         """Check that the value is a string and matches the pattern.
         """
         if isinstance(value, BASESTRING):
             if self.pattern and not self.regex.match(value):
                 self.fail(
-                    "must match the pattern {0}".format(self.pattern),
+                    u"must match the pattern {0}".format(self.pattern),
                     view
                 )
             return value
         else:
-            self.fail('must be a string', view, True)
+            self.fail(u'must be a string', view, True)
 
 
 class Choice(Template):
@@ -1037,7 +1149,7 @@ class Choice(Template):
         """
         if value not in self.choices:
             self.fail(
-                'must be one of {0}, not {1}'.format(
+                u'must be one of {0}, not {1}'.format(
                     repr(list(self.choices)), repr(value)
                 ),
                 view
@@ -1050,6 +1162,67 @@ class Choice(Template):
 
     def __repr__(self):
         return 'Choice({0!r})'.format(self.choices)
+
+
+class OneOf(Template):
+    """A template that permits values complying to one of the given templates.
+    """
+    def __init__(self, allowed, default=REQUIRED):
+        super(OneOf, self).__init__(default)
+        self.allowed = list(allowed)
+
+    def __repr__(self):
+        args = []
+
+        if self.allowed is not None:
+            args.append('allowed=' + repr(self.allowed))
+
+        if self.default is not REQUIRED:
+            args.append(repr(self.default))
+
+        return 'OneOf({0})'.format(', '.join(args))
+
+    def value(self, view, template):
+        self.template = template
+        return super(OneOf, self).value(view, template)
+
+    def convert(self, value, view):
+        """Ensure that the value follows at least one template.
+        """
+        is_mapping = isinstance(self.template, MappingTemplate)
+
+        for candidate in self.allowed:
+            try:
+                if is_mapping:
+                    if isinstance(candidate, Filename) and \
+                            candidate.relative_to:
+                        next_template = candidate.template_with_relatives(
+                            view,
+                            self.template
+                        )
+
+                        next_template.subtemplates[view.key] = as_template(
+                            candidate
+                        )
+                    else:
+                        next_template = MappingTemplate({view.key: candidate})
+
+                    return view.parent.get(next_template)[view.key]
+                else:
+                    return view.get(candidate)
+            except ConfigTemplateError:
+                raise
+            except ConfigError:
+                pass
+            except ValueError as exc:
+                raise ConfigTemplateError(exc)
+
+        self.fail(
+            u'must be one of {0}, not {1}'.format(
+                repr(self.allowed), repr(value)
+            ),
+            view
+        )
 
 
 class StrSeq(Template):
@@ -1070,7 +1243,7 @@ class StrSeq(Template):
 
     def convert(self, value, view):
         if isinstance(value, bytes):
-            value = value.decode('utf8', 'ignore')
+            value = value.decode('utf-8', 'ignore')
 
         if isinstance(value, STRING):
             if self.split:
@@ -1081,17 +1254,17 @@ class StrSeq(Template):
         try:
             value = list(value)
         except TypeError:
-            self.fail('must be a whitespace-separated string or a list',
+            self.fail(u'must be a whitespace-separated string or a list',
                       view, True)
 
         def convert(x):
-            if isinstance(x, unicode):
+            if isinstance(x, STRING):
                 return x
-            elif isinstance(x, BASESTRING):
-                return x.decode('utf8', 'ignore')
+            elif isinstance(x, bytes):
+                return x.decode('utf-8', 'ignore')
             else:
-                self.fail('must be a list of strings', view, True)
-        return map(convert, value)
+                self.fail(u'must be a list of strings', view, True)
+        return list(map(convert, value))
 
 
 class Filename(Template):
@@ -1107,7 +1280,7 @@ class Filename(Template):
     """
     def __init__(self, default=REQUIRED, cwd=None, relative_to=None,
                  in_app_dir=False):
-        """ `relative_to` is the name of a sibling value that is
+        """`relative_to` is the name of a sibling value that is
         being validated at the same time.
 
         `in_app_dir` indicates whether the path should be resolved
@@ -1140,19 +1313,19 @@ class Filename(Template):
         if not isinstance(template, (collections.Mapping, MappingTemplate)):
             # disallow config.get(Filename(relative_to='foo'))
             raise ConfigTemplateError(
-                'relative_to may only be used when getting multiple values.'
+                u'relative_to may only be used when getting multiple values.'
             )
 
         elif self.relative_to == view.key:
             raise ConfigTemplateError(
-                '{0} is relative to itself'.format(view.name)
+                u'{0} is relative to itself'.format(view.name)
             )
 
         elif self.relative_to not in view.parent.keys():
             # self.relative_to is not in the config
             self.fail(
                 (
-                    'needs sibling value "{0}" to expand relative path'
+                    u'needs sibling value "{0}" to expand relative path'
                 ).format(self.relative_to),
                 view
             )
@@ -1174,12 +1347,12 @@ class Filename(Template):
                 if next_relative in template.subtemplates:
                     # we encountered this config key previously
                     raise ConfigTemplateError((
-                        '{0} and {1} are recursively relative'
+                        u'{0} and {1} are recursively relative'
                     ).format(view.name, self.relative_to))
                 else:
                     raise ConfigTemplateError((
-                        'missing template for {0}, needed to expand {1}\'s' +
-                        'relative path'
+                        u'missing template for {0}, needed to expand {1}\'s' +
+                        u'relative path'
                     ).format(self.relative_to, view.name))
 
             next_template.subtemplates[next_relative] = rel_to_template
@@ -1191,7 +1364,7 @@ class Filename(Template):
         path, source = view.first()
         if not isinstance(path, BASESTRING):
             self.fail(
-                'must be a filename, not {0}'.format(type(path).__name__),
+                u'must be a filename, not {0}'.format(type(path).__name__),
                 view,
                 True
             )
@@ -1229,7 +1402,7 @@ class TypeTemplate(Template):
     def convert(self, value, view):
         if not isinstance(value, self.typ):
             self.fail(
-                'must be a {0}, not {1}'.format(
+                u'must be a {0}, not {1}'.format(
                     self.typ.__name__,
                     type(value).__name__,
                 ),
@@ -1267,6 +1440,11 @@ def as_template(value):
         return String()
     elif isinstance(value, BASESTRING):
         return String(value)
+    elif isinstance(value, set):
+        # convert to list to avoid hash related problems
+        return Choice(list(value))
+    elif isinstance(value, list):
+        return OneOf(value)
     elif value is float:
         return Number()
     elif value is None:
@@ -1278,4 +1456,4 @@ def as_template(value):
     elif isinstance(value, type):
         return TypeTemplate(value)
     else:
-        raise ValueError('cannot convert to template: {0!r}'.format(value))
+        raise ValueError(u'cannot convert to template: {0!r}'.format(value))
