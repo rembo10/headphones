@@ -167,6 +167,7 @@ _CONFIG_DEFINITIONS = {
     'LOSSLESS_BITRATE_TO': (int, 'General', 0),
     'LOSSLESS_DESTINATION_DIR': (path, 'General', ''),
     'MB_IGNORE_AGE': (int, 'General', 365),
+    'MB_IGNORE_AGE_MISSING': (int, 'General', 0),
     'MININOVA': (int, 'Mininova', 0),
     'MININOVA_RATIO': (str, 'Mininova', ''),
     'MIRROR': (str, 'General', 'musicbrainz.org'),
