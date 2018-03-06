@@ -417,6 +417,8 @@ def dbcheck():
         'CREATE INDEX IF NOT EXISTS tracks_Location ON tracks(Location ASC)')
     c.execute(
         'CREATE INDEX IF NOT EXISTS alltracks_Location ON alltracks(Location ASC)')
+    c.execute(
+        'CREATE INDEX IF NOT EXISTS tracks_artistid ON tracks(ArtistID ASC)')
 
     try:
         c.execute('SELECT IncludeExtras from artists')
