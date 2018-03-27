@@ -1160,6 +1160,7 @@ class WebInterface(object):
             "download_scan_interval": headphones.CONFIG.DOWNLOAD_SCAN_INTERVAL,
             "update_db_interval": headphones.CONFIG.UPDATE_DB_INTERVAL,
             "mb_ignore_age": headphones.CONFIG.MB_IGNORE_AGE,
+            "mb_ignore_age_missing": headphones.CONFIG.MB_IGNORE_AGE_MISSING,
             "search_interval": headphones.CONFIG.SEARCH_INTERVAL,
             "libraryscan_interval": headphones.CONFIG.LIBRARYSCAN_INTERVAL,
             "sab_host": headphones.CONFIG.SAB_HOST,

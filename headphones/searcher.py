@@ -1292,10 +1292,13 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
 
         if headphones.CONFIG.PREFERRED_QUALITY == 3 or losslessOnly:
             categories = "3040"
+            maxsize = 10000000000
         elif headphones.CONFIG.PREFERRED_QUALITY == 1 or allow_lossless:
             categories = "3040,3010,3050"
+            maxsize = 10000000000
         else:
             categories = "3010,3050"
+            maxsize = 300000000
 
         if album['Type'] == 'Other':
             categories = "3030"
@@ -1321,20 +1324,22 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                 "q": term
             }
 
-            data = request.request_feed(
+            data = request.request_soup(
                 url=torznab_host[0],
                 params=params, headers=headers
             )
 
             # Process feed
             if data:
-                if not len(data.entries):
+                items = data.find_all('item')
+                if not items:
                     logger.info(u"No results found from %s for %s", provider, term)
                 else:
-                    for item in data.entries:
+                    for item in items:
                         try:
-                            url = item.link
-                            title = item.title
+                            title = item.title.get_text()
+                            url = item.find("link").next_sibling.strip()
+                            seeders = int(item.find("torznab:attr", attrs={"name": "seeders"}).get('value'))
 
                             # Torrentech hack - size currently not returned, make it up
                             if 'torrentech' in torznab_host[0]:
@@ -1349,12 +1354,17 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                                     logger.info('Skipping %s, could not determine size' % title)
                                     continue
                             else:
-                                size = int(item.links[1]['length'])
+                                size = int(item.size.string)
 
                             if all(word.lower() in title.lower() for word in term.split()):
-                                logger.info(
-                                    'Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
-                                resultlist.append((title, size, url, provider, 'torrent', True))
+                                if size < maxsize and minimumseeders < seeders:
+                                    logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
+                                    resultlist.append((title, size, url, provider, 'torrent', True))
+                                else:
+                                    logger.info(
+                                        '%s is larger than the maxsize or has too little seeders for this category, '
+                                        'skipping. (Size: %i bytes, Seeders: %d)',
+                                        title, size, seeders)
                             else:
                                 logger.info('Skipping %s, not all search term words found' % title)
 

@@ -133,6 +133,12 @@
                                     </label>
                                     <input type="text" name="mb_ignore_age" value="${config['mb_ignore_age']}" size="4">days
                                 </div>
+                                <div class="row checkbox">
+                                    <label title="Ignore MusicBrainz album updates missing a release date.">
+                                        Ignore Undated Releases
+                                    </label>
+                                    <input type="checkbox" name="mb_ignore_age_missing" id="mb_ignore_age_missing" value="${config['mb_ignore_age_missing']}">
+                                </div>                                
                             </fieldset>
                         </td>
                     </tr>
@@ -2601,8 +2607,8 @@
                 initConfigCheckbox("#api_enabled");
                 initConfigCheckbox("#enable_https");
                 initConfigCheckbox("#customauth");
+                initConfigCheckbox("#mb_ignore_age_missing");
                 initConfigCheckbox("#use_tquattrecentonze");
-
 
                 $('#twitterStep1').click(function () {
                     $.get("/twitterStep1", function (data) {window.open(data); })
