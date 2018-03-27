@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.5.19
+Released 27 March 2018
+
+Highlights:
+* Improved: Windows encoding fixes
+* Improved: Performance enhancements
+* Improved: Many more since the last release. Check the list
+
+The full list of commits can be found [here](https://github.com/rembo10/headphones/compare/v0.5.18...v0.5.19).
+
 ## v0.5.18
 Released 01 December 2016
 
