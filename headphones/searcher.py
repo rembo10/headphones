@@ -1353,8 +1353,10 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                                 else:
                                     logger.info('Skipping %s, could not determine size' % title)
                                     continue
-                            else:
+                            elif item.size:
                                 size = int(item.size.string)
+                            else:
+                                size = int(item.find("torznab:attr", attrs={"name": "size"}).get('value'))
 
                             if all(word.lower() in title.lower() for word in term.split()):
                                 if size < maxsize and minimumseeders < seeders:
