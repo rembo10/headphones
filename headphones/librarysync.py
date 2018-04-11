@@ -20,8 +20,11 @@ import headphones
 from beets.mediafile import MediaFile, FileTypeError, UnreadableFileError
 from headphones import db, logger, helpers, importer, lastfm
 
+
 # encoding=utf8
 import sys
+
+
 reload(sys)
 sys.setdefaultencoding('utf8')
 
