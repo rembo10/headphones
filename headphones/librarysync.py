@@ -20,6 +20,10 @@ import headphones
 from beets.mediafile import MediaFile, FileTypeError, UnreadableFileError
 from headphones import db, logger, helpers, importer, lastfm
 
+# encoding=utf8
+import sys
+reload(sys)
+sys.setdefaultencoding('utf8')
 
 # You can scan a single directory and append it to the current library by
 # specifying append=True, ArtistID and ArtistName.
