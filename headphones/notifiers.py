@@ -941,6 +941,7 @@ class Email(object):
         message['From'] = email.utils.formataddr(
             ('Headphones', headphones.CONFIG.EMAIL_FROM))
         message['To'] = headphones.CONFIG.EMAIL_TO
+        message['Date'] = email.utils.formatdate(localtime=True)
 
         try:
             if headphones.CONFIG.EMAIL_SSL:
