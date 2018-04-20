@@ -289,13 +289,19 @@ def album_metadata(path, release, common_tags):
         first_char = sort_name[0]
 
     orig_folder = u''
-    for r, d, f in os.walk(path):
-        try:
-            orig_folder = os.path.basename(
-                os.path.normpath(r).decode(headphones.SYS_ENCODING, 'replace'))
-            break
-        except:
-            pass
+
+    # Get from temp path
+    if "_@hp@_" in path:
+        orig_folder = path.rsplit("headphones_", 1)[1].split("_@hp@_")[0]
+        orig_folder = orig_folder.decode(headphones.SYS_ENCODING, 'replace')
+    else:
+        for r, d, f in os.walk(path):
+            try:
+                orig_folder = os.path.basename(
+                    os.path.normpath(r).decode(headphones.SYS_ENCODING, 'replace'))
+                break
+            except:
+                pass
 
     override_values = {
         Vars.ARTIST: artist,

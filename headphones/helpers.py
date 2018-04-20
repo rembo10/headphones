@@ -669,9 +669,9 @@ def preserve_torrent_directory(albumpath, forced=False, single=False):
     try:
         file_name = os.path.basename(os.path.normpath(albumpath))
         if not single:
-            prefix = "headphones_" + file_name + "_"
+            prefix = "headphones_" + file_name + "_@hp@_"
         else:
-            prefix = "headphones_" + os.path.splitext(file_name)[0] + "_"
+            prefix = "headphones_" + os.path.splitext(file_name)[0] + "_@hp@_"
         new_folder = tempfile.mkdtemp(prefix=prefix, dir=tempdir)
     except Exception as e:
         logger.error("Cannot create temp directory: " + tempdir.decode(
