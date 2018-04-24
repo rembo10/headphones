@@ -176,8 +176,6 @@ def get_seed_ratio(provider):
         seed_ratio = headphones.CONFIG.WAFFLES_RATIO
     elif provider == 'Mininova':
         seed_ratio = headphones.CONFIG.MININOVA_RATIO
-    elif provider == 'Strike':
-        seed_ratio = headphones.CONFIG.STRIKE_RATIO
     else:
         seed_ratio = None
 
@@ -279,8 +277,7 @@ def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
                          headphones.CONFIG.WAFFLES or
                          headphones.CONFIG.RUTRACKER or
                          headphones.CONFIG.APOLLO or
-                         headphones.CONFIG.REDACTED or
-                         headphones.CONFIG.STRIKE)
+                         headphones.CONFIG.REDACTED)
 
     results = []
     myDB = db.DBConnection()
@@ -1895,46 +1892,6 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                     except Exception as e:
                         logger.error(
                             u"An unknown error occurred in the Old Pirate Bay parser: %s" % e)
-
-    # Strike
-    if headphones.CONFIG.STRIKE:
-        provider = "Strike"
-        s_term = term.replace("!", "")
-        providerurl = fix_url("https://getstrike.net/api/v2/torrents/search/?phrase=")
-
-        providerurl = providerurl + s_term + "&category=Music"
-
-        if headphones.CONFIG.PREFERRED_QUALITY == 3 or losslessOnly:
-            providerurl = providerurl + "&subcategory=Lossless"
-            maxsize = 10000000000
-        elif headphones.CONFIG.PREFERRED_QUALITY == 1 or allow_lossless:
-            maxsize = 10000000000
-        else:
-            maxsize = 300000000
-
-        logger.info("Searching %s using term: %s" % (provider, s_term))
-        data = request.request_json(url=providerurl,
-                                    whitelist_status_code=[404])
-
-        if not data or not data.get('torrents'):
-            logger.info("No results found on %s using search term: %s" % (provider, s_term))
-        else:
-            for item in data['torrents']:
-                try:
-                    title = item['torrent_title']
-                    seeders = item['seeds']
-                    url = item['magnet_uri']
-                    size = int(item['size'])
-
-                    if size < maxsize and minimumseeders < int(seeders):
-                        resultlist.append((title, size, url, provider, 'torrent', True))
-                        logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
-                    else:
-                        logger.info(
-                            '%s is larger than the maxsize, the wrong format or has too little seeders for this category, skipping. (Size: %i bytes, Seeders: %d)',
-                            title, size, int(seeders))
-                except Exception as e:
-                    logger.exception("Unhandled exception in the Strike parser")
 
     # Mininova
     if headphones.CONFIG.MININOVA:
