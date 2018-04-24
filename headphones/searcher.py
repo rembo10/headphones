@@ -280,8 +280,7 @@ def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
                          headphones.CONFIG.RUTRACKER or
                          headphones.CONFIG.APOLLO or
                          headphones.CONFIG.REDACTED or
-                         headphones.CONFIG.STRIKE or
-                         headphones.CONFIG.TQUATTRECENTONZE)
+                         headphones.CONFIG.STRIKE)
 
     results = []
     myDB = db.DBConnection()
