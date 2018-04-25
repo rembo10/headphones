@@ -25,7 +25,6 @@ import datetime
 import subprocess
 import unicodedata
 import urlparse
-from json import loads
 
 import os
 import re
