@@ -162,8 +162,6 @@ def get_seed_ratio(provider):
 
     if provider == 'rutracker.org':
         seed_ratio = headphones.CONFIG.RUTRACKER_RATIO
-    elif provider == 'Kick Ass Torrents':
-        seed_ratio = headphones.CONFIG.KAT_RATIO
     elif provider == 'Apollo.rip':
         seed_ratio = headphones.CONFIG.APOLLO_RATIO
     elif provider == 'Redacted':
@@ -270,7 +268,6 @@ def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
                        headphones.CONFIG.NZBGET_HOST)
 
     TORRENT_PROVIDERS = (headphones.CONFIG.TORZNAB or
-                         headphones.CONFIG.KAT or
                          headphones.CONFIG.PIRATEBAY or
                          headphones.CONFIG.OLDPIRATEBAY or
                          headphones.CONFIG.MININOVA or
@@ -1369,66 +1366,6 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                         except Exception as e:
                             logger.exception(
                                 "An unknown error occurred trying to parse the feed: %s" % e)
-
-    if headphones.CONFIG.KAT:
-        provider = "Kick Ass Torrents"
-        ka_term = term.replace("!", "")
-
-        # Use proxy if specified
-        if headphones.CONFIG.KAT_PROXY_URL:
-            providerurl = fix_url(set_proxy(headphones.CONFIG.KAT_PROXY_URL))
-        else:
-            providerurl = fix_url("https://katcr.co/new/")
-
-        # Build URL
-        providerurl = providerurl + "/usearch/" + ka_term
-
-        # Set max size and category
-        if headphones.CONFIG.PREFERRED_QUALITY == 3 or losslessOnly:
-            maxsize = 10000000000
-            providerurl += " category:lossless/"
-        elif headphones.CONFIG.PREFERRED_QUALITY == 1 or allow_lossless:
-            maxsize = 10000000000
-            providerurl += " category:music/"
-        else:
-            maxsize = 300000000
-            providerurl += " category:music/"
-
-        # Requesting content
-        logger.info("Searching %s using term: %s" % (provider, ka_term))
-
-        params = {
-            "field": "seeders",
-            "sorder": "desc",
-            "rss": "1"
-        }
-
-        data = request.request_feed(url=providerurl, params=params,
-                                    whitelist_status_code=[404])
-
-        # Process feed
-        if data:
-            if not len(data.entries):
-                logger.info("No results found on %s using search term: %s" % (provider, ka_term))
-            else:
-                for item in data.entries:
-                    try:
-                        title = item['title']
-                        seeders = item['torrent_seeds']
-                        if headphones.CONFIG.TORRENT_DOWNLOADER == 0:
-                            url = item['links'][1]['href']
-                        else:
-                            url = item['torrent_magneturi']
-                        size = int(item['links'][1]['length'])
-                        if size < maxsize and minimumseeders < int(seeders):
-                            resultlist.append((title, size, url, provider, 'torrent', True))
-                            logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
-                        else:
-                            logger.info(
-                                '%s is larger than the maxsize or has too little seeders for this category, skipping. (Size: %i bytes, Seeders: %d)',
-                                title, size, int(seeders))
-                    except Exception as e:
-                        logger.exception("Unhandled exception in the KAT parser")
 
     if headphones.CONFIG.WAFFLES:
         provider = "Waffles.ch"

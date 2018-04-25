@@ -1225,9 +1225,6 @@ class WebInterface(object):
             "torrentblackhole_dir": headphones.CONFIG.TORRENTBLACKHOLE_DIR,
             "download_torrent_dir": headphones.CONFIG.DOWNLOAD_TORRENT_DIR,
             "numberofseeders": headphones.CONFIG.NUMBEROFSEEDERS,
-            "use_kat": checked(headphones.CONFIG.KAT),
-            "kat_proxy_url": headphones.CONFIG.KAT_PROXY_URL,
-            "kat_ratio": headphones.CONFIG.KAT_RATIO,
             "use_piratebay": checked(headphones.CONFIG.PIRATEBAY),
             "piratebay_proxy_url": headphones.CONFIG.PIRATEBAY_PROXY_URL,
             "piratebay_ratio": headphones.CONFIG.PIRATEBAY_RATIO,
@@ -1460,7 +1457,7 @@ class WebInterface(object):
         checked_configs = [
             "launch_browser", "enable_https", "api_enabled", "use_blackhole", "headphones_indexer",
             "use_newznab", "newznab_enabled", "use_torznab", "torznab_enabled",
-            "use_nzbsorg", "use_omgwtfnzbs", "use_kat", "use_piratebay", "use_oldpiratebay",
+            "use_nzbsorg", "use_omgwtfnzbs", "use_piratebay", "use_oldpiratebay",
             "use_mininova", "use_waffles", "use_rutracker",
             "use_apollo", "use_redacted", "preferred_bitrate_allow_lossless",
             "detect_bitrate", "ignore_clean_releases", "freeze_db", "cue_split", "move_files",
