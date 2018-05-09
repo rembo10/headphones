@@ -14,7 +14,6 @@
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
 # NZBGet support added by CurlyMo <curlymoo1@gmail.com> as a part of XBian - XBMC on the Raspberry Pi
-# t411 support added by a1ex, @likeitneverwentaway on github for maintenance
 
 from base64 import b16encode, b32decode
 from hashlib import sha1
@@ -832,19 +831,6 @@ def send_to_downloader(data, bestqual, album):
             # Get torrent name from .torrent, this is usually used by the torrent client as the folder name
             torrent_name = helpers.replace_illegal_chars(folder_name) + '.torrent'
             download_path = os.path.join(headphones.CONFIG.TORRENTBLACKHOLE_DIR, torrent_name)
-
-            # Blackhole for t411
-            if bestqual[2].lower().startswith("http://api.t411"):
-                if headphones.CONFIG.MAGNET_LINKS == 2:
-                    try:
-                        url = bestqual[2].split('TOKEN')[0]
-                        token = bestqual[2].split('TOKEN')[1]
-                        data = request.request_content(url, headers={'Authorization': token})
-                        torrent_to_file(download_path, data)
-                        logger.info('Successfully converted magnet to torrent file')
-                    except Exception as e:
-                        logger.error("Error converting magnet link: %s" % str(e))
-                        return
 
             if bestqual[2].lower().startswith("magnet:"):
                 if headphones.CONFIG.MAGNET_LINKS == 1:
@@ -1923,10 +1909,7 @@ def preprocess(resultlist):
             # Download the torrent file
             headers = {}
 
-            if result[3] == 'Kick Ass Torrents':
-                headers['Referer'] = 'https://torcache.net/'
-                headers['User-Agent'] = USER_AGENT
-            elif result[3] == 'Apollo.rip':
+            if result[3] == 'Apollo.rip':
                 headers['User-Agent'] = 'Headphones'
             elif result[3] == 'Redacted':
                 headers['User-Agent'] = 'Headphones'
