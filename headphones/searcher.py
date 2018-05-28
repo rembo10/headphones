@@ -1916,6 +1916,17 @@ def preprocess(resultlist):
             elif result[3] == "The Pirate Bay" or result[3] == "Old Pirate Bay":
                 headers[
                     'User-Agent'] = 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2243.2 Safari/537.36'
+
+            # Jackett sometimes redirects to a magnet URI
+            if result[3].startswith('Jackett_'):
+                r = request.request_response(url=result[2], headers=headers, allow_redirects=False)
+                magnet_link = r.headers.get('Location')
+                if magnet_link and magnet_link.startswith('magnet:'):
+                    new_result = (result[0], result[1], magnet_link, result[3], "magnet", result[5])
+                    return "d10:magnet-uri%d:%se" % (len(magnet_link), magnet_link), new_result
+                else:
+                    return r.content, result
+
             return request.request_content(url=result[2], headers=headers), result
 
         if result[4] == 'magnet':
