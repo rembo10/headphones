@@ -1918,7 +1918,7 @@ def preprocess(resultlist):
                     'User-Agent'] = 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2243.2 Safari/537.36'
 
             # Jackett sometimes redirects to a magnet URI
-            if result[3].startswith('Jackett_'):
+            if result[3].startswith('Jackett_') or 'torznab' in result[3].lower():
                 r = request.request_response(url=result[2], headers=headers, allow_redirects=False)
                 magnet_link = r.headers.get('Location')
                 if magnet_link and magnet_link.startswith('magnet:'):
