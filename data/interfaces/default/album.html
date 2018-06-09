@@ -324,7 +324,7 @@
                 if (++x === 10) {
                     clearInterval(refreshInterval);
                 }
-                var sts = $("#artistname").text();
+                var sts = $("#artistname").text().trim();
                 if (wasLoading == true || sts == "Loading"){
                     location.reload();
                 $('#albumnamespinner').remove()

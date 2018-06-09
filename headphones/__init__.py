@@ -420,6 +420,13 @@ def dbcheck():
     c.execute(
         'CREATE INDEX IF NOT EXISTS tracks_artistid ON tracks(ArtistID ASC)')
 
+    # Speed up album page
+    c.execute('CREATE INDEX IF NOT EXISTS have_matched ON have(Matched ASC)')
+    c.execute('CREATE INDEX IF NOT EXISTS allalbums_albumid ON allalbums(AlbumID ASC)')
+    c.execute('CREATE INDEX IF NOT EXISTS alltracks_albumid ON alltracks(AlbumID ASC)')
+    c.execute('CREATE INDEX IF NOT EXISTS releases_albumid ON releases(ReleaseGroupID ASC)')
+    c.execute('CREATE INDEX IF NOT EXISTS descriptions_albumid ON descriptions(ReleaseGroupID ASC)')
+
     try:
         c.execute('SELECT IncludeExtras from artists')
     except sqlite3.OperationalError:
