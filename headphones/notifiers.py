@@ -23,6 +23,7 @@ import email.utils
 from httplib import HTTPSConnection
 from urlparse import parse_qsl
 import urllib2
+import requests as requests
 
 import os.path
 from headphones import logger, helpers, common, request
@@ -365,6 +366,41 @@ class Plex(object):
 
     def update(self):
 
+        # Get token from user credentials
+        if not self.token:
+            loginpage = 'https://plex.tv/users/sign_in.json'
+            post_params = {
+                'user[login]': self.username,
+                'user[password]': self.password
+            }
+            headers = {
+                'X-Plex-Device-Name': 'Headphones',
+                'X-Plex-Product': 'Headphones',
+                'X-Plex-Client-Identifier': common.USER_AGENT,
+                'X-Plex-Version': ''
+            }
+
+            logger.info("Getting plex.tv credentials for user %s", self.username)
+
+            try:
+                r = requests.post(loginpage, data=post_params, headers=headers)
+                r.raise_for_status()
+            except requests.RequestException as e:
+                logger.error("Error getting plex.tv credentials, check settings: %s", e)
+                return False
+
+            try:
+                data = r.json()
+            except ValueError as e:
+                logger.error("Error getting plex.tv credentials: %s", e)
+                return False
+
+            try:
+                self.token = data['user']['authentication_token']
+            except KeyError as e:
+                logger.error("Error getting plex.tv credentials: %s", e)
+                return False
+
         # From what I read you can't update the music library on a per
         # directory or per path basis so need to update the whole thing
 
@@ -379,19 +415,27 @@ class Plex(object):
             else:
                 params = False
 
-            r = request.request_minidom(url, params=params)
+            try:
+                r = request.request_minidom(url, params=params)
+                if not r:
+                    logger.warn("Error getting Plex Media Server details, check settings (possibly incorrect token)")
+                    return False
 
-            sections = r.getElementsByTagName('Directory')
+                sections = r.getElementsByTagName('Directory')
 
-            if not sections:
-                logger.info(u"Plex Media Server not running on: " + host)
+                if not sections:
+                    logger.info(u"Plex Media Server not running on: " + host)
+                    return False
+
+                for s in sections:
+                    if s.getAttribute('type') == "artist":
+                        url = "%s/library/sections/%s/refresh" % (
+                            host, s.getAttribute('key'))
+                        request.request_response(url, params=params)
+
+            except Exception as e:
+                logger.error("Error getting Plex Media Server details: %s" % e)
                 return False
-
-            for s in sections:
-                if s.getAttribute('type') == "artist":
-                    url = "%s/library/sections/%s/refresh" % (
-                        host, s.getAttribute('key'))
-                    request.request_response(url, params=params)
 
     def notify(self, artist, album, albumartpath):
 

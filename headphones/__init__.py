@@ -427,6 +427,11 @@ def dbcheck():
     c.execute('CREATE INDEX IF NOT EXISTS releases_albumid ON releases(ReleaseGroupID ASC)')
     c.execute('CREATE INDEX IF NOT EXISTS descriptions_albumid ON descriptions(ReleaseGroupID ASC)')
 
+    # Speed up artist deletion
+    c.execute('CREATE INDEX IF NOT EXISTS allalbums_artistid ON allalbums(ArtistID ASC)')
+    c.execute('CREATE INDEX IF NOT EXISTS alltracks_artistid ON alltracks(ArtistID ASC)')
+    c.execute('CREATE INDEX IF NOT EXISTS descriptions_artistid ON descriptions(ArtistID ASC)')
+
     try:
         c.execute('SELECT IncludeExtras from artists')
     except sqlite3.OperationalError:
