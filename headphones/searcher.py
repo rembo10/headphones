@@ -1531,6 +1531,18 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
             if album['Type'] == 'Mixtape/Street':
                 album_type = [gazellerelease_type.MIXTAPE]
 
+            # artist and album name cleanup - workaround for issue #3125
+            artist_name = album['ArtistName']
+            album_name = album['AlbumTitle']
+            dic = {'...': '', ' & ': ' ', ' = ': ' ', '?': '', '$': 's', ' + ': ' ', '"': '', ',': ' ', 
+           '*': ''}
+
+            for key in dic.iterkeys():
+                semi_clean_album_term = album_name.replace(key, dic[key])
+
+            for key in dic.iterkeys():
+                semi_clean_artist_term  = artist_name.replace(key, dic[key])
+
             for search_format in search_formats:
                 if usersearchterm:
                     all_torrents.extend(
