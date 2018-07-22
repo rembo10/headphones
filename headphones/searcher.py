@@ -1186,10 +1186,12 @@ def verifyresult(title, artistterm, term, lossless):
 
     return True
 
+
 def replace_all(text, dic):
     for i, j in dic.iteritems():
         text = text.replace(i, j)
     return text
+
 
 def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                   choose_specific_download=False):
@@ -1206,13 +1208,13 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
 
     semi_cleanalbum = replace_all(album['AlbumTitle'], dic)
     semi_cleanartist = replace_all(album['ArtistName'], dic)
-	
+
     cleanartist = helpers.latinToAscii(semi_cleanartist)
     cleanartist = re.sub('[\.\-\/]', ' ', cleanartist).encode('utf-8', 'replace')
-	
+
     cleanalbum = helpers.latinToAscii(semi_cleanalbum)
     cleanalbum = re.sub('[\.\-\/]', ' ', cleanalbum).encode('utf-8', 'replace')
-		
+	
     logger.debug ("cleanalbum: %s " % cleanalbum)
     logger.debug ("cleanartist: %s " % cleanartist)
 
