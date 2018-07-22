@@ -1204,7 +1204,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
     year = get_year_from_release_date(reldate)
 
     # MERGE THIS WITH THE TERM CLEANUP FROM searchNZB
-    dic = {'...': '', ' & ': ' ', ' = ': ' ', '?': '', '$': 's', ' + ': ' ', '"': '', ',': ' ','*': '', '+':' '}
+    dic = {'...': '', ' & ': ' ', ' = ': ' ', '?': '', '$': 's', ' + ': ' ', '"': '', ',': ' ', '*': '', '+': ' '}
 
     semi_cleanalbum = replace_all(album['AlbumTitle'], dic)
     semi_cleanartist = replace_all(album['ArtistName'], dic)
@@ -1214,9 +1214,9 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
 
     cleanalbum = helpers.latinToAscii(semi_cleanalbum)
     cleanalbum = re.sub('[\.\-\/]', ' ', cleanalbum).encode('utf-8', 'replace')
-	
-    logger.debug ("cleanalbum: %s " % cleanalbum)
-    logger.debug ("cleanartist: %s " % cleanartist)
+
+    logger.debug("cleanalbum: %s " % cleanalbum)
+    logger.debug("cleanartist: %s " % cleanartist)
 
     # Use provided term if available, otherwise build our own (this code needs to be cleaned up since a lot
     # of these torrent providers are just using cleanartist/cleanalbum terms
