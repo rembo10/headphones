@@ -431,7 +431,7 @@ def sort_search_results(resultlist, album, new, albumlength):
 
     resultlist = temp_list
 
-    if headphones.CONFIG.PREFERRED_QUALITY == 2 and headphones.CONFIG.PREFERRED_BITRATE:
+    if headphones.CONFIG.PREFERRED_QUALITY == 2 and headphones.CONFIG.PREFERRED_BITRATE and result[3] != 'Apollo.rip':
 
         try:
             targetsize = albumlength / 1000 * int(headphones.CONFIG.PREFERRED_BITRATE) * 128
@@ -459,6 +459,10 @@ def sort_search_results(resultlist, album, new, albumlength):
                         (result[0], result[1], result[2], result[3], result[4], result[5], delta))
 
                 finallist = sorted(newlist, key=lambda title: (-title[5], title[6]))
+
+                # keep number of seeders order for Apollo.rip
+                if result[3] == 'Apollo.rip':
+                    finallist = resultlist
 
                 if not len(finallist) and len(
                         flac_list) and headphones.CONFIG.PREFERRED_BITRATE_ALLOW_LOSSLESS:
@@ -1504,6 +1508,8 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
             logger.info(u"Searching %s..." % provider)
             all_torrents = []
 
+            album_type = ""
+
             # Specify release types to filter by
             if album['Type'] == 'Album':
                 album_type = [gazellerelease_type.ALBUM]
@@ -1530,6 +1536,8 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                 album_type = [gazellerelease_type.INTERVIEW]
             if album['Type'] == 'Mixtape/Street':
                 album_type = [gazellerelease_type.MIXTAPE]
+            if album['Type'] == 'Other':
+                album_type = [gazellerelease_type.UNKNOWN]
 
             for search_format in search_formats:
                 if usersearchterm:
@@ -1557,13 +1565,11 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
             elif len(match_torrents) > 1:
                 logger.info(u"Found %d matching releases from %s for %s - %s after filtering" %
                             (len(match_torrents), provider, artistterm, albumterm))
-                logger.info(
-                    "Sorting torrents by times snatched and preferred bitrate %s..." % bitrate_string)
-                match_torrents.sort(key=lambda x: int(x.snatched), reverse=True)
+                logger.info('Sorting torrents by number of seeders...')
+                match_torrents.sort(key=lambda x: int(x.seeders), reverse=True)
                 if gazelleformat.MP3 in search_formats:
-                    # sort by size after rounding to nearest 10MB...hacky, but will favor highest quality
-                    match_torrents.sort(key=lambda x: int(10 * round(x.size / 1024. / 1024. / 10.)),
-                                        reverse=True)
+                    logger.info('Sorting torrents by seeders...')
+                    match_torrents.sort(key=lambda x: int(x.seeders), reverse=True)
                 if search_formats and None not in search_formats:
                     match_torrents.sort(
                         key=lambda x: int(search_formats.index(x.format)))  # prefer lossless
@@ -1882,7 +1888,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
     results = [result for result in resultlist if verifyresult(result[0], artistterm, term, losslessOnly)]
 
     # Additional filtering for size etc
-    if results and not choose_specific_download:
+    if results and not choose_specific_download and result[3] != 'Apollo.rip':
         results = more_filtering(results, album, albumlength, new)
 
     return results
