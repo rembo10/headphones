@@ -1508,6 +1508,8 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
             logger.info(u"Searching %s..." % provider)
             all_torrents = []
 
+            album_type = ""
+
             # Specify release types to filter by
             if album['Type'] == 'Album':
                 album_type = [gazellerelease_type.ALBUM]
@@ -1534,6 +1536,8 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                 album_type = [gazellerelease_type.INTERVIEW]
             if album['Type'] == 'Mixtape/Street':
                 album_type = [gazellerelease_type.MIXTAPE]
+            if album['Type'] == 'Other':
+                album_type = [gazellerelease_type.UNKNOWN]
 
             for search_format in search_formats:
                 if usersearchterm:
