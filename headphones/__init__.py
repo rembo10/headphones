@@ -421,7 +421,6 @@ def dbcheck():
         'CREATE INDEX IF NOT EXISTS tracks_artistid ON tracks(ArtistID ASC)')
 
     # Speed up album page
-    c.execute('CREATE INDEX IF NOT EXISTS have_matched ON have(Matched ASC)')
     c.execute('CREATE INDEX IF NOT EXISTS allalbums_albumid ON allalbums(AlbumID ASC)')
     c.execute('CREATE INDEX IF NOT EXISTS alltracks_albumid ON alltracks(AlbumID ASC)')
     c.execute('CREATE INDEX IF NOT EXISTS releases_albumid ON releases(ReleaseGroupID ASC)')
@@ -431,6 +430,21 @@ def dbcheck():
     c.execute('CREATE INDEX IF NOT EXISTS allalbums_artistid ON allalbums(ArtistID ASC)')
     c.execute('CREATE INDEX IF NOT EXISTS alltracks_artistid ON alltracks(ArtistID ASC)')
     c.execute('CREATE INDEX IF NOT EXISTS descriptions_artistid ON descriptions(ArtistID ASC)')
+
+    # Speed up Artist refresh hybrid release
+    c.execute('CREATE INDEX IF NOT EXISTS albums_releaseid ON albums(ReleaseID ASC)')
+    c.execute('CREATE INDEX IF NOT EXISTS tracks_releaseid ON tracks(ReleaseID ASC)')
+
+    # Speed up scanning and track matching
+    c.execute('CREATE INDEX IF NOT EXISTS artist_artistname ON artists(ArtistName COLLATE NOCASE ASC)')
+
+    # General speed up
+    c.execute('CREATE INDEX IF NOT EXISTS artist_artistsortname ON artists(ArtistSortName COLLATE NOCASE ASC)')
+
+    exists = c.execute('SELECT * FROM pragma_index_info("have_matched_artist_album")').fetchone()
+    if not exists:
+        c.execute('CREATE INDEX have_matched_artist_album ON have(Matched ASC, ArtistName COLLATE NOCASE ASC, AlbumTitle COLLATE NOCASE ASC)')
+        c.execute('DROP INDEX IF EXISTS have_matched')
 
     try:
         c.execute('SELECT IncludeExtras from artists')

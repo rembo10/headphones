@@ -640,6 +640,7 @@ class WebInterface(object):
                     'SELECT Matched, CleanName, Location, BitRate, Format FROM have WHERE ArtistName=?',
                     [existing_artist])
                 update_count = 0
+                artist_id = None
                 for entry in have_tracks:
                     old_clean_filename = entry['CleanName']
                     if old_clean_filename.startswith(existing_artist_clean):
@@ -648,31 +649,30 @@ class WebInterface(object):
                         myDB.action(
                             'UPDATE have SET CleanName=? WHERE ArtistName=? AND CleanName=?',
                             [new_clean_filename, existing_artist, old_clean_filename])
-                        controlValueDict = {"CleanName": new_clean_filename}
-                        newValueDict = {"Location": entry['Location'],
-                                        "BitRate": entry['BitRate'],
-                                        "Format": entry['Format']
-                                        }
+
                         # Attempt to match tracks with new CleanName
                         match_alltracks = myDB.action(
-                            'SELECT CleanName from alltracks WHERE CleanName=?',
+                            'SELECT CleanName FROM alltracks WHERE CleanName = ?',
                             [new_clean_filename]).fetchone()
                         if match_alltracks:
-                            myDB.upsert("alltracks", newValueDict, controlValueDict)
+                            myDB.action(
+                                'UPDATE alltracks SET Location = ?, BitRate = ?, Format = ? WHERE CleanName = ?',
+                                [entry['Location'], entry['BitRate'], entry['Format'], new_clean_filename])
+
                         match_tracks = myDB.action(
-                            'SELECT CleanName, AlbumID from tracks WHERE CleanName=?',
+                            'SELECT ArtistID, CleanName, AlbumID FROM tracks WHERE CleanName = ?',
                             [new_clean_filename]).fetchone()
                         if match_tracks:
-                            myDB.upsert("tracks", newValueDict, controlValueDict)
+                            myDB.action(
+                                'UPDATE tracks SET Location = ?, BitRate = ?, Format = ? WHERE CleanName = ?',
+                                [entry['Location'], entry['BitRate'], entry['Format'], new_clean_filename])
                             myDB.action('UPDATE have SET Matched="Manual" WHERE CleanName=?',
                                         [new_clean_filename])
                             update_count += 1
-                            # This was throwing errors and I don't know why, but it seems to be working fine.
-                            # else:
-                            # logger.info("There was an error modifying Artist %s. This should not have happened" % existing_artist)
+                            artist_id = match_tracks['Artist_ID']
                 logger.info("Manual matching yielded %s new matches for Artist: %s" % (update_count, new_artist))
-                if update_count > 0:
-                    librarysync.update_album_status()
+                if artist_id:
+                    librarysync.update_album_status(ArtistID=artist_id)
             else:
                 logger.info(
                     "Artist %s already named appropriately; nothing to modify" % existing_artist)
@@ -698,29 +698,28 @@ class WebInterface(object):
                             'UPDATE have SET CleanName=? WHERE ArtistName=? AND AlbumTitle=? AND CleanName=?',
                             [new_clean_filename, existing_artist, existing_album,
                              old_clean_filename])
-                        controlValueDict = {"CleanName": new_clean_filename}
-                        newValueDict = {"Location": entry['Location'],
-                                        "BitRate": entry['BitRate'],
-                                        "Format": entry['Format']
-                                        }
+
                         # Attempt to match tracks with new CleanName
                         match_alltracks = myDB.action(
-                            'SELECT CleanName from alltracks WHERE CleanName=?',
+                            'SELECT CleanName FROM alltracks WHERE CleanName = ?',
                             [new_clean_filename]).fetchone()
                         if match_alltracks:
-                            myDB.upsert("alltracks", newValueDict, controlValueDict)
+                            myDB.action(
+                                'UPDATE alltracks SET Location = ?, BitRate = ?, Format = ? WHERE CleanName = ?',
+                                [entry['Location'], entry['BitRate'], entry['Format'], new_clean_filename])
+
                         match_tracks = myDB.action(
-                            'SELECT CleanName, AlbumID from tracks WHERE CleanName=?',
+                            'SELECT CleanName, AlbumID FROM tracks WHERE CleanName = ?',
                             [new_clean_filename]).fetchone()
                         if match_tracks:
-                            myDB.upsert("tracks", newValueDict, controlValueDict)
+                            myDB.action(
+                                'UPDATE tracks SET Location = ?, BitRate = ?, Format = ? WHERE CleanName = ?',
+                                [entry['Location'], entry['BitRate'], entry['Format'], new_clean_filename])
                             myDB.action('UPDATE have SET Matched="Manual" WHERE CleanName=?',
                                         [new_clean_filename])
                             album_id = match_tracks['AlbumID']
                             update_count += 1
-                            # This was throwing errors and I don't know why, but it seems to be working fine.
-                            # else:
-                            # logger.info("There was an error modifying Artist %s / Album %s with clean name %s" % (existing_artist, existing_album, existing_clean_string))
+
                 logger.info("Manual matching yielded %s new matches for Artist: %s / Album: %s" % (
                     update_count, new_artist, new_album))
                 if update_count > 0:
@@ -785,25 +784,29 @@ class WebInterface(object):
                 album = tracks['AlbumTitle']
                 track_title = tracks['TrackTitle']
                 if tracks['CleanName'] != original_clean:
+                    artist_id_check = myDB.action('SELECT ArtistID FROM tracks WHERE CleanName = ?',
+                                                 [tracks['CleanName']]).fetchone()
+                    if artist_id_check:
+                        artist_id = artist_id_check[0]
                     myDB.action(
-                        'UPDATE tracks SET Location=?, BitRate=?, Format=? WHERE CleanName=?',
+                        'UPDATE tracks SET Location=?, BitRate=?, Format=? WHERE CleanName = ?',
                         [None, None, None, tracks['CleanName']])
                     myDB.action(
-                        'UPDATE alltracks SET Location=?, BitRate=?, Format=? WHERE CleanName=?',
+                        'UPDATE alltracks SET Location=?, BitRate=?, Format=? WHERE CleanName = ?',
                         [None, None, None, tracks['CleanName']])
                     myDB.action(
                         'UPDATE have SET CleanName=?, Matched="Failed" WHERE ArtistName=? AND AlbumTitle=? AND TrackTitle=?',
                         (original_clean, artist, album, track_title))
                     update_count += 1
             if update_count > 0:
-                librarysync.update_album_status()
+                librarysync.update_album_status(ArtistID=artist_id)
             logger.info("Artist: %s successfully restored to unmatched list" % artist)
 
         elif action == "unmatchAlbum":
             artist = existing_artist
             album = existing_album
             update_clean = myDB.select(
-                'SELECT ArtistName, AlbumTitle, TrackTitle, CleanName, Matched from have WHERE ArtistName=? AND AlbumTitle=?',
+                'SELECT ArtistName, AlbumTitle, TrackTitle, CleanName, Matched FROM have WHERE ArtistName=? AND AlbumTitle=?',
                 (artist, album))
             update_count = 0
             for tracks in update_clean:
@@ -812,15 +815,15 @@ class WebInterface(object):
                         'TrackTitle']).lower()
                 track_title = tracks['TrackTitle']
                 if tracks['CleanName'] != original_clean:
-                    album_id_check = myDB.action('SELECT AlbumID from tracks WHERE CleanName=?',
+                    album_id_check = myDB.action('SELECT AlbumID FROM tracks WHERE CleanName = ?',
                                                  [tracks['CleanName']]).fetchone()
                     if album_id_check:
                         album_id = album_id_check[0]
                     myDB.action(
-                        'UPDATE tracks SET Location=?, BitRate=?, Format=? WHERE CleanName=?',
+                        'UPDATE tracks SET Location=?, BitRate=?, Format=? WHERE CleanName = ?',
                         [None, None, None, tracks['CleanName']])
                     myDB.action(
-                        'UPDATE alltracks SET Location=?, BitRate=?, Format=? WHERE CleanName=?',
+                        'UPDATE alltracks SET Location=?, BitRate=?, Format=? WHERE CleanName = ?',
                         [None, None, None, tracks['CleanName']])
                     myDB.action(
                         'UPDATE have SET CleanName=?, Matched="Failed" WHERE ArtistName=? AND AlbumTitle=? AND TrackTitle=?',

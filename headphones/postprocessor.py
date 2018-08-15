@@ -183,13 +183,17 @@ def verify(albumid, albumpath, Kind=None, forced=False, keep_original_folder=Fal
             controlValueDict = {"TrackID": track['id'],
                                 "AlbumID": albumid}
 
+            clean_name = helpers.clean_name(
+                release_dict['artist_name'] + ' ' + release_dict['title'] + ' ' + track['title'])
+
             newValueDict = {"ArtistID": release_dict['artist_id'],
                             "ArtistName": release_dict['artist_name'],
                             "AlbumTitle": release_dict['title'],
                             "AlbumASIN": release_dict['asin'],
                             "TrackTitle": track['title'],
                             "TrackDuration": track['duration'],
-                            "TrackNumber": track['number']
+                            "TrackNumber": track['number'],
+                            "CleanName": clean_name
                             }
 
             myDB.upsert("tracks", newValueDict, controlValueDict)
