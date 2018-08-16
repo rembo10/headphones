@@ -31,10 +31,14 @@ from pygazelle import api as gazelleapi
 from pygazelle import encoding as gazelleencoding
 from pygazelle import format as gazelleformat
 from pygazelle import release_type as gazellerelease_type
+
 import headphones
 from headphones.common import USER_AGENT
 from headphones import logger, db, helpers, classes, sab, nzbget, request
-from headphones import utorrent, transmission, notifiers, rutracker, deluge, qbittorrent
+from headphones import utorrent, transmission, notifiers, rutracker, deluge, qbittorrent,rtorrent
+
+from rtorrent import RTorrent
+
 from bencode import bencode, bdecode
 
 # Magnet to torrent services, for Black hole. Stolen from CouchPotato.
@@ -992,7 +996,7 @@ def send_to_downloader(data, bestqual, album):
             seed_ratio = get_seed_ratio(bestqual[3])
             if seed_ratio is not None:
                 utorrent.setSeedRatio(torrentid, seed_ratio)
-        else:  # if headphones.CONFIG.TORRENT_DOWNLOADER == 4:
+        elif headphones.CONFIG.TORRENT_DOWNLOADER == 4:
             logger.info("Sending torrent to QBiTorrent")
 
             # Add torrent
@@ -1015,6 +1019,17 @@ def send_to_downloader(data, bestqual, album):
             else:
                 logger.error('Torrent name could not be determined')
                 return
+        elif headphones.CONFIG.TORRENT_DOWNLOADER == 5:
+            logger.info("Sending torrent to rTorrent")
+
+            # Add torrent
+            if not rtorrent.addTorrent(bestqual[2]):
+                logger.error("rtorrent.addTorrent failed")
+
+        else:  # if headphones.CONFIG.TORRENT_DOWNLOADER is unnkown
+            logger.error("Unkown Torrent Downloader")
+            return
+
 
     myDB = db.DBConnection()
     myDB.action('UPDATE albums SET status = "Snatched" WHERE AlbumID=?', [album['AlbumID']])
