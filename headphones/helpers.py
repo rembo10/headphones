@@ -1020,6 +1020,8 @@ def cleanHost(host, protocol=True, ssl=False, username=None, password=None):
     'localhost:80'
     """
 
+    from headphones import logger
+
     if '://' not in host and protocol:
         host = ('https://' if ssl else 'http://') + host
 
@@ -1030,7 +1032,7 @@ def cleanHost(host, protocol=True, ssl=False, username=None, password=None):
         try:
             auth = re.findall('^(?:.+?//)(.+?):(.+?)@(?:.+)$', host)
             if auth:
-                log.error('Cleanhost error: auth already defined in url: %s, please remove BasicAuth from url.', host)
+                logger.error('Cleanhost error: auth already defined in url: %s, please remove BasicAuth from url.', host)
             else:
                 host = host.replace('://', '://%s:%s@' % (username, password), 1)
         except:
