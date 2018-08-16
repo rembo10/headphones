@@ -1001,7 +1001,8 @@ def capture_beets_log(logger='beets'):
     finally:
         log.removeHandler(capture)
 
-def cleanHost(host, protocol = True, ssl = False, username = None, password = None):
+
+def cleanHost(host, protocol=True, ssl=False, username=None, password=None):
     """  Return a cleaned up host with given url options set
             taken verbatim from CouchPotato
     Changes protocol to https if ssl is set to True and http if ssl is set to false.
@@ -1019,7 +1020,7 @@ def cleanHost(host, protocol = True, ssl = False, username = None, password = No
     'localhost:80'
     """
 
-    if not '://' in host and protocol:
+    if '://' not in host and protocol:
         host = ('https://' if ssl else 'http://') + host
 
     if not protocol:

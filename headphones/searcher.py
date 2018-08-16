@@ -35,7 +35,7 @@ from pygazelle import release_type as gazellerelease_type
 import headphones
 from headphones.common import USER_AGENT
 from headphones import logger, db, helpers, classes, sab, nzbget, request
-from headphones import utorrent, transmission, notifiers, rutracker, deluge, qbittorrent,rtorrent
+from headphones import utorrent, transmission, notifiers, rutracker, deluge, qbittorrent, rtorrent
 
 from rtorrent import RTorrent
 
@@ -1029,7 +1029,6 @@ def send_to_downloader(data, bestqual, album):
         else:  # if headphones.CONFIG.TORRENT_DOWNLOADER is unnkown
             logger.error("Unkown Torrent Downloader")
             return
-
 
     myDB = db.DBConnection()
     myDB.action('UPDATE albums SET status = "Snatched" WHERE AlbumID=?', [album['AlbumID']])

@@ -7,6 +7,7 @@ from lib.rtorrent import RTorrent
 import headphones
 from headphones import logger, helpers
 
+
 class rtorrentclient(object):
     def __init__(self):
         self.conn = None
@@ -29,10 +30,13 @@ class rtorrentclient(object):
         if headphones.CONFIG.RTORRENT_CA_BUNDLE is not None:
             ca_bundle = headphones.CONFIG.RTORRENT_CA_BUNDLE
 
-        logger.debug('calling connect(%s,%s,%s,%s,%s,%s,%s,%s)',host,self.username,"PASSWORD",self.auth,self.verify,self.ssl,self.rpcurl,ca_bundle)
-        self.conn = self.connect(host,self.username,self.password,self.auth,self.verify,self.ssl,self.rpcurl,ca_bundle)
+        logger.debug('calling connect(%s,%s,%s,%s,%s,%s,%s,%s)',
+                host, self.username, "PASSWORD", self.auth, self.verify,
+                self.ssl, self.rpcurl, ca_bundle)
+        self.conn = self.connect(host, self.username, self.password,
+                self.auth, self.verify, self.ssl, self.rpcurl, ca_bundle)
 
-        if self.conn == None:
+        if self.conn is None:
             logger.warn('Could not establish connection to %s' % host)
             return 'Error establishing connection to Rtorrent'
 
@@ -55,7 +59,7 @@ class rtorrentclient(object):
         if not host:
             return False
 
-        url = helpers.cleanHost(host, protocol = True, ssl = ssl)
+        url = helpers.cleanHost(host, protocol=True, ssl=ssl)
 
         # Automatically add '+https' to 'httprpc' protocol if SSL is enabled
         if ssl is True and url.startswith('httprpc://'):
@@ -72,10 +76,10 @@ class rtorrentclient(object):
         if username and password:
             try:
                 self.conn = RTorrent(
-                    url,(auth, username, password),
+                    url, (auth, username, password),
                     verify_server=True,
                     verify_ssl=self.getVerifySsl(verify, ca_bundle)
-            )
+                )
             except Exception as err:
                 logger.error('Failed to connect to rTorrent: %s', err)
                 return False
@@ -86,7 +90,7 @@ class rtorrentclient(object):
                     url, (auth, username, password),
                     verify_server=True,
                     verify_ssl=self.getVerifySsl(verify, ca_bundle)
-            )
+                )
             except Exception as err:
                 logger.error('Failed to connect to rTorrent: %s', err)
                 return False
@@ -96,7 +100,7 @@ class rtorrentclient(object):
     def find_torrent(self, hash):
         return self.conn.find_torrent(hash)
 
-    def get_torrent (self, torrent):
+    def get_torrent(self, torrent):
         torrent_files = []
         torrent_directory = os.path.normpath(torrent.directory)
         try:
@@ -135,7 +139,7 @@ class rtorrentclient(object):
             torrent_hash = re.findall('urn:btih:([\w]{32,40})', filepath)[0].upper()
             # Send request to rTorrent
             try:
-                #cannot verify_load magnet as it might take a very very long time for it to retrieve metadata
+                # cannot verify_load magnet as it might take a very very long time for it to retrieve metadata
                 torrent = self.conn.load_magnet(filepath, torrent_hash, verify_load=True)
                 if not torrent:
                     logger.error('Unable to find the torrent, did it fail to load?')
@@ -156,13 +160,13 @@ class rtorrentclient(object):
                 logger.error('Failed to send torrent to rTorrent: %s', err)
                 return False
 
-        #we can cherrypick the torrents here if required and if it's a pack (0day instance)
-        #torrent.get_files() will return list of files in torrent
-        #f.set_priority(0,1,2)
-        #for f in torrent.get_files():
-        #    logger.info('torrent_get_files: %s' % f)
-        #    f.set_priority(0)  #set them to not download just to see if this works...
-        #torrent.updated_priorities()
+        # we can cherrypick the torrents here if required and if it's a pack (0day instance)
+        # torrent.get_files() will return list of files in torrent
+        # f.set_priority(0,1,2)
+        # for f in torrent.get_files():
+        #     logger.info('torrent_get_files: %s' % f)
+        #     f.set_priority(0)  #set them to not download just to see if this works...
+        # torrent.updated_priorities()
 
         if headphones.CONFIG.RTORRENT_LABEL is not None:
             torrent.set_custom(1, headphones.CONFIG.RTORRENT_LABEL)
@@ -174,7 +178,7 @@ class rtorrentclient(object):
 
         logger.info('Successfully loaded torrent.')
 
-        #note that if set_directory is enabled, the torrent has to be started AFTER it's loaded or else it will give chunk errors and not seed
+        # note that if set_directory is enabled, the torrent has to be started AFTER it's loaded or else it will give chunk errors and not seed
         if start:
             logger.info('[' + str(start) + '] Now starting torrent.')
             torrent.start()
@@ -209,6 +213,7 @@ class rtorrentclient(object):
         torrent.erase()
 
         return deleted
+
 
 def addTorrent(link):
     rtorrentClient = rtorrentclient()
