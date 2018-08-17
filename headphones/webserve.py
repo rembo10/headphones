@@ -326,7 +326,7 @@ class WebInterface(object):
                   '$first': firstchar.lower(),
                   }
 
-        folder = helpers.replace_all(folder_format.strip(), values, normalize=True)
+        folder = helpers.pattern_substitute(folder_format.strip(), values, normalize=True)
 
         folder = helpers.replace_illegal_chars(folder, type="folder")
         folder = folder.replace('./', '_/').replace('/.', '/_')

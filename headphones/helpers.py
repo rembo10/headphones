@@ -197,9 +197,15 @@ def piratesize(size):
     return size
 
 
-def replace_all(text, dic, normalize=False):
+def pattern_substitute(pattern, dic, normalize=False):
+    """
+    Execute path rendering/substitution based on replacement dictionary
+    e.g. pattern = $Artist/$Album
+         dic = {Artist: 'My artist', Album: 'My album'}
+         returns My artist/My album
+    """
     from headphones import pathrender
-    if not text:
+    if not pattern:
         return ''
 
     if normalize:
@@ -216,7 +222,16 @@ def replace_all(text, dic, normalize=False):
                         j.decode(headphones.SYS_ENCODING, 'replace'))
             new_dic[i] = j
         dic = new_dic
-    return pathrender.render(text, dic)[0]
+    return pathrender.render(pattern, dic)[0]
+
+
+def replace_all(text, dic):
+    if not text:
+        return ''
+
+    for i, j in dic.iteritems():
+        text = text.replace(i, j)
+    return text
 
 
 def replace_illegal_chars(string, type="file"):
