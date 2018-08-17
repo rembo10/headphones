@@ -1015,3 +1015,46 @@ def capture_beets_log(logger='beets'):
         yield capture.messages
     finally:
         log.removeHandler(capture)
+
+
+def cleanHost(host, protocol=True, ssl=False, username=None, password=None):
+    """  Return a cleaned up host with given url options set
+            taken verbatim from CouchPotato
+    Changes protocol to https if ssl is set to True and http if ssl is set to false.
+    >>> cleanHost("localhost:80", ssl=True)
+    'https://localhost:80/'
+    >>> cleanHost("localhost:80", ssl=False)
+    'http://localhost:80/'
+
+    Username and password is managed with the username and password variables
+    >>> cleanHost("localhost:80", username="user", password="passwd")
+    'http://user:passwd@localhost:80/'
+
+    Output without scheme (protocol) can be forced with protocol=False
+    >>> cleanHost("localhost:80", protocol=False)
+    'localhost:80'
+    """
+
+    from headphones import logger
+
+    if '://' not in host and protocol:
+        host = ('https://' if ssl else 'http://') + host
+
+    if not protocol:
+        host = host.split('://', 1)[-1]
+
+    if protocol and username and password:
+        try:
+            auth = re.findall('^(?:.+?//)(.+?):(.+?)@(?:.+)$', host)
+            if auth:
+                logger.error('Cleanhost error: auth already defined in url: %s, please remove BasicAuth from url.', host)
+            else:
+                host = host.replace('://', '://%s:%s@' % (username, password), 1)
+        except:
+            pass
+
+    host = host.rstrip('/ ')
+    if protocol:
+        host += '/'
+
+    return host

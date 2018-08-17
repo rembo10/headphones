@@ -138,7 +138,7 @@
                                         Ignore Undated Releases
                                     </label>
                                     <input type="checkbox" name="mb_ignore_age_missing" id="mb_ignore_age_missing" value="${config['mb_ignore_age_missing']}">
-                                </div>                                
+                                </div>
                             </fieldset>
                         </td>
                     </tr>
@@ -319,6 +319,7 @@
                                 <input type="radio" name="torrent_downloader" id="torrent_downloader_utorrent" value="2" ${config['torrent_downloader_utorrent']}> uTorrent (Beta)
                                 <input type="radio" name="torrent_downloader" id="torrent_downloader_deluge" value="3" ${config['torrent_downloader_deluge']}> Deluge (Beta)
                                 <input type="radio" name="torrent_downloader" id="torrent_downloader_qbittorrent" value="4" ${config['torrent_downloader_qbittorrent']}> QBitTorrent
+                                <input type="radio" name="torrent_downloader" id="torrent_downloader_rtorrent" value="5" ${config['torrent_downloader_rtorrent']}> rTorrent (Beta)
                             </fieldset>
                             <fieldset id="torrent_blackhole_options">
                                 <div class="row">
@@ -411,7 +412,7 @@
                                 <div class="row">
                                     <label>QBitTorrent Label</label>
                                     <input type="text" name="qbittorrent_label" value="${config['qbittorrent_label']}" size="30">
-				</div>
+                                </div>
                             </fieldset>
                             <fieldset id="deluge_options">
                                 <div class="row">
@@ -422,7 +423,7 @@
                                 <div class="row">
                                     <label>Deluge SSL Certificate</label>
                                     <input type="text" name="deluge_cert" value="${config['deluge_cert']}" size="30">
-                                    <small>Path to the certificate file. Make sure to use a valid certificate ("Issued To" field must match 
+                                    <small>Path to the certificate file. Make sure to use a valid certificate ("Issued To" field must match
                                         hostname) which is <em>not</em> the case with the default certificate. Path is usually <span style="font-family: monospace;">%appdata%\deluge\ssl</span> on Windows, <span style="font-family: monospace;">~/.config/deluge/ssl/</span> on Linux. Leave this blank if you are using a self-signed certificate.</small>
                                 </div>
                                 <div class="row">
@@ -447,6 +448,68 @@
                                     <label>Add Torrent Paused</label>
                                     <input type="checkbox" name="deluge_paused" value="1" ${config['deluge_paused']}>
                                 </div>
+                            </fieldset>
+                            <fieldset id="rtorrent_options">
+                                <div class="row">
+                                        <label>rTorrent Host:port(optional)</label>
+                                        <input type="text" id="rtorrent_host" name="rtorrent_host" value="${config['rtorrent_host']}" size="30">
+					                              <small>ie. my.rtorrent:80, 192.168.1.1, scgi://localhost:5000</small>
+                                </div>
+                                <div class="row checkbox left clearfix">
+                                        <input id="rtorrent_ssl" type="checkbox" onclick="initConfigCheckbox($this));" name="rtorrent_ssl" value="1" ${config['rtorrent_ssl']} /><label>SSL</label>
+                                </div>
+                                <div class="config">
+                                    <div class="row checkbox left clearfix">
+                                        <input id="rtorrent_verify" type="checkbox" name="rtorrent_verify" value="1" ${config['rtorrent_verify']} /><label>Verify SSL</label>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <label>rTorrent Authentication</label>
+                                    <select name="rtorrent_authentication" id="rtorrent_authentication">
+                                    %for x in ['basic', 'digest']:
+                                        <%
+                                            if config['rtorrent_authentication'] == x:
+                                                outputselect = 'selected'
+                                            else:
+                                                outputselect = ''
+                                         %>
+                                    <option value=${x} ${outputselect}>${x}</option>
+                                    %endfor
+                                    </select>
+                                </div>
+                                <div class="row">
+                                        <label>rTorrent RPC</label>
+                                        <input type="text" id="rtorrent_rpc_url" name="rtorrent_rpc_url" value="${config['rtorrent_rpc_url']}" size="30">
+					                              <small>ie. httprpc plugin = rutorrent/plugins/httprpc/action.php<br>rpc plugin = user/RPC2</small>
+                                </div>
+                                <div class="row">
+                                        <label>rTorrent Username</label>
+                                        <input type="text" id="rtorrent_username" name="rtorrent_username" value="${config['rtorrent_username']}" size="30">
+                                </div>
+                                <div class="row">
+                                        <label>rTorrent Password</label>
+                                        <input type="password" id="rtorrent_password" name="rtorrent_password" value="${config['rtorrent_password']| h}" size="30">
+                                </div>
+                                <div class="row">
+                                        <label>rTorrent Directory</label>
+                                        <input type="text" name="rtorrent_directory" value="${config['rtorrent_directory']}" size="30"><br/>
+                                        <small>Folder path where torrent download will be assigned</small>
+                                </div>
+                                <div class="row">
+                                        <label>Label</label>
+                                        <input type="text" name="rtorrent_label" value="${config['rtorrent_label']}" size="30"><br/>
+                                        <small>Label to assign for torrents</small>
+                                </div>
+                                <div class="row checkbox left clearfix">
+                                        <input id="rtorrent_startonload" type="checkbox" name="rtorrent_startonload" value="1" ${config['rtorrent_startonload']} /><label>Start Torrent on Successful Load</label>
+                                        <small>Automatically start torrent on successful loading within rtorrent client</small>
+                                </div>
+<!--
+                                <div class="row">
+                                        <img name="rtorrent_statusicon" id="rtorrent_statusicon" src="interfaces/default/images/successs.png" style="float:right;visibility:hidden;" height="20" width="20" />
+                                        <input type="button" value="Test Connection" id="rtorrent_test" />
+                                </div>
+-->
                             </fieldset>
                             <fieldset id="general_torrent_options">
                                 <div class="row">
@@ -2384,28 +2447,33 @@
 
                 if ($("#torrent_downloader_blackhole").is(":checked"))
                         {
-                            $("#transmission_options,#utorrent_options,#deluge_options,#qbittorrent_options").hide();
+                            $("#transmission_options,#utorrent_options,#deluge_options,#qbittorrent_options,#rtorrent_options").hide();
                             $("#torrent_blackhole_options").show();
                         }
                 if ($("#torrent_downloader_transmission").is(":checked"))
                         {
-                            $("#torrent_blackhole_options,#utorrent_options,#deluge_options,#qbittorrent_options").hide();
+                            $("#torrent_blackhole_options,#utorrent_options,#deluge_options,#qbittorrent_options,#rtorrent_options").hide();
                             $("#transmission_options").show();
                         }
                 if ($("#torrent_downloader_utorrent").is(":checked"))
                         {
-                            $("#torrent_blackhole_options,#transmission_options,#deluge_options,#qbittorrent_options").hide();
+                            $("#torrent_blackhole_options,#transmission_options,#deluge_options,#qbittorrent_options,#rtorrent_options").hide();
                             $("#utorrent_options").show();
                         }
                 if ($("#torrent_downloader_qbittorrent").is(":checked"))
                         {
-                            $("#torrent_blackhole_options,#transmission_options,#utorrent_options,#deluge_options").hide();
+                            $("#torrent_blackhole_options,#transmission_options,#utorrent_options,#deluge_options,#rtorrent_options").hide();
                             $("#qbittorrent_options").show();
                         }
                 if ($("#torrent_downloader_deluge").is(":checked"))
                         {
-                            $("#torrent_blackhole_options,#transmission_options,#utorrent_options,#qbittorrent_options").hide();
+                            $("#torrent_blackhole_options,#transmission_options,#utorrent_options,#qbittorrent_options,#rtorrent_options").hide();
                             $("#deluge_options").show();
+                        }
+                if ($("#torrent_downloader_rtorrent").is(":checked"))
+                        {
+                            $("#torrent_blackhole_options,#transmission_options,#utorrent_options,#qbittorrent_options,#deluge_options").hide();
+                            $("#rtorrent_options").show();
                         }
 
                 $('input[type=radio]').change(function(){
@@ -2443,23 +2511,27 @@
                         }
                         if ($("#torrent_downloader_blackhole").is(":checked"))
                         {
-                            $("#transmission_options,#utorrent_options,#deluge_options,#qbittorrent_options").fadeOut("fast", function() { $("#torrent_blackhole_options").fadeIn() });
+                            $("#transmission_options,#utorrent_options,#deluge_options,#qbittorrent_options,#rtorrent_options").fadeOut("fast", function() { $("#torrent_blackhole_options").fadeIn() });
                         }
                         if ($("#torrent_downloader_transmission").is(":checked"))
                         {
-                            $("#torrent_blackhole_options,#utorrent_options,#deluge_options,#qbittorrent_options").fadeOut("fast", function() { $("#transmission_options").fadeIn() });
+                            $("#torrent_blackhole_options,#utorrent_options,#deluge_options,#qbittorrent_options,#rtorrent_options").fadeOut("fast", function() { $("#transmission_options").fadeIn() });
                         }
                         if ($("#torrent_downloader_utorrent").is(":checked"))
                         {
-                            $("#torrent_blackhole_options,#transmission_options,#deluge_options,#qbittorrent_options").fadeOut("fast", function() { $("#utorrent_options").fadeIn() });
+                            $("#torrent_blackhole_options,#transmission_options,#deluge_options,#qbittorrent_options,#rtorrent_options").fadeOut("fast", function() { $("#utorrent_options").fadeIn() });
                         }
                         if ($("#torrent_downloader_qbittorrent").is(":checked"))
                         {
-                            $("#torrent_blackhole_options,#transmission_options,#utorrent_options,#deluge_options").fadeOut("fast", function() { $("#qbittorrent_options").fadeIn() });
-			}
+                            $("#torrent_blackhole_options,#transmission_options,#utorrent_options,#deluge_options,#rtorrent_options").fadeOut("fast", function() { $("#qbittorrent_options").fadeIn() });
+			                  }
                         if ($("#torrent_downloader_deluge").is(":checked"))
                         {
-                            $("#torrent_blackhole_options,#utorrent_options,#transmission_options,#qbittorrent_options").fadeOut("fast", function() { $("#deluge_options").fadeIn() });
+                            $("#torrent_blackhole_options,#utorrent_options,#transmission_options,#qbittorrent_options,#rtorrent_options").fadeOut("fast", function() { $("#deluge_options").fadeIn() });
+                        }
+                        if ($("#torrent_downloader_rtorrent").is(":checked"))
+                        {
+                            $("#torrent_blackhole_options,#utorrent_options,#transmission_options,#qbittorrent_options,#deluge_options").fadeOut("fast", function() { $("#rtorrent_options").fadeIn() });
                         }
                 });
 
