@@ -82,7 +82,7 @@ class Api(object):
     def fetchData(self):
 
         if self.data == 'OK':
-            logger.info('Recieved API command: %s', self.cmd)
+            logger.info('Received API command: %s', self.cmd)
             methodToCall = getattr(self, "_" + self.cmd)
             methodToCall(**self.kwargs)
             if 'callback' not in self.kwargs:
