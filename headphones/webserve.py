@@ -1213,6 +1213,7 @@ class WebInterface(object):
             "use_torznab": checked(headphones.CONFIG.TORZNAB),
             "torznab_host": headphones.CONFIG.TORZNAB_HOST,
             "torznab_apikey": headphones.CONFIG.TORZNAB_APIKEY,
+            "torznab_ratio": headphones.CONFIG.TORZNAB_RATIO,
             "torznab_enabled": checked(headphones.CONFIG.TORZNAB_ENABLED),
             "extra_torznabs": headphones.CONFIG.get_extra_torznabs(),
             "use_nzbsorg": checked(headphones.CONFIG.NZBSORG),
@@ -1537,13 +1538,15 @@ class WebInterface(object):
             if len(torznab_number):
                 torznab_api_key = 'torznab_api' + torznab_number
                 torznab_enabled_key = 'torznab_enabled' + torznab_number
+                torznab_ratio_key = 'torznab_ratio' + torznab_number
                 torznab_host = kwargs.get(torznab_host_key, '')
                 torznab_api = kwargs.get(torznab_api_key, '')
                 torznab_enabled = int(kwargs.get(torznab_enabled_key, 0))
-                for key in [torznab_host_key, torznab_api_key, torznab_enabled_key]:
+                torznab_ratio = kwargs.get(torznab_ratio_key, '')
+                for key in [torznab_host_key, torznab_api_key, torznab_enabled_key, torznab_ratio_key]:
                     if key in kwargs:
                         del kwargs[key]
-                extra_torznabs.append((torznab_host, torznab_api, torznab_enabled))
+                extra_torznabs.append((torznab_host, torznab_api, torznab_ratio, torznab_enabled))
 
         # Convert the extras to list then string. Coming in as 0 or 1 (append new extras to the end)
         temp_extras_list = []

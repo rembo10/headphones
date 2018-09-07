@@ -704,6 +704,10 @@
                                                 <label>Torznab API</label>
                                                 <input type="text" name="torznab_apikey" value="${config['torznab_apikey']}" size="36">
                                             </div>
+                                            <div class="row">
+                                                <label>Torznab Seed Ratio</label>
+                                                <input type="text" class="override-float" name="torznab_ratio" value="${config['torznab_ratio']}" size="10" title="Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove torrent when post processed and finished seeding.">
+                                            </div>
                                             <div class="row checkbox">
                                                 <input id="torznab_enabled" type="checkbox" name="torznab_enabled" value="1" ${config['torznab_enabled']} /><label>Enabled</label>
                                             </div>
@@ -713,7 +717,7 @@
                                         %>
                                         %for torznab in config['extra_torznabs']:
                                             <%
-                                                if torznab[2] == '1' or torznab[2] == 1:
+                                                if torznab[3] == '1' or torznab[3] == 1:
                                                     torznab_enabled = "checked"
                                                 else:
                                                     torznab_enabled = ""
@@ -726,6 +730,10 @@
                                                 <div class="row">
                                                     <label>Torznab API</label>
                                                     <input type="text" name="torznab_api${torznab_number}" value="${torznab[1]}" size="36">
+                                                </div>
+                                                <div class="row">
+                                                    <label>Torznab Seed Ratio</label>
+                                                    <input type="text" class="override-float" name="torznab_ratio${torznab_number}" value="${torznab[2]}" size="10" title="Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove torrent when post processed and finished seeding.">
                                                 </div>
                                                 <div class="row checkbox">
                                                     <input id="torznab_enabled" type="checkbox" name="torznab_enabled${torznab_number}" value="1" ${torznab_enabled} /><label>Enabled</label>
@@ -2521,7 +2529,7 @@
 
                 $("#add_torznab").click(function() {
                     var intId = $("#torznab_providers > div").size() + deletedTorznabs + 1;
-                    var formfields = $("<div class=\"config\" id=\"torznab" + intId + "\"><div class=\"row\"><label>Torznab Host</label><input type=\"text\" name=\"torznab_host" + intId + "\" size=\"30\"></div><div class=\"row\"><label>Torznab API</label><input type=\"text\" name=\"torznab_api" + intId + "\" size=\"36\"></div><div class=\"row checkbox\"><input type=\"checkbox\" name=\"torznab_enabled" + intId + "\" value=\"1\" checked /><label>Enabled</label></div>");
+                    var formfields = $("<div class=\"config\" id=\"torznab" + intId + "\"><div class=\"row\"><label>Torznab Host</label><input type=\"text\" name=\"torznab_host" + intId + "\" size=\"30\"></div><div class=\"row\"><label>Torznab API</label><input type=\"text\" name=\"torznab_api" + intId + "\" size=\"36\"></div><div class=\"row\"><label>Torznab Seed Ratio</label><input type=\"text\" class=\"override-float\" name=\"torznab_ratio" + intId + "\" size=\"10\"></div><div class=\"row checkbox\"><input type=\"checkbox\" name=\"torznab_enabled" + intId + "\" value=\"1\" checked /><label>Enabled</label></div>");
                     var removeTorznabButton = $("<div class=\"row\"><input type=\"button\" class=\"remove_torznab\" value=\"Remove\" /></div>");
                     removeTorznabButton.click(function() {
                         $(this).parent().remove();

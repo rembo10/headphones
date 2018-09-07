@@ -284,6 +284,7 @@ _CONFIG_DEFINITIONS = {
     'TORZNAB_APIKEY': (str, 'Torznab', ''),
     'TORZNAB_ENABLED': (int, 'Torznab', 1),
     'TORZNAB_HOST': (str, 'Torznab', ''),
+    'TORZNAB_RATIO': (str, 'Torznab', ''),
     'TRANSMISSION_HOST': (str, 'Transmission', ''),
     'TRANSMISSION_PASSWORD': (str, 'Transmission', ''),
     'TRANSMISSION_USERNAME': (str, 'Transmission', ''),
@@ -412,8 +413,8 @@ class Config(object):
     def get_extra_torznabs(self):
         """ Return the extra torznab tuples """
         extra_torznabs = list(
-            itertools.izip(*[itertools.islice(self.EXTRA_TORZNABS, i, None, 3)
-                             for i in range(3)])
+            itertools.izip(*[itertools.islice(self.EXTRA_TORZNABS, i, None, 4)
+                             for i in range(4)])
         )
         return extra_torznabs
 
@@ -484,4 +485,19 @@ class Config(object):
         if self.CONFIG_VERSION == '5':
             if self.OPEN_MAGNET_LINKS:
                 self.MAGNET_LINKS = 2
-            self.CONFIG_VERSION = '5'
+
+            # Add Seed Ratio to Torznabs
+            if self.EXTRA_TORZNABS:
+                extra_torznabs = list(
+                    itertools.izip(*[itertools.islice(self.EXTRA_TORZNABS, i, None, 3)
+                                     for i in range(3)])
+                )
+                new_torznabs = []
+                for torznab in extra_torznabs:
+                    new_torznabs.extend([torznab[0], torznab[1], u'', torznab[2]])
+                if new_torznabs:
+                    self.EXTRA_TORZNABS = new_torznabs
+
+            self.CONFIG_VERSION = '6'
+
+

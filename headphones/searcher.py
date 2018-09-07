@@ -154,7 +154,7 @@ def calculate_torrent_hash(link, data=None):
 
 def get_seed_ratio(provider):
     """
-    Return the seed ratio for the specified provider, if applicable. Defaults to
+    Return the seed ratio for the specified provider if applicable. Defaults to
     None in case of an error.
     """
 
@@ -172,6 +172,15 @@ def get_seed_ratio(provider):
         seed_ratio = headphones.CONFIG.WAFFLES_RATIO
     elif provider == 'Mininova':
         seed_ratio = headphones.CONFIG.MININOVA_RATIO
+    elif provider.startswith("Jackett_"):
+        provider = provider.split("Jackett_")[1]
+        if provider in headphones.CONFIG.TORZNAB_HOST:
+            seed_ratio = headphones.CONFIG.TORZNAB_RATIO
+        else:
+            for torznab in headphones.CONFIG.get_extra_torznabs():
+                if provider in torznab[0]:
+                    seed_ratio = torznab[2]
+                    break
     else:
         seed_ratio = None
 
@@ -1266,10 +1275,10 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
 
         if headphones.CONFIG.TORZNAB_HOST and headphones.CONFIG.TORZNAB_ENABLED:
             torznab_hosts.append((headphones.CONFIG.TORZNAB_HOST, headphones.CONFIG.TORZNAB_APIKEY,
-                                  headphones.CONFIG.TORZNAB_ENABLED))
+                                  headphones.CONFIG.TORZNAB_RATIO, headphones.CONFIG.TORZNAB_ENABLED))
 
         for torznab_host in headphones.CONFIG.get_extra_torznabs():
-            if torznab_host[2] == '1' or torznab_host[2] == 1:
+            if torznab_host[3] == '1' or torznab_host[3] == 1:
                 torznab_hosts.append(torznab_host)
 
         if headphones.CONFIG.PREFERRED_QUALITY == 3 or losslessOnly:
