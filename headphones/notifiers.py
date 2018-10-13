@@ -861,7 +861,7 @@ class OSX_NOTIFY(object):
             self.AppKit = __import__("AppKit")
         except:
             logger.warn('OS X Notification: Cannot import objc or AppKit')
-            return False
+            pass
 
     def swizzle(self, cls, SEL, func):
         old_IMP = getattr(cls, SEL, None)
