@@ -499,5 +499,6 @@ class Config(object):
                     self.EXTRA_TORZNABS = new_torznabs
 
             self.CONFIG_VERSION = '6'
+            
 
 
