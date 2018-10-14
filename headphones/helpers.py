@@ -825,9 +825,11 @@ def smartMove(src, dest, delete=True):
 
     source_dir = os.path.dirname(src)
     filename = os.path.basename(src)
+    source_path = os.path.join(source_dir, filename)
+    dest_path = os.path.join(dest, filename)
 
-    if os.path.isfile(os.path.join(dest, filename)):
-        logger.info('Destination file exists: %s', os.path.join(dest, filename))
+    if os.path.isfile(dest_path):
+        logger.info('Destination file exists: %s', dest_path)
         title = os.path.splitext(filename)[0]
         ext = os.path.splitext(filename)[1]
         i = 1
@@ -845,15 +847,29 @@ def smartMove(src, dest, delete=True):
                                 src.decode(headphones.SYS_ENCODING, 'replace'), e)
                 break
 
-    try:
-        if delete:
-            shutil.move(os.path.join(source_dir, filename), os.path.join(dest, filename))
-        else:
-            shutil.copy(os.path.join(source_dir, filename), os.path.join(dest, filename))
+    if delete:
+        try:
+            logger.info('Moving "%s" to "%s"', source_path, dest_path)
+            shutil.move(source_path, dest_path)
+        except Exception as e:
+            exists = os.path.exists(dest_path)
+            if exists and os.path.getsize(source_path) == os.path.getsize(dest_path):
+                logger.warn('Successfully moved file "%s", but something went wrong: %s',
+                    filename.decode(headphones.SYS_ENCODING, 'replace'), e)
+                os.unlink(source_path)
+            else:
+                # remove faultly copied file
+                if exists:
+                    os.unlink(dest_path)
+                raise
+    else:
+        try:
+            logger.info('Copying "%s" to "%s"', source_path, dest_path)
+            shutil.copy(source_path, dest_path)
             return True
-    except Exception as e:
-        logger.warn('Error moving file %s: %s', filename.decode(headphones.SYS_ENCODING, 'replace'),
-                    e)
+        except Exception as e:
+            logger.warn('Error copying file %s: %s', filename.decode(headphones.SYS_ENCODING, 'replace'),
+                        e)
 
 
 def walk_directory(basedir, followlinks=True):
