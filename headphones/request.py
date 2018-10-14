@@ -93,7 +93,7 @@ def request_response(url, method="get", auto_raise=True,
         if kwargs["verify"]:
             logger.error(
                 "Unable to connect to remote host because of a SSL error. "
-                "It is likely that your system cannot verify the validity"
+                "It is likely that your system cannot verify the validity "
                 "of the certificate. The remote certificate is either "
                 "self-signed, or the remote server uses SNI. See the wiki for "
                 "more information on this topic.")
