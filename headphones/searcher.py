@@ -469,10 +469,6 @@ def sort_search_results(resultlist, album, new, albumlength):
 
                 finallist = sorted(newlist, key=lambda title: (-title[5], title[6]))
 
-                # keep number of seeders order for Orpheus.network
-                if result[3] == 'Orpheus.network':
-                    finallist = resultlist
-
                 if not len(finallist) and len(
                         flac_list) and headphones.CONFIG.PREFERRED_BITRATE_ALLOW_LOSSLESS:
                     logger.info(
@@ -490,6 +486,10 @@ def sort_search_results(resultlist, album, new, albumlength):
     else:
 
         finallist = sorted(resultlist, key=lambda title: (title[5], int(title[1])), reverse=True)
+		
+		# keep number of seeders order for Orpheus.network
+        if result[3] == 'Orpheus.network':
+			finallist = resultlist
 
     if not len(finallist):
         logger.info('No appropriate matches found for %s - %s', album['ArtistName'],
@@ -1929,8 +1929,7 @@ def preprocess(resultlist):
             elif result[3] == 'Redacted':
                 headers['User-Agent'] = 'Headphones'
             elif result[3] == "The Pirate Bay" or result[3] == "Old Pirate Bay":
-                headers[
-                    'User-Agent'] = 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2243.2 Safari/537.36'
+                headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2243.2 Safari/537.36'
 
             # Jackett sometimes redirects to a magnet URI
             if result[3].startswith('Jackett_') or 'torznab' in result[3].lower():
