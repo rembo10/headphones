@@ -486,10 +486,10 @@ def sort_search_results(resultlist, album, new, albumlength):
     else:
 
         finallist = sorted(resultlist, key=lambda title: (title[5], int(title[1])), reverse=True)
-		
-		# keep number of seeders order for Orpheus.network
+        
+        # keep number of seeders order for Orpheus.network
         if result[3] == 'Orpheus.network':
-			finallist = resultlist
+            finallist = resultlist
 
     if not len(finallist):
         logger.info('No appropriate matches found for %s - %s', album['ArtistName'],
