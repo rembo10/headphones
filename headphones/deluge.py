@@ -83,7 +83,7 @@ def addTorrent(link, data=None, name=None):
 
         result = {}
         retid = False
-        url_apollo = ['https://apollo.rip/', 'http://apollo.rip/']
+        url_orpheus = ['https://orpheus.network/', 'http://orpheus.network/']
         url_waffles = ['https://waffles.ch/', 'http://waffles.ch/']
 
         if link.lower().startswith('magnet:'):
@@ -97,7 +97,7 @@ def addTorrent(link, data=None, name=None):
             if link.lower().startswith(tuple(url_waffles)):
                 if 'rss=' not in link:
                     link = link + '&rss=1'
-            if link.lower().startswith(tuple(url_apollo)):
+            if link.lower().startswith(tuple(url_orpheus)):
                 logger.debug('Deluge: Using different User-Agent for this site')
                 user_agent = 'Headphones'
                 # This method will make Deluge download the file

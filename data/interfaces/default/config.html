@@ -647,24 +647,24 @@
 
                                 <fieldset>
                                     <div class="row checkbox left">
-                                        <input id="use_apollo" type="checkbox" class="bigcheck" name="use_apollo" value="1" ${config['use_apollo']} /><label for="use_apollo"><span class="option">Apollo.rip</span></label>
+                                        <input id="use_orpheus" type="checkbox" class="bigcheck" name="use_orpheus" value="1" ${config['use_orpheus']} /><label for="use_orpheus"><span class="option">Orpheus.network</span></label>
                                     </div>
                                     <div class="config">
                                         <div class="row">
                                             <label>Username</label>
-                                            <input type="text" name="apollo_username" value="${config['apollo_username']}" size="36">
+                                            <input type="text" name="orpheus_username" value="${config['orpheus_username']}" size="36">
                                         </div>
                                         <div class="row">
                                             <label>Password</label>
-                                            <input type="password" name="apollo_password" value="${config['apollo_password'] | h}" size="36">
+                                            <input type="password" name="orpheus_password" value="${config['orpheus_password'] | h}" size="36">
                                         </div>
                                         <div class="row">
                                             <label>URL</label>
-                                            <input type="text" name="apollo_url" value="${config['apollo_url']}" size="36">
+                                            <input type="text" name="orpheus_url" value="${config['orpheus_url']}" size="36">
                                         </div>
                                         <div class="row">
                                             <label>Seed Ratio</label>
-                                            <input type="text" class="override-float" name="apollo_ratio" value="${config['apollo_ratio']}" size="10" title="Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove torrent when post processed and finished seeding">
+                                            <input type="text" class="override-float" name="orpheus_ratio" value="${config['orpheus_ratio']}" size="10" title="Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove torrent when post processed and finished seeding">
                                         </div>
                                     </div>
                                 </fieldset>
@@ -2563,7 +2563,7 @@
                 initConfigCheckbox("#use_mininova");
                 initConfigCheckbox("#use_waffles");
                 initConfigCheckbox("#use_rutracker");
-                initConfigCheckbox("#use_apollo");
+                initConfigCheckbox("#use_orpheus");
                 initConfigCheckbox("#use_redacted");
                 initConfigCheckbox("#api_enabled");
                 initConfigCheckbox("#enable_https");
