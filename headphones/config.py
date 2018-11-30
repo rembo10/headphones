@@ -309,6 +309,7 @@ _CONFIG_DEFINITIONS = {
     'REDACTED_USERNAME': (str, 'Redacted', ''),
     'REDACTED_PASSWORD': (str, 'Redacted', ''),
     'REDACTED_RATIO': (str, 'Redacted', ''),
+    'REDACTED_USE_FLTOKEN': (int, 'Redacted', 0),
     'XBMC_ENABLED': (int, 'XBMC', 0),
     'XBMC_HOST': (str, 'XBMC', ''),
     'XBMC_NOTIFY': (int, 'XBMC', 0),

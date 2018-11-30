@@ -1691,9 +1691,10 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
             for torrent in match_torrents:
                 if not torrent.file_path:
                     torrent.group.update_group_data()  # will load the file_path for the individual torrents
+                use_token = headphones.CONFIG.REDACTED_USE_FLTOKEN and torrent.can_use_token
                 resultlist.append((torrent.file_path,
                                    torrent.size,
-                                   redobj.generate_torrent_link(torrent.id),
+                                   redobj.generate_torrent_link(torrent.id, use_token),
                                    provider,
                                    'torrent', True))
 
@@ -1914,8 +1915,9 @@ def preprocess(resultlist):
             if result[3] == 'rutracker.org':
                 return ruobj.get_torrent_data(result[2]), result
 
-            # Get out of here if we're using Transmission
-            if headphones.CONFIG.TORRENT_DOWNLOADER == 1:  # if not a magnet link still need the .torrent to generate hash... uTorrent support labeling
+            # Get out of here if we're using Transmission or Deluge
+            # if not a magnet link still need the .torrent to generate hash... uTorrent support labeling
+            if headphones.CONFIG.TORRENT_DOWNLOADER in [1, 3]:
                 return True, result
             # Get out of here if it's a magnet link
             if result[2].lower().startswith("magnet:"):
