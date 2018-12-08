@@ -45,8 +45,8 @@ TORRENT_TO_MAGNET_SERVICES = [
     'http://itorrents.org/torrent/%s.torrent',
 ]
 
-# Persistent Apollo.rip API object
-apolloobj = None
+# Persistent Orpheus.network API object
+orpheusobj = None
 ruobj = None
 # Persistent RED API object
 redobj = None
@@ -160,8 +160,8 @@ def get_seed_ratio(provider):
 
     if provider == 'rutracker.org':
         seed_ratio = headphones.CONFIG.RUTRACKER_RATIO
-    elif provider == 'Apollo.rip':
-        seed_ratio = headphones.CONFIG.APOLLO_RATIO
+    elif provider == 'Orpheus.network':
+        seed_ratio = headphones.CONFIG.ORPHEUS_RATIO
     elif provider == 'Redacted':
         seed_ratio = headphones.CONFIG.REDACTED_RATIO
     elif provider == 'The Pirate Bay':
@@ -280,7 +280,7 @@ def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
                          headphones.CONFIG.MININOVA or
                          headphones.CONFIG.WAFFLES or
                          headphones.CONFIG.RUTRACKER or
-                         headphones.CONFIG.APOLLO or
+                         headphones.CONFIG.ORPHEUS or
                          headphones.CONFIG.REDACTED)
 
     results = []
@@ -440,7 +440,7 @@ def sort_search_results(resultlist, album, new, albumlength):
 
     resultlist = temp_list
 
-    if headphones.CONFIG.PREFERRED_QUALITY == 2 and headphones.CONFIG.PREFERRED_BITRATE and result[3] != 'Apollo.rip':
+    if headphones.CONFIG.PREFERRED_QUALITY == 2 and headphones.CONFIG.PREFERRED_BITRATE and result[3] != 'Orpheus.network':
 
         try:
             targetsize = albumlength / 1000 * int(headphones.CONFIG.PREFERRED_BITRATE) * 128
@@ -469,10 +469,6 @@ def sort_search_results(resultlist, album, new, albumlength):
 
                 finallist = sorted(newlist, key=lambda title: (-title[5], title[6]))
 
-                # keep number of seeders order for Apollo.rip
-                if result[3] == 'Apollo.rip':
-                    finallist = resultlist
-
                 if not len(finallist) and len(
                         flac_list) and headphones.CONFIG.PREFERRED_BITRATE_ALLOW_LOSSLESS:
                     logger.info(
@@ -490,6 +486,10 @@ def sort_search_results(resultlist, album, new, albumlength):
     else:
 
         finallist = sorted(resultlist, key=lambda title: (title[5], int(title[1])), reverse=True)
+
+        # keep number of seeders order for Orpheus.network
+        if result[3] == 'Orpheus.network':
+            finallist = resultlist
 
     if not len(finallist):
         logger.info('No appropriate matches found for %s - %s', album['ArtistName'],
@@ -1202,7 +1202,7 @@ def verifyresult(title, artistterm, term, lossless):
 
 def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                   choose_specific_download=False):
-    global apolloobj  # persistent apollo.rip api object to reduce number of login attempts
+    global orpheusobj  # persistent orpheus.network api object to reduce number of login attempts
     global redobj  # persistent redacted api object to reduce number of login attempts
     global ruobj  # and rutracker
 
@@ -1467,9 +1467,9 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                 if rulist:
                     resultlist.extend(rulist)
 
-    if headphones.CONFIG.APOLLO:
-        provider = "Apollo.rip"
-        providerurl = "http://apollo.rip/"
+    if headphones.CONFIG.ORPHEUS:
+        provider = "Orpheus.network"
+        providerurl = "http://orpheus.network/"
 
         bitrate = None
         bitrate_string = bitrate
@@ -1492,7 +1492,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                         bitrate_string = encoding_string
                 if bitrate_string not in gazelleencoding.ALL_ENCODINGS:
                     logger.info(
-                        u"Your preferred bitrate is not one of the available Apollo.rip filters, so not using it as a search parameter.")
+                        u"Your preferred bitrate is not one of the available Orpheus.network filters, so not using it as a search parameter.")
             maxsize = 10000000000
         elif headphones.CONFIG.PREFERRED_QUALITY == 1 or allow_lossless:  # Highest quality including lossless
             search_formats = [gazelleformat.FLAC, gazelleformat.MP3]
@@ -1501,19 +1501,19 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
             search_formats = [gazelleformat.MP3]
             maxsize = 300000000
 
-        if not apolloobj or not apolloobj.logged_in():
+        if not orpheusobj or not orpheusobj.logged_in():
             try:
-                logger.info(u"Attempting to log in to Apollo.rip...")
-                apolloobj = gazelleapi.GazelleAPI(headphones.CONFIG.APOLLO_USERNAME,
-                                                headphones.CONFIG.APOLLO_PASSWORD,
-                                                headphones.CONFIG.APOLLO_URL)
-                apolloobj._login()
+                logger.info(u"Attempting to log in to Orpheus.network...")
+                orpheusobj = gazelleapi.GazelleAPI(headphones.CONFIG.ORPHEUS_USERNAME,
+                                                headphones.CONFIG.ORPHEUS_PASSWORD,
+                                                headphones.CONFIG.ORPHEUS_URL)
+                orpheusobj._login()
             except Exception as e:
-                apolloobj = None
-                logger.error(u"Apollo.rip credentials incorrect or site is down. Error: %s %s" % (
+                orpheusobj = None
+                logger.error(u"Orpheus.network credentials incorrect or site is down. Error: %s %s" % (
                     e.__class__.__name__, str(e)))
 
-        if apolloobj and apolloobj.logged_in():
+        if orpheusobj and orpheusobj.logged_in():
             logger.info(u"Searching %s..." % provider)
             all_torrents = []
 
@@ -1551,10 +1551,10 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
             for search_format in search_formats:
                 if usersearchterm:
                     all_torrents.extend(
-                        apolloobj.search_torrents(searchstr=usersearchterm, format=search_format,
+                        orpheusobj.search_torrents(searchstr=usersearchterm, format=search_format,
                                                 encoding=bitrate_string, releasetype=album_type)['results'])
                 else:
-                    all_torrents.extend(apolloobj.search_torrents(artistname=semi_clean_artist_term,
+                    all_torrents.extend(orpheusobj.search_torrents(artistname=semi_clean_artist_term,
                                                                 groupname=semi_clean_album_term,
                                                                 format=search_format,
                                                                 encoding=bitrate_string,
@@ -1593,7 +1593,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                     torrent.group.update_group_data()  # will load the file_path for the individual torrents
                 resultlist.append((torrent.file_path,
                                    torrent.size,
-                                   apolloobj.generate_torrent_link(torrent.id),
+                                   orpheusobj.generate_torrent_link(torrent.id),
                                    provider,
                                    'torrent', True))
 
@@ -1897,7 +1897,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
     results = [result for result in resultlist if verifyresult(result[0], artistterm, term, losslessOnly)]
 
     # Additional filtering for size etc
-    if results and not choose_specific_download and result[3] != 'Apollo.rip':
+    if results and not choose_specific_download and result[3] != 'Orpheus.network':
         results = more_filtering(results, album, albumlength, new)
 
     return results
@@ -1924,13 +1924,12 @@ def preprocess(resultlist):
             # Download the torrent file
             headers = {}
 
-            if result[3] == 'Apollo.rip':
+            if result[3] == 'Orpheus.network':
                 headers['User-Agent'] = 'Headphones'
             elif result[3] == 'Redacted':
                 headers['User-Agent'] = 'Headphones'
             elif result[3] == "The Pirate Bay" or result[3] == "Old Pirate Bay":
-                headers[
-                    'User-Agent'] = 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2243.2 Safari/537.36'
+                headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2243.2 Safari/537.36'
 
             # Jackett sometimes redirects to a magnet URI
             if result[3].startswith('Jackett_') or 'torznab' in result[3].lower():
