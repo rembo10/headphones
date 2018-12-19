@@ -265,9 +265,13 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
             if artist_name != prev_artist_name:
                 prev_artist_name = artist_name
                 artistid = None
-                artist_lookup = '"' + artist_name + '"'
 
-                dbartist = myDB.select('SELECT DISTINCT ArtistID, ArtistName FROM artists WHERE ArtistName LIKE ' + artist_lookup + '')
+                artist_lookup = "\"" + artist_name.replace("\"", "\"\"") + "\""
+
+                try:
+                    dbartist = myDB.select('SELECT DISTINCT ArtistID, ArtistName FROM artists WHERE ArtistName LIKE ' + artist_lookup + '')
+                except:
+                    dbartist = None
                 if not dbartist:
                     dbartist = myDB.select('SELECT DISTINCT ArtistID, ArtistName FROM tracks WHERE CleanName = ?', [clean_name])
                     if not dbartist:
@@ -361,8 +365,12 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
         for artist in unique_artists:
 
             # check if artist is already in the db
-            artist_lookup = '"' + artist + '"'
-            dbartist = myDB.select('SELECT DISTINCT ArtistID, ArtistName FROM artists WHERE ArtistName LIKE ' + artist_lookup + '')
+            artist_lookup = "\"" + artist.replace("\"", "\"\"") + "\""
+
+            try:
+                dbartist = myDB.select('SELECT DISTINCT ArtistID, ArtistName FROM artists WHERE ArtistName LIKE ' + artist_lookup + '')
+            except:
+                dbartist = None
             if not dbartist:
                 clean_artist = helpers.clean_name(artist)
                 if clean_artist:
@@ -427,7 +435,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
         # If we're appending a new album to the database, update the artists total track counts
         logger.info('Updating artist track counts')
 
-        artist_lookup = '"' + ArtistName + '"'
+        artist_lookup = "\"" + ArtistName.replace("\"", "\"\"") + "\""
         havetracks = len(
             myDB.select('SELECT ArtistID FROM tracks WHERE ArtistID = ? AND Location IS NOT NULL',
                         [ArtistID])) + len(myDB.select(
