@@ -437,7 +437,8 @@ def sort_search_results(resultlist, album, new, albumlength):
 
     resultlist = temp_list
 
-    if headphones.CONFIG.PREFERRED_QUALITY == 2 and headphones.CONFIG.PREFERRED_BITRATE and result[3] != 'Orpheus.network':
+    # if headphones.CONFIG.PREFERRED_QUALITY == 2 and headphones.CONFIG.PREFERRED_BITRATE and result[3] != 'Orpheus.network':
+    if headphones.CONFIG.PREFERRED_QUALITY == 2 and headphones.CONFIG.PREFERRED_BITRATE:
 
         try:
             targetsize = albumlength / 1000 * int(headphones.CONFIG.PREFERRED_BITRATE) * 128
@@ -485,8 +486,8 @@ def sort_search_results(resultlist, album, new, albumlength):
         finallist = sorted(resultlist, key=lambda title: (title[5], int(title[1])), reverse=True)
 
         # keep number of seeders order for Orpheus.network
-        if result[3] == 'Orpheus.network':
-            finallist = resultlist
+        # if result[3] == 'Orpheus.network':
+        #    finallist = resultlist
 
     if not len(finallist):
         logger.info('No appropriate matches found for %s - %s', album['ArtistName'],
@@ -1737,7 +1738,6 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                 for item in rows:
                     try:
                         url = None
-                        rightformat = True
                         title = ''.join(item.find("a", {"class": "detLink"}))
                         seeds = int(''.join(item.find("td", {"align": "right"})))
 
@@ -1806,7 +1806,6 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                     try:
                         links = item.select("td.title-row a")
 
-                        rightformat = True
                         title = links[1].text
                         seeds = int(item.select("td.seeders-row")[0].text)
                         url = links[0][
@@ -1834,7 +1833,8 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
     results = [result for result in resultlist if verifyresult(result[0], artistterm, term, losslessOnly)]
 
     # Additional filtering for size etc
-    if results and not choose_specific_download and result[3] != 'Orpheus.network':
+    # if results and not choose_specific_download and result[3] != 'Orpheus.network':
+    if results and not choose_specific_download:
         results = more_filtering(results, album, albumlength, new)
 
     return results
