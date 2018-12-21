@@ -170,8 +170,6 @@ def get_seed_ratio(provider):
         seed_ratio = headphones.CONFIG.OLDPIRATEBAY_RATIO
     elif provider == 'Waffles.ch':
         seed_ratio = headphones.CONFIG.WAFFLES_RATIO
-    elif provider == 'Mininova':
-        seed_ratio = headphones.CONFIG.MININOVA_RATIO
     elif provider.startswith("Jackett_"):
         provider = provider.split("Jackett_")[1]
         if provider in headphones.CONFIG.TORZNAB_HOST:
@@ -277,7 +275,6 @@ def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
     TORRENT_PROVIDERS = (headphones.CONFIG.TORZNAB or
                          headphones.CONFIG.PIRATEBAY or
                          headphones.CONFIG.OLDPIRATEBAY or
-                         headphones.CONFIG.MININOVA or
                          headphones.CONFIG.WAFFLES or
                          headphones.CONFIG.RUTRACKER or
                          headphones.CONFIG.ORPHEUS or
@@ -1830,67 +1827,6 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                     except Exception as e:
                         logger.error(
                             u"An unknown error occurred in the Old Pirate Bay parser: %s" % e)
-
-    # Mininova
-    if headphones.CONFIG.MININOVA:
-        provider = "Mininova"
-        providerurl = fix_url("http://www.mininova.org/rss/" + term + "/5")
-
-        if headphones.CONFIG.PREFERRED_QUALITY == 3 or losslessOnly:
-            # categories = "7"        #music
-            format = "2"  # flac
-            maxsize = 10000000000
-        elif headphones.CONFIG.PREFERRED_QUALITY == 1 or allow_lossless:
-            # categories = "7"        #music
-            format = "10"  # mp3+flac
-            maxsize = 10000000000
-        else:
-            # categories = "7"        #music
-            format = "8"  # mp3
-            maxsize = 300000000
-
-        # Requesting content
-        logger.info('Parsing results from Mininova')
-
-        data = request.request_feed(
-            url=providerurl,
-            timeout=20
-        )
-
-        # Process feed
-        if data:
-            if not len(data.entries):
-                logger.info(u"No results found from %s for %s" % (provider, term))
-            else:
-                for item in data.entries:
-                    try:
-                        rightformat = True
-                        title = item.title
-                        sxstart = item.description.find("Ratio: ") + 7
-                        seeds = ""
-                        while item.description[sxstart:sxstart + 1] != " ":
-                            seeds = seeds + item.description[sxstart:sxstart + 1]
-                            sxstart = sxstart + 1
-                        url = item.links[1]['url']
-                        size = int(item.links[1]['length'])
-                        if format == "2":
-                            torrent = request.request_content(url)
-                            if not torrent or (int(torrent.find(".mp3")) > 0 and int(
-                                    torrent.find(".flac")) < 1):
-                                rightformat = False
-
-                        if rightformat and size < maxsize and minimumseeders < seeds:
-                            match = True
-                            logger.info('Found %s. Size: %s' % (title, helpers.bytes_to_mb(size)))
-                        else:
-                            match = False
-                            logger.info('%s is larger than the maxsize, the wrong format or has too little seeders'
-                                        ' for this category, skipping. (Size: %i bytes, Seeders: %i, Format: %s)' % (
-                                            title, size, int(seeds), rightformat))
-
-                        resultlist.append((title, size, url, provider, 'torrent', match))
-                    except Exception as e:
-                        logger.exception("Unhandled exception in Mininova Parser")
 
     # attempt to verify that this isn't a substring result
     # when looking for "Foo - Foo" we don't want "Foobar"
