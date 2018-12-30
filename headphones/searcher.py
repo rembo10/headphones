@@ -39,10 +39,9 @@ from bencode import bencode, bdecode
 
 # Magnet to torrent services, for Black hole. Stolen from CouchPotato.
 TORRENT_TO_MAGNET_SERVICES = [
-    # 'https://zoink.it/torrent/%s.torrent',
-    # 'http://torrage.com/torrent/%s.torrent',
-    # 'https://torcache.net/torrent/%s.torrent',
     'http://itorrents.org/torrent/%s.torrent',
+    'https://cache.torrentgalaxy.org/get/%s',
+    'https://www.seedpeer.me/torrent/%s'
 ]
 
 # Persistent Orpheus.network API object
@@ -1847,20 +1846,33 @@ def preprocess(resultlist):
     for result in resultlist:
         if result[4] == 'torrent':
 
+            headers = {}
+
             # rutracker always needs the torrent data
             if result[3] == 'rutracker.org':
                 return ruobj.get_torrent_data(result[2]), result
+
+            # Jackett sometimes redirects to a magnet URI
+            jackett_content = None
+            if result[3].startswith('Jackett_') or 'torznab' in result[3].lower():
+                r = request.request_response(url=result[2], headers=headers, allow_redirects=False)
+                magnet = r.headers.get('Location')
+                if magnet and magnet.startswith('magnet:'):
+                    result = (result[0], result[1], magnet, result[3], "magnet", result[5])
+                    return "d10:magnet-uri%d:%se" % (len(magnet), magnet), result
+                else:
+                    jackett_content = r.content
 
             # Get out of here if we're using Transmission or Deluge
             # if not a magnet link still need the .torrent to generate hash... uTorrent support labeling
             if headphones.CONFIG.TORRENT_DOWNLOADER in [1, 3]:
                 return True, result
+
             # Get out of here if it's a magnet link
             if result[2].lower().startswith("magnet:"):
                 return True, result
 
             # Download the torrent file
-            headers = {}
 
             if result[3] == 'Orpheus.network':
                 headers['User-Agent'] = 'Headphones'
@@ -1868,16 +1880,8 @@ def preprocess(resultlist):
                 headers['User-Agent'] = 'Headphones'
             elif result[3] == "The Pirate Bay" or result[3] == "Old Pirate Bay":
                 headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2243.2 Safari/537.36'
-
-            # Jackett sometimes redirects to a magnet URI
-            if result[3].startswith('Jackett_') or 'torznab' in result[3].lower():
-                r = request.request_response(url=result[2], headers=headers, allow_redirects=False)
-                magnet_link = r.headers.get('Location')
-                if magnet_link and magnet_link.startswith('magnet:'):
-                    new_result = (result[0], result[1], magnet_link, result[3], "magnet", result[5])
-                    return "d10:magnet-uri%d:%se" % (len(magnet_link), magnet_link), new_result
-                else:
-                    return r.content, result
+            elif jackett_content:
+                return jackett_content, result
 
             return request.request_content(url=result[2], headers=headers), result
 
