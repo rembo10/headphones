@@ -1852,16 +1852,20 @@ def preprocess(resultlist):
             if result[3] == 'rutracker.org':
                 return ruobj.get_torrent_data(result[2]), result
 
-            # Jackett sometimes redirects to a magnet URI
+            # Jackett sometimes redirects
             jackett_content = None
             if result[3].startswith('Jackett_') or 'torznab' in result[3].lower():
                 r = request.request_response(url=result[2], headers=headers, allow_redirects=False)
-                magnet = r.headers.get('Location')
-                if magnet and magnet.startswith('magnet:'):
-                    result = (result[0], result[1], magnet, result[3], "magnet", result[5])
-                    return "d10:magnet-uri%d:%se" % (len(magnet), magnet), result
-                else:
+                if r:
                     jackett_content = r.content
+                    link = r.headers.get('Location')
+                    if link and link != result[2]:
+                        if link.startswith('magnet:'):
+                            result = (result[0], result[1], link, result[3], "magnet", result[5])
+                            return "d10:magnet-uri%d:%se" % (len(link), link), result
+                        else:
+                            result = (result[0], result[1], link, result[3], result[4], result[5])
+                            return True, result
 
             # Get out of here if we're using Transmission or Deluge
             # if not a magnet link still need the .torrent to generate hash... uTorrent support labeling
