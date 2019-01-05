@@ -443,10 +443,9 @@ def dbcheck():
     # General speed up
     c.execute('CREATE INDEX IF NOT EXISTS artist_artistsortname ON artists(ArtistSortName COLLATE NOCASE ASC)')
 
-    exists = c.execute('SELECT * FROM pragma_index_info("have_matched_artist_album")').fetchone()
-    if not exists:
-        c.execute('CREATE INDEX have_matched_artist_album ON have(Matched ASC, ArtistName COLLATE NOCASE ASC, AlbumTitle COLLATE NOCASE ASC)')
-        c.execute('DROP INDEX IF EXISTS have_matched')
+    c.execute(
+        'CREATE INDEX IF NOT EXISTS have_matched_artist_album ON have(Matched ASC, ArtistName COLLATE NOCASE ASC, AlbumTitle COLLATE NOCASE ASC)')
+    c.execute('DROP INDEX IF EXISTS have_matched')
 
     try:
         c.execute('SELECT IncludeExtras from artists')
