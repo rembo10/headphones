@@ -444,7 +444,7 @@ def dbcheck():
     c.execute('CREATE INDEX IF NOT EXISTS artist_artistsortname ON artists(ArtistSortName COLLATE NOCASE ASC)')
 
     c.execute(
-        'CREATE INDEX IF NOT EXISTS have_matched_artist_album ON have(Matched ASC, ArtistName COLLATE NOCASE ASC, AlbumTitle COLLATE NOCASE ASC)')
+        """CREATE INDEX IF NOT EXISTS have_matched_artist_album ON have(Matched ASC, ArtistName COLLATE NOCASE ASC, AlbumTitle COLLATE NOCASE ASC)""")
     c.execute('DROP INDEX IF EXISTS have_matched')
 
     try:
