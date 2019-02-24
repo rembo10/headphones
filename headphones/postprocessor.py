@@ -46,10 +46,12 @@ def checkFolder():
             if album['FolderName']:
                 folder_name = album['FolderName']
                 single = False
+                # If not a torrent, use the default download directory
                 if album['Kind'] == 'nzb':
                     download_dir = headphones.CONFIG.DOWNLOAD_DIR
                 else:
-                    if headphones.CONFIG.DELUGE_DONE_DIRECTORY and headphones.CONFIG.TORRENT_DOWNLOADER == 3:
+                    # If Deluge 'Move after done' directory set and Deluge is in use
+                    if headphones.CONFIG.DELUGE_DONE_DIRECTORY and headphones.CONFIG.TORRENT_DOWNLOADER == 3 and headphones.CONFIG.DELUGE_FOREIGN != 1:
                         download_dir = headphones.CONFIG.DELUGE_DONE_DIRECTORY
                     else:
                         download_dir = headphones.CONFIG.DOWNLOAD_TORRENT_DIR
