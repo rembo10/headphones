@@ -50,7 +50,7 @@ def checkFolder():
                 if album['Kind'] == 'nzb':
                     download_dir = headphones.CONFIG.DOWNLOAD_DIR
                 else:
-                    # If Deluge 'Move after done' directory set and Deluge is in use
+                    # If Deluge 'Move after done' directory set, Deluge is in use and Deluge is not remote
                     if headphones.CONFIG.DELUGE_DONE_DIRECTORY and headphones.CONFIG.TORRENT_DOWNLOADER == 3 and headphones.CONFIG.DELUGE_FOREIGN != 1:
                         download_dir = headphones.CONFIG.DELUGE_DONE_DIRECTORY
                     else:
