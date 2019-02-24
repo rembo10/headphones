@@ -76,6 +76,7 @@ _CONFIG_DEFINITIONS = {
     'DELETE_LOSSLESS_FILES': (int, 'General', 1),
     'DELUGE_HOST': (str, 'Deluge', ''),
     'DELUGE_CERT': (str, 'Deluge', ''),
+    'DELUGE_FOREIGN': (int, 'Deluge', 0),
     'DELUGE_PASSWORD': (str, 'Deluge', ''),
     'DELUGE_LABEL': (str, 'Deluge', ''),
     'DELUGE_DONE_DIRECTORY': (str, 'Deluge', ''),

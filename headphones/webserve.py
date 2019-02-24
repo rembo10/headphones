@@ -1184,6 +1184,7 @@ class WebInterface(object):
             "transmission_password": headphones.CONFIG.TRANSMISSION_PASSWORD,
             "deluge_host": headphones.CONFIG.DELUGE_HOST,
             "deluge_cert": headphones.CONFIG.DELUGE_CERT,
+            "deluge_foreign": checked(headphones.CONFIG.DELUGE_FOREIGN),
             "deluge_password": headphones.CONFIG.DELUGE_PASSWORD,
             "deluge_label": headphones.CONFIG.DELUGE_LABEL,
             "deluge_done_directory": headphones.CONFIG.DELUGE_DONE_DIRECTORY,
@@ -1484,7 +1485,7 @@ class WebInterface(object):
             "songkick_enabled", "songkick_filter_enabled",
             "mpc_enabled", "email_enabled", "email_ssl", "email_tls", "email_onsnatch",
             "customauth", "idtag", "deluge_paused",
-            "join_enabled", "join_onsnatch"
+            "join_enabled", "join_onsnatch", "deluge_foreign"
         ]
         for checked_config in checked_configs:
             if checked_config not in kwargs:
