@@ -50,6 +50,7 @@ ruobj = None
 # Persistent RED API object
 redobj = None
 
+
 def fix_url(s, charset="utf-8"):
     """
     Fix the URL so it is proper formatted and encoded.
@@ -1205,7 +1206,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
     reldate = album['ReleaseDate']
 
     year = get_year_from_release_date(reldate)
-    
+
     # Specify release types to filter by - used by Orpheus and Redacted
     # Could be added to any Gazelle-based music tracker
     album_type = ""
