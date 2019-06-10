@@ -483,15 +483,15 @@ def sort_search_results(resultlist, album, new, albumlength):
 
         finallist = sorted(resultlist, key=lambda title: (title[5], int(title[1])), reverse=True)
 
-
     if not len(finallist):
         logger.info('No appropriate matches found for %s - %s', album['ArtistName'],
                     album['AlbumTitle'])
         return None
 
-    if (result[3] == 'Orpheus.network') or (result[3] == 'Redacted'):
-        logger.info('NOTICE: setting finalist for proper order')
-        finallist = resultlist
+    if result[3]:
+        if (result[3] == 'Orpheus.network') or (result[3] == 'Redacted'):
+            logger.info('Keeping torrents ordered by seeders for %s' % result[3])
+            finallist = resultlist
 
     return finallist
 
