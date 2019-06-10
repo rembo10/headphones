@@ -18,7 +18,10 @@ import os
 import headphones
 from headphones import db, helpers, logger, lastfm, request, mb
 
-LASTFM_API_KEY = "690e1ed3bc00bc91804cd8f7fe5ed6d4"
+if headphones.CONFIG.LASTFM_PERSONAL_KEY:
+    LASTFM_API_KEY = headphones.CONFIG.LASTFM_PERSONAL_KEY
+else:
+    LASTFM_API_KEY = "690e1ed3bc00bc91804cd8f7fe5ed6d4"
 
 
 class Cache(object):
