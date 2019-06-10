@@ -483,7 +483,6 @@ def sort_search_results(resultlist, album, new, albumlength):
 
         finallist = sorted(resultlist, key=lambda title: (title[5], int(title[1])), reverse=True)
 
-
     if not len(finallist):
         logger.info('No appropriate matches found for %s - %s', album['ArtistName'],
                     album['AlbumTitle'])
