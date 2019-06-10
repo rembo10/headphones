@@ -28,7 +28,6 @@ API_KEY = "395e6ec6bb557382fc41fde867bce66f"
 # Required for API request limit
 lastfm_lock = headphones.lock.TimedLock(REQUEST_LIMIT)
 
-
 def request_lastfm(method, **kwargs):
     """
     Call a Last.FM API method. Automatically sets the method and API key. Method
@@ -37,7 +36,12 @@ def request_lastfm(method, **kwargs):
     By default, this method will request the JSON format, since it is more
     lightweight than XML.
     """
-
+    
+    if headphones.CONFIG.LASTFM_PERSONAL_KEY:
+        API_KEY = headphones.CONFIG.LASTFM_PERSONAL_KEY
+    else:
+        API_KEY = "395e6ec6bb557382fc41fde867bce66f"
+    
     # Prepare request
     kwargs["method"] = method
     kwargs.setdefault("api_key", API_KEY)
@@ -45,6 +49,7 @@ def request_lastfm(method, **kwargs):
 
     # Send request
     logger.debug("Calling Last.FM method: %s", method)
+    logger.debug("API Key is: %s" % API_KEY)
     logger.debug("Last.FM call parameters: %s", kwargs)
 
     data = request.request_json(ENTRY_POINT, timeout=TIMEOUT, params=kwargs, lock=lastfm_lock)
