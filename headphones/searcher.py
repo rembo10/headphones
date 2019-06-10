@@ -490,7 +490,7 @@ def sort_search_results(resultlist, album, new, albumlength):
 
     if result[3]:
         if (result[3] == 'Orpheus.network') or (result[3] == 'Redacted'):
-            logger.info('Keeping torrent ordered by seeders for %s' % result[3])
+            logger.info('Keeping torrents ordered by seeders for %s' % result[3])
             finallist = resultlist
 
     return finallist
