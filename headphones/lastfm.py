@@ -49,7 +49,7 @@ def request_lastfm(method, **kwargs):
 
     # Send request
     logger.debug("Calling Last.FM method: %s", method)
-    logger.debug("API Key is: %s" % API_KEY)
+    logger.debug("Last.FM API Key is: %s" % API_KEY)
     logger.debug("Last.FM call parameters: %s", kwargs)
 
     data = request.request_json(ENTRY_POINT, timeout=TIMEOUT, params=kwargs, lock=lastfm_lock)

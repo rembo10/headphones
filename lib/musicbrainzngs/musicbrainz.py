@@ -21,6 +21,7 @@ from musicbrainzngs import util
 from musicbrainzngs import compat
 
 import headphones
+from headphones import logger
 
 # headphones
 import base64
@@ -507,6 +508,7 @@ def _safe_read(opener, req, body=None, max_retries=8, retry_delay_delta=2.0):
             return f.read()
 
         except compat.HTTPError as exc:
+            logger.error("Musicbrainz request error: HTTP code %s" % exc.code)
             if exc.code in (400, 404, 411):
                 # Bad request, not found, etc.
                 raise ResponseError(cause=exc)
@@ -689,6 +691,7 @@ def _mb_request(path, method='GET', auth_required=AUTH_NO,
     # Make request.
     req = _MusicbrainzHttpRequest(method, url, data)
     req.add_header('User-Agent', _useragent)
+    logger.debug("Musicbrainz request url: %s" % url)
 
     # Add headphones credentials
     if mb_auth:
@@ -696,6 +699,7 @@ def _mb_request(path, method='GET', auth_required=AUTH_NO,
         req.add_header("Authorization", "Basic %s" % base64string)
 
     _log.debug("requesting with UA %s" % _useragent)
+    logger.debug("Musicbrainz user-agent: %s" % _useragent)
     if body:
         req.add_header('Content-Type', 'application/xml; charset=UTF-8')
     elif not data and not req.has_header('Content-Length'):
