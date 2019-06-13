@@ -436,7 +436,6 @@ def sort_search_results(resultlist, album, new, albumlength):
 
     resultlist = temp_list
 
-    # if headphones.CONFIG.PREFERRED_QUALITY == 2 and headphones.CONFIG.PREFERRED_BITRATE and result[3] != 'Orpheus.network':
     if headphones.CONFIG.PREFERRED_QUALITY == 2 and headphones.CONFIG.PREFERRED_BITRATE:
 
         try:
@@ -484,14 +483,15 @@ def sort_search_results(resultlist, album, new, albumlength):
 
         finallist = sorted(resultlist, key=lambda title: (title[5], int(title[1])), reverse=True)
 
-        # keep number of seeders order for Orpheus.network
-        # if result[3] == 'Orpheus.network':
-        #    finallist = resultlist
-
     if not len(finallist):
         logger.info('No appropriate matches found for %s - %s', album['ArtistName'],
                     album['AlbumTitle'])
         return None
+
+    if result[3]:
+        if (result[3] == 'Orpheus.network') or (result[3] == 'Redacted'):
+            logger.info('Keeping torrents ordered by seeders for %s' % result[3])
+            finallist = resultlist
 
     return finallist
 
@@ -1207,6 +1207,37 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
 
     year = get_year_from_release_date(reldate)
 
+    # Specify release types to filter by - used by Orpheus and Redacted
+    # Could be added to any Gazelle-based music tracker
+    album_type = ""
+    if album['Type'] == 'Album':
+        album_type = [gazellerelease_type.ALBUM]
+    if album['Type'] == 'Soundtrack':
+        album_type = [gazellerelease_type.SOUNDTRACK]
+    if album['Type'] == 'EP':
+        album_type = [gazellerelease_type.EP]
+    # No musicbrainz match for this type
+    # if album['Type'] == 'Anthology':
+    #   album_type = [gazellerelease_type.ANTHOLOGY]
+    if album['Type'] == 'Compilation':
+        album_type = [gazellerelease_type.COMPILATION]
+    if album['Type'] == 'DJ-mix':
+        album_type = [gazellerelease_type.DJ_MIX]
+    if album['Type'] == 'Single':
+        album_type = [gazellerelease_type.SINGLE]
+    if album['Type'] == 'Live':
+        album_type = [gazellerelease_type.LIVE_ALBUM]
+    if album['Type'] == 'Remix':
+        album_type = [gazellerelease_type.REMIX]
+    if album['Type'] == 'Bootleg':
+        album_type = [gazellerelease_type.BOOTLEG]
+    if album['Type'] == 'Interview':
+        album_type = [gazellerelease_type.INTERVIEW]
+    if album['Type'] == 'Mixtape/Street':
+        album_type = [gazellerelease_type.MIXTAPE]
+    if album['Type'] == 'Other':
+        album_type = [gazellerelease_type.UNKNOWN]
+
     # MERGE THIS WITH THE TERM CLEANUP FROM searchNZB
     dic = {'...': '', ' & ': ' ', ' = ': ' ', '?': '', '$': 's', ' + ': ' ', '"': '', ',': ' ',
            '*': ''}
@@ -1514,37 +1545,6 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
             logger.info(u"Searching %s..." % provider)
             all_torrents = []
 
-            album_type = ""
-
-            # Specify release types to filter by
-            if album['Type'] == 'Album':
-                album_type = [gazellerelease_type.ALBUM]
-            if album['Type'] == 'Soundtrack':
-                album_type = [gazellerelease_type.SOUNDTRACK]
-            if album['Type'] == 'EP':
-                album_type = [gazellerelease_type.EP]
-            # No musicbrainz match for this type
-            # if album['Type'] == 'Anthology':
-            #   album_type = [gazellerelease_type.ANTHOLOGY]
-            if album['Type'] == 'Compilation':
-                album_type = [gazellerelease_type.COMPILATION]
-            if album['Type'] == 'DJ-mix':
-                album_type = [gazellerelease_type.DJ_MIX]
-            if album['Type'] == 'Single':
-                album_type = [gazellerelease_type.SINGLE]
-            if album['Type'] == 'Live':
-                album_type = [gazellerelease_type.LIVE_ALBUM]
-            if album['Type'] == 'Remix':
-                album_type = [gazellerelease_type.REMIX]
-            if album['Type'] == 'Bootleg':
-                album_type = [gazellerelease_type.BOOTLEG]
-            if album['Type'] == 'Interview':
-                album_type = [gazellerelease_type.INTERVIEW]
-            if album['Type'] == 'Mixtape/Street':
-                album_type = [gazellerelease_type.MIXTAPE]
-            if album['Type'] == 'Other':
-                album_type = [gazellerelease_type.UNKNOWN]
-
             for search_format in search_formats:
                 if usersearchterm:
                     all_torrents.extend(
@@ -1644,16 +1644,18 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
         if redobj and redobj.logged_in():
             logger.info(u"Searching %s..." % provider)
             all_torrents = []
+
             for search_format in search_formats:
                 if usersearchterm:
                     all_torrents.extend(
                         redobj.search_torrents(searchstr=usersearchterm, format=search_format,
-                                                encoding=bitrate_string)['results'])
+                                                encoding=bitrate_string, releasetype=album_type)['results'])
                 else:
                     all_torrents.extend(redobj.search_torrents(artistname=semi_clean_artist_term,
                                                                 groupname=semi_clean_album_term,
                                                                 format=search_format,
-                                                                encoding=bitrate_string)['results'])
+                                                                encoding=bitrate_string,
+                                                                releasetype=album_type)['results'])
 
             # filter on format, size, and num seeders
             logger.info(u"Filtering torrents by format, maximum size, and minimum seeders...")

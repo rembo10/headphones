@@ -314,7 +314,9 @@ _CONFIG_DEFINITIONS = {
     'XBMC_PASSWORD': (str, 'XBMC', ''),
     'XBMC_UPDATE': (int, 'XBMC', 0),
     'XBMC_USERNAME': (str, 'XBMC', ''),
-    'XLDPROFILE': (str, 'General', '')
+    'XLDPROFILE': (str, 'General', ''),
+    'MUSICBRAINZ_USERAGENT': (str, 'General', ''),
+    'LASTFM_PERSONAL_KEY': (str, 'General', '')
 }
 
 

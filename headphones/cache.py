@@ -19,8 +19,12 @@ import headphones
 from headphones import db, helpers, logger, lastfm, request, mb, os
 from fanart.music import Artist
 
-LASTFM_API_KEY = "690e1ed3bc00bc91804cd8f7fe5ed6d4"
 os.environ.setdefault('FANART_APIKEY', '1f081b32bcd780219f4e6d519f78e37e')
+
+if headphones.CONFIG.LASTFM_PERSONAL_KEY:
+    LASTFM_API_KEY = headphones.CONFIG.LASTFM_PERSONAL_KEY
+else:
+    LASTFM_API_KEY = "690e1ed3bc00bc91804cd8f7fe5ed6d4"
 
 class Cache(object):
     """

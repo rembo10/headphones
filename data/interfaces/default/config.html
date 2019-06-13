@@ -411,7 +411,7 @@
                                 <div class="row">
                                     <label>QBitTorrent Label</label>
                                     <input type="text" name="qbittorrent_label" value="${config['qbittorrent_label']}" size="30">
-				</div>
+                                </div>
                             </fieldset>
                             <fieldset id="deluge_options">
                                 <div class="row">
@@ -1722,6 +1722,23 @@
                                         <a href="https://headphones.codeshy.com/vip" id="vipserver" target="_blank">Get an Account!</a>
                                     </div>
                                 </div>
+                                
+                                <div id="mbuseragent_options">
+                                  <div class="row">
+                                      <a target="_blank" href="https://musicbrainz.org/doc/XML_Web_Service/Rate_Limiting"><label>Musicbrainz Useragent</label></a>
+                                      <input type="text" name="musicbrainz_useragent" value="${config['musicbrainz_useragent']}" size="40" title="Custom user-agent should be in the format:&#013;Application name/<version> ( contact-email )&#013;&#013;Example:&#013;MyAwesomeTagger/1.2.0 ( me@example.com )">
+                                  </div>
+                                </div>
+                            </fieldset>
+                            
+                            <fieldset>
+                                <legend>Lastfm</legend>
+                                <div id="lastfm_options">
+                                  <div class="row">
+                                      <a target="_blank" href="https://www.last.fm/api"><label>Last.fm API Key</label></a>
+                                      <input type="text" name="lastfm_personal_key" value="${config['lastfm_personal_key']}" size="40" title="Custom Last.fm API key. If left blank, the default key that comes with Headphones is used.">
+                                  </div>
+                                </div>
                             </fieldset>
 
                         </td>
@@ -2456,7 +2473,7 @@
                         if ($("#torrent_downloader_qbittorrent").is(":checked"))
                         {
                             $("#torrent_blackhole_options,#transmission_options,#utorrent_options,#deluge_options").fadeOut("fast", function() { $("#qbittorrent_options").fadeIn() });
-			}
+                        }
                         if ($("#torrent_downloader_deluge").is(":checked"))
                         {
                             $("#torrent_blackhole_options,#utorrent_options,#transmission_options,#qbittorrent_options").fadeOut("fast", function() { $("#deluge_options").fadeIn() });

@@ -1415,7 +1415,9 @@ class WebInterface(object):
             "join_enabled": checked(headphones.CONFIG.JOIN_ENABLED),
             "join_onsnatch": checked(headphones.CONFIG.JOIN_ONSNATCH),
             "join_apikey": headphones.CONFIG.JOIN_APIKEY,
-            "join_deviceid": headphones.CONFIG.JOIN_DEVICEID
+            "join_deviceid": headphones.CONFIG.JOIN_DEVICEID,
+            "musicbrainz_useragent": headphones.CONFIG.MUSICBRAINZ_USERAGENT,
+            "lastfm_personal_key": headphones.CONFIG.LASTFM_PERSONAL_KEY
         }
 
         for k, v in config.iteritems():

@@ -20,6 +20,9 @@ from musicbrainzngs import mbxml
 from musicbrainzngs import util
 from musicbrainzngs import compat
 
+import headphones
+from headphones import logger
+
 # headphones
 import base64
 
@@ -166,62 +169,62 @@ class AUTH_IFSET: pass
 # Exceptions.
 
 class MusicBrainzError(Exception):
-	"""Base class for all exceptions related to MusicBrainz."""
-	pass
+    """Base class for all exceptions related to MusicBrainz."""
+    pass
 
 class UsageError(MusicBrainzError):
-	"""Error related to misuse of the module API."""
-	pass
+    """Error related to misuse of the module API."""
+    pass
 
 class InvalidSearchFieldError(UsageError):
-	pass
+    pass
 
 class InvalidIncludeError(UsageError):
-	def __init__(self, msg='Invalid Includes', reason=None):
-		super(InvalidIncludeError, self).__init__(self)
-		self.msg = msg
-		self.reason = reason
+    def __init__(self, msg='Invalid Includes', reason=None):
+        super(InvalidIncludeError, self).__init__(self)
+        self.msg = msg
+        self.reason = reason
 
-	def __str__(self):
-		return self.msg
+    def __str__(self):
+        return self.msg
 
 class InvalidFilterError(UsageError):
-	def __init__(self, msg='Invalid Includes', reason=None):
-		super(InvalidFilterError, self).__init__(self)
-		self.msg = msg
-		self.reason = reason
+    def __init__(self, msg='Invalid Includes', reason=None):
+        super(InvalidFilterError, self).__init__(self)
+        self.msg = msg
+        self.reason = reason
 
-	def __str__(self):
-		return self.msg
+    def __str__(self):
+        return self.msg
 
 class WebServiceError(MusicBrainzError):
-	"""Error related to MusicBrainz API requests."""
-	def __init__(self, message=None, cause=None):
-		"""Pass ``cause`` if this exception was caused by another
-		exception.
-		"""
-		self.message = message
-		self.cause = cause
+    """Error related to MusicBrainz API requests."""
+    def __init__(self, message=None, cause=None):
+        """Pass ``cause`` if this exception was caused by another
+        exception.
+        """
+        self.message = message
+        self.cause = cause
 
-	def __str__(self):
-		if self.message:
-			msg = "%s, " % self.message
-		else:
-			msg = ""
-		msg += "caused by: %s" % str(self.cause)
-		return msg
+    def __str__(self):
+        if self.message:
+            msg = "%s, " % self.message
+        else:
+            msg = ""
+        msg += "caused by: %s" % str(self.cause)
+        return msg
 
 class NetworkError(WebServiceError):
-	"""Problem communicating with the MB server."""
-	pass
+    """Problem communicating with the MB server."""
+    pass
 
 class ResponseError(WebServiceError):
-	"""Bad response sent by the MB server."""
-	pass
+    """Bad response sent by the MB server."""
+    pass
 
 class AuthenticationError(WebServiceError):
-	"""Received a HTTP 401 response while accessing a protected resource."""
-	pass
+    """Received a HTTP 401 response while accessing a protected resource."""
+    pass
 
 
 # Helpers for validating and formatting allowed sets.
@@ -235,9 +238,9 @@ def _check_includes(entity, inc):
     _check_includes_impl(inc, VALID_INCLUDES[entity])
 
 def _check_filter(values, valid):
-	for v in values:
-		if v not in valid:
-			raise InvalidFilterError(v)
+    for v in values:
+        if v not in valid:
+            raise InvalidFilterError(v)
 
 def _check_filter_and_make_params(entity, includes, release_status=[], release_type=[]):
     """Check that the status or type values are valid. Then, check that
@@ -302,12 +305,12 @@ _useragent = ""
 mb_auth = False
 
 def auth(u, p):
-	"""Set the username and password to be used in subsequent queries to
-	the MusicBrainz XML API that require authentication.
-	"""
-	global user, password
-	user = u
-	password = p
+    """Set the username and password to be used in subsequent queries to
+    the MusicBrainz XML API that require authentication.
+    """
+    global user, password
+    user = u
+    password = p
 
 # headphones
 def hpauth(u, p):
@@ -331,10 +334,13 @@ def set_useragent(app, version, contact=None):
     global _useragent, _client
     if not app or not version:
         raise ValueError("App and version can not be empty")
-    if contact is not None:
-        _useragent = "%s/%s python-musicbrainzngs/%s ( %s )" % (app, version, _version, contact)
+    if headphones.CONFIG.MUSICBRAINZ_USERAGENT:
+        _useragent = headphones.CONFIG.MUSICBRAINZ_USERAGENT
     else:
-        _useragent = "%s/%s python-musicbrainzngs/%s" % (app, version, _version)
+        if contact is not None:
+            _useragent = "%s/%s python-musicbrainzngs/%s ( %s )" % (app, version, _version, contact)
+        else:
+            _useragent = "%s/%s python-musicbrainzngs/%s" % (app, version, _version)
     _client = "%s-%s" % (app, version)
     _log.debug("set user-agent to %s" % _useragent)
 
@@ -422,19 +428,19 @@ class _rate_limit(object):
 
 # From pymb2
 class _RedirectPasswordMgr(compat.HTTPPasswordMgr):
-	def __init__(self):
-		self._realms = { }
+    def __init__(self):
+        self._realms = { }
 
-	def find_user_password(self, realm, uri):
-		# ignoring the uri parameter intentionally
-		try:
-			return self._realms[realm]
-		except KeyError:
-			return (None, None)
+    def find_user_password(self, realm, uri):
+        # ignoring the uri parameter intentionally
+        try:
+            return self._realms[realm]
+        except KeyError:
+            return (None, None)
 
-	def add_password(self, realm, uri, username, password):
-		# ignoring the uri parameter intentionally
-		self._realms[realm] = (username, password)
+    def add_password(self, realm, uri, username, password):
+        # ignoring the uri parameter intentionally
+        self._realms[realm] = (username, password)
 
 class _DigestAuthHandler(compat.HTTPDigestAuthHandler):
     def get_authorization (self, req, chal):
@@ -468,84 +474,85 @@ class _DigestAuthHandler(compat.HTTPDigestAuthHandler):
         return H, KD
 
 class _MusicbrainzHttpRequest(compat.Request):
-	""" A custom request handler that allows DELETE and PUT"""
-	def __init__(self, method, url, data=None):
-		compat.Request.__init__(self, url, data)
-		allowed_m = ["GET", "POST", "DELETE", "PUT"]
-		if method not in allowed_m:
-			raise ValueError("invalid method: %s" % method)
-		self.method = method
+    """ A custom request handler that allows DELETE and PUT"""
+    def __init__(self, method, url, data=None):
+        compat.Request.__init__(self, url, data)
+        allowed_m = ["GET", "POST", "DELETE", "PUT"]
+        if method not in allowed_m:
+            raise ValueError("invalid method: %s" % method)
+        self.method = method
 
-	def get_method(self):
-		return self.method
+    def get_method(self):
+        return self.method
 
 
 # Core (internal) functions for calling the MB API.
 
 def _safe_read(opener, req, body=None, max_retries=8, retry_delay_delta=2.0):
-	"""Open an HTTP request with a given URL opener and (optionally) a
-	request body. Transient errors lead to retries.  Permanent errors
-	and repeated errors are translated into a small set of handleable
-	exceptions. Return a bytestring.
-	"""
-	last_exc = None
-	for retry_num in range(max_retries):
-		if retry_num: # Not the first try: delay an increasing amount.
-			_log.info("retrying after delay (#%i)" % retry_num)
-			time.sleep(retry_num * retry_delay_delta)
+    """Open an HTTP request with a given URL opener and (optionally) a
+    request body. Transient errors lead to retries.  Permanent errors
+    and repeated errors are translated into a small set of handleable
+    exceptions. Return a bytestring.
+    """
+    last_exc = None
+    for retry_num in range(max_retries):
+        if retry_num: # Not the first try: delay an increasing amount.
+            _log.info("retrying after delay (#%i)" % retry_num)
+            time.sleep(retry_num * retry_delay_delta)
 
-		try:
-			if body:
-				f = opener.open(req, body)
-			else:
-				f = opener.open(req)
-			return f.read()
+        try:
+            if body:
+                f = opener.open(req, body)
+            else:
+                f = opener.open(req)
+            return f.read()
 
-		except compat.HTTPError as exc:
-			if exc.code in (400, 404, 411):
-				# Bad request, not found, etc.
-				raise ResponseError(cause=exc)
-			elif exc.code in (503, 502, 500):
-				# Rate limiting, internal overloading...
-				_log.info("HTTP error %i" % exc.code)
-			elif exc.code in (401, ):
-				raise AuthenticationError(cause=exc)
-			else:
-				# Other, unknown error. Should handle more cases, but
-				# retrying for now.
-				_log.info("unknown HTTP error %i" % exc.code)
-			last_exc = exc
-		except compat.BadStatusLine as exc:
-			_log.info("bad status line")
-			last_exc = exc
-		except compat.HTTPException as exc:
-			_log.info("miscellaneous HTTP exception: %s" % str(exc))
-			last_exc = exc
-		except compat.URLError as exc:
-			if isinstance(exc.reason, socket.error):
-				code = exc.reason.errno
-				if code == 104: # "Connection reset by peer."
-					continue
-			raise NetworkError(cause=exc)
-		except socket.timeout as exc:
-			_log.info("socket timeout")
-			last_exc = exc
-		except socket.error as exc:
-			if exc.errno == 104:
-				continue
-			raise NetworkError(cause=exc)
-		except IOError as exc:
-			raise NetworkError(cause=exc)
+        except compat.HTTPError as exc:
+            logger.error("Musicbrainz request error: HTTP code %s" % exc.code)
+            if exc.code in (400, 404, 411):
+                # Bad request, not found, etc.
+                raise ResponseError(cause=exc)
+            elif exc.code in (503, 502, 500):
+                # Rate limiting, internal overloading...
+                _log.info("HTTP error %i" % exc.code)
+            elif exc.code in (401, ):
+                raise AuthenticationError(cause=exc)
+            else:
+                # Other, unknown error. Should handle more cases, but
+                # retrying for now.
+                _log.info("unknown HTTP error %i" % exc.code)
+            last_exc = exc
+        except compat.BadStatusLine as exc:
+            _log.info("bad status line")
+            last_exc = exc
+        except compat.HTTPException as exc:
+            _log.info("miscellaneous HTTP exception: %s" % str(exc))
+            last_exc = exc
+        except compat.URLError as exc:
+            if isinstance(exc.reason, socket.error):
+                code = exc.reason.errno
+                if code == 104: # "Connection reset by peer."
+                    continue
+            raise NetworkError(cause=exc)
+        except socket.timeout as exc:
+            _log.info("socket timeout")
+            last_exc = exc
+        except socket.error as exc:
+            if exc.errno == 104:
+                continue
+            raise NetworkError(cause=exc)
+        except IOError as exc:
+            raise NetworkError(cause=exc)
 
-	# Out of retries!
-	raise NetworkError("retried %i times" % max_retries, last_exc)
+    # Out of retries!
+    raise NetworkError("retried %i times" % max_retries, last_exc)
 
 # Get the XML parsing exceptions to catch. The behavior chnaged with Python 2.7
 # and ElementTree 1.3.
 if hasattr(etree, 'ParseError'):
-	ETREE_EXCEPTIONS = (etree.ParseError, expat.ExpatError)
+    ETREE_EXCEPTIONS = (etree.ParseError, expat.ExpatError)
 else:
-	ETREE_EXCEPTIONS = (expat.ExpatError)
+    ETREE_EXCEPTIONS = (expat.ExpatError)
 
 
 # Parsing setup
@@ -684,6 +691,7 @@ def _mb_request(path, method='GET', auth_required=AUTH_NO,
     # Make request.
     req = _MusicbrainzHttpRequest(method, url, data)
     req.add_header('User-Agent', _useragent)
+    logger.debug("Musicbrainz request url: %s" % url)
 
     # Add headphones credentials
     if mb_auth:
@@ -691,6 +699,7 @@ def _mb_request(path, method='GET', auth_required=AUTH_NO,
         req.add_header("Authorization", "Basic %s" % base64string)
 
     _log.debug("requesting with UA %s" % _useragent)
+    logger.debug("Musicbrainz user-agent: %s" % _useragent)
     if body:
         req.add_header('Content-Type', 'application/xml; charset=UTF-8')
     elif not data and not req.has_header('Content-Length'):
@@ -716,100 +725,100 @@ def _get_auth_type(entity, id, includes):
         return AUTH_NO
 
 def _do_mb_query(entity, id, includes=[], params={}):
-	"""Make a single GET call to the MusicBrainz XML API. `entity` is a
-	string indicated the type of object to be retrieved. The id may be
-	empty, in which case the query is a search. `includes` is a list
-	of strings that must be valid includes for the entity type. `params`
-	is a dictionary of additional parameters for the API call. The
-	response is parsed and returned.
-	"""
-	# Build arguments.
-	if not isinstance(includes, list):
-		includes = [includes]
-	_check_includes(entity, includes)
-	auth_required = _get_auth_type(entity, id, includes)
-	args = dict(params)
-	if len(includes) > 0:
-		inc = " ".join(includes)
-		args["inc"] = inc
+    """Make a single GET call to the MusicBrainz XML API. `entity` is a
+    string indicated the type of object to be retrieved. The id may be
+    empty, in which case the query is a search. `includes` is a list
+    of strings that must be valid includes for the entity type. `params`
+    is a dictionary of additional parameters for the API call. The
+    response is parsed and returned.
+    """
+    # Build arguments.
+    if not isinstance(includes, list):
+        includes = [includes]
+    _check_includes(entity, includes)
+    auth_required = _get_auth_type(entity, id, includes)
+    args = dict(params)
+    if len(includes) > 0:
+        inc = " ".join(includes)
+        args["inc"] = inc
 
-	# Build the endpoint components.
-	path = '%s/%s' % (entity, id)
-	return _mb_request(path, 'GET', auth_required, args=args)
+    # Build the endpoint components.
+    path = '%s/%s' % (entity, id)
+    return _mb_request(path, 'GET', auth_required, args=args)
 
 def _do_mb_search(entity, query='', fields={},
-		  limit=None, offset=None, strict=False):
-	"""Perform a full-text search on the MusicBrainz search server.
-	`query` is a lucene query string when no fields are set,
-	but is escaped when any fields are given. `fields` is a dictionary
-	of key/value query parameters. They keys in `fields` must be valid
-	for the given entity type.
-	"""
-	# Encode the query terms as a Lucene query string.
-	query_parts = []
-	if query:
-		clean_query = util._unicode(query)
-		if fields:
-			clean_query = re.sub(LUCENE_SPECIAL, r'\\\1',
-					     clean_query)
-			if strict:
-				query_parts.append('"%s"' % clean_query)
-			else:
-				query_parts.append(clean_query.lower())
-		else:
-			query_parts.append(clean_query)
-	for key, value in fields.items():
-		# Ensure this is a valid search field.
-		if key not in VALID_SEARCH_FIELDS[entity]:
-			raise InvalidSearchFieldError(
-				'%s is not a valid search field for %s' % (key, entity)
-			)
-		elif key == "puid":
-			warn("PUID support was removed from server\n"
-			     "the 'puid' field is ignored",
-			     Warning, stacklevel=2)
+          limit=None, offset=None, strict=False):
+    """Perform a full-text search on the MusicBrainz search server.
+    `query` is a lucene query string when no fields are set,
+    but is escaped when any fields are given. `fields` is a dictionary
+    of key/value query parameters. They keys in `fields` must be valid
+    for the given entity type.
+    """
+    # Encode the query terms as a Lucene query string.
+    query_parts = []
+    if query:
+        clean_query = util._unicode(query)
+        if fields:
+            clean_query = re.sub(LUCENE_SPECIAL, r'\\\1',
+                         clean_query)
+            if strict:
+                query_parts.append('"%s"' % clean_query)
+            else:
+                query_parts.append(clean_query.lower())
+        else:
+            query_parts.append(clean_query)
+    for key, value in fields.items():
+        # Ensure this is a valid search field.
+        if key not in VALID_SEARCH_FIELDS[entity]:
+            raise InvalidSearchFieldError(
+                '%s is not a valid search field for %s' % (key, entity)
+            )
+        elif key == "puid":
+            warn("PUID support was removed from server\n"
+                 "the 'puid' field is ignored",
+                 Warning, stacklevel=2)
 
-		# Escape Lucene's special characters.
-		value = util._unicode(value)
-		value = re.sub(LUCENE_SPECIAL, r'\\\1', value)
-		if value:
-			if strict:
-				query_parts.append('%s:"%s"' % (key, value))
-			else:
-				value = value.lower() # avoid AND / OR
-				query_parts.append('%s:(%s)' % (key, value))
-	if strict:
-		full_query = ' AND '.join(query_parts).strip()
-	else:
-		full_query = ' '.join(query_parts).strip()
+        # Escape Lucene's special characters.
+        value = util._unicode(value)
+        value = re.sub(LUCENE_SPECIAL, r'\\\1', value)
+        if value:
+            if strict:
+                query_parts.append('%s:"%s"' % (key, value))
+            else:
+                value = value.lower() # avoid AND / OR
+                query_parts.append('%s:(%s)' % (key, value))
+    if strict:
+        full_query = ' AND '.join(query_parts).strip()
+    else:
+        full_query = ' '.join(query_parts).strip()
 
-	if not full_query:
-		raise ValueError('at least one query term is required')
+    if not full_query:
+        raise ValueError('at least one query term is required')
 
-	# Additional parameters to the search.
-	params = {'query': full_query}
-	if limit:
-		params['limit'] = str(limit)
-	if offset:
-		params['offset'] = str(offset)
+    # Additional parameters to the search.
+    params = {'query': full_query}
+    if limit:
+        params['limit'] = str(limit)
+    if offset:
+        params['offset'] = str(offset)
 
-	return _do_mb_query(entity, '', [], params)
+    return _do_mb_query(entity, '', [], params)
 
 def _do_mb_delete(path):
-	"""Send a DELETE request for the specified object.
-	"""
-	return _mb_request(path, 'DELETE', AUTH_YES, True)
+    """Send a DELETE request for the specified object.
+    """
+    return _mb_request(path, 'DELETE', AUTH_YES, True)
 
 def _do_mb_put(path):
-	"""Send a PUT request for the specified object.
-	"""
-	return _mb_request(path, 'PUT', AUTH_YES, True)
+    """Send a PUT request for the specified object.
+    """
+    return _mb_request(path, 'PUT', AUTH_YES, True)
 
 def _do_mb_post(path, body):
-	"""Perform a single POST call for an endpoint with a specified
-	request body.
-	"""
-	return _mb_request(path, 'POST', AUTH_YES, True, body=body)
+    """Perform a single POST call for an endpoint with a specified
+    request body.
+    """
+    return _mb_request(path, 'POST', AUTH_YES, True, body=body)
 
 
 # The main interface!
@@ -993,7 +1002,7 @@ def search_releases(query='', limit=None, offset=None, strict=False, **fields):
 
 @_docstring_search("release-group")
 def search_release_groups(query='', limit=None, offset=None,
-			  strict=False, **fields):
+              strict=False, **fields):
     """Search for release groups and return a dict
     with a 'release-group-list' key.
 
