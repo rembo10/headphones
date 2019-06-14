@@ -16,10 +16,12 @@
 import os
 
 import headphones
-from headphones import db, helpers, logger, lastfm, request, mb
+from headphones import db, helpers, logger, lastfm, request, mb, os
+from fanart.music import Artist
 
 LASTFM_API_KEY = "690e1ed3bc00bc91804cd8f7fe5ed6d4"
 
+os.environ.setdefault('FANART_APIKEY', '1f081b32bcd780219f4e6d519f78e37e')
 
 class Cache(object):
     """
@@ -105,22 +107,6 @@ class Cache(object):
             return True
         else:
             return False
-
-    def _get_thumb_url(self, data):
-
-        thumb_url = None
-
-        try:
-            images = data[self.id_type]['image']
-        except KeyError:
-            return None
-
-        for image in images:
-            if image['size'] == 'medium' and '#text' in image:
-                thumb_url = image['#text']
-                break
-
-        return thumb_url
 
     def get_artwork_from_cache(self, ArtistID=None, AlbumID=None):
         """
@@ -211,39 +197,67 @@ class Cache(object):
         if ArtistID:
 
             self.id_type = 'artist'
-            data = lastfm.request_lastfm("artist.getinfo", mbid=ArtistID, api_key=LASTFM_API_KEY)
+            data = Artist.get(id=ArtistID)
+            logger.debug('Fanart.tv ArtistID: %s', ArtistID)
 
             if not data:
+                logger.debug('Fanart.tv ArtistID not found')
                 return
 
-            try:
-                image_url = data['artist']['image'][-1]['#text']
-            except (KeyError, IndexError):
-                logger.debug('No artist image found')
-                image_url = None
+            artist_url = None
+            thumb_url = None
+            image_url = None
 
-            thumb_url = self._get_thumb_url(data)
+            if data.thumbs:
+                for thumbs in data.thumbs[0:1]:
+                    artist_url = str(thumbs.url)
+
+            if artist_url:
+                thumb_url = artist_url.replace('fanart/', 'preview/')
+                image_url = thumb_url
+
+            if not image_url:
+                logger.debug('Fanart.tv no artist image found')
+            else:
+                logger.debug('Fanart.tv artist url: %s', image_url)
+
             if not thumb_url:
-                logger.debug('No artist thumbnail image found')
+                logger.debug('Fanart.tv no artist thumbnail image found')
+            else:
+                logger.debug('Fanart.tv artist thumb url: %s', thumb_url)
 
         else:
 
+            album_url = None
+            thumb_url = None
+            image_url = None
+
             self.id_type = 'album'
-            data = lastfm.request_lastfm("album.getinfo", mbid=AlbumID, api_key=LASTFM_API_KEY)
+            data = Artist.get(id="ArtistID")
+            logger.debug('Fanart.tv AlbumID: %s', AlbumID)
 
             if not data:
+                logger.debug('Fanart.tv artist lookup failed')
                 return
 
-            try:
-                image_url = data['album']['image'][-1]['#text']
-            except (KeyError, IndexError):
-                logger.debug('No album image found on last.fm')
-                image_url = None
+            if data.albums:
+                for x in data.albums:
+                    if x.mbid == AlbumID:
+                        album_url = str(x.covers[0])
 
-            thumb_url = self._get_thumb_url(data)
+            if album_url:
+                thumb_url = album_url.replace('fanart/', 'preview/')
+                image_url = thumb_url
+
+            if not image_url:
+                logger.debug('Fanart.tv no album image found')
+            else:
+                logger.debug('Fanart.tv album url: %s', image_url)
 
             if not thumb_url:
-                logger.debug('No album thumbnail image found on last.fm')
+                logger.debug('Fanart.tv no album thumbnail image found')
+            else:
+                logger.debug('Fanart.tv album thumb url: %s', thumb_url)
 
         return {'artwork': image_url, 'thumbnail': thumb_url}
 
@@ -284,9 +298,33 @@ class Cache(object):
 
         myDB = db.DBConnection()
 
-        # Since lastfm uses release ids rather than release group ids for albums, we have to do a artist + album search for albums
-        # Exception is when adding albums manually, then we should use release id
         if self.id_type == 'artist':
+
+            data = Artist.get(id=self.id)
+
+            logger.debug('Fanart.tv ArtistID is: %s', self.id)
+
+            artist_url = None
+            thumb_url = None
+            image_url = None
+
+            if data.thumbs:
+                for thumbs in data.thumbs[0:1]:
+                    artist_url = str(thumbs.url)
+
+            if artist_url:
+                thumb_url = artist_url.replace('fanart/', 'preview/')
+                image_url = thumb_url
+
+            if not image_url:
+                logger.debug('Fanart.tv no artist image found')
+            else:
+                logger.debug('Fanart.tv artist url: %s', image_url)
+
+            if not thumb_url:
+                logger.debug('Fanart.tv no artist thumbnail image found')
+            else:
+                logger.debug('Fanart.tv artist thumb url: %s', thumb_url)
 
             data = lastfm.request_lastfm("artist.getinfo", mbid=self.id, api_key=LASTFM_API_KEY)
 
@@ -299,7 +337,7 @@ class Cache(object):
                                                  api_key=LASTFM_API_KEY)
 
             if not data:
-                return
+                logger.debug('Last.fm connection cannot be made')
 
             try:
                 self.info_summary = data['artist']['bio']['summary']
@@ -311,80 +349,44 @@ class Cache(object):
             except KeyError:
                 logger.debug('No artist bio found')
                 self.info_content = None
-            try:
-                image_url = data['artist']['image'][-1]['#text']
-            except KeyError:
-                logger.debug('No artist image found')
-                image_url = None
-
-            thumb_url = self._get_thumb_url(data)
-            if not thumb_url:
-                logger.debug('No artist thumbnail image found')
 
         else:
-            dbalbum = myDB.action(
-                'SELECT ArtistName, AlbumTitle, ReleaseID, Type FROM albums WHERE AlbumID=?',
-                [self.id]).fetchone()
-            if dbalbum['ReleaseID'] != self.id:
-                data = lastfm.request_lastfm("album.getinfo", mbid=dbalbum['ReleaseID'],
-                                             api_key=LASTFM_API_KEY)
-                if not data:
-                    data = lastfm.request_lastfm("album.getinfo",
-                                                 artist=helpers.clean_musicbrainz_name(dbalbum['ArtistName']),
-                                                 album=helpers.clean_musicbrainz_name(dbalbum['AlbumTitle']),
-                                                 api_key=LASTFM_API_KEY)
-            else:
-                if dbalbum['Type'] != "part of":
-                    data = lastfm.request_lastfm("album.getinfo",
-                                                artist=helpers.clean_musicbrainz_name(dbalbum['ArtistName']),
-                                                album=helpers.clean_musicbrainz_name(dbalbum['AlbumTitle']),
-                                                api_key=LASTFM_API_KEY)
-                else:
 
-                    # Series, use actual artist for the release-group
-                    artist = mb.getArtistForReleaseGroup(self.id)
-                    if artist:
-                        data = lastfm.request_lastfm("album.getinfo",
-                                                     artist=helpers.clean_musicbrainz_name(artist),
-                                                     album=helpers.clean_musicbrainz_name(dbalbum['AlbumTitle']),
-                                                     api_key=LASTFM_API_KEY)
+            # get ArtistID from AlbumID lookup - ArtistID not passed into this function otherwise
+            myDB = db.DBConnection()
+            ArtistID = myDB.action('SELECT ArtistID FROM albums WHERE ReleaseID=?', [self.id]).fetchone()[0]
+
+            logger.debug('Fanart.tv AlbumID: %s', self.id)
+            logger.debug('Fanart.tv ArtistID: %s', ArtistID)
+
+            data = Artist.get(id=ArtistID)
+
+            album_url = None
+            thumb_url = None
+            image_url = None
 
             if not data:
+                logger.debug('Fanart.tv artist lookup failed')
                 return
 
-            try:
-                self.info_summary = data['album']['wiki']['summary']
-            except KeyError:
-                logger.debug('No album summary found')
-                self.info_summary = None
-            try:
-                self.info_content = data['album']['wiki']['content']
-            except KeyError:
-                logger.debug('No album infomation found')
-                self.info_content = None
-            try:
-                image_url = data['album']['image'][-1]['#text']
-            except KeyError:
-                logger.debug('No album image link found')
-                image_url = None
+            if data.albums:
+                for x in data.albums:
+                    if x.mbid == self.id:
+                        album_url = str(x.covers[0])
 
-            thumb_url = self._get_thumb_url(data)
+            if album_url:
+                thumb_url = album_url.replace('fanart/', 'preview/')
+                image_url = thumb_url
+
+            if not image_url:
+                logger.debug('Fanart.tv no album image found')
+            else:
+                logger.debug('Fanart.tv album url: %s', image_url)
 
             if not thumb_url:
-                logger.debug('No album thumbnail image found')
-
-        # Save the content & summary to the database no matter what if we've
-        # opened up the url
-        if self.id_type == 'artist':
-            controlValueDict = {"ArtistID": self.id}
-        else:
-            controlValueDict = {"ReleaseGroupID": self.id}
-
-        newValueDict = {"Summary": self.info_summary,
-                        "Content": self.info_content,
-                        "LastUpdated": helpers.today()}
-
-        myDB.upsert("descriptions", newValueDict, controlValueDict)
+                logger.debug('Fanart.tv no album thumbnail image found')
+            else:
+                logger.debug('Fanart.tv album thumb url: %s', thumb_url)
 
         # Save the image URL to the database
         if image_url:
@@ -403,8 +405,14 @@ class Cache(object):
 
         # Should we grab the artwork here if we're just grabbing thumbs or
         # info? Probably not since the files can be quite big
+
+        # With fanart.tv only one url is used for both thumb_url and image_url - so only making one request
+        # If seperate ones are desired in the future, the artwork vars below will need to be uncommented
+
+        artwork = request.request_content(image_url, timeout=20)
+
         if image_url and self.query_type == 'artwork':
-            artwork = request.request_content(image_url, timeout=20)
+            #artwork = request.request_content(image_url, timeout=20)
 
             if artwork:
                 # Make sure the artwork dir exists:
@@ -443,7 +451,7 @@ class Cache(object):
         # as it's missing/outdated.
         if thumb_url and self.query_type in ['thumb', 'artwork'] and not (
                 self.thumb_files and self._is_current(self.thumb_files[0])):
-            artwork = request.request_content(thumb_url, timeout=20)
+            #artwork = request.request_content(thumb_url, timeout=20)
 
             if artwork:
                 # Make sure the artwork dir exists:
@@ -478,6 +486,59 @@ class Cache(object):
                     self.thumb_errors = True
                     self.thumb_url = image_url
 
+            dbalbum = myDB.action(
+                'SELECT ArtistName, AlbumTitle, ReleaseID, Type FROM albums WHERE AlbumID=?',
+                [self.id]).fetchone()
+            if dbalbum['ReleaseID'] != self.id:
+                data = lastfm.request_lastfm("album.getinfo", mbid=dbalbum['ReleaseID'],
+                                             api_key=LASTFM_API_KEY)
+                if not data:
+                    data = lastfm.request_lastfm("album.getinfo",
+                                                 artist=helpers.clean_musicbrainz_name(dbalbum['ArtistName']),
+                                                 album=helpers.clean_musicbrainz_name(dbalbum['AlbumTitle']),
+                                                 api_key=LASTFM_API_KEY)
+            else:
+                if dbalbum['Type'] != "part of":
+                    data = lastfm.request_lastfm("album.getinfo",
+                                                artist=helpers.clean_musicbrainz_name(dbalbum['ArtistName']),
+                                                album=helpers.clean_musicbrainz_name(dbalbum['AlbumTitle']),
+                                                api_key=LASTFM_API_KEY)
+                else:
+
+                    # Series, use actual artist for the release-group
+                    artist = mb.getArtistForReleaseGroup(self.id)
+                    if artist:
+                        data = lastfm.request_lastfm("album.getinfo",
+                                                     artist=helpers.clean_musicbrainz_name(artist),
+                                                     album=helpers.clean_musicbrainz_name(dbalbum['AlbumTitle']),
+                                                     api_key=LASTFM_API_KEY)
+
+            if not data:
+                logger.debug('Last.fm connection cannot be made')
+
+            try:
+                self.info_summary = data['album']['wiki']['summary']
+            except KeyError:
+                logger.debug('No album summary found')
+                self.info_summary = None
+            try:
+                self.info_content = data['album']['wiki']['content']
+            except KeyError:
+                logger.debug('No album infomation found')
+                self.info_content = None
+
+        # Save the content & summary to the database no matter what if we've
+        # opened up the url
+        if self.id_type == 'artist':
+            controlValueDict = {"ArtistID": self.id}
+        else:
+            controlValueDict = {"ReleaseGroupID": self.id}
+
+        newValueDict = {"Summary": self.info_summary,
+                        "Content": self.info_content,
+                        "LastUpdated": helpers.today()}
+
+        myDB.upsert("descriptions", newValueDict, controlValueDict)
 
 def getArtwork(ArtistID=None, AlbumID=None):
     c = Cache()
@@ -486,7 +547,7 @@ def getArtwork(ArtistID=None, AlbumID=None):
     if not artwork_path:
         return None
 
-    if artwork_path.startswith('http://'):
+    if artwork_path.startswith('http://') or artwork_path.startswith('https://'):
         return artwork_path
     else:
         artwork_file = os.path.basename(artwork_path)
@@ -500,7 +561,7 @@ def getThumb(ArtistID=None, AlbumID=None):
     if not artwork_path:
         return None
 
-    if artwork_path.startswith('http://'):
+    if artwork_path.startswith('http://') or artwork_path.startswith('https://'):
         return artwork_path
     else:
         thumbnail_file = os.path.basename(artwork_path)

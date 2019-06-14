@@ -540,7 +540,7 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
     try:
         cache.getThumb(ArtistID=artistid)
     except Exception as e:
-        logger.error("Error getting album art: %s", e)
+        logger.error("Error getting artist art: %s", e)
 
     logger.info(u"Fetching Metacritic reviews for: %s" % artist['artist_name'])
     try:

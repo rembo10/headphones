@@ -1,0 +1,648 @@
+{
+    "name": "Avenged Sevenfold",
+    "mbid_id": "24e1b53c-3085-4581-8472-0b0088d2508c",
+    "albums": {
+        "fe4373ed-5e89-46b3-b4c0-31433ce217df": {
+            "albumcover": [
+                {
+                    "id": "128441",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/nightmare-53b398b4d032e.jpg",
+                    "likes": "4"
+                },
+                {
+                    "id": "128499",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/nightmare-53b4103e89cb1.jpg",
+                    "likes": "1"
+                },
+                {
+                    "id": "251000",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/nightmare-5be54c7b03578.jpg",
+                    "likes": "0"
+                }
+            ],
+            "cdart": [
+                {
+                    "id": "11630",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/cdart/nightmare-4e8059a3c581c.png",
+                    "likes": "2",
+                    "disc": "1",
+                    "size": "1000"
+                }
+            ]
+        },
+        "6937c4d3-ecf8-3464-8453-9f3a86dbecef": {
+            "albumcover": [
+                {
+                    "id": "190903",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/live-in-the-lbc--diamonds-in-the-rough-56daab95340aa.jpg",
+                    "likes": "3"
+                },
+                {
+                    "id": "249974",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/live-in-the-lbc--diamonds-in-the-rough-5bcd0ee12eecc.jpg",
+                    "likes": "2"
+                },
+                {
+                    "id": "102876",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/live-in-the-lbc--diamonds-in-the-rough-526fdf214a2ba.jpg",
+                    "likes": "0"
+                }
+            ],
+            "cdart": [
+                {
+                    "id": "105723",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/cdart/live-in-the-lbc--diamonds-in-the-rough-5296c531b6370.png",
+                    "likes": "0",
+                    "disc": "1",
+                    "size": "1000"
+                }
+            ]
+        },
+        "94672194-7f42-3965-a489-f2f3cdc1c79e": {
+            "albumcover": [
+                {
+                    "id": "128449",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/avenged-sevenfold-53b3b73b9800f.jpg",
+                    "likes": "3"
+                },
+                {
+                    "id": "128450",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/avenged-sevenfold-53b3b749894c6.jpg",
+                    "likes": "1"
+                }
+            ],
+            "cdart": [
+                {
+                    "id": "9923",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/cdart/avenged-sevenfold-4e5f7b9f5fb7f.png",
+                    "likes": "0",
+                    "disc": "1",
+                    "size": "1000"
+                }
+            ]
+        },
+        "180560ee-2d9d-33cf-8de7-cdaaba610739": {
+            "albumcover": [
+                {
+                    "id": "128493",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/city-of-evil-53b40f8f72620.jpg",
+                    "likes": "3"
+                },
+                {
+                    "id": "168354",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/city-of-evil-559316eeccee8.jpg",
+                    "likes": "1"
+                },
+                {
+                    "id": "128494",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/city-of-evil-53b40fa5e5385.jpg",
+                    "likes": "1"
+                },
+                {
+                    "id": "250863",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/city-of-evil-5be135ee3e6c7.jpg",
+                    "likes": "0"
+                }
+            ],
+            "cdart": [
+                {
+                    "id": "9921",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/cdart/city-of-evil-4e5f7b9f50d37.png",
+                    "likes": "0",
+                    "disc": "1",
+                    "size": "1000"
+                }
+            ]
+        },
+        "6f7e9796-bec7-4b79-aa6a-27db027f5c57": {
+            "albumcover": [
+                {
+                    "id": "205688",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/the-stage-581358402bb49.jpg",
+                    "likes": "2"
+                },
+                {
+                    "id": "249971",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/the-stage-5bcd0e5ef1df7.jpg",
+                    "likes": "1"
+                },
+                {
+                    "id": "249975",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/the-stage-5bcd0ee132ed4.jpg",
+                    "likes": "1"
+                },
+                {
+                    "id": "230472",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/the-stage-5a134ebfa84d0.jpg",
+                    "likes": "0"
+                }
+            ]
+        },
+        "e7ea84a1-bf34-43f9-a421-af93624b708f": {
+            "albumcover": [
+                {
+                    "id": "249976",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/all-excess-5bcd101139bc6.jpg",
+                    "likes": "2"
+                },
+                {
+                    "id": "128401",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/all-excess-53b3086f398d7.jpg",
+                    "likes": "1"
+                }
+            ]
+        },
+        "78b8223a-8ba3-403e-bea6-63be9f378716": {
+            "albumcover": [
+                {
+                    "id": "249977",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/critical-acclaim-5bcd114adbe6c.jpg",
+                    "likes": "2"
+                },
+                {
+                    "id": "131968",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/critical-acclaim-53e65d0ba7dab.jpg",
+                    "likes": "0"
+                }
+            ]
+        },
+        "46303229-3ef4-480d-b648-a78e1c64c911": {
+            "albumcover": [
+                {
+                    "id": "128895",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/hail-to-the-king-53b8592f20a8a.jpg",
+                    "likes": "2"
+                },
+                {
+                    "id": "128896",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/hail-to-the-king-53b85946c4a9a.jpg",
+                    "likes": "2"
+                },
+                {
+                    "id": "190904",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/hail-to-the-king-56daabbf72f39.jpg",
+                    "likes": "2"
+                },
+                {
+                    "id": "128495",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/hail-to-the-king-53b40fdfce251.jpg",
+                    "likes": "2"
+                },
+                {
+                    "id": "128898",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/hail-to-the-king-53b85961c471f.jpg",
+                    "likes": "1"
+                }
+            ],
+            "cdart": [
+                {
+                    "id": "101408",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/cdart/hail-to-the-king-525c4d2d69b27.png",
+                    "likes": "1",
+                    "disc": "1",
+                    "size": "1000"
+                },
+                {
+                    "id": "98963",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/cdart/hail-to-the-king-523da0068ff85.png",
+                    "likes": "0",
+                    "disc": "1",
+                    "size": "1000"
+                }
+            ]
+        },
+        "9d642393-0005-3e89-b3d4-35d89c2f6ad6": {
+            "albumcover": [
+                {
+                    "id": "128403",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/sounding-the-seventh-trumpet-53b308d7bea26.jpg",
+                    "likes": "2"
+                },
+                {
+                    "id": "3031",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/sounding-the-seventh-trumpet-4ddd79ca1d05e.jpg",
+                    "likes": "1"
+                },
+                {
+                    "id": "250992",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/sounding-the-seventh-trumpet-5be53d28d601e.jpg",
+                    "likes": "0"
+                }
+            ],
+            "cdart": [
+                {
+                    "id": "105693",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/cdart/sounding-the-seventh-trumpet-529649562b8bf.png",
+                    "likes": "2",
+                    "disc": "1",
+                    "size": "1000"
+                }
+            ]
+        },
+        "1c7120ae-32b6-3693-8974-599977b01601": {
+            "albumcover": [
+                {
+                    "id": "128452",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/waking-the-fallen-53b3b83b67dbe.jpg",
+                    "likes": "2"
+                },
+                {
+                    "id": "131878",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/waking-the-fallen-53e524aeb7a1b.jpg",
+                    "likes": "1"
+                },
+                {
+                    "id": "249972",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/waking-the-fallen-5bcd0e5f03053.jpg",
+                    "likes": "1"
+                }
+            ],
+            "cdart": [
+                {
+                    "id": "9922",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/cdart/waking-the-fallen-4e5f7b9f5ebdf.png",
+                    "likes": "0",
+                    "disc": "1",
+                    "size": "1000"
+                }
+            ]
+        },
+        "46633632-801d-4f4d-8c5b-0d2a207ae2f8": {
+            "albumcover": [
+                {
+                    "id": "128492",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/carry-on-call-of-duty-black-ops-ii-version-53b40f6ebbf21.jpg",
+                    "likes": "2"
+                },
+                {
+                    "id": "190902",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/carry-on-call-of-duty-black-ops-ii-version-56daa99ff2f13.jpg",
+                    "likes": "1"
+                }
+            ]
+        },
+        "04576112-0cb5-381e-85f8-9020939de1a9": {
+            "albumcover": [
+                {
+                    "id": "129360",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/beast-and-the-harlot-53bc6579556f5.jpg",
+                    "likes": "1"
+                }
+            ]
+        },
+        "7a64c494-4652-4577-93b3-0d6090f2473e": {
+            "albumcover": [
+                {
+                    "id": "180078",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/hail-to-the-king-deathbat-original-video-game-soundtrack-560ceef32e364.jpg",
+                    "likes": "1"
+                }
+            ]
+        },
+        "b47f833c-f496-4a00-b9c4-7336a04fb867": {
+            "albumcover": [
+                {
+                    "id": "249966",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/as-tears-go-by-5bcd0e5ed3742.jpg",
+                    "likes": "1"
+                }
+            ]
+        },
+        "811001d5-88bb-4ba2-bcef-05827d85d4f1": {
+            "albumcover": [
+                {
+                    "id": "249967",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/dose-5bcd0e5ed762d.jpg",
+                    "likes": "1"
+                }
+            ]
+        },
+        "e0344128-b071-48eb-b420-3c5f8d9ea8cd": {
+            "albumcover": [
+                {
+                    "id": "249968",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/god-only-knows-5bcd0e5edf7ca.jpg",
+                    "likes": "1"
+                }
+            ]
+        },
+        "d041c6c1-0829-4f6e-a69e-8e29ad004860": {
+            "albumcover": [
+                {
+                    "id": "249969",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/mad-hatter-5bcd0e5ee776d.jpg",
+                    "likes": "1"
+                }
+            ]
+        },
+        "02ff3ae6-89b9-4a14-a147-d86e80a4cdad": {
+            "albumcover": [
+                {
+                    "id": "249970",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/malaguea-salerosa-la-malaguea-5bcd0e5eeb939.jpg",
+                    "likes": "1"
+                }
+            ]
+        },
+        "123d6c7f-d26a-4b94-a79e-fcdec59ec0b9": {
+            "albumcover": [
+                {
+                    "id": "249973",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/wish-you-were-here-5bcd0e5f079fc.jpg",
+                    "likes": "1"
+                }
+            ]
+        },
+        "5ddff4f2-c053-46ee-b785-180c06e5dd97": {
+            "albumcover": [
+                {
+                    "id": "249979",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/the-best-of-2005-2013-5bcd16939221d.jpg",
+                    "likes": "1"
+                }
+            ]
+        },
+        "87c98289-1b38-4eb3-baf5-eb9f6f5a165d": {
+            "albumcover": [
+                {
+                    "id": "249980",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/shepherd-of-fire-5bcd179e54c3b.jpg",
+                    "likes": "1"
+                }
+            ]
+        },
+        "adaa4143-984e-48a6-a94a-b8f48ea19614": {
+            "albumcover": [
+                {
+                    "id": "128899",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/not-ready-to-die-from-call-of-the-dead-53b8597c550fd.jpg",
+                    "likes": "1"
+                }
+            ]
+        },
+        "7f017b86-bd88-3ed2-a16f-19d6427c423a": {
+            "albumcover": [
+                {
+                    "id": "128402",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/walk-53b3089985c9f.jpg",
+                    "likes": "1"
+                }
+            ]
+        },
+        "fbbcda22-58a8-44fd-972d-e4d25e18e544": {
+            "albumcover": [
+                {
+                    "id": "129203",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/so-far-away-53bac4f31dd95.jpg",
+                    "likes": "1"
+                }
+            ]
+        },
+        "f674046a-ea6e-4af5-a04e-82263702ec8d": {
+            "albumcover": [
+                {
+                    "id": "129204",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/nightmare-53bac5ee6506d.jpg",
+                    "likes": "1"
+                }
+            ]
+        },
+        "da8d77cd-dd26-4356-86f9-9fe45b25f799": {
+            "albumcover": [
+                {
+                    "id": "129206",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/crossroads-53bac65f5d21a.jpg",
+                    "likes": "1"
+                }
+            ]
+        },
+        "6292ac51-7acc-341c-a00a-bab0f21ab01b": {
+            "albumcover": [
+                {
+                    "id": "129207",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/dear-god-53bac6c17e960.jpg",
+                    "likes": "1"
+                }
+            ]
+        },
+        "14d9ed56-09dd-4247-b5b2-add06260a79a": {
+            "albumcover": [
+                {
+                    "id": "129208",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/afterlife-53bac73411c0d.jpg",
+                    "likes": "1"
+                }
+            ]
+        },
+        "f12684ec-4fef-4726-a1fe-8fa96a6bb1ce": {
+            "albumcover": [
+                {
+                    "id": "128448",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/almost-easy-53b3b72787936.jpg",
+                    "likes": "1"
+                }
+            ]
+        },
+        "ceb758f6-aaa9-37a9-a32e-1c21127394e3": {
+            "albumcover": [
+                {
+                    "id": "128451",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/burn-it-down-53b3b7ae7c0da.jpg",
+                    "likes": "1"
+                }
+            ]
+        },
+        "9083fc88-0f05-4a30-b38d-a23e02dbb3d0": {
+            "albumcover": [
+                {
+                    "id": "128453",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/welcome-to-the-family-53b3b876a15a9.jpeg",
+                    "likes": "1"
+                }
+            ]
+        },
+        "93ed6b5b-818a-4755-8767-de707c9619b8": {
+            "albumcover": [
+                {
+                    "id": "231762",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/live-at-the-grammy-museum-5a2eb8f73efad.jpg",
+                    "likes": "0"
+                }
+            ]
+        },
+        "9c564498-48e5-4ee5-bb3a-dbc003cb36e2": {
+            "albumcover": [
+                {
+                    "id": "248157",
+                    "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/black-reign-5ba7d9ae1b7ad.jpg",
+                    "likes": "0"
+                }
+            ]
+        }
+    },
+    "hdmusiclogo": [
+        {
+            "id": "102865",
+            "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/hdmusiclogo/avenged-sevenfold-526fc8c4162a1.png",
+            "likes": "2"
+        },
+        {
+            "id": "49644",
+            "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/hdmusiclogo/avenged-sevenfold-503fcebece042.png",
+            "likes": "2"
+        },
+        {
+            "id": "252774",
+            "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/hdmusiclogo/avenged-sevenfold-5c0de54aee1e1.png",
+            "likes": "1"
+        },
+        {
+            "id": "252775",
+            "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/hdmusiclogo/avenged-sevenfold-5c0de55415caf.png",
+            "likes": "1"
+        },
+        {
+            "id": "249963",
+            "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/hdmusiclogo/avenged-sevenfold-5bcd06e699335.png",
+            "likes": "1"
+        },
+        {
+            "id": "125845",
+            "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/hdmusiclogo/avenged-sevenfold-538ce566b1184.png",
+            "likes": "1"
+        },
+        {
+            "id": "142153",
+            "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/hdmusiclogo/avenged-sevenfold-54752ea02da53.png",
+            "likes": "0"
+        },
+        {
+            "id": "125844",
+            "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/hdmusiclogo/avenged-sevenfold-538ce566a8f0a.png",
+            "likes": "0"
+        },
+        {
+            "id": "125888",
+            "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/hdmusiclogo/avenged-sevenfold-538dcd706ac32.png",
+            "likes": "0"
+        },
+        {
+            "id": "102871",
+            "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/hdmusiclogo/avenged-sevenfold-526fd948c757d.png",
+            "likes": "0"
+        },
+        {
+            "id": "49645",
+            "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/hdmusiclogo/avenged-sevenfold-503fcebecf17e.png",
+            "likes": "0"
+        }
+    ],
+    "artistthumb": [
+        {
+            "id": "95995",
+            "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/artistthumb/avenged-sevenfold-521f7ed77cf4f.jpg",
+            "likes": "2"
+        },
+        {
+            "id": "249978",
+            "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/artistthumb/avenged-sevenfold-5bcd121f3fda0.jpg",
+            "likes": "1"
+        },
+        {
+            "id": "64042",
+            "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/artistthumb/avenged-sevenfold-50c4d9279d6e9.jpg",
+            "likes": "0"
+        },
+        {
+            "id": "31109",
+            "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/artistthumb/avenged-sevenfold-4fb2b533bc73a.jpg",
+            "likes": "0"
+        }
+    ],
+    "artistbackground": [
+        {
+            "id": "64048",
+            "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/artistbackground/avenged-sevenfold-50c4dc653f004.jpg",
+            "likes": "1"
+        },
+        {
+            "id": "3027",
+            "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/artistbackground/avenged-sevenfold-4ddd7889a0fcf.jpg",
+            "likes": "1"
+        },
+        {
+            "id": "80600",
+            "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/artistbackground/avenged-sevenfold-517bf40c1fb22.jpg",
+            "likes": "1"
+        },
+        {
+            "id": "105700",
+            "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/artistbackground/avenged-sevenfold-529652bade8a4.jpg",
+            "likes": "1"
+        },
+        {
+            "id": "95993",
+            "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/artistbackground/avenged-sevenfold-521f7b1318390.jpg",
+            "likes": "1"
+        },
+        {
+            "id": "64046",
+            "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/artistbackground/avenged-sevenfold-50c4db9a2c6e2.jpg",
+            "likes": "0"
+        },
+        {
+            "id": "76946",
+            "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/artistbackground/avenged-sevenfold-51544ff4401ab.jpg",
+            "likes": "0"
+        },
+        {
+            "id": "105695",
+            "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/artistbackground/avenged-sevenfold-52964c30e0486.jpg",
+            "likes": "0"
+        },
+        {
+            "id": "105697",
+            "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/artistbackground/avenged-sevenfold-52964cdfa6282.jpg",
+            "likes": "0"
+        },
+        {
+            "id": "105698",
+            "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/artistbackground/avenged-sevenfold-52964d9c79f26.jpg",
+            "likes": "0"
+        },
+        {
+            "id": "105702",
+            "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/artistbackground/avenged-sevenfold-529653ef8cef7.jpg",
+            "likes": "0"
+        },
+        {
+            "id": "95994",
+            "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/artistbackground/avenged-sevenfold-521f7e4c48ad3.jpg",
+            "likes": "0"
+        }
+    ],
+    "musiclogo": [
+        {
+            "id": "5712",
+            "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/musiclogo/avenged-sevenfold-4dfc8aee78b49.png",
+            "likes": "0"
+        },
+        {
+            "id": "41835",
+            "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/musiclogo/avenged-sevenfold-4ffc75f3a7e54.png",
+            "likes": "0"
+        },
+        {
+            "id": "41836",
+            "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/musiclogo/avenged-sevenfold-4ffc75f3a8473.png",
+            "likes": "0"
+        }
+    ],
+    "musicbanner": [
+        {
+            "id": "52630",
+            "url": "https://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/musicbanner/avenged-sevenfold-505b2346a559d.jpg",
+            "likes": "0"
+        }
+    ]
+}
