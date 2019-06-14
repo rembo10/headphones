@@ -53,12 +53,12 @@ def request_lastfm(method, **kwargs):
     if not data:
         logger.error("Error calling Last.FM method: %s", method)
         # when there is a last.fm api fail, this return prevents artist artwork from loading
-        #return
+        # return
 
     if "error" in data:
         logger.debug("Last.FM returned an error: %s", data["message"])
         # when there is a last.fm api fail, this return prevents artist artwork from loading
-        #return
+        # return
 
     return data
 

@@ -16,12 +16,13 @@
 import os
 
 import headphones
-from headphones import db, helpers, logger, lastfm, request, mb, os
+from headphones import db, helpers, logger, lastfm, request, mb
 from fanart.music import Artist
 
 LASTFM_API_KEY = "690e1ed3bc00bc91804cd8f7fe5ed6d4"
 
 os.environ.setdefault('FANART_APIKEY', '1f081b32bcd780219f4e6d519f78e37e')
+
 
 class Cache(object):
     """
@@ -412,7 +413,7 @@ class Cache(object):
         artwork = request.request_content(image_url, timeout=20)
 
         if image_url and self.query_type == 'artwork':
-            #artwork = request.request_content(image_url, timeout=20)
+            # artwork = request.request_content(image_url, timeout=20)
 
             if artwork:
                 # Make sure the artwork dir exists:
@@ -451,7 +452,7 @@ class Cache(object):
         # as it's missing/outdated.
         if thumb_url and self.query_type in ['thumb', 'artwork'] and not (
                 self.thumb_files and self._is_current(self.thumb_files[0])):
-            #artwork = request.request_content(thumb_url, timeout=20)
+            # artwork = request.request_content(thumb_url, timeout=20)
 
             if artwork:
                 # Make sure the artwork dir exists:
@@ -539,6 +540,7 @@ class Cache(object):
                         "LastUpdated": helpers.today()}
 
         myDB.upsert("descriptions", newValueDict, controlValueDict)
+
 
 def getArtwork(ArtistID=None, AlbumID=None):
     c = Cache()
