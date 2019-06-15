@@ -1187,6 +1187,7 @@ class WebInterface(object):
             "deluge_password": headphones.CONFIG.DELUGE_PASSWORD,
             "deluge_label": headphones.CONFIG.DELUGE_LABEL,
             "deluge_done_directory": headphones.CONFIG.DELUGE_DONE_DIRECTORY,
+            "deluge_download_directory": headphones.CONFIG.DELUGE_DOWNLOAD_DIRECTORY,
             "deluge_paused": checked(headphones.CONFIG.DELUGE_PAUSED),
             "utorrent_host": headphones.CONFIG.UTORRENT_HOST,
             "utorrent_username": headphones.CONFIG.UTORRENT_USERNAME,

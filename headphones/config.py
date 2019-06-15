@@ -79,6 +79,7 @@ _CONFIG_DEFINITIONS = {
     'DELUGE_PASSWORD': (str, 'Deluge', ''),
     'DELUGE_LABEL': (str, 'Deluge', ''),
     'DELUGE_DONE_DIRECTORY': (str, 'Deluge', ''),
+    'DELUGE_DOWNLOAD_DIRECTORY': (str, 'Deluge', ''),
     'DELUGE_PAUSED': (int, 'Deluge', 0),
     'DESTINATION_DIR': (str, 'General', ''),
     'DETECT_BITRATE': (int, 'General', 0),
