@@ -139,6 +139,9 @@ def getartwork(artwork_path):
     if headphones.CONFIG.ALBUM_ART_MAX_WIDTH:
         maxwidth = int(headphones.CONFIG.ALBUM_ART_MAX_WIDTH)
 
+    if artwork_path is None:
+        return
+
     resp = request.request_response(artwork_path, timeout=20, stream=True, whitelist_status_code=404)
 
     if resp:
