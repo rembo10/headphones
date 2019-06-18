@@ -474,7 +474,7 @@ class Cache(object):
                     self.thumb_errors = True
                     self.thumb_url = image_url
 
-            dbalbum = myDB.action('SELECT ArtistName, AlbumTitle, ReleaseID, Type FROM albums WHERE AlbumID=?',[self.id]).fetchone()
+            dbalbum = myDB.action('SELECT ArtistName, AlbumTitle, ReleaseID, Type FROM albums WHERE AlbumID=?', [self.id]).fetchone()
             if dbalbum:
                 if dbalbum['ReleaseID'] != self.id:
                     data = lastfm.request_lastfm("album.getinfo", mbid=dbalbum['ReleaseID'],
