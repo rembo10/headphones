@@ -43,7 +43,8 @@ class Request(object):
             if not isinstance(rjson, dict):
                 raise Exception(response.text)
             if 'error message' in rjson:
-                raise Exception(rjson['status'], rjson['error message'])
+                #raise Exception(rjson['status'], rjson['error message'])
+				raise Exception(rjson['error message'])
             return rjson
         except Exception as e:
             raise ResponseFanartError(str(e))

@@ -18,6 +18,7 @@ import os
 import headphones
 from headphones import db, helpers, logger, lastfm, request, mb
 from fanart.music import Artist
+from fanart.errors import ResponseFanartError
 
 LASTFM_API_KEY = "690e1ed3bc00bc91804cd8f7fe5ed6d4"
 
@@ -198,12 +199,14 @@ class Cache(object):
         if ArtistID:
 
             self.id_type = 'artist'
-            data = Artist.get(id=ArtistID)
-            logger.debug('Fanart.tv ArtistID: %s', ArtistID)
 
-            if not data:
-                logger.debug('Fanart.tv ArtistID not found')
+            try:
+                data = Artist.get(id=ArtistID)
+            except ResponseFanartError as e:
+                logger.debug('Fanart.tv lookup error for %s: %s', ArtistID, e)
                 return
+
+            logger.debug('Fanart.tv ArtistID: %s', ArtistID)
 
             artist_url = None
             thumb_url = None
@@ -216,30 +219,25 @@ class Cache(object):
             if artist_url:
                 thumb_url = artist_url.replace('fanart/', 'preview/')
                 image_url = thumb_url
-
-            if not image_url:
-                logger.debug('Fanart.tv no artist image found')
+                logger.debug('Fanart.tv artist url: %s', thumb_url)
             else:
-                logger.debug('Fanart.tv artist url: %s', image_url)
-
-            if not thumb_url:
-                logger.debug('Fanart.tv no artist thumbnail image found')
-            else:
-                logger.debug('Fanart.tv artist thumb url: %s', thumb_url)
+                logger.debug('Fanart.tv no artist image found for %s', ArtistID)
 
         else:
+
+            self.id_type = 'album'
+
+            try:
+                data = Artist.get(id="ArtistID")
+            except ResponseFanartError as e:
+                logger.debug('Fanart.tv lookup error for %s: %s', ArtistID, e)
+                return
+
+            logger.debug('Fanart.tv AlbumID: %s', AlbumID)
 
             album_url = None
             thumb_url = None
             image_url = None
-
-            self.id_type = 'album'
-            data = Artist.get(id="ArtistID")
-            logger.debug('Fanart.tv AlbumID: %s', AlbumID)
-
-            if not data:
-                logger.debug('Fanart.tv artist lookup failed')
-                return
 
             if data.albums:
                 for x in data.albums:
@@ -249,16 +247,9 @@ class Cache(object):
             if album_url:
                 thumb_url = album_url.replace('fanart/', 'preview/')
                 image_url = thumb_url
-
-            if not image_url:
-                logger.debug('Fanart.tv no album image found')
+                logger.debug('Fanart.tv album url: %s', thumb_url)
             else:
-                logger.debug('Fanart.tv album url: %s', image_url)
-
-            if not thumb_url:
-                logger.debug('Fanart.tv no album thumbnail image found')
-            else:
-                logger.debug('Fanart.tv album thumb url: %s', thumb_url)
+                logger.debug('Fanart.tv no album image found for %s', AlbumID)
 
         return {'artwork': image_url, 'thumbnail': thumb_url}
 
@@ -301,9 +292,16 @@ class Cache(object):
 
         if self.id_type == 'artist':
 
-            data = Artist.get(id=self.id)
-
-            logger.debug('Fanart.tv ArtistID is: %s', self.id)
+            try:
+                data = Artist.get(id=self.id)
+            except Exception as e:
+                dbartist = myDB.action('SELECT ArtistName, Type FROM artists WHERE ArtistID=?', [self.id]).fetchone()[0]
+                if dbartist:
+                    logger.debug('Fanart.tv artist lookup error for %s: %s', dbartist, e)
+                    logger.debug('Stored id for %s is: %s', dbartist, self.id)
+                else:
+                    logger.debug('Fanart.tv artist lookup error for %s: %s', self.id, e)
+                return
 
             artist_url = None
             thumb_url = None
@@ -316,22 +314,15 @@ class Cache(object):
             if artist_url:
                 thumb_url = artist_url.replace('fanart/', 'preview/')
                 image_url = thumb_url
-
-            if not image_url:
-                logger.debug('Fanart.tv no artist image found')
+                logger.debug('Fanart.tv artist image url: %s', thumb_url)
             else:
-                logger.debug('Fanart.tv artist url: %s', image_url)
-
-            if not thumb_url:
-                logger.debug('Fanart.tv no artist thumbnail image found')
-            else:
-                logger.debug('Fanart.tv artist thumb url: %s', thumb_url)
+                logger.debug('Fanart.tv no artist image found for: %s', self.id)
 
             data = lastfm.request_lastfm("artist.getinfo", mbid=self.id, api_key=LASTFM_API_KEY)
 
             # Try with name if not found
             if not data:
-                dbartist = myDB.action('SELECT ArtistName, Type FROM artists WHERE ArtistID=?', [self.id]).fetchone()
+                dbartist = myDB.action('SELECT ArtistName, Type FROM artists WHERE ArtistID=?', [self.id]).fetchone()[0]
                 if dbartist:
                     data = lastfm.request_lastfm("artist.getinfo",
                                                  artist=helpers.clean_musicbrainz_name(dbartist['ArtistName']),
@@ -357,18 +348,20 @@ class Cache(object):
             myDB = db.DBConnection()
             ArtistID = myDB.action('SELECT ArtistID FROM albums WHERE ReleaseID=?', [self.id]).fetchone()[0]
 
-            logger.debug('Fanart.tv AlbumID: %s', self.id)
-            logger.debug('Fanart.tv ArtistID: %s', ArtistID)
-
-            data = Artist.get(id=ArtistID)
+            try:
+                data = Artist.get(id=ArtistID)
+            except Exception as e:
+                dbartist = myDB.action('SELECT ArtistName, Type FROM artists WHERE ArtistID=?', [ArtistID]).fetchone()[0]
+                if dbartist:
+                    logger.debug('Fanart.tv artist lookup error for %s: %s', dbartist, e)
+                    logger.debug('Stored id for %s is: %s', dbartist, ArtistID)
+                else:
+                    logger.debug('Fanart.tv artist lookup error for %s: %s', ArtistID, e)
+                return
 
             album_url = None
             thumb_url = None
             image_url = None
-
-            if not data:
-                logger.debug('Fanart.tv artist lookup failed')
-                return
 
             if data.albums:
                 for x in data.albums:
@@ -378,16 +371,9 @@ class Cache(object):
             if album_url:
                 thumb_url = album_url.replace('fanart/', 'preview/')
                 image_url = thumb_url
-
-            if not image_url:
-                logger.debug('Fanart.tv no album image found')
+                logger.debug('Fanart.tv album url: %s', thumb_url)
             else:
-                logger.debug('Fanart.tv album url: %s', image_url)
-
-            if not thumb_url:
-                logger.debug('Fanart.tv no album thumbnail image found')
-            else:
-                logger.debug('Fanart.tv album thumb url: %s', thumb_url)
+                logger.debug('Fanart.tv no album image found for: %s', self.id)
 
         # Save the image URL to the database
         if image_url:
@@ -410,7 +396,8 @@ class Cache(object):
         # With fanart.tv only one url is used for both thumb_url and image_url - so only making one request
         # If seperate ones are desired in the future, the artwork vars below will need to be uncommented
 
-        artwork = request.request_content(image_url, timeout=20)
+        if image_url is not None:
+            artwork = request.request_content(image_url, timeout=20)
 
         if image_url and self.query_type == 'artwork':
             # artwork = request.request_content(image_url, timeout=20)
@@ -487,32 +474,30 @@ class Cache(object):
                     self.thumb_errors = True
                     self.thumb_url = image_url
 
-            dbalbum = myDB.action(
-                'SELECT ArtistName, AlbumTitle, ReleaseID, Type FROM albums WHERE AlbumID=?',
-                [self.id]).fetchone()
-            if dbalbum['ReleaseID'] != self.id:
-                data = lastfm.request_lastfm("album.getinfo", mbid=dbalbum['ReleaseID'],
-                                             api_key=LASTFM_API_KEY)
-                if not data:
-                    data = lastfm.request_lastfm("album.getinfo",
-                                                 artist=helpers.clean_musicbrainz_name(dbalbum['ArtistName']),
-                                                 album=helpers.clean_musicbrainz_name(dbalbum['AlbumTitle']),
+            dbalbum = myDB.action('SELECT ArtistName, AlbumTitle, ReleaseID, Type FROM albums WHERE AlbumID=?',[self.id]).fetchone()
+            if dbalbum:
+                if dbalbum['ReleaseID'] != self.id:
+                    data = lastfm.request_lastfm("album.getinfo", mbid=dbalbum['ReleaseID'],
                                                  api_key=LASTFM_API_KEY)
-            else:
-                if dbalbum['Type'] != "part of":
-                    data = lastfm.request_lastfm("album.getinfo",
-                                                artist=helpers.clean_musicbrainz_name(dbalbum['ArtistName']),
-                                                album=helpers.clean_musicbrainz_name(dbalbum['AlbumTitle']),
-                                                api_key=LASTFM_API_KEY)
-                else:
-
-                    # Series, use actual artist for the release-group
-                    artist = mb.getArtistForReleaseGroup(self.id)
-                    if artist:
+                    if not data:
                         data = lastfm.request_lastfm("album.getinfo",
-                                                     artist=helpers.clean_musicbrainz_name(artist),
+                                                     artist=helpers.clean_musicbrainz_name(dbalbum['ArtistName']),
                                                      album=helpers.clean_musicbrainz_name(dbalbum['AlbumTitle']),
                                                      api_key=LASTFM_API_KEY)
+                else:
+                    if dbalbum['Type'] != "part of":
+                        data = lastfm.request_lastfm("album.getinfo",
+                                                    artist=helpers.clean_musicbrainz_name(dbalbum['ArtistName']),
+                                                    album=helpers.clean_musicbrainz_name(dbalbum['AlbumTitle']),
+                                                    api_key=LASTFM_API_KEY)
+                    else:
+                        # Series, use actual artist for the release-group
+                        artist = mb.getArtistForReleaseGroup(self.id)
+                        if artist:
+                            data = lastfm.request_lastfm("album.getinfo",
+                                                         artist=helpers.clean_musicbrainz_name(artist),
+                                                         album=helpers.clean_musicbrainz_name(dbalbum['AlbumTitle']),
+                                                         api_key=LASTFM_API_KEY)
 
             if not data:
                 logger.debug('Last.fm connection cannot be made')
