@@ -2,7 +2,6 @@ import errno
 from functools import partial
 import select
 import sys
-
 try:
     from time import monotonic
 except ImportError:
@@ -41,8 +40,6 @@ if sys.version_info >= (3, 5):
     # Modern Python, that retries syscalls by default
     def _retry_on_intr(fn, timeout):
         return fn(timeout)
-
-
 else:
     # Old and broken Pythons.
     def _retry_on_intr(fn, timeout):
