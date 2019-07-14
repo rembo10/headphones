@@ -27,7 +27,6 @@ FANART_PROJECT_KEY = '22b73c9603eba09d0c855f2d2bdba31c'
 FANART_CLIENT_KEY = '919b389a18a3f0b2c916090022ab3c7a'
 
 
-
 class Cache(object):
     """
     This class deals with getting, storing and serving up artwork (album art,
@@ -250,7 +249,7 @@ class Cache(object):
             if image_url:
                 thumb_url = image_url
             else:
-               logger.debug('No artist image found on fanart.tv for Artist Id: %s', self.id)
+                logger.debug('No artist image found on fanart.tv for Artist Id: %s', self.id)
 
         else:
 
@@ -373,7 +372,7 @@ class Cache(object):
                     thumb_url = dbalbum['ThumbURL']
 
             if not image_url:
-               logger.debug('No artist image found on fanart.tv for Artist Id: %s', self.id)
+                logger.debug('No artist image found on fanart.tv for Artist Id: %s', self.id)
 
         else:
             dbalbum = myDB.action(
@@ -528,7 +527,7 @@ class Cache(object):
 
                 if fanart:
                     thumb_path = os.path.join(self.path_to_art_cache,
-                                              'T_' + self.id + '_fanart_' +'.' + helpers.today() + ext)
+                                              'T_' + self.id + '_fanart_' + '.' + helpers.today() + ext)
                 else:
                     thumb_path = os.path.join(self.path_to_art_cache,
                                               'T_' + self.id + '.' + helpers.today() + ext)

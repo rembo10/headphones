@@ -803,7 +803,7 @@ def getArtistRelationships(artistid):
     artist = None
     try:
         with mb_lock:
-            info = musicbrainzngs.get_artist_by_id(artistid, includes = 'url-rels' )
+            info = musicbrainzngs.get_artist_by_id(artistid, includes='url-rels')
     except musicbrainzngs.WebServiceError as e:
         logger.warn(
             'Attempt to query MusicBrainz for %s failed "%s"' % (artistid, str(e)))
@@ -817,4 +817,3 @@ def getArtistRelationships(artistid):
                     'url': l['target']
                 })
     return urls
-
