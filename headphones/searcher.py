@@ -1075,8 +1075,12 @@ def send_to_downloader(data, bestqual, album):
         slack.notify(name, "Download started")
     if headphones.CONFIG.TELEGRAM_ENABLED and headphones.CONFIG.TELEGRAM_ONSNATCH:
         logger.info(u"Sending Telegram notification")
+        from headphones import cache
+        c = cache.Cache()
+        album_art = c.get_artwork_from_cache(None, rgid)
         telegram = notifiers.TELEGRAM()
-        telegram.notify(name, "Download started")
+        message = 'Snatched from ' + provider + '. ' + name
+        telegram.notify(message, "Snatched: " + title, rgid, image=album_art)
     if headphones.CONFIG.TWITTER_ENABLED and headphones.CONFIG.TWITTER_ONSNATCH:
         logger.info(u"Sending Twitter notification")
         twitter = notifiers.TwitterNotifier()

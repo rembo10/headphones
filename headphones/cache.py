@@ -236,8 +236,8 @@ class Cache(object):
                 image_url = data['artistthumb'][0]['url']
             elif data.get('artistbackground'):
                 image_url = data['artistbackground'][0]['url']
-            elif data.get('hdmusiclogo'):
-                image_url = data['hdmusiclogo'][0]['url']
+            # elif data.get('hdmusiclogo'):
+            #    image_url = data['hdmusiclogo'][0]['url']
 
             # fallback to 1st album cover if none of the above
             elif 'albums' in data:
@@ -348,8 +348,8 @@ class Cache(object):
                 image_url = data['artistthumb'][0]['url']
             elif data.get('artistbackground'):
                 image_url = data['artistbackground'][0]['url']
-            elif data.get('hdmusiclogo'):
-                image_url = data['hdmusiclogo'][0]['url']
+            # elif data.get('hdmusiclogo'):
+            #    image_url = data['hdmusiclogo'][0]['url']
 
             # fallback to 1st album cover if none of the above
             elif 'albums' in data:

@@ -1017,7 +1017,7 @@ class Email(object):
 
 
 class TELEGRAM(object):
-    def notify(self, message, status):
+    def notify(self, message, status, rgid=None, image=None):
         if not headphones.CONFIG.TELEGRAM_ENABLED:
             return
 
@@ -1030,22 +1030,34 @@ class TELEGRAM(object):
         userid = headphones.CONFIG.TELEGRAM_USERID
 
         # Construct message
-        payload = {'chat_id': userid, 'text': status + ': ' + message}
+        message = '\n\n' + message
 
-        # Send message to user using Telegram's Bot API
-        try:
-            response = requests.post(TELEGRAM_API % (token, "sendMessage"),
-                                     data=payload)
-        except Exception, e:
-            logger.info(u'Telegram notify failed: ' + str(e))
+        # MusicBrainz link
+        if rgid:
+           message += '\n\n <a href="http://musicbrainz.org/' \
+                      'release-group/%s">MusicBrainz</a>' % rgid
+
+        # Send image
+        if image:
+            image_file = {'photo': (image, open(image, "rb"))}
+            payload = {'chat_id': userid, 'parse_mode': "HTML", 'caption': status + message}
+            try:
+                response = requests.post(TELEGRAM_API % (token, "sendPhoto"), data=payload, files=image_file)
+            except Exception, e:
+                logger.info(u'Telegram notify failed: ' + str(e))
+        # Sent text
+        else:
+            payload = {'chat_id': userid, 'parse_mode': "HTML", 'text': status + message}
+            try:
+                response = requests.post(TELEGRAM_API % (token, "sendMessage"), data=payload)
+            except Exception, e:
+                logger.info(u'Telegram notify failed: ' + str(e))
+
 
         # Error logging
         sent_successfuly = True
         if not response.status_code == 200:
-            logger.info(
-                u'Could not send notification to TelegramBot '
-                u'(token=%s). Response: [%s]',
-                (token, response.text))
+            logger.info("Could not send notification to TelegramBot (token=%s). Response: [%s]", token, response.text)
             sent_successfuly = False
 
         logger.info(u"Telegram notifications sent.")
