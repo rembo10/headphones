@@ -1034,7 +1034,7 @@ class TELEGRAM(object):
 
         # MusicBrainz link
         if rgid:
-           message += '\n\n <a href="http://musicbrainz.org/' \
+            message += '\n\n <a href="http://musicbrainz.org/' \
                       'release-group/%s">MusicBrainz</a>' % rgid
 
         # Send image
@@ -1052,7 +1052,6 @@ class TELEGRAM(object):
                 response = requests.post(TELEGRAM_API % (token, "sendMessage"), data=payload)
             except Exception, e:
                 logger.info(u'Telegram notify failed: ' + str(e))
-
 
         # Error logging
         sent_successfuly = True

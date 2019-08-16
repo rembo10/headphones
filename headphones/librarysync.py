@@ -404,7 +404,6 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
                 #             [artist]))
                 # )
 
-
                 try:
                     havetracks = (
                         len(myDB.select(
