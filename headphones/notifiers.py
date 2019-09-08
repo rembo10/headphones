@@ -1038,6 +1038,7 @@ class TELEGRAM(object):
                       'release-group/%s">MusicBrainz</a>' % rgid
 
         # Send image
+        response = None
         if image:
             image_file = {'photo': (image, open(image, "rb"))}
             payload = {'chat_id': userid, 'parse_mode': "HTML", 'caption': status + message}
@@ -1055,7 +1056,7 @@ class TELEGRAM(object):
 
         # Error logging
         sent_successfuly = True
-        if not response.status_code == 200:
+        if response and not response.status_code == 200:
             logger.info("Could not send notification to TelegramBot (token=%s). Response: [%s]", token, response.text)
             sent_successfuly = False
 
