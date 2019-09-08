@@ -793,3 +793,27 @@ def getArtistForReleaseGroup(rgid):
         return False
     else:
         return releaseGroup['artist-credit'][0]['artist']['name']
+
+
+def getArtistRelationships(artistid):
+    """
+    Returns list of relationship urls. e.g. Discogs, Wikipedia etc.
+    """
+    urls = []
+    artist = None
+    try:
+        with mb_lock:
+            info = musicbrainzngs.get_artist_by_id(artistid, includes='url-rels')
+    except musicbrainzngs.WebServiceError as e:
+        logger.warn(
+            'Attempt to query MusicBrainz for %s failed "%s"' % (artistid, str(e)))
+        mb_lock.snooze(5)
+    if 'artist' in info:
+        artist = info['artist']
+        if 'url-relation-list' in artist:
+            for l in artist['url-relation-list']:
+                urls.append({
+                    'type': l['type'],
+                    'url': l['target']
+                })
+    return urls

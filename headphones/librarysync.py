@@ -364,6 +364,11 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
 
         for artist in unique_artists:
 
+            if not artist:
+                continue
+
+            logger.info('Processing artist: %s' % artist)
+
             # check if artist is already in the db
             artist_lookup = "\"" + artist.replace("\"", "\"\"") + "\""
 
@@ -399,20 +404,23 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
                 #             [artist]))
                 # )
 
-                havetracks = (
-                    len(myDB.select(
-                        'SELECT ArtistID From tracks WHERE ArtistID = ? AND Location IS NOT NULL',
-                        [artistid])) + len(myDB.select(
-                            'SELECT ArtistName FROM have WHERE ArtistName LIKE ' + artist_lookup + ' AND Matched = "Failed"'))
-                )
+                try:
+                    havetracks = (
+                        len(myDB.select(
+                            'SELECT ArtistID From tracks WHERE ArtistID = ? AND Location IS NOT NULL',
+                            [artistid])) + len(myDB.select(
+                                'SELECT ArtistName FROM have WHERE ArtistName LIKE ' + artist_lookup + ' AND Matched = "Failed"'))
+                    )
+                except Exception as e:
+                    logger.warn('Error updating counts for artist: %s: %s' % (artist, e))
 
                 # Note: some people complain about having "artist have tracks" > # of tracks total in artist official releases
                 # (can fix by getting rid of second len statement)
 
-                myDB.action('UPDATE artists SET HaveTracks = ? WHERE ArtistID = ?', [havetracks, artistid])
-
-                # Update albums to downloaded
                 if havetracks:
+                    myDB.action('UPDATE artists SET HaveTracks = ? WHERE ArtistID = ?', [havetracks, artistid])
+
+                    # Update albums to downloaded
                     update_album_status(ArtistID=artistid)
 
         logger.info('Found %i new artists' % len(new_artist_list))
@@ -436,11 +444,16 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
         logger.info('Updating artist track counts')
 
         artist_lookup = "\"" + ArtistName.replace("\"", "\"\"") + "\""
-        havetracks = len(
-            myDB.select('SELECT ArtistID FROM tracks WHERE ArtistID = ? AND Location IS NOT NULL',
-                        [ArtistID])) + len(myDB.select(
-                            'SELECT ArtistName FROM have WHERE ArtistName LIKE ' + artist_lookup + ' AND Matched = "Failed"'))
-        myDB.action('UPDATE artists SET HaveTracks=? WHERE ArtistID=?', [havetracks, ArtistID])
+        try:
+            havetracks = len(
+                myDB.select('SELECT ArtistID FROM tracks WHERE ArtistID = ? AND Location IS NOT NULL',
+                            [ArtistID])) + len(myDB.select(
+                                'SELECT ArtistName FROM have WHERE ArtistName LIKE ' + artist_lookup + ' AND Matched = "Failed"'))
+        except Exception as e:
+            logger.warn('Error updating counts for artist: %s: %s' % (ArtistName, e))
+
+        if havetracks:
+            myDB.action('UPDATE artists SET HaveTracks=? WHERE ArtistID=?', [havetracks, ArtistID])
 
     # Moved above to call for each artist
     # if not append:

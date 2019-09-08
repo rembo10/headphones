@@ -586,7 +586,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
     if headphones.CONFIG.TELEGRAM_ENABLED:
         logger.info(u"Telegram request")
         telegram = notifiers.TELEGRAM()
-        telegram.notify(pushmessage, statusmessage)
+        telegram.notify(statusmessage, pushmessage)
 
     if headphones.CONFIG.TWITTER_ENABLED:
         logger.info(u"Sending Twitter notification")

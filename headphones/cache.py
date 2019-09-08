@@ -14,11 +14,17 @@
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+from six.moves.urllib.parse import urlencode
 
 import headphones
 from headphones import db, helpers, logger, lastfm, request, mb
 
-LASTFM_API_KEY = "690e1ed3bc00bc91804cd8f7fe5ed6d4"
+# LASTFM_API_KEY = "690e1ed3bc00bc91804cd8f7fe5ed6d4"
+LASTFM_API_KEY = "a1c959f36a912a165d73c4dc5b9520f5"
+
+FANART_URL = 'https://webservice.fanart.tv/v3/music/'
+FANART_PROJECT_KEY = '22b73c9603eba09d0c855f2d2bdba31c'
+FANART_CLIENT_KEY = '919b389a18a3f0b2c916090022ab3c7a'
 
 
 class Cache(object):
@@ -96,6 +102,11 @@ class Cache(object):
     def _is_current(self, filename=None, date=None):
 
         if filename:
+
+            # 2019 last.fm no longer allows access to artist images, for now we'll keep the cached artist image if it exists and get new from fanart.tv
+            if self.id_type == 'artist' and 'fanart' not in filename:
+                return True
+
             base_filename = os.path.basename(filename)
             date = base_filename.split('.')[1]
 
@@ -211,20 +222,34 @@ class Cache(object):
         if ArtistID:
 
             self.id_type = 'artist'
-            data = lastfm.request_lastfm("artist.getinfo", mbid=ArtistID, api_key=LASTFM_API_KEY)
+
+            # 2019 last.fm no longer allows access to artist images, try fanart.tv instead
+            image_url = None
+            thumb_url = None
+            data = request.request_json(FANART_URL + ArtistID, whitelist_status_code=404,
+                                        headers={'api-key': FANART_PROJECT_KEY, 'client-key': FANART_CLIENT_KEY})
 
             if not data:
                 return
 
-            try:
-                image_url = data['artist']['image'][-1]['#text']
-            except (KeyError, IndexError):
-                logger.debug('No artist image found')
-                image_url = None
+            if data.get('artistthumb'):
+                image_url = data['artistthumb'][0]['url']
+            elif data.get('artistbackground'):
+                image_url = data['artistbackground'][0]['url']
+            # elif data.get('hdmusiclogo'):
+            #    image_url = data['hdmusiclogo'][0]['url']
 
-            thumb_url = self._get_thumb_url(data)
-            if not thumb_url:
-                logger.debug('No artist thumbnail image found')
+            # fallback to 1st album cover if none of the above
+            elif 'albums' in data:
+                for mbid, art in data.get('albums', dict()).items():
+                    if 'albumcover' in art:
+                        image_url = art['albumcover'][0]['url']
+                        break
+
+            if image_url:
+                thumb_url = image_url
+            else:
+                logger.debug('No artist image found on fanart.tv for Artist Id: %s', self.id)
 
         else:
 
@@ -283,6 +308,7 @@ class Cache(object):
         """
 
         myDB = db.DBConnection()
+        fanart = False
 
         # Since lastfm uses release ids rather than release group ids for albums, we have to do a artist + album search for albums
         # Exception is when adding albums manually, then we should use release id
@@ -311,15 +337,42 @@ class Cache(object):
             except KeyError:
                 logger.debug('No artist bio found')
                 self.info_content = None
-            try:
-                image_url = data['artist']['image'][-1]['#text']
-            except KeyError:
-                logger.debug('No artist image found')
-                image_url = None
 
-            thumb_url = self._get_thumb_url(data)
-            if not thumb_url:
-                logger.debug('No artist thumbnail image found')
+            # 2019 last.fm no longer allows access to artist images, try fanart.tv instead
+            image_url = None
+            thumb_url = None
+            data = request.request_json(FANART_URL + self.id, whitelist_status_code=404,
+                                        headers={'api-key': FANART_PROJECT_KEY, 'client-key': FANART_CLIENT_KEY})
+
+            if data.get('artistthumb'):
+                image_url = data['artistthumb'][0]['url']
+            elif data.get('artistbackground'):
+                image_url = data['artistbackground'][0]['url']
+            # elif data.get('hdmusiclogo'):
+            #    image_url = data['hdmusiclogo'][0]['url']
+
+            # fallback to 1st album cover if none of the above
+            elif 'albums' in data:
+                for mbid, art in data.get('albums', dict()).items():
+                    if 'albumcover' in art:
+                        image_url = art['albumcover'][0]['url']
+                        break
+
+            # finally, use 1st album cover from last.fm
+            if image_url:
+                fanart = True
+                thumb_url = image_url
+            else:
+                dbalbum = myDB.action(
+                    'SELECT ArtworkURL, ThumbURL FROM albums WHERE ArtworkURL IS NOT NULL AND ArtistID=?',
+                    [self.id]).fetchone()
+                if dbalbum:
+                    fanart = True
+                    image_url = dbalbum['ArtworkURL']
+                    thumb_url = dbalbum['ThumbURL']
+
+            if not image_url:
+                logger.debug('No artist image found on fanart.tv for Artist Id: %s', self.id)
 
         else:
             dbalbum = myDB.action(
@@ -427,7 +480,11 @@ class Cache(object):
 
                 ext = os.path.splitext(image_url)[1]
 
-                artwork_path = os.path.join(self.path_to_art_cache,
+                if fanart:
+                    artwork_path = os.path.join(self.path_to_art_cache,
+                                                self.id + '_fanart_' + '.' + helpers.today() + ext)
+                else:
+                    artwork_path = os.path.join(self.path_to_art_cache,
                                             self.id + '.' + helpers.today() + ext)
                 try:
                     with open(artwork_path, 'wb') as f:
@@ -443,7 +500,9 @@ class Cache(object):
         # as it's missing/outdated.
         if thumb_url and self.query_type in ['thumb', 'artwork'] and not (
                 self.thumb_files and self._is_current(self.thumb_files[0])):
-            artwork = request.request_content(thumb_url, timeout=20)
+
+            if not (self.query_type == 'artwork' and 'fanart' in thumb_url and artwork):
+                artwork = request.request_content(thumb_url, timeout=20)
 
             if artwork:
                 # Make sure the artwork dir exists:
@@ -466,11 +525,34 @@ class Cache(object):
 
                 ext = os.path.splitext(image_url)[1]
 
-                thumb_path = os.path.join(self.path_to_art_cache,
-                                          'T_' + self.id + '.' + helpers.today() + ext)
+                if fanart:
+                    thumb_path = os.path.join(self.path_to_art_cache,
+                                              'T_' + self.id + '_fanart_' + '.' + helpers.today() + ext)
+                else:
+                    thumb_path = os.path.join(self.path_to_art_cache,
+                                              'T_' + self.id + '.' + helpers.today() + ext)
                 try:
-                    with open(thumb_path, 'wb') as f:
-                        f.write(artwork)
+                    if self.id_type != 'artist':
+                        with open(thumb_path, 'wb') as f:
+                            f.write(artwork)
+                    else:
+
+                        # 2019 last.fm no longer allows access to artist images, use the fanart.tv image to create a thumb
+                        artwork_thumb = None
+                        if 'fanart' in thumb_url:
+                            # Create thumb using image resizing service
+                            artwork_path = '{0}?{1}'.format('http://images.weserv.nl/', urlencode({
+                                'url': thumb_url.replace('http://', ''),
+                                'w': 300,
+                            }))
+                            artwork_thumb = request.request_content(artwork_path, timeout=20, whitelist_status_code=404)
+
+                        if artwork_thumb:
+                            with open(thumb_path, 'wb') as f:
+                                f.write(artwork_thumb)
+                        else:
+                            with open(thumb_path, 'wb') as f:
+                                f.write(artwork)
 
                     os.chmod(thumb_path, int(headphones.CONFIG.FILE_PERMISSIONS, 8))
                 except (OSError, IOError) as e:
@@ -486,7 +568,7 @@ def getArtwork(ArtistID=None, AlbumID=None):
     if not artwork_path:
         return None
 
-    if artwork_path.startswith('http://'):
+    if artwork_path.startswith(('http://', 'https://')):
         return artwork_path
     else:
         artwork_file = os.path.basename(artwork_path)
@@ -500,7 +582,7 @@ def getThumb(ArtistID=None, AlbumID=None):
     if not artwork_path:
         return None
 
-    if artwork_path.startswith('http://'):
+    if artwork_path.startswith(('http://', 'https://')):
         return artwork_path
     else:
         thumbnail_file = os.path.basename(artwork_path)
