@@ -66,7 +66,7 @@ class WebInterface(object):
     @cherrypy.expose
     def home(self):
         myDB = db.DBConnection()
-        artists = myDB.select('SELECT * from artists order by ArtistSortName COLLATE NOCASE')
+        artists = myDB.select('SELECT * from artists order by lower(ArtistSortName)')
         myDB.commit()
         return serve_template(templatename="index.html", title="Home", artists=artists)
 
@@ -566,7 +566,7 @@ class WebInterface(object):
     @cherrypy.expose
     def manageArtists(self):
         myDB = db.DBConnection()
-        artists = myDB.select('SELECT * from artists order by ArtistSortName COLLATE NOCASE')
+        artists = myDB.select('SELECT * from artists order by lower(ArtistSortName)')
         myDB.commit()
         return serve_template(templatename="manageartists.html", title="Manage Artists",
                               artists=artists)
@@ -1028,13 +1028,18 @@ class WebInterface(object):
         elif iSortCol_0 == '4':
             sortbyhavepercent = True
 
+        if sortcolumn == releasedate_type:
+            searchstr = "%s"
+        else:
+            searchstr = "lower(%s)"
+
         if sSearch == "":
-            query = ('SELECT * from artists order by %s COLLATE NOCASE %s') % (sortcolumn, sSortDir_0)
+            query = ('SELECT * from artists order by ' + searchstr + ' %s') % (sortcolumn, sSortDir_0)
             filtered = myDB.select(query)
             totalcount = len(filtered)
         else:
             sTerm = '%' + sSearch + '%'
-            query = ('SELECT * from artists WHERE ArtistSortName LIKE %%s OR LatestAlbum LIKE %%s ORDER BY %s COLLATE NOCASE %s') % (
+            query = ('SELECT * from artists WHERE ArtistSortName LIKE %%s OR LatestAlbum LIKE %%s ORDER BY ' + searchstr + ' %s') % (
                 sortcolumn, sSortDir_0)
             filtered = myDB.select(query, [sTerm, sTerm])
             totalcount = myDB.select('SELECT COUNT(*) as c from artists')[0]['c']

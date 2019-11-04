@@ -449,13 +449,13 @@ def dbcheck_pgsql():
     c.execute('CREATE INDEX IF NOT EXISTS tracks_releaseid ON tracks(ReleaseID ASC)')
 
     # Speed up scanning and track matching
-    c.execute('CREATE INDEX IF NOT EXISTS artist_artistname ON artists(ArtistName COLLATE NOCASE ASC)')
+    c.execute('CREATE INDEX IF NOT EXISTS artist_artistname ON artists(lower(ArtistName) ASC)')
 
     # General speed up
-    c.execute('CREATE INDEX IF NOT EXISTS artist_artistsortname ON artists(ArtistSortName COLLATE NOCASE ASC)')
+    c.execute('CREATE INDEX IF NOT EXISTS artist_artistsortname ON artists(lower(ArtistSortName) ASC)')
 
     c.execute(
-        """CREATE INDEX IF NOT EXISTS have_matched_artist_album ON have(Matched ASC, ArtistName COLLATE NOCASE ASC, AlbumTitle COLLATE NOCASE ASC)""")
+        """CREATE INDEX IF NOT EXISTS have_matched_artist_album ON have(Matched ASC, lower(ArtistName) ASC, lower(AlbumTitle) ASC)""")
     c.execute('DROP INDEX IF EXISTS have_matched')
 
     # Upsert data integrity tables
@@ -743,13 +743,13 @@ def dbcheck():
     c.execute('CREATE INDEX IF NOT EXISTS tracks_releaseid ON tracks(ReleaseID ASC)')
 
     # Speed up scanning and track matching
-    c.execute('CREATE INDEX IF NOT EXISTS artist_artistname ON artists(ArtistName COLLATE NOCASE ASC)')
+    c.execute('CREATE INDEX IF NOT EXISTS artist_artistname ON artists(lower(ArtistName) ASC)')
 
     # General speed up
-    c.execute('CREATE INDEX IF NOT EXISTS artist_artistsortname ON artists(ArtistSortName COLLATE NOCASE ASC)')
+    c.execute('CREATE INDEX IF NOT EXISTS artist_artistsortname ON artists(lower(ArtistSortName) ASC)')
 
     c.execute(
-        """CREATE INDEX IF NOT EXISTS have_matched_artist_album ON have(Matched ASC, ArtistName COLLATE NOCASE ASC, AlbumTitle COLLATE NOCASE ASC)""")
+        """CREATE INDEX IF NOT EXISTS have_matched_artist_album ON have(Matched ASC, lower(ArtistName) ASC, lower(AlbumTitle) ASC)""")
     c.execute('DROP INDEX IF EXISTS have_matched')
 
     try:

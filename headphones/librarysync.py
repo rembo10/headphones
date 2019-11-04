@@ -73,7 +73,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
                             [None, None, None, location])
 
         if ArtistName:
-            del_have_tracks = myDB.select('SELECT Location, Matched, ArtistName FROM have WHERE ArtistName = %s COLLATE NOCASE', [ArtistName])
+            del_have_tracks = myDB.select('SELECT Location, Matched, ArtistName FROM have WHERE ArtistName = lower(%s)', [ArtistName])
         else:
             del_have_tracks = myDB.select('SELECT Location, Matched, ArtistName FROM have')
 
@@ -401,11 +401,11 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
                 # ) c;', [ArtistID, ArtistName, 'Failed'])
 
                 try:
-                    havetracks = myDB.action('SELECT SUM (c.len) AS total FROM (
+                    havetracks = myDB.action('''SELECT SUM (c.len) AS total FROM (
                         SELECT count(t.ArtistID) AS len FROM tracks t WHERE t.ArtistID = %s  and Location IS NOT NULL
                         UNION ALL
                         SELECT count(h.ArtistName) as len fROM have h WHERE h.ArtistName LIKE %s AND Matched = %s
-                    ) c;', [ArtistID, ArtistName, 'Failed'])
+                    ) c''', [ArtistID, ArtistName, 'Failed'])
                 except Exception as e:
                     logger.warn('Error updating counts for artist: %s: %s' % (artist, e))
 
@@ -444,11 +444,11 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
 
         artist_lookup = "\"" + ArtistName.replace("\"", "\"\"") + "\""
         try:
-            havetracks = myDB.action('SELECT SUM (c.len) AS total FROM (
+            havetracks = myDB.action('''SELECT SUM (c.len) AS total FROM (
                     SELECT count(t.ArtistID) AS len FROM tracks t WHERE t.ArtistID = %s  and Location IS NOT NULL
                     UNION ALL
                     SELECT count(h.ArtistName) as len fROM have h WHERE h.ArtistName LIKE %s AND Matched = %s
-                    ) c;', [ArtistID, ArtistName, 'Failed'])
+                    ) c''', [ArtistID, ArtistName, 'Failed'])
             """havetracks = len(
                 myDB.select('SELECT ArtistID FROM tracks WHERE ArtistID = %s AND Location IS NOT NULL',
                             [ArtistID])) + len(myDB.select(

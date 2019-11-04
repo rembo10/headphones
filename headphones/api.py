@@ -114,7 +114,7 @@ class Api(object):
     def _getIndex(self, **kwargs):
 
         self.data = self._dic_from_query(
-                'SELECT * from artists order by ArtistSortName COLLATE NOCASE')
+                'SELECT * from artists order by lower(ArtistSortName)')
         return
 
     def _getArtist(self, **kwargs):
