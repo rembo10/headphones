@@ -310,7 +310,7 @@ class DBConnection_psql:
             c.rollback()
             raise
 
-        return sqlResult
+        return cursor
 
     def select(self, query, args=None):
 
