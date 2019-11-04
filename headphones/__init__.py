@@ -464,159 +464,218 @@ def dbcheck_pgsql():
     c.execute(
         'CREATE UNIQUE INDEX IF NOT EXISTS descriptions_uniqid ON descriptions(ArtistID ASC, ReleaseGroupID ASC)')
 
+    conn.commit()
+
     try:
         c.execute('SELECT IncludeExtras from artists')
     except psycopg2.Error:
+        conn.rollback()
         c.execute(
             'ALTER TABLE artists ADD COLUMN IncludeExtras INTEGER DEFAULT 0')
+        conn.commit()
 
     try:
         c.execute('SELECT LatestAlbum from artists')
     except psycopg2.Error:
+        conn.rollback()
         c.execute('ALTER TABLE artists ADD COLUMN LatestAlbum TEXT')
+        conn.commit()
 
     try:
         c.execute('SELECT ReleaseDate from artists')
     except psycopg2.Error:
+        conn.rollback()
         c.execute('ALTER TABLE artists ADD COLUMN ReleaseDate TEXT')
+        conn.commit()
 
     try:
         c.execute('SELECT AlbumID from artists')
     except psycopg2.Error:
+        conn.rollback()
         c.execute('ALTER TABLE artists ADD COLUMN AlbumID TEXT')
+        conn.commit()
 
     try:
         c.execute('SELECT HaveTracks from artists')
     except psycopg2.Error:
+        conn.rollback()
         c.execute(
             'ALTER TABLE artists ADD COLUMN HaveTracks INTEGER DEFAULT 0')
+        conn.commit()
 
     try:
         c.execute('SELECT TotalTracks from artists')
     except psycopg2.Error:
+        conn.rollback()
         c.execute(
             'ALTER TABLE artists ADD COLUMN TotalTracks INTEGER DEFAULT 0')
+        conn.commit()
 
     try:
         c.execute('SELECT Type from albums')
     except psycopg2.Error:
+        conn.rollback()
         c.execute('ALTER TABLE albums ADD COLUMN Type TEXT DEFAULT "Album"')
+        conn.commit()
 
     try:
         c.execute('SELECT TrackNumber from tracks')
     except psycopg2.Error:
+        conn.rollback()
         c.execute('ALTER TABLE tracks ADD COLUMN TrackNumber INTEGER')
+        conn.commit()
 
     try:
         c.execute('SELECT FolderName from snatched')
     except psycopg2.Error:
+        conn.rollback()
         c.execute('ALTER TABLE snatched ADD COLUMN FolderName TEXT')
+        conn.commit()
 
     try:
         c.execute('SELECT Location from tracks')
     except psycopg2.Error:
+        conn.rollback()
         c.execute('ALTER TABLE tracks ADD COLUMN Location TEXT')
+        conn.commit()
 
     try:
         c.execute('SELECT Location from have')
     except psycopg2.Error:
+        conn.rollback()
         c.execute('ALTER TABLE have ADD COLUMN Location TEXT')
+        conn.commit()
 
     try:
         c.execute('SELECT BitRate from tracks')
     except psycopg2.Error:
+        conn.rollback()
         c.execute('ALTER TABLE tracks ADD COLUMN BitRate INTEGER')
+        conn.commit()
 
     try:
         c.execute('SELECT CleanName from tracks')
     except psycopg2.Error:
+        conn.rollback()
         c.execute('ALTER TABLE tracks ADD COLUMN CleanName TEXT')
+        conn.commit()
 
     try:
         c.execute('SELECT CleanName from have')
     except psycopg2.Error:
+        conn.rollback()
         c.execute('ALTER TABLE have ADD COLUMN CleanName TEXT')
+        conn.commit()
 
     # Add the Format column
     try:
         c.execute('SELECT Format from have')
     except psycopg2.Error:
+        conn.rollback()
         c.execute('ALTER TABLE have ADD COLUMN Format TEXT DEFAULT NULL')
+        conn.commit()
 
     try:
         c.execute('SELECT Format from tracks')
     except psycopg2.Error:
+        conn.rollback()
         c.execute('ALTER TABLE tracks ADD COLUMN Format TEXT DEFAULT NULL')
+        conn.commit()
 
     try:
         c.execute('SELECT LastUpdated from artists')
     except psycopg2.Error:
+        conn.rollback()
         c.execute(
             'ALTER TABLE artists ADD COLUMN LastUpdated TEXT DEFAULT NULL')
+        conn.commit()
 
     try:
         c.execute('SELECT ArtworkURL from artists')
     except psycopg2.Error:
+        conn.rollback()
         c.execute(
             'ALTER TABLE artists ADD COLUMN ArtworkURL TEXT DEFAULT NULL')
+        conn.commit()
 
     try:
         c.execute('SELECT ArtworkURL from albums')
     except psycopg2.Error:
+        conn.rollback()
         c.execute('ALTER TABLE albums ADD COLUMN ArtworkURL TEXT DEFAULT NULL')
+        conn.commit()
 
     try:
         c.execute('SELECT ThumbURL from artists')
     except psycopg2.Error:
+        conn.rollback()
         c.execute('ALTER TABLE artists ADD COLUMN ThumbURL TEXT DEFAULT NULL')
+        conn.commit()
 
     try:
         c.execute('SELECT ThumbURL from albums')
     except psycopg2.Error:
+        conn.rollback()
         c.execute('ALTER TABLE albums ADD COLUMN ThumbURL TEXT DEFAULT NULL')
+        conn.commit()
 
     try:
         c.execute('SELECT ArtistID from descriptions')
     except psycopg2.Error:
+        conn.rollback()
         c.execute(
             'ALTER TABLE descriptions ADD COLUMN ArtistID TEXT DEFAULT NULL')
+        conn.commit()
 
     try:
         c.execute('SELECT LastUpdated from descriptions')
     except psycopg2.Error:
+        conn.rollback()
         c.execute(
             'ALTER TABLE descriptions ADD COLUMN LastUpdated TEXT DEFAULT NULL')
+        conn.commit()
 
     try:
         c.execute('SELECT ReleaseID from albums')
     except psycopg2.Error:
+        conn.rollback()
         c.execute('ALTER TABLE albums ADD COLUMN ReleaseID TEXT DEFAULT NULL')
+        conn.commit()
 
     try:
         c.execute('SELECT ReleaseFormat from albums')
     except psycopg2.Error:
+        conn.rollback()
         c.execute(
             'ALTER TABLE albums ADD COLUMN ReleaseFormat TEXT DEFAULT NULL')
+        conn.commit()
 
     try:
         c.execute('SELECT ReleaseCountry from albums')
     except psycopg2.Error:
+        conn.rollback()
         c.execute(
             'ALTER TABLE albums ADD COLUMN ReleaseCountry TEXT DEFAULT NULL')
+        conn.commit()
 
     try:
         c.execute('SELECT ReleaseID from tracks')
     except psycopg2.Error:
+        conn.rollback()
         c.execute('ALTER TABLE tracks ADD COLUMN ReleaseID TEXT DEFAULT NULL')
+        conn.commit()
 
     try:
         c.execute('SELECT Matched from have')
     except psycopg2.Error:
+        conn.rollback()
         c.execute('ALTER TABLE have ADD COLUMN Matched TEXT DEFAULT NULL')
+        conn.commit()
 
     try:
         c.execute('SELECT Extras from artists')
     except psycopg2.Error:
+        conn.rollback()
         c.execute('ALTER TABLE artists ADD COLUMN Extras TEXT DEFAULT NULL')
         # Need to update some stuff when people are upgrading and have 'include
         # extras' set globally/for an artist
@@ -629,36 +688,72 @@ def dbcheck_pgsql():
             if artist['IncludeExtras']:
                 c.execute(
                     'UPDATE artists SET Extras=%s WHERE ArtistID=%s', ("1,2,3,4,5,6,7,8", artist['ArtistID']))
+        conn.commit()
 
     try:
         c.execute('SELECT Kind from snatched')
     except psycopg2.Error:
+        conn.rollback()
         c.execute('ALTER TABLE snatched ADD COLUMN Kind TEXT DEFAULT NULL')
+        conn.commit()
 
     try:
         c.execute('SELECT SearchTerm from albums')
     except psycopg2.Error:
+        conn.rollback()
         c.execute('ALTER TABLE albums ADD COLUMN SearchTerm TEXT DEFAULT NULL')
+        conn.commit()
 
     try:
         c.execute('SELECT CriticScore from albums')
     except psycopg2.Error:
+        conn.rollback()
         c.execute('ALTER TABLE albums ADD COLUMN CriticScore TEXT DEFAULT NULL')
+        conn.commit()
 
     try:
         c.execute('SELECT UserScore from albums')
     except psycopg2.Error:
+        conn.rollback()
         c.execute('ALTER TABLE albums ADD COLUMN UserScore TEXT DEFAULT NULL')
+        conn.commit()
 
     try:
         c.execute('SELECT Type from artists')
     except psycopg2.Error:
+        conn.rollback()
         c.execute('ALTER TABLE artists ADD COLUMN Type TEXT DEFAULT NULL')
+        conn.commit()
 
     try:
         c.execute('SELECT MetaCritic from artists')
     except psycopg2.Error:
+        conn.rollback()
         c.execute('ALTER TABLE artists ADD COLUMN MetaCritic TEXT DEFAULT NULL')
+        conn.commit()
+
+    try:
+        c.execute('SELECT TorrentHash from snatched')
+    except psycopg2.Error:
+        conn.rollback()
+        c.execute('ALTER TABLE snatched ADD COLUMN TorrentHash TEXT')
+        c.execute('UPDATE snatched SET TorrentHash = FolderName WHERE Status LIKE %s', ['Seed_%'])
+        conn.commit()
+
+    try:
+        c.execute('select t from cleandone')
+    except psycopg2.Error:
+        conn.rollback()
+        logger.info("Updating track clean name, this could take some time...")
+        c.execute('UPDATE tracks SET CleanName = LOWER(CleanName) WHERE LOWER(CleanName) != CleanName')
+        c.execute('UPDATE alltracks SET CleanName = LOWER(CleanName) WHERE LOWER(CleanName) != CleanName')
+        c.execute('UPDATE have SET CleanName = LOWER(CleanName) WHERE LOWER(CleanName) != CleanName')
+        c.execute('create table cleandone (t timestamptz)')
+        c.execute('insert into cleandone values (now())')
+        conn.commit()
+
+
+
 
     c.close()
     conn.commit()
@@ -964,7 +1059,6 @@ def dbcheck():
 
     conn.commit()
     c.close()
-
 
 def shutdown(restart=False, update=False):
     cherrypy.engine.exit()
