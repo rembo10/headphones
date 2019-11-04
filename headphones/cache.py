@@ -364,7 +364,7 @@ class Cache(object):
                 thumb_url = image_url
             else:
                 dbalbum = myDB.action(
-                    'SELECT ArtworkURL, ThumbURL FROM albums WHERE ArtworkURL IS NOT NULL AND ArtistID=?',
+                    'SELECT ArtworkURL, ThumbURL FROM albums WHERE ArtworkURL IS NOT NULL AND ArtistID=%s',
                     [self.id]).fetchone()
                 if dbalbum:
                     fanart = True
@@ -376,7 +376,7 @@ class Cache(object):
 
         else:
             dbalbum = myDB.action(
-                'SELECT ArtistName, AlbumTitle, ReleaseID, Type FROM albums WHERE AlbumID=%S',
+                'SELECT ArtistName, AlbumTitle, ReleaseID, Type FROM albums WHERE AlbumID=%s',
                 [self.id]).fetchone()
             if dbalbum['ReleaseID'] != self.id:
                 data = lastfm.request_lastfm("album.getinfo", mbid=dbalbum['ReleaseID'],
