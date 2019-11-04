@@ -400,12 +400,13 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
                 #     SELECT count(h.ArtistName) as len fROM have h WHERE h.ArtistName LIKE %s AND Matched = %s
                 # ) c;', [ArtistID, ArtistName, 'Failed'])
 
+                havetracks = 0
                 try:
-                    havetracks = myDB.action('''SELECT SUM (c.len) AS total FROM (
+                    havetracks = myDB.select('''SELECT SUM (c.len) AS total FROM (
                         SELECT count(t.ArtistID) AS len FROM tracks t WHERE t.ArtistID = %s  and Location IS NOT NULL
                         UNION ALL
                         SELECT count(h.ArtistName) as len fROM have h WHERE h.ArtistName LIKE %s AND Matched = %s
-                    ) c''', [ArtistID, ArtistName, 'Failed'])
+                    ) c''', [ArtistID, ArtistName, 'Failed'])[0]['total']
                 except Exception as e:
                     logger.warn('Error updating counts for artist: %s: %s' % (artist, e))
 
@@ -443,12 +444,13 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
         logger.info('Updating artist track counts')
 
         artist_lookup = "\"" + ArtistName.replace("\"", "\"\"") + "\""
+        havetracks = 0
         try:
-            havetracks = myDB.action('''SELECT SUM (c.len) AS total FROM (
+            havetracks = myDB.select('''SELECT SUM (c.len) AS total FROM (
                     SELECT count(t.ArtistID) AS len FROM tracks t WHERE t.ArtistID = %s  and Location IS NOT NULL
                     UNION ALL
                     SELECT count(h.ArtistName) as len fROM have h WHERE h.ArtistName LIKE %s AND Matched = %s
-                    ) c''', [ArtistID, ArtistName, 'Failed'])
+                    ) c''', [ArtistID, ArtistName, 'Failed'])[0]['total']
             """havetracks = len(
                 myDB.select('SELECT ArtistID FROM tracks WHERE ArtistID = %s AND Location IS NOT NULL',
                             [ArtistID])) + len(myDB.select(
