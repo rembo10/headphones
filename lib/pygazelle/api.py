@@ -401,14 +401,15 @@ class GazelleAPI(object):
 
         return {'curr_page': curr_page, 'pages': pages, 'results': matching_torrents}
 
-    def generate_torrent_link(self, id):
-        url = "%storrents.php?action=download&id=%s&authkey=%s&torrent_pass=%s" %\
-              (self.site, id, self.logged_in_user.authkey, self.logged_in_user.passkey)
+    def generate_torrent_link(self, id, use_token=False):
+        url = "%storrents.php?action=download&id=%s&authkey=%s&torrent_pass=%s&usetoken=%d" %\
+              (self.site, id, self.logged_in_user.authkey, self.logged_in_user.passkey, use_token)
         return url
 
-    def save_torrent_file(self, id, dest):
+    def save_torrent_file(self, id, dest, use_token=False):
         file_data = self.unparsed_request("torrents.php", 'download',
-            id=id, authkey=self.logged_in_user.authkey, torrent_pass=self.logged_in_user.passkey)
+            id=id, authkey=self.logged_in_user.authkey, torrent_pass=self.logged_in_user.passkey,
+            usetoken=int(use_token))
         with open(dest, 'w+') as dest_file:
             dest_file.write(file_data)
 

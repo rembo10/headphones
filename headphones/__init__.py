@@ -430,6 +430,33 @@ def dbcheck_pgsql():
         'CREATE INDEX IF NOT EXISTS artist_ciStatus ON artists(lower(Status) ASC)')
     c.execute(
         'CREATE INDEX IF NOT EXISTS artist_ciReleaseDate ON artists(lower(ReleaseDate) ASC)')
+    c.execute(
+        'CREATE INDEX IF NOT EXISTS tracks_artistid ON tracks(ArtistID ASC)')
+
+    # Speed up album page
+    c.execute('CREATE INDEX IF NOT EXISTS allalbums_albumid ON allalbums(AlbumID ASC)')
+    c.execute('CREATE INDEX IF NOT EXISTS alltracks_albumid ON alltracks(AlbumID ASC)')
+    c.execute('CREATE INDEX IF NOT EXISTS releases_albumid ON releases(ReleaseGroupID ASC)')
+    c.execute('CREATE INDEX IF NOT EXISTS descriptions_albumid ON descriptions(ReleaseGroupID ASC)')
+
+    # Speed up artist deletion
+    c.execute('CREATE INDEX IF NOT EXISTS allalbums_artistid ON allalbums(ArtistID ASC)')
+    c.execute('CREATE INDEX IF NOT EXISTS alltracks_artistid ON alltracks(ArtistID ASC)')
+    c.execute('CREATE INDEX IF NOT EXISTS descriptions_artistid ON descriptions(ArtistID ASC)')
+
+    # Speed up Artist refresh hybrid release
+    c.execute('CREATE INDEX IF NOT EXISTS albums_releaseid ON albums(ReleaseID ASC)')
+    c.execute('CREATE INDEX IF NOT EXISTS tracks_releaseid ON tracks(ReleaseID ASC)')
+
+    # Speed up scanning and track matching
+    c.execute('CREATE INDEX IF NOT EXISTS artist_artistname ON artists(ArtistName COLLATE NOCASE ASC)')
+
+    # General speed up
+    c.execute('CREATE INDEX IF NOT EXISTS artist_artistsortname ON artists(ArtistSortName COLLATE NOCASE ASC)')
+
+    c.execute(
+        """CREATE INDEX IF NOT EXISTS have_matched_artist_album ON have(Matched ASC, ArtistName COLLATE NOCASE ASC, AlbumTitle COLLATE NOCASE ASC)""")
+    c.execute('DROP INDEX IF EXISTS have_matched')
 
     # Upsert data integrity tables
     c.execute(
@@ -638,6 +665,8 @@ def dbcheck_pgsql():
 
 
 def dbcheck():
+    logger.debug("SQLite Version: %s", sqlite3.sqlite_version)
+    logger.debug("DB-API Version: %s", sqlite3.version)
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
     c.execute(
@@ -695,6 +724,33 @@ def dbcheck():
         'CREATE INDEX IF NOT EXISTS tracks_Location ON tracks(Location ASC)')
     c.execute(
         'CREATE INDEX IF NOT EXISTS alltracks_Location ON alltracks(Location ASC)')
+    c.execute(
+        'CREATE INDEX IF NOT EXISTS tracks_artistid ON tracks(ArtistID ASC)')
+
+    # Speed up album page
+    c.execute('CREATE INDEX IF NOT EXISTS allalbums_albumid ON allalbums(AlbumID ASC)')
+    c.execute('CREATE INDEX IF NOT EXISTS alltracks_albumid ON alltracks(AlbumID ASC)')
+    c.execute('CREATE INDEX IF NOT EXISTS releases_albumid ON releases(ReleaseGroupID ASC)')
+    c.execute('CREATE INDEX IF NOT EXISTS descriptions_albumid ON descriptions(ReleaseGroupID ASC)')
+
+    # Speed up artist deletion
+    c.execute('CREATE INDEX IF NOT EXISTS allalbums_artistid ON allalbums(ArtistID ASC)')
+    c.execute('CREATE INDEX IF NOT EXISTS alltracks_artistid ON alltracks(ArtistID ASC)')
+    c.execute('CREATE INDEX IF NOT EXISTS descriptions_artistid ON descriptions(ArtistID ASC)')
+
+    # Speed up Artist refresh hybrid release
+    c.execute('CREATE INDEX IF NOT EXISTS albums_releaseid ON albums(ReleaseID ASC)')
+    c.execute('CREATE INDEX IF NOT EXISTS tracks_releaseid ON tracks(ReleaseID ASC)')
+
+    # Speed up scanning and track matching
+    c.execute('CREATE INDEX IF NOT EXISTS artist_artistname ON artists(ArtistName COLLATE NOCASE ASC)')
+
+    # General speed up
+    c.execute('CREATE INDEX IF NOT EXISTS artist_artistsortname ON artists(ArtistSortName COLLATE NOCASE ASC)')
+
+    c.execute(
+        """CREATE INDEX IF NOT EXISTS have_matched_artist_album ON have(Matched ASC, ArtistName COLLATE NOCASE ASC, AlbumTitle COLLATE NOCASE ASC)""")
+    c.execute('DROP INDEX IF EXISTS have_matched')
 
     try:
         c.execute('SELECT IncludeExtras from artists')

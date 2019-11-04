@@ -231,6 +231,7 @@ def getFolder(hash):
                 single_file = True
             else:
                 torrent_folder = os.path.split(torrent_files[0]['name'])[0]
+                torrent_folder = torrent_folder.split(os.sep)[0]
                 single_file = False
     except:
         torrent_folder = None

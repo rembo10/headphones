@@ -82,7 +82,7 @@ class Api(object):
     def fetchData(self):
 
         if self.data == 'OK':
-            logger.info('Recieved API command: %s', self.cmd)
+            logger.info('Received API command: %s', self.cmd)
             methodToCall = getattr(self, "_" + self.cmd)
             methodToCall(**self.kwargs)
             if 'callback' not in self.kwargs:
@@ -114,7 +114,7 @@ class Api(object):
     def _getIndex(self, **kwargs):
 
         self.data = self._dic_from_query(
-                'SELECT * from artists order by lower(ArtistSortName)')
+                'SELECT * from artists order by ArtistSortName COLLATE NOCASE')
         return
 
     def _getArtist(self, **kwargs):

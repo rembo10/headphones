@@ -184,13 +184,17 @@ def verify(albumid, albumpath, Kind=None, forced=False, keep_original_folder=Fal
             controlValueDict = {"TrackID": track['id'],
                                 "AlbumID": albumid}
 
+            clean_name = helpers.clean_name(
+                release_dict['artist_name'] + ' ' + release_dict['title'] + ' ' + track['title'])
+
             newValueDict = {"ArtistID": release_dict['artist_id'],
                             "ArtistName": release_dict['artist_name'],
                             "AlbumTitle": release_dict['title'],
                             "AlbumASIN": release_dict['asin'],
                             "TrackTitle": track['title'],
                             "TrackDuration": track['duration'],
-                            "TrackNumber": track['number']
+                            "TrackNumber": track['number'],
+                            "CleanName": clean_name
                             }
 
             myDB.upsert("tracks", newValueDict, controlValueDict)
@@ -584,7 +588,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
     if headphones.CONFIG.TELEGRAM_ENABLED:
         logger.info(u"Telegram request")
         telegram = notifiers.TELEGRAM()
-        telegram.notify(pushmessage, statusmessage)
+        telegram.notify(statusmessage, pushmessage)
 
     if headphones.CONFIG.TWITTER_ENABLED:
         logger.info(u"Sending Twitter notification")
@@ -660,7 +664,7 @@ def addAlbumArt(artwork, albumpath, release, metadata_dict):
     if artwork[:4] == '\x89PNG':
         ext = ".png"
 
-    album_art_name = helpers.replace_all(
+    album_art_name = helpers.pattern_substitute(
         headphones.CONFIG.ALBUM_ART_FORMAT.strip(), md) + ext
 
     album_art_name = helpers.replace_illegal_chars(album_art_name).encode(
@@ -716,7 +720,7 @@ def moveFiles(albumpath, release, metadata_dict):
     logger.info("Moving files: %s" % albumpath)
 
     md = metadata.album_metadata(albumpath, release, metadata_dict)
-    folder = helpers.replace_all(
+    folder = helpers.pattern_substitute(
         headphones.CONFIG.FOLDER_FORMAT.strip(), md, normalize=True)
 
     if headphones.CONFIG.FILE_UNDERSCORES:
@@ -1095,7 +1099,7 @@ def renameFiles(albumpath, downloaded_track_list, release):
             title = md[metadata.Vars.TITLE]
             new_file_name = helpers.cleanTitle(title) + ext
         else:
-            new_file_name = helpers.replace_all(
+            new_file_name = helpers.pattern_substitute(
                 headphones.CONFIG.FILE_FORMAT.strip(), md
             ).replace('/', '_') + ext
 

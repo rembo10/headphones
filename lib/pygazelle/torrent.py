@@ -152,6 +152,7 @@ class Torrent(object):
         self.snatched = search_torrent_json_response['snatches']
         self.free_torrent = search_torrent_json_response['isFreeleech'] or search_torrent_json_response['isPersonalFreeleech']
         self.time = search_torrent_json_response['time']
+        self.can_use_token = search_torrent_json_response.get('canUseToken', False)
 
     def set_torrent_top_10_data(self, top_10_json_response):
         if self.id != top_10_json_response['torrentId']:

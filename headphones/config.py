@@ -41,11 +41,11 @@ _CONFIG_DEFINITIONS = {
     'ALBUM_COMPLETION_PCT': (int, 'Advanced', 80),
     'API_ENABLED': (int, 'General', 0),
     'API_KEY': (str, 'General', ''),
-    'APOLLO': (int, 'Apollo.rip', 0),
-    'APOLLO_PASSWORD': (str, 'Apollo.rip', ''),
-    'APOLLO_RATIO': (str, 'Apollo.rip', ''),
-    'APOLLO_USERNAME': (str, 'Apollo.rip', ''),
-    'APOLLO_URL': (str, 'Apollo.rip', 'https://apollo.rip'),
+    'ORPHEUS': (int, 'Orpheus.network', 0),
+    'ORPHEUS_PASSWORD': (str, 'Orpheus.network', ''),
+    'ORPHEUS_RATIO': (str, 'Orpheus.network', ''),
+    'ORPHEUS_USERNAME': (str, 'Orpheus.network', ''),
+    'ORPHEUS_URL': (str, 'Orpheus.network', 'https://orpheus.network'),
     'AUTOWANT_ALL': (int, 'General', 0),
     'AUTOWANT_MANUALLY_ADDED': (int, 'General', 1),
     'AUTOWANT_UPCOMING': (int, 'General', 1),
@@ -150,9 +150,6 @@ _CONFIG_DEFINITIONS = {
     'JOIN_ENABLED': (int, 'Join', 0),
     'JOIN_ONSNATCH': (int, 'Join', 0),
     'JOURNAL_MODE': (str, 'Advanced', 'wal'),
-    'KAT': (int, 'Kat', 0),
-    'KAT_PROXY_URL': (str, 'Kat', ''),
-    'KAT_RATIO': (str, 'Kat', ''),
     'KEEP_NFO': (int, 'General', 0),
     'KEEP_TORRENT_FILES': (int, 'General', 0),
     'KEEP_TORRENT_FILES_DIR': (path, 'General', ''),
@@ -167,8 +164,7 @@ _CONFIG_DEFINITIONS = {
     'LOSSLESS_BITRATE_TO': (int, 'General', 0),
     'LOSSLESS_DESTINATION_DIR': (path, 'General', ''),
     'MB_IGNORE_AGE': (int, 'General', 365),
-    'MININOVA': (int, 'Mininova', 0),
-    'MININOVA_RATIO': (str, 'Mininova', ''),
+    'MB_IGNORE_AGE_MISSING': (int, 'General', 0),
     'MIRROR': (str, 'General', 'musicbrainz.org'),
     'MOVE_FILES': (int, 'General', 0),
     'MPC_ENABLED': (bool_int, 'MPC', False),
@@ -270,8 +266,6 @@ _CONFIG_DEFINITIONS = {
     'SONGKICK_ENABLED': (int, 'Songkick', 1),
     'SONGKICK_FILTER_ENABLED': (int, 'Songkick', 0),
     'SONGKICK_LOCATION': (str, 'Songkick', ''),
-    'STRIKE': (int, 'Strike', 0),
-    'STRIKE_RATIO': (str, 'Strike', ''),
     'SUBSONIC_ENABLED': (int, 'Subsonic', 0),
     'SUBSONIC_HOST': (str, 'Subsonic', ''),
     'SUBSONIC_PASSWORD': (str, 'Subsonic', ''),
@@ -288,6 +282,7 @@ _CONFIG_DEFINITIONS = {
     'TORZNAB_APIKEY': (str, 'Torznab', ''),
     'TORZNAB_ENABLED': (int, 'Torznab', 1),
     'TORZNAB_HOST': (str, 'Torznab', ''),
+    'TORZNAB_RATIO': (str, 'Torznab', ''),
     'TRANSMISSION_HOST': (str, 'Transmission', ''),
     'TRANSMISSION_PASSWORD': (str, 'Transmission', ''),
     'TRANSMISSION_USERNAME': (str, 'Transmission', ''),
@@ -296,9 +291,6 @@ _CONFIG_DEFINITIONS = {
     'TWITTER_PASSWORD': (str, 'Twitter', ''),
     'TWITTER_PREFIX': (str, 'Twitter', 'Headphones'),
     'TWITTER_USERNAME': (str, 'Twitter', ''),
-    'TQUATTRECENTONZE': (int, 'tquattrecentonze', 0),
-    'TQUATTRECENTONZE_PASSWORD': (str, 'tquattrecentonze', ''),
-    'TQUATTRECENTONZE_USER': (str, 'tquattrecentonze', ''),
     'UPDATE_DB_INTERVAL': (int, 'General', 24),
     'USE_POSTGRES': (bool_int, 'Advanced', 0),
     'POSTGRES_DSN': (str, 'Advanced', ''),
@@ -317,6 +309,7 @@ _CONFIG_DEFINITIONS = {
     'REDACTED_USERNAME': (str, 'Redacted', ''),
     'REDACTED_PASSWORD': (str, 'Redacted', ''),
     'REDACTED_RATIO': (str, 'Redacted', ''),
+    'REDACTED_USE_FLTOKEN': (int, 'Redacted', 0),
     'XBMC_ENABLED': (int, 'XBMC', 0),
     'XBMC_HOST': (str, 'XBMC', ''),
     'XBMC_NOTIFY': (int, 'XBMC', 0),
@@ -421,8 +414,8 @@ class Config(object):
     def get_extra_torznabs(self):
         """ Return the extra torznab tuples """
         extra_torznabs = list(
-            itertools.izip(*[itertools.islice(self.EXTRA_TORZNABS, i, None, 3)
-                             for i in range(3)])
+            itertools.izip(*[itertools.islice(self.EXTRA_TORZNABS, i, None, 4)
+                             for i in range(4)])
         )
         return extra_torznabs
 
@@ -493,4 +486,17 @@ class Config(object):
         if self.CONFIG_VERSION == '5':
             if self.OPEN_MAGNET_LINKS:
                 self.MAGNET_LINKS = 2
-            self.CONFIG_VERSION = '5'
+
+            # Add Seed Ratio to Torznabs
+            if self.EXTRA_TORZNABS:
+                extra_torznabs = list(
+                    itertools.izip(*[itertools.islice(self.EXTRA_TORZNABS, i, None, 3)
+                                     for i in range(3)])
+                )
+                new_torznabs = []
+                for torznab in extra_torznabs:
+                    new_torznabs.extend([torznab[0], torznab[1], u'', torznab[2]])
+                if new_torznabs:
+                    self.EXTRA_TORZNABS = new_torznabs
+
+            self.CONFIG_VERSION = '6'

@@ -87,10 +87,10 @@ class Rutracker(object):
         searchterm = searchterm + year
 
         if format == 'lossless':
-            format = '+lossless'
+            format = '+lossless||TR24'
             self.maxsize = 10000000000
         elif format == 'lossless+mp3':
-            format = '+lossless||mp3||aac'
+            format = '+lossless||TR24||mp3||aac'
             self.maxsize = 10000000000
         else:
             format = '+mp3||aac'
@@ -104,6 +104,7 @@ class Rutracker(object):
             searchterm = searchterm.encode('utf-8')
             searchurl = "%s?nm=%s%s%s" % (self.search_referer, urllib.quote(searchterm), format, sort)
         logger.info("Searching rutracker using term: %s", searchterm)
+
         return searchurl
 
     def search(self, searchurl):

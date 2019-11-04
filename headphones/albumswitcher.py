@@ -85,8 +85,8 @@ def switch(AlbumID, ReleaseID):
 
     # Update have track counts on index
     totaltracks = len(myDB.select(
-        'SELECT TrackTitle from tracks WHERE ArtistID=%s AND AlbumID IN (SELECT AlbumID FROM albums WHERE Status != %s)',
-        [newalbumdata['ArtistID'], 'Ignored']))
+        'SELECT TrackTitle from tracks AS tr INNER JOIN albums AS al ON al.AlbumID = tr.AlbumID WHERE al.ArtistID=%s '
+        'AND al.Status != %s', [newalbumdata['ArtistID', 'Ignored']]))
     havetracks = len(myDB.select(
         'SELECT TrackTitle from tracks WHERE ArtistID=%s AND Location IS NOT NULL',
         [newalbumdata['ArtistID']]))

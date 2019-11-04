@@ -133,6 +133,12 @@
                                     </label>
                                     <input type="text" name="mb_ignore_age" value="${config['mb_ignore_age']}" size="4">days
                                 </div>
+                                <div class="row checkbox">
+                                    <label title="Ignore MusicBrainz album updates missing a release date.">
+                                        Ignore Undated Releases
+                                    </label>
+                                    <input type="checkbox" id="mb_ignore_age_missing" name="mb_ignore_age_missing" value="1" ${config['mb_ignore_age_missing']}
+                                </div>                                
                             </fieldset>
                         </td>
                     </tr>
@@ -597,23 +603,6 @@
 
                                 <fieldset>
                                     <div class="row checkbox left">
-                                        <input id="use_kat" type="checkbox" class="bigcheck" name="use_kat" value="1" ${config['use_kat']} /><label for="use_kat"><span class="option">Kick Ass Torrents</span></label>
-                                    </div>
-                                    <div class="config">
-                                        <div class="row">
-                                            <label>Proxy URL</label>
-                                            <input type="text" name="kat_proxy_url" value="${config['kat_proxy_url']}" size="36">
-                                            <small>Optional. Leave empty for default.</small>
-                                        </div>
-                                        <div class="row">
-                                            <label>Seed Ratio</label>
-                                            <input type="text" class="override-float" name="kat_ratio" value="${config['kat_ratio']}" size="10" title="Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove torrent when post processed and finished seeding">
-                                        </div>
-                                    </div>
-                                </fieldset>
-
-                                <fieldset>
-                                    <div class="row checkbox left">
                                         <input id="use_waffles" type="checkbox" class="bigcheck" name="use_waffles" value="1" ${config['use_waffles']} /><label for="use_waffles"><span class="option">Waffles.ch</span></label>
                                     </div>
                                     <div class="config">
@@ -658,24 +647,24 @@
 
                                 <fieldset>
                                     <div class="row checkbox left">
-                                        <input id="use_apollo" type="checkbox" class="bigcheck" name="use_apollo" value="1" ${config['use_apollo']} /><label for="use_apollo"><span class="option">Apollo.rip</span></label>
+                                        <input id="use_orpheus" type="checkbox" class="bigcheck" name="use_orpheus" value="1" ${config['use_orpheus']} /><label for="use_orpheus"><span class="option">Orpheus.network</span></label>
                                     </div>
                                     <div class="config">
                                         <div class="row">
                                             <label>Username</label>
-                                            <input type="text" name="apollo_username" value="${config['apollo_username']}" size="36">
+                                            <input type="text" name="orpheus_username" value="${config['orpheus_username']}" size="36">
                                         </div>
                                         <div class="row">
                                             <label>Password</label>
-                                            <input type="password" name="apollo_password" value="${config['apollo_password'] | h}" size="36">
+                                            <input type="password" name="orpheus_password" value="${config['orpheus_password'] | h}" size="36">
                                         </div>
                                         <div class="row">
                                             <label>URL</label>
-                                            <input type="text" name="apollo_url" value="${config['apollo_url']}" size="36">
+                                            <input type="text" name="orpheus_url" value="${config['orpheus_url']}" size="36">
                                         </div>
                                         <div class="row">
                                             <label>Seed Ratio</label>
-                                            <input type="text" class="override-float" name="apollo_ratio" value="${config['apollo_ratio']}" size="10" title="Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove torrent when post processed and finished seeding">
+                                            <input type="text" class="override-float" name="orpheus_ratio" value="${config['orpheus_ratio']}" size="10" title="Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove torrent when post processed and finished seeding">
                                         </div>
                                     </div>
                                 </fieldset>
@@ -697,17 +686,9 @@
                                             <label>Seed Ratio</label>
                                             <input type="text" class="override-float" name="redacted_ratio" value="${config['redacted_ratio']}" size="10" title="Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove torrent when post processed and finished seeding">
                                         </div>
-                                    </div>
-                                </fieldset>
-
-                                <fieldset>
-                                    <div class="row checkbox left">
-                                        <input id="use_strike" type="checkbox" class="bigcheck" name="use_strike" value="1" ${config['use_strike']} /><label for="use_strike"><span class="option">Strike Search</span></label>
-                                    </div>
-                                    <div class="config">
                                         <div class="row">
-                                            <label>Seed Ratio</label>
-                                            <input type="text" class="override-float" name="strike_ratio" value="${config['strike_ratio']}" size="10" title="Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove torrent when post processed and finished seeding.">
+                                            <label>Use freeleech tokens when available</label>
+                                            <input type="checkbox" name="redacted_use_fltoken" value="1" ${config['redacted_use_fltoken']}>
                                         </div>
                                     </div>
                                 </fieldset>
@@ -720,12 +701,16 @@
                                         <div class="config" id="torznab1">
                                             <div class="row">
                                                 <label>Torznab Host</label>
-                                                <input type="text" name="torznab_host" value="${config['torznab_host']}" size="30">
-                                                <small>e.g. http://localhost:9117/torznab/iptorrents</small>
+                                                <input type="text" name="torznab_host" value="${config['torznab_host']}" size="36">
+                                                <small>e.g. http://localhost:9117/api/v2.0/indexers/demonoid/results/torznab/</small>
                                             </div>
                                             <div class="row">
                                                 <label>Torznab API</label>
                                                 <input type="text" name="torznab_apikey" value="${config['torznab_apikey']}" size="36">
+                                            </div>
+                                            <div class="row">
+                                                <label>Torznab Seed Ratio</label>
+                                                <input type="text" class="override-float" name="torznab_ratio" value="${config['torznab_ratio']}" size="10" title="Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove torrent when post processed and finished seeding.">
                                             </div>
                                             <div class="row checkbox">
                                                 <input id="torznab_enabled" type="checkbox" name="torznab_enabled" value="1" ${config['torznab_enabled']} /><label>Enabled</label>
@@ -736,7 +721,7 @@
                                         %>
                                         %for torznab in config['extra_torznabs']:
                                             <%
-                                                if torznab[2] == '1' or torznab[2] == 1:
+                                                if torznab[3] == '1' or torznab[3] == 1:
                                                     torznab_enabled = "checked"
                                                 else:
                                                     torznab_enabled = ""
@@ -744,11 +729,15 @@
                                             <div class="config" id="torznab${torznab_number}">
                                                 <div class="row">
                                                     <label>Torznab Host</label>
-                                                    <input type="text" name="torznab_host${torznab_number}" value="${torznab[0]}" size="30">
+                                                    <input type="text" name="torznab_host${torznab_number}" value="${torznab[0]}" size="36">
                                                 </div>
                                                 <div class="row">
                                                     <label>Torznab API</label>
                                                     <input type="text" name="torznab_api${torznab_number}" value="${torznab[1]}" size="36">
+                                                </div>
+                                                <div class="row">
+                                                    <label>Torznab Seed Ratio</label>
+                                                    <input type="text" class="override-float" name="torznab_ratio${torznab_number}" value="${torznab[2]}" size="10" title="Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove torrent when post processed and finished seeding.">
                                                 </div>
                                                 <div class="row checkbox">
                                                     <input id="torznab_enabled" type="checkbox" name="torznab_enabled${torznab_number}" value="1" ${torznab_enabled} /><label>Enabled</label>
@@ -777,34 +766,6 @@
                                         <div class="row">
                                             <label>Seed Ratio</label>
                                             <input type="text" class="override-float" name="oldpiratebay_ratio" value="${config['oldpiratebay_ratio']}" size="10" title="Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove torrent when post processed and finished seeding.">
-                                        </div>
-                                    </div>
-                                </fieldset>
-
-                                <fieldset>
-                                     <div class="row checkbox left">
-                                        <input id="use_mininova" type="checkbox" class="bigcheck" name="use_mininova" value="1" ${config['use_mininova']} /><label for="use_mininova"><span class="option">Mininova</span></label>
-                                    </div>
-                                    <div class="config">
-                                        <div class="row">
-                                            <label>Seed Ratio</label>
-                                            <input type="text" class="override-float" name="mininova_ratio" value="${config['mininova_ratio']}" size="10" title="Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove torrent when post processed and finished seeding">
-                                        </div>
-                                    </div>
-                                </fieldset>
-								
-                                <fieldset>
-                                    <div class="row checkbox left">
-                                        <input id="use_tquattrecentonze" type="checkbox" class="bigcheck" name="use_tquattrecentonze" value="1" ${config['use_tquattrecentonze']} /><label for="use_tquattrecentonze"><span class="option">t411</span></label>
-                                    </div>
-                                    <div class="config">
-                                        <div class="row">
-                                            <label>Username</label>
-                                            <input type="text" name="tquattrecentonze_user" value="${config['tquattrecentonze_user']}" size="36">
-                                        </div>
-                                        <div class="row">
-                                            <label>Password</label>
-                                            <input type="password" name="tquattrecentonze_password" value="${config['tquattrecentonze_password'] | h}" size="36">
                                         </div>
                                     </div>
                                 </fieldset>
@@ -2560,7 +2521,7 @@
 
                 $("#add_torznab").click(function() {
                     var intId = $("#torznab_providers > div").size() + deletedTorznabs + 1;
-                    var formfields = $("<div class=\"config\" id=\"torznab" + intId + "\"><div class=\"row\"><label>Torznab Host</label><input type=\"text\" name=\"torznab_host" + intId + "\" size=\"30\"></div><div class=\"row\"><label>Torznab API</label><input type=\"text\" name=\"torznab_api" + intId + "\" size=\"36\"></div><div class=\"row checkbox\"><input type=\"checkbox\" name=\"torznab_enabled" + intId + "\" value=\"1\" checked /><label>Enabled</label></div>");
+                    var formfields = $("<div class=\"config\" id=\"torznab" + intId + "\"><div class=\"row\"><label>Torznab Host</label><input type=\"text\" name=\"torznab_host" + intId + "\" size=\"30\"></div><div class=\"row\"><label>Torznab API</label><input type=\"text\" name=\"torznab_api" + intId + "\" size=\"36\"></div><div class=\"row\"><label>Torznab Seed Ratio</label><input type=\"text\" class=\"override-float\" name=\"torznab_ratio" + intId + "\" size=\"10\"></div><div class=\"row checkbox\"><input type=\"checkbox\" name=\"torznab_enabled" + intId + "\" value=\"1\" checked /><label>Enabled</label></div>");
                     var removeTorznabButton = $("<div class=\"row\"><input type=\"button\" class=\"remove_torznab\" value=\"Remove\" /></div>");
                     removeTorznabButton.click(function() {
                         $(this).parent().remove();
@@ -2589,20 +2550,16 @@
                 initConfigCheckbox("#use_nzbsorg");
                 initConfigCheckbox("#use_omgwtfnzbs");
                 initConfigCheckbox("#use_torznab");
-                initConfigCheckbox("#use_kat");
                 initConfigCheckbox("#use_piratebay");
                 initConfigCheckbox("#use_oldpiratebay");
-                initConfigCheckbox("#use_mininova");
                 initConfigCheckbox("#use_waffles");
                 initConfigCheckbox("#use_rutracker");
-                initConfigCheckbox("#use_apollo");
+                initConfigCheckbox("#use_orpheus");
                 initConfigCheckbox("#use_redacted");
-                initConfigCheckbox("#use_strike");
                 initConfigCheckbox("#api_enabled");
                 initConfigCheckbox("#enable_https");
                 initConfigCheckbox("#customauth");
-                initConfigCheckbox("#use_tquattrecentonze");
-
+                initConfigCheckbox("#mb_ignore_age_missing");
 
                 $('#twitterStep1').click(function () {
                     $.get("/twitterStep1", function (data) {window.open(data); })

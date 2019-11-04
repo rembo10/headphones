@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 #  This file is part of Headphones.
 #
 #  Headphones is free software: you can redistribute it and/or modify
@@ -81,7 +83,7 @@ def addTorrent(link, data=None, name=None):
 
         result = {}
         retid = False
-        url_apollo = ['https://apollo.rip/', 'http://apollo.rip/']
+        url_orpheus = ['https://orpheus.network/', 'http://orpheus.network/']
         url_waffles = ['https://waffles.ch/', 'http://waffles.ch/']
 
         if link.lower().startswith('magnet:'):
@@ -95,7 +97,7 @@ def addTorrent(link, data=None, name=None):
             if link.lower().startswith(tuple(url_waffles)):
                 if 'rss=' not in link:
                     link = link + '&rss=1'
-            if link.lower().startswith(tuple(url_apollo)):
+            if link.lower().startswith(tuple(url_orpheus)):
                 logger.debug('Deluge: Using different User-Agent for this site')
                 user_agent = 'Headphones'
                 # This method will make Deluge download the file
@@ -168,7 +170,10 @@ def addTorrent(link, data=None, name=None):
                     # remove '.torrent' suffix
                     if name[-len('.torrent'):] == '.torrent':
                         name = name[:-len('.torrent')]
-            logger.debug('Deluge: Sending Deluge torrent with name %s and content [%s...]' % (name, str(torrentfile)[:40]))
+            try:
+                logger.debug('Deluge: Sending Deluge torrent with name %s and content [%s...]' % (name, str(torrentfile)[:40]))
+            except UnicodeDecodeError:
+                logger.debug('Deluge: Sending Deluge torrent with name %s and content [%s...]' % (name.decode('utf-8'), str(torrentfile)[:40]))
             result = {'type': 'torrent',
                         'name': name,
                         'content': torrentfile}
@@ -379,7 +384,8 @@ def _get_auth():
             return None
 
         delugeweb_hosts = json.loads(response.text)['result']
-        if len(delugeweb_hosts) == 0:
+        # Check if delugeweb_hosts is None before checking its length
+        if not delugeweb_hosts or len(delugeweb_hosts) == 0:
             logger.error('Deluge: WebUI does not contain daemons')
             return None
 
@@ -465,7 +471,8 @@ def _add_torrent_file(result):
     try:
         # content is torrent file contents that needs to be encoded to base64
         post_data = json.dumps({"method": "core.add_torrent_file",
-                                "params": [result['name'] + '.torrent', b64encode(result['content'].encode('utf8')), {}],
+                                "params": [result['name'] + '.torrent',
+                                b64encode(result['content'].encode('utf8')), {}],
                                 "id": 2})
         response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth,
             verify=deluge_verify_cert, headers=headers)
@@ -478,7 +485,8 @@ def _add_torrent_file(result):
             # this time let's try leaving the encoding as is
             logger.debug('Deluge: There was a decoding issue, let\'s try again')
             post_data = json.dumps({"method": "core.add_torrent_file",
-                                    "params": [result['name'] + '.torrent', b64encode(result['content']), {}],
+                                    "params": [result['name'].decode('utf8') + '.torrent',
+                                    b64encode(result['content']), {}],
                                     "id": 22})
             response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth,
                 verify=deluge_verify_cert, headers=headers)

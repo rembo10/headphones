@@ -145,7 +145,7 @@ class _GNTPBase(object):
 		pointerEnd = pointerStart + dataLength
 		data = self.raw[pointerStart:pointerEnd]
 		if not len(data) == dataLength:
-			raise errors.ParseError('INVALID_DATA_LENGTH Expected: %s Recieved %s' % (dataLength, len(data)))
+			raise errors.ParseError('INVALID_DATA_LENGTH Expected: %s Received %s' % (dataLength, len(data)))
 		return data
 
 	def _validate_password(self, password):

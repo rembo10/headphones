@@ -23,6 +23,7 @@ import email.utils
 from httplib import HTTPSConnection
 from urlparse import parse_qsl
 import urllib2
+import requests as requests
 
 import os.path
 from headphones import logger, helpers, common, request
@@ -365,6 +366,41 @@ class Plex(object):
 
     def update(self):
 
+        # Get token from user credentials
+        if not self.token:
+            loginpage = 'https://plex.tv/users/sign_in.json'
+            post_params = {
+                'user[login]': self.username,
+                'user[password]': self.password
+            }
+            headers = {
+                'X-Plex-Device-Name': 'Headphones',
+                'X-Plex-Product': 'Headphones',
+                'X-Plex-Client-Identifier': common.USER_AGENT,
+                'X-Plex-Version': ''
+            }
+
+            logger.info("Getting plex.tv credentials for user %s", self.username)
+
+            try:
+                r = requests.post(loginpage, data=post_params, headers=headers)
+                r.raise_for_status()
+            except requests.RequestException as e:
+                logger.error("Error getting plex.tv credentials, check settings: %s", e)
+                return False
+
+            try:
+                data = r.json()
+            except ValueError as e:
+                logger.error("Error getting plex.tv credentials: %s", e)
+                return False
+
+            try:
+                self.token = data['user']['authentication_token']
+            except KeyError as e:
+                logger.error("Error getting plex.tv credentials: %s", e)
+                return False
+
         # From what I read you can't update the music library on a per
         # directory or per path basis so need to update the whole thing
 
@@ -379,19 +415,27 @@ class Plex(object):
             else:
                 params = False
 
-            r = request.request_minidom(url, params=params)
+            try:
+                r = request.request_minidom(url, params=params)
+                if not r:
+                    logger.warn("Error getting Plex Media Server details, check settings (possibly incorrect token)")
+                    return False
 
-            sections = r.getElementsByTagName('Directory')
+                sections = r.getElementsByTagName('Directory')
 
-            if not sections:
-                logger.info(u"Plex Media Server not running on: " + host)
+                if not sections:
+                    logger.info(u"Plex Media Server not running on: " + host)
+                    return False
+
+                for s in sections:
+                    if s.getAttribute('type') == "artist":
+                        url = "%s/library/sections/%s/refresh" % (
+                            host, s.getAttribute('key'))
+                        request.request_response(url, params=params)
+
+            except Exception as e:
+                logger.error("Error getting Plex Media Server details: %s" % e)
                 return False
-
-            for s in sections:
-                if s.getAttribute('type') == "artist":
-                    url = "%s/library/sections/%s/refresh" % (
-                        host, s.getAttribute('key'))
-                    request.request_response(url, params=params)
 
     def notify(self, artist, album, albumartpath):
 
@@ -817,7 +861,7 @@ class OSX_NOTIFY(object):
             self.AppKit = __import__("AppKit")
         except:
             logger.warn('OS X Notification: Cannot import objc or AppKit')
-            return False
+            pass
 
     def swizzle(self, cls, SEL, func):
         old_IMP = getattr(cls, SEL, None)
@@ -941,6 +985,7 @@ class Email(object):
         message['From'] = email.utils.formataddr(
             ('Headphones', headphones.CONFIG.EMAIL_FROM))
         message['To'] = headphones.CONFIG.EMAIL_TO
+        message['Date'] = email.utils.formatdate(localtime=True)
 
         try:
             if headphones.CONFIG.EMAIL_SSL:
@@ -972,7 +1017,7 @@ class Email(object):
 
 
 class TELEGRAM(object):
-    def notify(self, message, status):
+    def notify(self, message, status, rgid=None, image=None):
         if not headphones.CONFIG.TELEGRAM_ENABLED:
             return
 
@@ -985,22 +1030,34 @@ class TELEGRAM(object):
         userid = headphones.CONFIG.TELEGRAM_USERID
 
         # Construct message
-        payload = {'chat_id': userid, 'text': status + ': ' + message}
+        message = '\n\n' + message
 
-        # Send message to user using Telegram's Bot API
-        try:
-            response = requests.post(TELEGRAM_API % (token, "sendMessage"),
-                                     data=payload)
-        except Exception, e:
-            logger.info(u'Telegram notify failed: ' + str(e))
+        # MusicBrainz link
+        if rgid:
+            message += '\n\n <a href="http://musicbrainz.org/' \
+                      'release-group/%s">MusicBrainz</a>' % rgid
+
+        # Send image
+        response = None
+        if image:
+            image_file = {'photo': (image, open(image, "rb"))}
+            payload = {'chat_id': userid, 'parse_mode': "HTML", 'caption': status + message}
+            try:
+                response = requests.post(TELEGRAM_API % (token, "sendPhoto"), data=payload, files=image_file)
+            except Exception, e:
+                logger.info(u'Telegram notify failed: ' + str(e))
+        # Sent text
+        else:
+            payload = {'chat_id': userid, 'parse_mode': "HTML", 'text': status + message}
+            try:
+                response = requests.post(TELEGRAM_API % (token, "sendMessage"), data=payload)
+            except Exception, e:
+                logger.info(u'Telegram notify failed: ' + str(e))
 
         # Error logging
         sent_successfuly = True
-        if not response.status_code == 200:
-            logger.info(
-                u'Could not send notification to TelegramBot '
-                u'(token=%s). Response: [%s]',
-                (token, response.text))
+        if response and not response.status_code == 200:
+            logger.info("Could not send notification to TelegramBot (token=%s). Response: [%s]", token, response.text)
             sent_successfuly = False
 
         logger.info(u"Telegram notifications sent.")

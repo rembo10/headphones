@@ -6,7 +6,7 @@
 	myDB = db.DBConnection()
 	artist_json = {}
 	counter = 0
-	artist_list = myDB.action("SELECT ArtistName from artists ORDER BY lower(ArtistName)")
+	artist_list = myDB.action("SELECT ArtistName from artists ORDER BY ArtistName COLLATE NOCASE")
 	for artist in artist_list:
 		artist_json[counter] = artist['ArtistName'] 
 		counter+=1

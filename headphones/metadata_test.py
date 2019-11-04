@@ -168,8 +168,8 @@ class MetadataTest(TestCase):
         if not _h.SYS_ENCODING:
             _h.SYS_ENCODING = 'UTF-8'
 
-        res = _hp.replace_all(
+        res = _hp.pattern_substitute(
             "/music/$First/$Artist/$Artist - $Album{ [$Year]}", md, True)
 
         self.assertEqual(res, u"/music/A/artist/artist - Album",
-                         "check correct rendering of None via replace_all()")
+                         "check correct rendering of None via pattern_substitute()")

@@ -91,11 +91,13 @@ def artistlist_to_mbids(artistlist, forced=False):
             addArtisttoDB(artistid)
 
         # Just update the tracks if it does
-        else:
-            havetracks = len(
-                myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=%s', [artistid])) + len(
-                myDB.select('SELECT TrackTitle from have WHERE ArtistName like ?', [artist]))
-            myDB.action('UPDATE artists SET HaveTracks=%s WHERE ArtistID=%s', [havetracks, artistid])
+
+        # not sure this is correct and we're updating during scanning in librarysync
+        # else:
+        #     havetracks = len(
+        #         myDB.select('SELECT TrackTitle from tracks WHERE ArtistID=%s', [artistid])) + len(
+        #         myDB.select('SELECT TrackTitle from have WHERE ArtistName like %s', [artist]))
+        #     myDB.action('UPDATE artists SET HaveTracks=%s WHERE ArtistID=%s', [havetracks, artistid])
 
         # Delete it from the New Artists if the request came from there
         if forced:
@@ -108,7 +110,7 @@ def artistlist_to_mbids(artistlist, forced=False):
     try:
         lastfm.getSimilar()
     except Exception as e:
-        logger.warn('Failed to update arist information from Last.fm: %s' % e)
+        logger.warn('Failed to update artist information from Last.fm: %s' % e)
 
 
 def addArtistIDListToDB(artistidlist):
@@ -265,8 +267,12 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
 
             else:
                 if check_release_date is None or check_release_date == u"None":
-                    logger.info("[%s] Now updating: %s (No Release Date)" % (artist['artist_name'], rg['title']))
-                    new_releases = mb.get_new_releases(rgid, includeExtras, True)
+                    if headphones.CONFIG.MB_IGNORE_AGE_MISSING is not 1:
+                        logger.info("[%s] Now updating: %s (No Release Date)" % (artist['artist_name'], rg['title']))
+                        new_releases = mb.get_new_releases(rgid, includeExtras, True)
+                    else:
+                        logger.info("[%s] Skipping update of: %s (No Release Date)" % (artist['artist_name'], rg['title']))
+                        new_releases = 0
                 else:
                     if len(check_release_date) == 10:
                         release_date = check_release_date
@@ -308,7 +314,7 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
             # This will be used later to build a hybrid release
             fullreleaselist = []
             # Search for releases within a release group
-            find_hybrid_releases = myDB.action("SELECT * from allalbums WHERE AlbumID=%s",
+            find_hybrid_releases = myDB.select("SELECT * from allalbums WHERE AlbumID=%s",
                                                [rg['id']])
 
             # Build the dictionary for the fullreleaselist
@@ -515,7 +521,10 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
 
             logger.info(
                 u"[%s] Seeing if we need album art for %s" % (artist['artist_name'], rg['title']))
-            cache.getThumb(AlbumID=rg['id'])
+            try:
+                cache.getThumb(AlbumID=rg['id'])
+            except Exception as e:
+                logger.error("Error getting album art: %s", e)
 
             # Start a search for the album if it's new, hasn't been marked as
             # downloaded and autowant_all is selected. This search is deferred,
@@ -531,10 +540,16 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
     finalize_update(artistid, artist['artist_name'], errors)
 
     logger.info(u"Seeing if we need album art for: %s" % artist['artist_name'])
-    cache.getThumb(ArtistID=artistid)
+    try:
+        cache.getThumb(ArtistID=artistid)
+    except Exception as e:
+        logger.error("Error getting album art: %s", e)
 
     logger.info(u"Fetching Metacritic reviews for: %s" % artist['artist_name'])
-    metacritic.update(artistid, artist['artist_name'], artist['releasegroups'])
+    try:
+        metacritic.update(artistid, artist['artist_name'], artist['releasegroups'])
+    except Exception as e:
+        logger.error("Error getting Metacritic reviews: %s", e)
 
     if errors:
         logger.info(
