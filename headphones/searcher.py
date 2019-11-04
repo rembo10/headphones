@@ -1037,7 +1037,7 @@ def send_to_downloader(data, bestqual, album):
     if seed_ratio is not None and seed_ratio != 0 and torrentid:
         myDB.action(
             'INSERT INTO snatched VALUES( %s, %s, %s, %s, now(), %s, %s, %s, %s)',
-            [album['AlbumID'], bestqual[0], bestqual[1], bestqual[2], 'Seed_Snatched', 
+            [album['AlbumID'], bestqual[0], bestqual[1], bestqual[2], 'Seed_Snatched', folder_name,
              kind, torrentid])
 
     # notify
