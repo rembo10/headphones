@@ -1007,7 +1007,10 @@ def send_to_downloader(data, bestqual, album):
 
             # Add torrent
             if bestqual[3] == 'rutracker.org':
-                ruobj.qbittorrent_add_file(data)
+                if qbittorrent.apiVersion2:
+                    qbittorrent.addFile(data)
+                else:
+                    ruobj.qbittorrent_add_file(data)
             else:
                 qbittorrent.addTorrent(bestqual[2])
 
@@ -1025,6 +1028,11 @@ def send_to_downloader(data, bestqual, album):
             else:
                 logger.error('Torrent name could not be determined')
                 return
+
+            # Set Seed Ratio
+            seed_ratio = get_seed_ratio(bestqual[3])
+            if seed_ratio is not None:
+                qbittorrent.setSeedRatio(torrentid, seed_ratio)
 
     myDB = db.DBConnection()
     myDB.action('UPDATE albums SET status = "Snatched" WHERE AlbumID=?', [album['AlbumID']])
