@@ -186,9 +186,9 @@ def removeTorrent(hash, remove_data=False):
             if torrent['ratio'] >= torrent['ratio_limit'] and torrent['ratio_limit'] >= 0:
                 if qbclient.version == 2:
                     if remove_data:
-                        logger.info('%s has finished seeding, removing torrent and data. '
-                                    'Ratio: %s, Ratio Limit: %s' % (
-                                    torrent['name'], torrent['ratio'], torrent['ratio_limit']))
+                        logger.info(
+                            '%s has finished seeding, removing torrent and data. '
+                            'Ratio: %s, Ratio Limit: %s' % (torrent['name'], torrent['ratio'], torrent['ratio_limit']))
                         qbclient.qb.delete_permanently(hash)
                     else:
                         logger.info('%s has finished seeding, removing torrent' % torrent['name'])
