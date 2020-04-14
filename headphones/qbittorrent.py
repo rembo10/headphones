@@ -174,7 +174,6 @@ class qbittorrentclient(object):
 
 
 def removeTorrent(hash, remove_data=False):
-
     logger.debug('removeTorrent(%s,%s)' % (hash, remove_data))
 
     qbclient = qbittorrentclient()
@@ -187,7 +186,9 @@ def removeTorrent(hash, remove_data=False):
             if torrent['ratio'] >= torrent['ratio_limit'] and torrent['ratio_limit'] >= 0:
                 if qbclient.version == 2:
                     if remove_data:
-                        logger.info('%s has finished seeding, removing torrent and data' % torrent['name'])
+                        logger.info('%s has finished seeding, removing torrent and data. '
+                                    'Ratio: %s, Ratio Limit: %s' % (
+                                    torrent['name'], torrent['ratio'], torrent['ratio_limit']))
                         qbclient.qb.delete_permanently(hash)
                     else:
                         logger.info('%s has finished seeding, removing torrent' % torrent['name'])
@@ -196,7 +197,9 @@ def removeTorrent(hash, remove_data=False):
                     qbclient.remove(hash, remove_data)
                 return True
             else:
-                logger.info('%s has not finished seeding yet, torrent will not be removed, will try again on next run' % torrent['name'])
+                logger.info(
+                    '%s has not finished seeding yet, torrent will not be removed, will try again on next run. '
+                    'Ratio: %s, Ratio Limit: %s' % (torrent['name'], torrent['ratio'], torrent['ratio_limit']))
                 return False
     return False
 
