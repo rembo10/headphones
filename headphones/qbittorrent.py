@@ -28,6 +28,8 @@ import headphones
 from headphones import logger
 from collections import namedtuple
 
+from qbittorrentv2 import Client
+
 
 class qbittorrentclient(object):
 
@@ -49,9 +51,20 @@ class qbittorrentclient(object):
         self.base_url = host
         self.username = headphones.CONFIG.QBITTORRENT_USERNAME
         self.password = headphones.CONFIG.QBITTORRENT_PASSWORD
-        self.cookiejar = cookielib.CookieJar()
-        self.opener = self._make_opener()
-        self._get_sid(self.base_url, self.username, self.password)
+
+        # Try new v2 api
+        try:
+            self.qb = Client(self.base_url)
+            login_text = self.qb.login(self.username, self.password)
+            if login_text:
+                logger.warning("Could not login to qBittorrent v2 api, check credentials: %s", login_text)
+            self.version = 2
+        except Exception as e:
+            logger.warning("Error with qBittorrent v2 api, check settings or update, will try v1: %s" % e)
+            self.cookiejar = cookielib.CookieJar()
+            self.opener = self._make_opener()
+            self._get_sid(self.base_url, self.username, self.password)
+            self.version = 1
 
     def _make_opener(self):
         # create opener with cookie handler to carry QBitTorrent SID cookie
@@ -161,19 +174,32 @@ class qbittorrentclient(object):
 
 
 def removeTorrent(hash, remove_data=False):
-
     logger.debug('removeTorrent(%s,%s)' % (hash, remove_data))
 
     qbclient = qbittorrentclient()
-    status, torrentList = qbclient._get_list()
-    for torrent in torrentList:
-        if torrent['hash'].upper() == hash.upper():
-            if torrent['state'] == 'uploading' or torrent['state'] == 'stalledUP':
-                logger.info('%s has finished seeding, removing torrent and data' % torrent['name'])
-                qbclient.remove(hash, remove_data)
+    if qbclient.version == 2:
+        torrentlist = qbclient.qb.torrents(hashes=hash.lower())
+    else:
+        status, torrentlist = qbclient._get_list()
+    for torrent in torrentlist:
+        if torrent['hash'].lower() == hash.lower():
+            if torrent['ratio'] >= torrent['ratio_limit'] and torrent['ratio_limit'] >= 0:
+                if qbclient.version == 2:
+                    if remove_data:
+                        logger.info(
+                            '%s has finished seeding, removing torrent and data. '
+                            'Ratio: %s, Ratio Limit: %s' % (torrent['name'], torrent['ratio'], torrent['ratio_limit']))
+                        qbclient.qb.delete_permanently(hash)
+                    else:
+                        logger.info('%s has finished seeding, removing torrent' % torrent['name'])
+                        qbclient.qb.delete(hash)
+                else:
+                    qbclient.remove(hash, remove_data)
                 return True
             else:
-                logger.info('%s has not finished seeding yet, torrent will not be removed, will try again on next run' % torrent['name'])
+                logger.info(
+                    '%s has not finished seeding yet, torrent will not be removed, will try again on next run. '
+                    'Ratio: %s, Ratio Limit: %s' % (torrent['name'], torrent['ratio'], torrent['ratio_limit']))
                 return False
     return False
 
@@ -182,20 +208,27 @@ def addTorrent(link):
     logger.debug('addTorrent(%s)' % link)
 
     qbclient = qbittorrentclient()
-    args = {'urls': link, 'savepath': headphones.CONFIG.DOWNLOAD_TORRENT_DIR}
-    if headphones.CONFIG.QBITTORRENT_LABEL:
-        args['category'] = headphones.CONFIG.QBITTORRENT_LABEL
+    if qbclient.version == 2:
+        return qbclient.qb.download_from_link(link, savepath=headphones.CONFIG.DOWNLOAD_TORRENT_DIR,
+                                              category=headphones.CONFIG.QBITTORRENT_LABEL)
+    else:
+        args = {'urls': link, 'savepath': headphones.CONFIG.DOWNLOAD_TORRENT_DIR}
+        if headphones.CONFIG.QBITTORRENT_LABEL:
+            args['category'] = headphones.CONFIG.QBITTORRENT_LABEL
 
-    return qbclient._command('command/download', args, 'multipart/form-data')
+        return qbclient._command('command/download', args, 'multipart/form-data')
 
 
 def addFile(data):
     logger.debug('addFile(data)')
 
     qbclient = qbittorrentclient()
-    files = {'torrents': {'filename': '', 'content': data}}
-
-    return qbclient._command('command/upload', filelist=files)
+    if qbclient.version == 2:
+        return qbclient.qb.download_from_file(data, savepath=headphones.CONFIG.DOWNLOAD_TORRENT_DIR,
+                                              category=headphones.CONFIG.QBITTORRENT_LABEL)
+    else:
+        files = {'torrents': {'filename': '', 'content': data}}
+        return qbclient._command('command/upload', filelist=files)
 
 
 def getName(hash):
@@ -206,7 +239,10 @@ def getName(hash):
     tries = 1
     while tries <= 6:
         time.sleep(10)
-        status, torrentlist = qbclient._get_list()
+        if qbclient.version == 2:
+            torrentlist = qbclient.qb.torrents(hashes=hash.lower())
+        else:
+            status, torrentlist = qbclient._get_list()
         for torrent in torrentlist:
             if torrent['hash'].lower() == hash.lower():
                 return torrent['name']
@@ -224,7 +260,10 @@ def getFolder(hash):
     qbclient = qbittorrentclient()
 
     try:
-        status, torrent_files = qbclient.getfiles(hash.lower())
+        if qbclient.version == 2:
+            torrent_files = qbclient.qb.get_torrent_files(hash.lower())
+        else:
+            status, torrent_files = qbclient.getfiles(hash.lower())
         if torrent_files:
             if len(torrent_files) == 1:
                 torrent_folder = torrent_files[0]['name']
@@ -238,6 +277,30 @@ def getFolder(hash):
         single_file = False
 
     return torrent_folder, single_file
+
+
+def setSeedRatio(hash, ratio):
+    logger.debug('setSeedRatio(%s)' % hash)
+
+    qbclient = qbittorrentclient()
+
+    if qbclient.version == 2:
+        ratio = -1 if ratio == 0 else ratio
+        return qbclient.qb.set_share_ratio(hash.lower(), ratio)
+    else:
+        logger.warn('setSeedRatio only available with qBittorrent v2 api')
+        return
+
+
+def apiVersion2():
+    logger.debug('getApiVersion')
+
+    qbclient = qbittorrentclient()
+
+    if qbclient.version == 2:
+        return True
+    else:
+        return False
 
 
 _BOUNDARY_CHARS = string.digits + string.ascii_letters
