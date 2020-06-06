@@ -1415,7 +1415,9 @@ class WebInterface(object):
             "join_enabled": checked(headphones.CONFIG.JOIN_ENABLED),
             "join_onsnatch": checked(headphones.CONFIG.JOIN_ONSNATCH),
             "join_apikey": headphones.CONFIG.JOIN_APIKEY,
-            "join_deviceid": headphones.CONFIG.JOIN_DEVICEID
+            "join_deviceid": headphones.CONFIG.JOIN_DEVICEID,
+            "use_bandcamp": checked(headphones.CONFIG.BANDCAMP),
+            "bandcamp_dir": headphones.CONFIG.BANDCAMP_DIR
         }
 
         for k, v in config.iteritems():
@@ -1484,7 +1486,7 @@ class WebInterface(object):
             "songkick_enabled", "songkick_filter_enabled",
             "mpc_enabled", "email_enabled", "email_ssl", "email_tls", "email_onsnatch",
             "customauth", "idtag", "deluge_paused",
-            "join_enabled", "join_onsnatch"
+            "join_enabled", "join_onsnatch", "use_bandcamp"
         ]
         for checked_config in checked_configs:
             if checked_config not in kwargs:
