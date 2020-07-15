@@ -24,23 +24,32 @@ from headphones.common import USER_AGENT
 from beets.mediafile import MediaFile, UnreadableFileError
 from bs4 import BeautifulSoup
 
-def search(album, albumlength=None, page=1, resultlist = None):
-    dic = {'...': '', ' & ': ' ', ' = ': ' ', '?': '', '$': 's', ' + ': ' ', '"': '', ',': '',
-           '*': '', '.': '', ':': ''}
-    if resultlist == None:
+
+def search(album, albumlength=None, page=1, resultlist=None):
+    dic = {'...': '', ' & ': ' ', ' = ': ' ', '?': '', '$': 's', ' + ': ' ',
+           '"': '', ',': '', '*': '', '.': '', ':': ''}
+    if resultlist is None:
         resultlist = []
 
-    cleanalbum = helpers.latinToAscii(helpers.replace_all(album['AlbumTitle'], dic)).strip()
-    cleanartist = helpers.latinToAscii(helpers.replace_all(album['ArtistName'], dic)).strip()
+    cleanalbum = helpers.latinToAscii(
+        helpers.replace_all(album['AlbumTitle'], dic)
+        ).strip()
+    cleanartist = helpers.latinToAscii(
+        helpers.replace_all(album['ArtistName'], dic)
+        ).strip()
 
     headers = {'User-Agent': USER_AGENT}
     params = {
         "page": page,
         "q": cleanalbum,
     }
-    logger.debug("Looking up http://bandcamp.com/search with {}".format(params))
+    logger.debug("Looking up https://bandcamp.com/search with {}".format(
+        params))
     content = request.request_content(
-        url='https://bandcamp.com/search', params=params, headers=headers).decode('utf8')
+        url='https://bandcamp.com/search',
+        params=params,
+        headers=headers
+        ).decode('utf8')
     soup = BeautifulSoup(content, "html5lib")
 
     for item in soup.find_all("li", class_="searchresult"):
@@ -53,26 +62,34 @@ def search(album, albumlength=None, page=1, resultlist = None):
 
             logger.info(u"{} - {}".format(data['album'], cleanalbum_found))
 
-            logger.info("Comparing {} to {}".format(cleanalbum, cleanalbum_found))
-            if cleanartist.lower() == cleanartist_found.lower() and cleanalbum.lower()  == cleanalbum_found.lower():
-                resultlist.append((data['title'], data['size'], data['url'], 'bandcamp', 'bandcamp', True))
+            logger.info("Comparing {} to {}".format(
+                cleanalbum, cleanalbum_found))
+            if (cleanartist.lower() == cleanartist_found.lower() and
+                    cleanalbum.lower() == cleanalbum_found.lower()):
+                resultlist.append((
+                    data['title'], data['size'], data['url'],
+                    'bandcamp', 'bandcamp', True))
         else:
             continue
 
     if(soup.find('a', class_='next')):
-        page += 1;
+        page += 1
         logger.info("Calling next page ({})".format(page))
-        search(album, albumlength=albumlength, page=page, resultlist=resultlist)
+        search(album, albumlength=albumlength,
+               page=page, resultlist=resultlist)
 
     return resultlist
 
+
 def download(album, bestqual):
     html = request.request_content(url=bestqual[2]).decode('utf-8')
-    trackinfo= []
+    trackinfo = []
     try:
-        trackinfo = json.loads(re.search(r"trackinfo: (\[.*?\]),",html).group(1))
-    except:
-        logger.warn("Couldn't load json")
+        trackinfo = json.loads(
+            re.search(r"trackinfo: (\[.*?\]),", html)
+            .group(1))
+    except ValueError as e:
+        logger.warn("Couldn't load json: {}".format(e))
 
     directory = os.path.join(
         headphones.CONFIG.BANDCAMP_DIR,
@@ -89,9 +106,10 @@ def download(album, bestqual):
 
     index = 1
     for track in trackinfo:
-        filename  = helpers.replace_illegal_chars(
+        filename = helpers.replace_illegal_chars(
                     u'{:02d} - {}.mp3'.format(index, track['title']))
-        fullname  = os.path.join(directory.encode('utf-8'), filename.encode('utf-8'))
+        fullname = os.path.join(directory.encode('utf-8'),
+                                filename.encode('utf-8'))
         logger.debug("Downloading to {}".format(fullname))
 
         if track['file']['mp3-128']:
@@ -110,11 +128,14 @@ def download(album, bestqual):
                 })
                 f.save()
             except UnreadableFileError as ex:
-                logger.info("MediaFile couldn't parse: %s (%s)", fullname, str(ex))
+                logger.info("MediaFile couldn't parse: %s (%s)",
+                            fullname,
+                            str(ex))
 
         index += 1
 
     return directory
+
 
 def parse_album(item):
     album = item.find('div', class_='heading').text.strip()

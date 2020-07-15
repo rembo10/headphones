@@ -515,6 +515,7 @@ def get_year_from_release_date(release_date):
 def searchBandcamp(album, new=False, albumlength=None):
     return bandcamp.search(album)
 
+
 def searchNZB(album, new=False, losslessOnly=False, albumlength=None,
               choose_specific_download=False):
     reldate = album['ReleaseDate']
@@ -843,7 +844,7 @@ def send_to_downloader(data, bestqual, album):
     elif kind == 'bandcamp':
         folder_name = bandcamp.download(album, bestqual)
         logger.info("Setting folder_name to: {}".format(folder_name))
-    
+
     else:
         folder_name = '%s - %s [%s]' % (
             helpers.latinToAscii(album['ArtistName']).encode('UTF-8').replace('/', '_'),
