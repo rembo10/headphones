@@ -18,12 +18,17 @@ import json
 import os
 import re
 
-from headphones import logger, helpers, request
+from headphones import logger, helpers, metadata, request
 from headphones.common import USER_AGENT
 
-def search(album, albumlength=None, page=1):
+from beets.mediafile import MediaFile, UnreadableFileError
+from bs4 import BeautifulSoup
+
+def search(album, albumlength=None, page=1, resultlist = None):
     dic = {'...': '', ' & ': ' ', ' = ': ' ', '?': '', '$': 's', ' + ': ' ', '"': '', ',': '',
            '*': '', '.': '', ':': ''}
+    if resultlist == None:
+        resultlist = []
 
     cleanalbum = helpers.latinToAscii(helpers.replace_all(album['AlbumTitle'], dic)).strip()
     cleanartist = helpers.latinToAscii(helpers.replace_all(album['ArtistName'], dic)).strip()
@@ -34,28 +39,35 @@ def search(album, albumlength=None, page=1):
         "q": cleanalbum,
     }
     logger.debug("Looking up http://bandcamp.com/search with {}".format(params))
-    soup = request.request_soup(
-        url='https://bandcamp.com/search', params=params, headers=headers)
-
-    resultlist = []
+    content = request.request_content(
+        url='https://bandcamp.com/search', params=params, headers=headers).decode('utf8')
+    soup = BeautifulSoup(content, "html5lib")
 
     for item in soup.find_all("li", class_="searchresult"):
         type = item.find('div', class_='itemtype').text.strip().lower()
         if type == "album":
             data = parse_album(item)
 
-            cleanartist_found = helpers.latinToAscii(helpers.replace_all(data['artist'], dic)).strip()
-            cleanalbum_found = helpers.latinToAscii(helpers.replace_all(data['album'], dic)).strip()
+            cleanartist_found = helpers.latinToAscii(data['artist'])
+            cleanalbum_found = helpers.latinToAscii(data['album'])
 
+            logger.info(u"{} - {}".format(data['album'], cleanalbum_found))
+
+            logger.info("Comparing {} to {}".format(cleanalbum, cleanalbum_found))
             if cleanartist.lower() == cleanartist_found.lower() and cleanalbum.lower()  == cleanalbum_found.lower():
                 resultlist.append((data['title'], data['size'], data['url'], 'bandcamp', 'bandcamp', True))
         else:
             continue
 
+    if(soup.find('a', class_='next')):
+        page += 1;
+        logger.info("Calling next page ({})".format(page))
+        search(album, albumlength=albumlength, page=page, resultlist=resultlist)
+
     return resultlist
 
 def download(album, bestqual):
-    html = request.request_content(url=bestqual[2])
+    html = request.request_content(url=bestqual[2]).decode('utf-8')
     trackinfo= []
     try:
         trackinfo = json.loads(re.search(r"trackinfo: (\[.*?\]),",html).group(1))
@@ -64,31 +76,44 @@ def download(album, bestqual):
 
     directory = os.path.join(
         headphones.CONFIG.BANDCAMP_DIR,
-        "{} - {}".format(
-            helpers.latinToAscii(album['ArtistName']).encode('UTF-8').replace('/', '_'),
-            helpers.latinToAscii(album['AlbumTitle']).encode('UTF-8').replace('/', '_')))
+        u'{} - {}'.format(
+            album['ArtistName'].replace('/', '_'),
+            album['AlbumTitle'].replace('/', '_')))
+    directory = helpers.latinToAscii(directory)
 
     if not os.path.exists(directory):
         try:
-            logger.debug("Creating directory {}".format(directory))
             os.makedirs(directory)
         except Exception as e:
-            logger.warn("Could not create directory {} ({})".format(directory, e))
+            logger.warn("Could not create directory ({})".format(e))
 
     index = 1
     for track in trackinfo:
         filename  = helpers.replace_illegal_chars(
-                    "{:02d} - {}.mp3".format(index, track['title']))
-        fullname  = os.path.join(directory, filename)
+                    u'{:02d} - {}.mp3'.format(index, track['title']))
+        fullname  = os.path.join(directory.encode('utf-8'), filename.encode('utf-8'))
         logger.debug("Downloading to {}".format(fullname))
 
         if track['file']['mp3-128']:
             content = request.request_content(track['file']['mp3-128'])
             open(fullname, 'wb').write(content)
+            try:
+                f = MediaFile(fullname)
+                date, year = metadata._date_year(album)
+                f.update({
+                    'artist': album['ArtistName'].encode('utf-8'),
+                    'album': album['AlbumTitle'].encode('utf-8'),
+                    'title': track['title'].encode('utf-8'),
+                    'track': track['track_num'],
+                    'tracktotal': len(trackinfo),
+                    'year': year,
+                })
+                f.save()
+            except UnreadableFileError as ex:
+                logger.info("MediaFile couldn't parse: %s (%s)", fullname, str(ex))
 
         index += 1
 
-    logger.info("Returning directory {}".format(directory))
     return directory
 
 def parse_album(item):
@@ -100,16 +125,15 @@ def parse_album(item):
 
     url = item.find('div', class_='heading').find('a')['href'].split("?")[0]
 
-    lenght = item.find('div', class_='length').text.strip()
-    tracks, minutes = lenght.split(",")
+    length = item.find('div', class_='length').text.strip()
+    tracks, minutes = length.split(",")
     tracks = tracks.replace(" tracks", "").replace(" track", "").strip()
     minutes = minutes.replace(" minutes", "").strip()
     # bandcamp offers mp3 128b with should be 960KB/minute
     size = int(minutes) * 983040
 
-    data = {"title": "{} - {} [{}]".format(artist, album, year),
+    data = {"title": u'{} - {} [{}]'.format(artist, album, year),
             "artist": artist, "album": album,
             "url": url, "size": size}
 
-    #logger.debug("Found {}".format(data['title']))
     return data
