@@ -285,14 +285,13 @@ def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
                               [album['AlbumID']])[0][0]
 
     if headphones.CONFIG.PREFER_TORRENTS == 0 and not choose_specific_download:
-        results = searchBandcamp(album, new, albumlength)
         if NZB_PROVIDERS and NZB_DOWNLOADERS:
             results = searchNZB(album, new, losslessOnly, albumlength)
 
         if not results and TORRENT_PROVIDERS:
             results = searchTorrent(album, new, losslessOnly, albumlength)
 
-        if not results:
+        if not results and headphones.CONFIG.BANDCAMP:
             results = searchBandcamp(album, new, albumlength)
 
     elif headphones.CONFIG.PREFER_TORRENTS == 1 and not choose_specific_download:
@@ -302,10 +301,13 @@ def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
         if not results and NZB_PROVIDERS and NZB_DOWNLOADERS:
             results = searchNZB(album, new, losslessOnly, albumlength)
 
+        if not results and headphones.CONFIG.BANDCAMP:
+            results = searchBandcamp(album, new, albumlength)
     else:
 
         nzb_results = None
         torrent_results = None
+        bandcamp_results = None
 
         if NZB_PROVIDERS and NZB_DOWNLOADERS:
             nzb_results = searchNZB(album, new, losslessOnly, albumlength, choose_specific_download)
@@ -314,13 +316,16 @@ def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
             torrent_results = searchTorrent(album, new, losslessOnly, albumlength,
                                             choose_specific_download)
 
+        if headphones.CONFIG.BANDCAMP:
+            bandcamp_results = searchBandcamp(album, new, albumlength)
+
         if not nzb_results:
             nzb_results = []
 
         if not torrent_results:
             torrent_results = []
 
-        results = nzb_results + torrent_results
+        results = nzb_results + torrent_results + bandcamp_results
 
     if choose_specific_download:
         return results
