@@ -48,6 +48,8 @@ def checkFolder():
                 single = False
                 if album['Kind'] == 'nzb':
                     download_dir = headphones.CONFIG.DOWNLOAD_DIR
+                elif album['Kind'] == 'bandcamp':
+                    download_dir = headphones.CONFIG.BANDCAMP_DIR
                 else:
                     if headphones.CONFIG.DELUGE_DONE_DIRECTORY and headphones.CONFIG.TORRENT_DOWNLOADER == 3:
                         download_dir = headphones.CONFIG.DELUGE_DONE_DIRECTORY
@@ -1180,6 +1182,9 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None, keep_orig
         if headphones.CONFIG.DOWNLOAD_TORRENT_DIR and not dir:
             download_dirs.append(
                 headphones.CONFIG.DOWNLOAD_TORRENT_DIR.encode(headphones.SYS_ENCODING, 'replace'))
+        if headphones.CONFIG.BANDCAMP and not dir:
+            download_dirs.append(
+                headphones.CONFIG.BANDCAMP_DIR.encode(headphones.SYS_ENCODING, 'replace'))
 
         # If DOWNLOAD_DIR and DOWNLOAD_TORRENT_DIR are the same, remove the duplicate to prevent us from trying to process the same folder twice.
         download_dirs = list(set(download_dirs))
