@@ -43,7 +43,7 @@ def search(album, albumlength=None, page=1, resultlist=None):
         "page": page,
         "q": cleanalbum,
     }
-    logger.debug("Looking up https://bandcamp.com/search with {}".format(
+    logger.info("Looking up https://bandcamp.com/search with {}".format(
         params))
     content = request.request_content(
         url='https://bandcamp.com/search',
@@ -60,9 +60,9 @@ def search(album, albumlength=None, page=1, resultlist=None):
             cleanartist_found = helpers.latinToAscii(data['artist'])
             cleanalbum_found = helpers.latinToAscii(data['album'])
 
-            logger.info(u"{} - {}".format(data['album'], cleanalbum_found))
+            logger.debug(u"{} - {}".format(data['album'], cleanalbum_found))
 
-            logger.info("Comparing {} to {}".format(
+            logger.debuginfo("Comparing {} to {}".format(
                 cleanalbum, cleanalbum_found))
             if (cleanartist.lower() == cleanartist_found.lower() and
                     cleanalbum.lower() == cleanalbum_found.lower()):
@@ -74,7 +74,7 @@ def search(album, albumlength=None, page=1, resultlist=None):
 
     if(soup.find('a', class_='next')):
         page += 1
-        logger.info("Calling next page ({})".format(page))
+        logger.debug("Calling next page ({})".format(page))
         search(album, albumlength=albumlength,
                page=page, resultlist=resultlist)
 
@@ -128,7 +128,7 @@ def download(album, bestqual):
                 })
                 f.save()
             except UnreadableFileError as ex:
-                logger.info("MediaFile couldn't parse: %s (%s)",
+                logger.warn("MediaFile couldn't parse: %s (%s)",
                             fullname,
                             str(ex))
 
