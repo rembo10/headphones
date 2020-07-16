@@ -62,7 +62,7 @@ def search(album, albumlength=None, page=1, resultlist=None):
 
             logger.debug(u"{} - {}".format(data['album'], cleanalbum_found))
 
-            logger.debuginfo("Comparing {} to {}".format(
+            logger.debug("Comparing {} to {}".format(
                 cleanalbum, cleanalbum_found))
             if (cleanartist.lower() == cleanartist_found.lower() and
                     cleanalbum.lower() == cleanalbum_found.lower()):
