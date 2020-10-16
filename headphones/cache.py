@@ -19,8 +19,7 @@ from six.moves.urllib.parse import urlencode
 import headphones
 from headphones import db, helpers, logger, lastfm, request, mb
 
-# LASTFM_API_KEY = "a1c959f36a912a165d73c4dc5b9520f5"
-LASTFM_API_KEY = "6168e725d96eef5856fbf679954abf2b"
+LASTFM_API_KEY = "5205f5b3ef8a30eb341f67802274cec2"
 
 FANART_URL = 'https://webservice.fanart.tv/v3/music/'
 FANART_PROJECT_KEY = '22b73c9603eba09d0c855f2d2bdba31c'
