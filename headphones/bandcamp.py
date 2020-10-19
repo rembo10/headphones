@@ -86,8 +86,9 @@ def download(album, bestqual):
     trackinfo = []
     try:
         trackinfo = json.loads(
-            re.search(r"trackinfo: (\[.*?\]),", html)
-            .group(1))
+            re.search(r"trackinfo&quot;:(\[.*?\]),", html)
+            .group(1)
+            .replace('&quot;', '"'))
     except ValueError as e:
         logger.warn("Couldn't load json: {}".format(e))
 
