@@ -113,7 +113,7 @@ def download(album, bestqual):
                                 filename.encode('utf-8'))
         logger.debug("Downloading to {}".format(fullname))
 
-        if track['file']['mp3-128']:
+        if 'file' in track and track['file'] != None and 'mp3-128' in track['file']:
             content = request.request_content(track['file']['mp3-128'])
             open(fullname, 'wb').write(content)
             try:
