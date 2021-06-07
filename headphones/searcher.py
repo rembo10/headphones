@@ -1297,7 +1297,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
             categories = "3040,3010,3050"
             maxsize = 10000000000
         else:
-            categories = "3010,3050"
+            categories = "3000,3010,3050,8000,8010"
             maxsize = 300000000
 
         if album['Type'] == 'Other':
@@ -1307,10 +1307,64 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
         for torznab_host in torznab_hosts:
 
             provider = torznab_host[0]
+            categories_b = categories
 
             # Format Jackett provider
             if "api/v2.0/indexers" in torznab_host[0]:
                 provider = "Jackett_" + provider.split("/indexers/", 1)[1].split('/', 1)[0]
+                # Update categories for Jackett providers
+                if provider == "Jackett_1337x":
+                    categories += ",8000,8010,100003,100022,100023,100027,100040,100053,100058,100059,100060,100069"
+                if provider == "Jackett_exttorrents":
+                    categories += ",106587,121774,129114,142081,150037,151589"
+                if provider == "Jackett_extratorrent-cd":
+                    categories += ",104627,127246"
+                if provider == "Jackett_extratorrent-it":
+                    categories += ",100005,100056,100058,100060,100061,100063,100064,100065,100066,100068,100070,100071,100072,100073,100074,100075,100076,100077,100078,100079,100161,100230,100233,100306,100420,100505,100511,100514,100515,100519,100521,100522,100526,100527,100724,100850,100852,100971,100990,101002,101003,101004,101006,101008,101009,101012"
+                if provider == "Jackett_glodls":
+                    categories += ",100022,100075"
+                if provider == "Jackett_ibit":
+                    categories += ",104627,127246"
+                if provider == "Jackett_idope":
+                    categories += ",100000,100006"
+                if provider == "Jackett_isohunt2":
+                    categories += ",100006,100007"
+                if provider == "Jackett_kickasstorrents-ws":
+                    categories += ",100314,138096"
+                if provider == "Jackett_limetorrents":
+                    categories += ",104627,127246"
+                if provider == "Jackett_monova":
+                    categories += ",100314"
+                if provider == "Jackett_redacted":
+                    categories += ",100001"
+                if provider == "Jackett_skytorrents-to":
+                    categories += ",108963,127296"
+                if provider == "Jackett_solidtorrents":
+                    categories += ",130908,155980"
+                if provider == "Jackett_thepiratebay":
+                    categories += ",100100,100101,100104,100199,100600,100699"
+                if provider == "Jackett_torlock":
+                    categories += ",115039,131893"
+                if provider == "Jackett_toros":
+                    categories += ",100002,100010"
+                if provider == "Jackett_torrentdownloads":
+                    categories += ",100000,100005,100009"
+                if provider == "Jackett_torrentfunk":
+                    categories += ",100000,100002,100008,100009,100010,100011"
+                if provider == "Jackett_torrentgalaxy":
+                    categories += ",100022,100023,100024,100026,100040,"
+                if provider == "Jackett_torrentproject2":
+                    categories += ",104627,127246"
+                if provider == "Jackett_torrentz2":
+                    categories += ",102640,121047,127296,138096,"
+                if provider == "Jackett_torrentz2k":
+                    categories += ",100314,123189,146648"
+                if provider == "Jackett_yourbittorrent":
+                    categories += ",100314,138096,155376"
+                if provider == "Jackett_yts":
+                    categories += ",3020"
+                if provider == "Jackett_zooqle":
+                    categories += ",100314,138096"
 
             # Request results
             logger.info('Parsing results from %s using search term: %s' % (provider, term))
@@ -1373,6 +1427,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                         except Exception as e:
                             logger.exception(
                                 "An unknown error occurred trying to parse the feed: %s" % e)
+            categories = categories_b
 
     if headphones.CONFIG.WAFFLES:
         provider = "Waffles.ch"
