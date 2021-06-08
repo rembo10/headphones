@@ -612,7 +612,7 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None,
         elif headphones.CONFIG.PREFERRED_QUALITY == 1 or allow_lossless:
             categories = "3040,3010"
         else:
-            categories = "3010"
+            categories = "3000,3010,3030,3040,3999"
 
         if album['Type'] == 'Other':
             categories = "3030"
@@ -670,6 +670,7 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None,
                         except Exception as e:
                             logger.exception(
                                 "An unknown error occurred trying to parse the feed: %s" % e)
+            categories = categories_b
 
     if headphones.CONFIG.NZBSORG:
         provider = "nzbsorg"
