@@ -26,7 +26,7 @@
 				<div id="dialog" title="Choose an Alternate Release" style="display:none" class="configtable">
 					<div class="links">
 						<%
-							alternate_albums = myDB.select("SELECT * from allalbums WHERE AlbumID=? ORDER BY ReleaseDate ASC", [album['AlbumID']])
+							alternate_albums = myDB.select("SELECT * from allalbums WHERE AlbumID=%s ORDER BY ReleaseDate ASC", [album['AlbumID']])
 						%>
 						%if not alternate_albums:
 							<p>No alternate releases found. Try refreshing the artist (if the artist is being refreshed, please wait until it's finished)</p>
@@ -34,9 +34,9 @@
 						%else:
 							%for alternate_album in alternate_albums:
 								<%
-									track_count = len(myDB.select("SELECT * from alltracks WHERE ReleaseID=?", [alternate_album['ReleaseID']]))
+									track_count = len(myDB.select("SELECT * from alltracks WHERE ReleaseID=%s", [alternate_album['ReleaseID']]))
 									mb_link = "http://musicbrainz.org/release/" + alternate_album['ReleaseID']
-									have_track_count = len(myDB.select("SELECT * from alltracks WHERE ReleaseID=? AND Location IS NOT NULL", [alternate_album['ReleaseID']]))
+									have_track_count = len(myDB.select("SELECT * from alltracks WHERE ReleaseID=%s AND Location IS NOT NULL", [alternate_album['ReleaseID']]))
 									if alternate_album['AlbumID'] == alternate_album['ReleaseID']:
 										alternate_album_name = "Headphones Default Release (" + str(alternate_album['ReleaseDate']) + ") [" + str(have_track_count) + "/" + str(track_count) + " tracks]"
 									else:
@@ -100,8 +100,8 @@
             </h2>
 
 			<%
-				totalduration = myDB.action("SELECT SUM(TrackDuration) FROM tracks WHERE AlbumID=?", [album['AlbumID']]).fetchone()[0]
-				totaltracks = len(myDB.select("SELECT TrackTitle from tracks WHERE AlbumID=?", [album['AlbumID']]))
+				totalduration = myDB.action("SELECT SUM(TrackDuration) as totalduration FROM tracks WHERE AlbumID=%s", [album['AlbumID']]).fetchone()['totalduration']
+				totaltracks = len(myDB.select("SELECT TrackTitle from tracks WHERE AlbumID=%s", [album['AlbumID']]))
 				try:
 					albumduration = helpers.convert_milliseconds(totalduration)
 				except:
@@ -163,7 +163,7 @@
 					</tr>
 				%endfor
 				<%
-				unmatched = myDB.select('SELECT * from have WHERE ArtistName LIKE ? AND AlbumTitle LIKE ? AND Matched = "Failed" ORDER BY CAST(TrackNumber AS INTEGER)', [album['ArtistName'], album['AlbumTitle']])
+				unmatched = myDB.select('SELECT * from have WHERE ArtistName LIKE %s AND AlbumTitle LIKE %s AND Matched = %s ORDER BY CAST(TrackNumber AS INTEGER)', [album['ArtistName'], album['AlbumTitle'], 'Failed'])
 				%>
 				%if unmatched:
 					 %for track in unmatched:

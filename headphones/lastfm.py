@@ -101,7 +101,9 @@ def getSimilar():
         artist_name, artist_mbid = item[0]
         count = item[1]
 
-        myDB.action("INSERT INTO lastfmcloud VALUES( ?, ?, ?)", [artist_name, artist_mbid, count])
+        myDB.action("INSERT INTO lastfmcloud VALUES( %s, %s, %s)", [artist_name, artist_mbid, count])
+
+    myDB.commit()
 
     logger.debug("Inserted %d artists into Last.FM tag cloud", len(top_list))
 

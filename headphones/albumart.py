@@ -38,7 +38,7 @@ def getAlbumArt(albumid):
     logger.info("Searching for artwork at Amazon")
     myDB = db.DBConnection()
     dbalbum = myDB.action(
-        'SELECT ArtistName, AlbumTitle, ReleaseID, AlbumASIN FROM albums WHERE AlbumID=?',
+        'SELECT ArtistName, AlbumTitle, ReleaseID, AlbumASIN FROM albums WHERE AlbumID=%s',
         [albumid]).fetchone()
     if dbalbum['AlbumASIN']:
         artwork_path = 'http://ec1.images-amazon.com/images/P/%s.01.LZZZZZZZ.jpg' % dbalbum['AlbumASIN']

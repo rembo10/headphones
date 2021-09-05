@@ -603,9 +603,13 @@ def setTorrentPath(result):
             else:
                 move_to = headphones.CONFIG.DOWNLOAD_TORRENT_DIR
 
-            if not os.path.exists(move_to):
-                logger.debug('Deluge: %s directory doesn\'t exist, let\'s create it' % move_to)
-                os.makedirs(move_to)
+            try:
+                if not os.path.exists(move_to):
+                    logger.debug('Deluge: %s directory doesn\'t exist, let\'s create it', move_to)
+                    os.makedirs(move_to)
+            except OSError:
+                logger.exception('Could not test parent or mkdir for torrent move directory: %s', move_to)
+
             post_data = json.dumps({"method": "core.set_torrent_move_completed_path",
                                     "params": [result['hash'], move_to],
                                     "id": 8})

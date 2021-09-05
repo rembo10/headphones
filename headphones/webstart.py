@@ -13,6 +13,8 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
+import headphones.db
+
 import sys
 
 import os
@@ -21,6 +23,7 @@ import headphones
 from headphones import logger
 from headphones.webserve import WebInterface
 from headphones.helpers import create_https_certificates
+
 
 
 def initialize(options):

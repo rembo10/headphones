@@ -49,7 +49,7 @@ def serve_template(templatename, **kwargs):
     interface_dir = os.path.join(str(headphones.PROG_DIR), 'data/interfaces/')
     template_dir = os.path.join(str(interface_dir), headphones.CONFIG.INTERFACE)
 
-    _hplookup = TemplateLookup(directories=[template_dir])
+    _hplookup = TemplateLookup(directories=[template_dir], input_encoding='utf-8', output_encoding='utf-8')
 
     try:
         template = _hplookup.get_template(templatename)
@@ -66,7 +66,8 @@ class WebInterface(object):
     @cherrypy.expose
     def home(self):
         myDB = db.DBConnection()
-        artists = myDB.select('SELECT * from artists order by ArtistSortName COLLATE NOCASE')
+        artists = myDB.select('SELECT * from artists order by lower(ArtistSortName)')
+        myDB.commit()
         return serve_template(templatename="index.html", title="Home", artists=artists)
 
     @cherrypy.expose
@@ -77,7 +78,7 @@ class WebInterface(object):
     @cherrypy.expose
     def artistPage(self, ArtistID):
         myDB = db.DBConnection()
-        artist = myDB.action('SELECT * FROM artists WHERE ArtistID=?', [ArtistID]).fetchone()
+        artist = myDB.action('SELECT * FROM artists WHERE ArtistID=%s', [ArtistID]).fetchone()
 
         # Don't redirect to the artist page until it has the bare minimum info inserted
         # Redirect to the home page if we still can't get it after 5 seconds
@@ -85,13 +86,13 @@ class WebInterface(object):
 
         while not artist and retry < 5:
             time.sleep(1)
-            artist = myDB.action('SELECT * FROM artists WHERE ArtistID=?', [ArtistID]).fetchone()
+            artist = myDB.action('SELECT * FROM artists WHERE ArtistID=%s', [ArtistID]).fetchone()
             retry += 1
 
         if not artist:
             raise cherrypy.HTTPRedirect("home")
 
-        albums = myDB.select('SELECT * from albums WHERE ArtistID=? order by ReleaseDate DESC',
+        albums = myDB.select("SELECT * from albums WHERE ArtistID=%s order by to_date(ReleaseDate,'YYYY-MM-DD') DESC",
                              [ArtistID])
 
         # Serve the extras up as a dict to make things easier for new templates (append new extras to the end)
@@ -111,19 +112,20 @@ class WebInterface(object):
                 extras_dict[extra] = ""
             i += 1
 
+        myDB.commit()
         return serve_template(templatename="artist.html", title=artist['ArtistName'], artist=artist,
                               albums=albums, extras=extras_dict)
 
     @cherrypy.expose
     def albumPage(self, AlbumID):
         myDB = db.DBConnection()
-        album = myDB.action('SELECT * from albums WHERE AlbumID=?', [AlbumID]).fetchone()
+        album = myDB.action('SELECT * from albums WHERE AlbumID=%s', [AlbumID]).fetchone()
 
         retry = 0
         while retry < 5:
             if not album:
                 time.sleep(1)
-                album = myDB.action('SELECT * from albums WHERE AlbumID=?', [AlbumID]).fetchone()
+                album = myDB.action('SELECT * from albums WHERE AlbumID=%s', [AlbumID]).fetchone()
                 retry += 1
             else:
                 break
@@ -132,8 +134,8 @@ class WebInterface(object):
             raise cherrypy.HTTPRedirect("home")
 
         tracks = myDB.select(
-            'SELECT * from tracks WHERE AlbumID=? ORDER BY CAST(TrackNumber AS INTEGER)', [AlbumID])
-        description = myDB.action('SELECT * from descriptions WHERE ReleaseGroupID=?',
+            'SELECT * from tracks WHERE AlbumID=%s ORDER BY CAST(TrackNumber AS INTEGER)', [AlbumID])
+        description = myDB.action('SELECT * from descriptions WHERE ReleaseGroupID=%s',
                                   [AlbumID]).fetchone()
 
         if not album['ArtistName']:
@@ -144,6 +146,7 @@ class WebInterface(object):
             title = title + ""
         else:
             title = title + album['AlbumTitle']
+        myDB.commit()
         return serve_template(templatename="album.html", title=title, album=album, tracks=tracks,
                               description=description)
 
@@ -210,18 +213,18 @@ class WebInterface(object):
         newValueDict = {'IncludeExtras': 0}
         myDB.upsert("artists", newValueDict, controlValueDict)
         extraalbums = myDB.select(
-            'SELECT AlbumID from albums WHERE ArtistID=? AND Status="Skipped" AND Type!="Album"',
-            [ArtistID])
+            'SELECT AlbumID from albums WHERE ArtistID=%s AND Status=%s AND Type!=%s',
+            ['Skipped', 'Album', ArtistID])
         for album in extraalbums:
-            myDB.action('DELETE from tracks WHERE ArtistID=? AND AlbumID=?',
+            myDB.action('DELETE from tracks WHERE ArtistID=%s AND AlbumID=%s',
                         [ArtistID, album['AlbumID']])
-            myDB.action('DELETE from albums WHERE ArtistID=? AND AlbumID=?',
+            myDB.action('DELETE from albums WHERE ArtistID=%s AND AlbumID=%s',
                         [ArtistID, album['AlbumID']])
-            myDB.action('DELETE from allalbums WHERE ArtistID=? AND AlbumID=?',
+            myDB.action('DELETE from allalbums WHERE ArtistID=%s AND AlbumID=%s',
                         [ArtistID, album['AlbumID']])
-            myDB.action('DELETE from alltracks WHERE ArtistID=? AND AlbumID=?',
+            myDB.action('DELETE from alltracks WHERE ArtistID=%s AND AlbumID=%s',
                         [ArtistID, album['AlbumID']])
-            myDB.action('DELETE from releases WHERE ReleaseGroupID=?', [album['AlbumID']])
+            myDB.action('DELETE from releases WHERE ReleaseGroupID=%s', [album['AlbumID']])
             from headphones import cache
             c = cache.Cache()
             c.remove_from_cache(AlbumID=album['AlbumID'])
@@ -248,37 +251,38 @@ class WebInterface(object):
 
     def removeArtist(self, ArtistID):
         myDB = db.DBConnection()
-        namecheck = myDB.select('SELECT ArtistName from artists where ArtistID=?', [ArtistID])
+        namecheck = myDB.select('SELECT ArtistName from artists where ArtistID=%s', [ArtistID])
         for name in namecheck:
             artistname = name['ArtistName']
         try:
             logger.info(u"Deleting all traces of artist: " + artistname)
         except TypeError:
             logger.info(u"Deleting all traces of artist: null")
-        myDB.action('DELETE from artists WHERE ArtistID=?', [ArtistID])
+        myDB.action('DELETE from artists WHERE ArtistID=%s', [ArtistID])
 
         from headphones import cache
         c = cache.Cache()
 
         rgids = myDB.select(
-            'SELECT AlbumID FROM albums WHERE ArtistID=? UNION SELECT AlbumID FROM allalbums WHERE ArtistID=?',
+            'SELECT AlbumID FROM albums WHERE ArtistID=%s UNION SELECT AlbumID FROM allalbums WHERE ArtistID=%s',
             [ArtistID, ArtistID])
         for rgid in rgids:
             albumid = rgid['AlbumID']
-            myDB.action('DELETE from releases WHERE ReleaseGroupID=?', [albumid])
-            myDB.action('DELETE from have WHERE Matched=?', [albumid])
+            myDB.action('DELETE from releases WHERE ReleaseGroupID=%s', [albumid])
+            myDB.action('DELETE from have WHERE Matched=%s', [albumid])
             c.remove_from_cache(AlbumID=albumid)
-            myDB.action('DELETE from descriptions WHERE ReleaseGroupID=?', [albumid])
+            myDB.action('DELETE from descriptions WHERE ReleaseGroupID=%s', [albumid])
 
-        myDB.action('DELETE from albums WHERE ArtistID=?', [ArtistID])
-        myDB.action('DELETE from tracks WHERE ArtistID=?', [ArtistID])
+        myDB.action('DELETE from albums WHERE ArtistID=%s', [ArtistID])
+        myDB.action('DELETE from tracks WHERE ArtistID=%s', [ArtistID])
 
-        myDB.action('DELETE from allalbums WHERE ArtistID=?', [ArtistID])
-        myDB.action('DELETE from alltracks WHERE ArtistID=?', [ArtistID])
-        myDB.action('DELETE from have WHERE ArtistName=?', [artistname])
+        myDB.action('DELETE from allalbums WHERE ArtistID=%s', [ArtistID])
+        myDB.action('DELETE from alltracks WHERE ArtistID=%s', [ArtistID])
+        myDB.action('DELETE from have WHERE ArtistName=%s', [artistname])
         c.remove_from_cache(ArtistID=ArtistID)
-        myDB.action('DELETE from descriptions WHERE ArtistID=?', [ArtistID])
-        myDB.action('INSERT OR REPLACE into blacklist VALUES (?)', [ArtistID])
+        myDB.action('DELETE from descriptions WHERE ArtistID=%s', [ArtistID])
+        myDB.action('INSERT into blacklist VALUES (%s) ON CONFLICT DO NOTHING', [ArtistID])
+        myDB.commit()
 
     @cherrypy.expose
     def deleteArtist(self, ArtistID):
@@ -289,7 +293,7 @@ class WebInterface(object):
     def scanArtist(self, ArtistID):
 
         myDB = db.DBConnection()
-        artist_name = myDB.select('SELECT DISTINCT ArtistName FROM artists WHERE ArtistID=?', [ArtistID])[0][0]
+        artist_name = myDB.select('SELECT DISTINCT ArtistName FROM artists WHERE ArtistID=%s', [ArtistID])[0]['ArtistName']
 
         logger.info(u"Scanning artist: %s", artist_name)
 
@@ -359,6 +363,8 @@ class WebInterface(object):
         except Exception as e:
             logger.error('Unable to complete the scan: %s' % e)
 
+        myDB.commit()
+
         raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
 
     @cherrypy.expose
@@ -398,10 +404,11 @@ class WebInterface(object):
             if ArtistID:
                 ArtistIDT = ArtistID
             else:
-                ArtistIDT = myDB.action('SELECT ArtistID FROM albums WHERE AlbumID=?', [mbid]).fetchone()[0]
+                ArtistIDT = myDB.action('SELECT ArtistID FROM albums WHERE AlbumID=%s', [mbid]).fetchone()['ArtistID']
             myDB.action(
-                'UPDATE artists SET TotalTracks=(SELECT COUNT(*) FROM tracks WHERE ArtistID = ? AND AlbumTitle IN (SELECT AlbumTitle FROM albums WHERE Status != "Ignored")) WHERE ArtistID = ?',
-                [ArtistIDT, ArtistIDT])
+                'UPDATE artists SET TotalTracks=(SELECT COUNT(*) FROM tracks WHERE ArtistID = %s AND AlbumTitle IN (SELECT AlbumTitle FROM albums WHERE Status != %s)) WHERE ArtistID = %s',
+                [ArtistIDT, 'Ignored', ArtistIDT])
+        myDB.commit()
         if ArtistID:
             raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
         else:
@@ -414,11 +421,12 @@ class WebInterface(object):
         if action == "ignore":
             myDB = db.DBConnection()
             for artist in args:
-                myDB.action('DELETE FROM newartists WHERE ArtistName=?',
+                myDB.action('DELETE FROM newartists WHERE ArtistName=%s',
                             [artist.decode(headphones.SYS_ENCODING, 'replace')])
-                myDB.action('UPDATE have SET Matched="Ignored" WHERE ArtistName=?',
-                            [artist.decode(headphones.SYS_ENCODING, 'replace')])
+                myDB.action('UPDATE have SET Matched=%s WHERE ArtistName=%s',
+                            ['Ignored', artist.decode(headphones.SYS_ENCODING, 'replace')])
                 logger.info("Artist %s removed from new artist list and set to ignored" % artist)
+            myDB.commit()
         raise cherrypy.HTTPRedirect("home")
 
     @cherrypy.expose
@@ -472,7 +480,8 @@ class WebInterface(object):
 
         if data and bestqual:
             myDB = db.DBConnection()
-            album = myDB.action('SELECT * from albums WHERE AlbumID=?', [AlbumID]).fetchone()
+            album = myDB.action('SELECT * from albums WHERE AlbumID=%s', [AlbumID]).fetchone()
+            myDB.commit()
             searcher.send_to_downloader(data, bestqual, album)
             return json.dumps({'result': 'success'})
         else:
@@ -492,24 +501,26 @@ class WebInterface(object):
         logger.info(u"Deleting all traces of album: " + AlbumID)
         myDB = db.DBConnection()
 
-        myDB.action('DELETE from have WHERE Matched=?', [AlbumID])
-        album = myDB.action('SELECT ArtistID, ArtistName, AlbumTitle from albums where AlbumID=?',
+        myDB.action('DELETE from have WHERE Matched=%s', [AlbumID])
+        album = myDB.action('SELECT ArtistID, ArtistName, AlbumTitle from albums where AlbumID=%s',
                             [AlbumID]).fetchone()
         if album:
             ArtistID = album['ArtistID']
-            myDB.action('DELETE from have WHERE ArtistName=? AND AlbumTitle=?',
+            myDB.action('DELETE from have WHERE ArtistName=%s AND AlbumTitle=%s',
                         [album['ArtistName'], album['AlbumTitle']])
 
-        myDB.action('DELETE from albums WHERE AlbumID=?', [AlbumID])
-        myDB.action('DELETE from tracks WHERE AlbumID=?', [AlbumID])
-        myDB.action('DELETE from allalbums WHERE AlbumID=?', [AlbumID])
-        myDB.action('DELETE from alltracks WHERE AlbumID=?', [AlbumID])
-        myDB.action('DELETE from releases WHERE ReleaseGroupID=?', [AlbumID])
-        myDB.action('DELETE from descriptions WHERE ReleaseGroupID=?', [AlbumID])
+        myDB.action('DELETE from albums WHERE AlbumID=%s', [AlbumID])
+        myDB.action('DELETE from tracks WHERE AlbumID=%s', [AlbumID])
+        myDB.action('DELETE from allalbums WHERE AlbumID=%s', [AlbumID])
+        myDB.action('DELETE from alltracks WHERE AlbumID=%s', [AlbumID])
+        myDB.action('DELETE from releases WHERE ReleaseGroupID=%s', [AlbumID])
+        myDB.action('DELETE from descriptions WHERE ReleaseGroupID=%s', [AlbumID])
 
         from headphones import cache
         c = cache.Cache()
         c.remove_from_cache(AlbumID=AlbumID)
+
+        myDB.commit()
 
         if ArtistID:
             raise cherrypy.HTTPRedirect("artistPage?ArtistID=%s" % ArtistID)
@@ -539,8 +550,9 @@ class WebInterface(object):
     def upcoming(self):
         myDB = db.DBConnection()
         upcoming = myDB.select(
-            "SELECT * from albums WHERE ReleaseDate > date('now') order by ReleaseDate ASC")
-        wanted = myDB.select("SELECT * from albums WHERE Status='Wanted' order by ReleaseDate ASC")
+            "SELECT * from albums WHERE to_date(ReleaseDate,'YYYY-MM-DD') > date('now') order by ReleaseDate ASC")
+        wanted = myDB.select("SELECT * from albums WHERE Status=%s order by ReleaseDate ASC", ['Wanted'])
+        myDB.commit()
         return serve_template(templatename="upcoming.html", title="Upcoming", upcoming=upcoming,
                               wanted=wanted)
 
@@ -548,12 +560,14 @@ class WebInterface(object):
     def manage(self):
         myDB = db.DBConnection()
         emptyArtists = myDB.select("SELECT * FROM artists WHERE LatestAlbum IS NULL")
+        myDB.commit()
         return serve_template(templatename="manage.html", title="Manage", emptyArtists=emptyArtists)
 
     @cherrypy.expose
     def manageArtists(self):
         myDB = db.DBConnection()
-        artists = myDB.select('SELECT * from artists order by ArtistSortName COLLATE NOCASE')
+        artists = myDB.select('SELECT * from artists order by lower(ArtistSortName)')
+        myDB.commit()
         return serve_template(templatename="manageartists.html", title="Manage Artists",
                               artists=artists)
 
@@ -561,11 +575,12 @@ class WebInterface(object):
     def manageAlbums(self, Status=None):
         myDB = db.DBConnection()
         if Status == "Upcoming":
-            albums = myDB.select("SELECT * from albums WHERE ReleaseDate > date('now')")
+            albums = myDB.select("SELECT * from albums WHERE to_date(ReleaseDate,'YYYY-MM-DD') > date('now')")
         elif Status:
-            albums = myDB.select('SELECT * from albums WHERE Status=?', [Status])
+            albums = myDB.select('SELECT * from albums WHERE Status=%s', [Status])
         else:
             albums = myDB.select('SELECT * from albums')
+        myDB.commit()
         return serve_template(templatename="managealbums.html", title="Manage Albums",
                               albums=albums)
 
@@ -573,6 +588,7 @@ class WebInterface(object):
     def manageNew(self):
         myDB = db.DBConnection()
         newartists = myDB.select('SELECT * from newartists')
+        myDB.commit()
         return serve_template(templatename="managenew.html", title="Manage New Artists",
                               newartists=newartists)
 
@@ -582,7 +598,7 @@ class WebInterface(object):
         have_album_dictionary = []
         headphones_album_dictionary = []
         have_albums = myDB.select(
-            'SELECT ArtistName, AlbumTitle, TrackTitle, CleanName from have WHERE Matched = "Failed" GROUP BY AlbumTitle ORDER BY ArtistName')
+            'SELECT ArtistName, AlbumTitle, TrackTitle, CleanName from have WHERE Matched = %s GROUP BY AlbumTitle, TrackTitle, CleanName, ArtistName ORDER BY ArtistName', ('Failed',))
         for albums in have_albums:
             # Have to skip over manually matched tracks
             if albums['ArtistName'] and albums['AlbumTitle'] and albums['TrackTitle']:
@@ -611,6 +627,7 @@ class WebInterface(object):
             clean_name(d['ArtistName']).lower(),
             clean_name(d['AlbumTitle']).lower()) not in check]
 
+        myDB.commit()
         return serve_template(templatename="manageunmatched.html", title="Manage Unmatched Items",
                               unmatchedalbums=unmatchedalbums)
 
@@ -622,22 +639,22 @@ class WebInterface(object):
         if action == "ignoreArtist":
             artist = existing_artist
             myDB.action(
-                'UPDATE have SET Matched="Ignored" WHERE ArtistName=? AND Matched = "Failed"',
-                [artist])
+                'UPDATE have SET Matched=%s WHERE ArtistName=%s AND Matched = %s',
+                ['Ignored' ,artist, 'Failed'])
 
         elif action == "ignoreAlbum":
             artist = existing_artist
             album = existing_album
             myDB.action(
-                'UPDATE have SET Matched="Ignored" WHERE ArtistName=? AND AlbumTitle=? AND Matched = "Failed"',
-                (artist, album))
+                'UPDATE have SET Matched=%s WHERE ArtistName=%s AND AlbumTitle=%s AND Matched = %s',
+                ('Ignored', artist, album, 'Failed'))
 
         elif action == "matchArtist":
             existing_artist_clean = helpers.clean_name(existing_artist).lower()
             new_artist_clean = helpers.clean_name(new_artist).lower()
             if new_artist_clean != existing_artist_clean:
                 have_tracks = myDB.action(
-                    'SELECT Matched, CleanName, Location, BitRate, Format FROM have WHERE ArtistName=?',
+                    'SELECT Matched, CleanName, Location, BitRate, Format FROM have WHERE ArtistName=%s',
                     [existing_artist])
                 update_count = 0
                 artist_id = None
@@ -647,26 +664,26 @@ class WebInterface(object):
                         new_clean_filename = old_clean_filename.replace(existing_artist_clean,
                                                                         new_artist_clean, 1)
                         myDB.action(
-                            'UPDATE have SET CleanName=? WHERE ArtistName=? AND CleanName=?',
+                            'UPDATE have SET CleanName=%s WHERE ArtistName=%s AND CleanName=%s',
                             [new_clean_filename, existing_artist, old_clean_filename])
 
                         # Attempt to match tracks with new CleanName
                         match_alltracks = myDB.action(
-                            'SELECT CleanName FROM alltracks WHERE CleanName = ?',
+                            'SELECT CleanName FROM alltracks WHERE CleanName = %s',
                             [new_clean_filename]).fetchone()
                         if match_alltracks:
                             myDB.action(
-                                'UPDATE alltracks SET Location = ?, BitRate = ?, Format = ? WHERE CleanName = ?',
+                                'UPDATE alltracks SET Location = %s, BitRate = %s, Format = %s WHERE CleanName = %s',
                                 [entry['Location'], entry['BitRate'], entry['Format'], new_clean_filename])
 
                         match_tracks = myDB.action(
-                            'SELECT ArtistID, CleanName, AlbumID FROM tracks WHERE CleanName = ?',
+                            'SELECT ArtistID, CleanName, AlbumID FROM tracks WHERE CleanName = %s',
                             [new_clean_filename]).fetchone()
                         if match_tracks:
                             myDB.action(
-                                'UPDATE tracks SET Location = ?, BitRate = ?, Format = ? WHERE CleanName = ?',
+                                'UPDATE tracks SET Location = %s, BitRate = %s, Format = %s WHERE CleanName = %s',
                                 [entry['Location'], entry['BitRate'], entry['Format'], new_clean_filename])
-                            myDB.action('UPDATE have SET Matched="Manual" WHERE CleanName=?',
+                            myDB.action('UPDATE have SET Matched="Manual" WHERE CleanName=%s',
                                         [new_clean_filename])
                             update_count += 1
                             artist_id = match_tracks['Artist_ID']
@@ -686,7 +703,7 @@ class WebInterface(object):
             new_clean_string = new_artist_clean + " " + new_album_clean
             if existing_clean_string != new_clean_string:
                 have_tracks = myDB.action(
-                    'SELECT Matched, CleanName, Location, BitRate, Format FROM have WHERE ArtistName=? AND AlbumTitle=?',
+                    'SELECT Matched, CleanName, Location, BitRate, Format FROM have WHERE ArtistName=%s AND AlbumTitle=%s',
                     (existing_artist, existing_album))
                 update_count = 0
                 for entry in have_tracks:
@@ -695,27 +712,27 @@ class WebInterface(object):
                         new_clean_filename = old_clean_filename.replace(existing_clean_string,
                                                                         new_clean_string, 1)
                         myDB.action(
-                            'UPDATE have SET CleanName=? WHERE ArtistName=? AND AlbumTitle=? AND CleanName=?',
+                            'UPDATE have SET CleanName=%s WHERE ArtistName=%s AND AlbumTitle=%s AND CleanName=%s',
                             [new_clean_filename, existing_artist, existing_album,
                              old_clean_filename])
 
                         # Attempt to match tracks with new CleanName
                         match_alltracks = myDB.action(
-                            'SELECT CleanName FROM alltracks WHERE CleanName = ?',
+                            'SELECT CleanName FROM alltracks WHERE CleanName = %s',
                             [new_clean_filename]).fetchone()
                         if match_alltracks:
                             myDB.action(
-                                'UPDATE alltracks SET Location = ?, BitRate = ?, Format = ? WHERE CleanName = ?',
+                                'UPDATE alltracks SET Location = %s, BitRate = %s, Format = %s WHERE CleanName = %s',
                                 [entry['Location'], entry['BitRate'], entry['Format'], new_clean_filename])
 
                         match_tracks = myDB.action(
-                            'SELECT CleanName, AlbumID FROM tracks WHERE CleanName = ?',
+                            'SELECT CleanName, AlbumID FROM tracks WHERE CleanName = %s',
                             [new_clean_filename]).fetchone()
                         if match_tracks:
                             myDB.action(
-                                'UPDATE tracks SET Location = ?, BitRate = ?, Format = ? WHERE CleanName = ?',
+                                'UPDATE tracks SET Location = %s, BitRate = %s, Format = %s WHERE CleanName = %s',
                                 [entry['Location'], entry['BitRate'], entry['Format'], new_clean_filename])
-                            myDB.action('UPDATE have SET Matched="Manual" WHERE CleanName=?',
+                            myDB.action('UPDATE have SET Matched="Manual" WHERE CleanName=%s',
                                         [new_clean_filename])
                             album_id = match_tracks['AlbumID']
                             update_count += 1
@@ -728,6 +745,7 @@ class WebInterface(object):
                 logger.info(
                     "Artist %s / Album %s already named appropriately; nothing to modify" % (
                         existing_artist, existing_album))
+        myDB.commit()
 
     @cherrypy.expose
     def manageManual(self):
@@ -751,6 +769,7 @@ class WebInterface(object):
                         manual_albums.append(manual_dict)
         manual_albums_sorted = sorted(manual_albums, key=itemgetter('ArtistName', 'AlbumTitle'))
 
+        myDB.commit()
         return serve_template(templatename="managemanual.html", title="Manage Manual Items",
                               manualalbums=manual_albums_sorted)
 
@@ -759,22 +778,22 @@ class WebInterface(object):
         myDB = db.DBConnection()
         if action == "unignoreArtist":
             artist = existing_artist
-            myDB.action('UPDATE have SET Matched="Failed" WHERE ArtistName=? AND Matched="Ignored"',
-                        [artist])
+            myDB.action('UPDATE have SET Matched=%s WHERE ArtistName=%s AND Matched=%s',
+                        ['Failed', artist, 'Ignored'])
             logger.info("Artist: %s successfully restored to unmatched list" % artist)
 
         elif action == "unignoreAlbum":
             artist = existing_artist
             album = existing_album
             myDB.action(
-                'UPDATE have SET Matched="Failed" WHERE ArtistName=? AND AlbumTitle=? AND Matched="Ignored"',
-                (artist, album))
+                'UPDATE have SET Matched=%s WHERE ArtistName=%s AND AlbumTitle=%s AND Matched=%s',
+                ('Failed', artist, album, 'Ignored'))
             logger.info("Album: %s successfully restored to unmatched list" % album)
 
         elif action == "unmatchArtist":
             artist = existing_artist
             update_clean = myDB.select(
-                'SELECT ArtistName, AlbumTitle, TrackTitle, CleanName, Matched from have WHERE ArtistName=?',
+                'SELECT ArtistName, AlbumTitle, TrackTitle, CleanName, Matched from have WHERE ArtistName=%s',
                 [artist])
             update_count = 0
             for tracks in update_clean:
@@ -784,18 +803,18 @@ class WebInterface(object):
                 album = tracks['AlbumTitle']
                 track_title = tracks['TrackTitle']
                 if tracks['CleanName'] != original_clean:
-                    artist_id_check = myDB.action('SELECT ArtistID FROM tracks WHERE CleanName = ?',
+                    artist_id_check = myDB.action('SELECT ArtistID FROM tracks WHERE CleanName = %s',
                                                  [tracks['CleanName']]).fetchone()
                     if artist_id_check:
                         artist_id = artist_id_check[0]
                     myDB.action(
-                        'UPDATE tracks SET Location=?, BitRate=?, Format=? WHERE CleanName = ?',
+                        'UPDATE tracks SET Location=%s, BitRate=%s, Format=%s WHERE CleanName = %s',
                         [None, None, None, tracks['CleanName']])
                     myDB.action(
-                        'UPDATE alltracks SET Location=?, BitRate=?, Format=? WHERE CleanName = ?',
+                        'UPDATE alltracks SET Location=%s, BitRate=%s, Format=%s WHERE CleanName = %s',
                         [None, None, None, tracks['CleanName']])
                     myDB.action(
-                        'UPDATE have SET CleanName=?, Matched="Failed" WHERE ArtistName=? AND AlbumTitle=? AND TrackTitle=?',
+                        'UPDATE have SET CleanName=%s, Matched="Failed" WHERE ArtistName=%s AND AlbumTitle=%s AND TrackTitle=%s',
                         (original_clean, artist, album, track_title))
                     update_count += 1
             if update_count > 0:
@@ -806,7 +825,7 @@ class WebInterface(object):
             artist = existing_artist
             album = existing_album
             update_clean = myDB.select(
-                'SELECT ArtistName, AlbumTitle, TrackTitle, CleanName, Matched FROM have WHERE ArtistName=? AND AlbumTitle=?',
+                'SELECT ArtistName, AlbumTitle, TrackTitle, CleanName, Matched FROM have WHERE ArtistName=%s AND AlbumTitle=%s',
                 (artist, album))
             update_count = 0
             for tracks in update_clean:
@@ -815,23 +834,24 @@ class WebInterface(object):
                         'TrackTitle']).lower()
                 track_title = tracks['TrackTitle']
                 if tracks['CleanName'] != original_clean:
-                    album_id_check = myDB.action('SELECT AlbumID FROM tracks WHERE CleanName = ?',
+                    album_id_check = myDB.action('SELECT AlbumID FROM tracks WHERE CleanName = %s',
                                                  [tracks['CleanName']]).fetchone()
                     if album_id_check:
-                        album_id = album_id_check[0]
+                        album_id = album_id_check['AlbumID']
                     myDB.action(
-                        'UPDATE tracks SET Location=?, BitRate=?, Format=? WHERE CleanName = ?',
+                        'UPDATE tracks SET Location=%s, BitRate=%s, Format=%s WHERE CleanName = %s',
                         [None, None, None, tracks['CleanName']])
                     myDB.action(
-                        'UPDATE alltracks SET Location=?, BitRate=?, Format=? WHERE CleanName = ?',
+                        'UPDATE alltracks SET Location=%s, BitRate=%s, Format=%s WHERE CleanName = %s',
                         [None, None, None, tracks['CleanName']])
                     myDB.action(
-                        'UPDATE have SET CleanName=?, Matched="Failed" WHERE ArtistName=? AND AlbumTitle=? AND TrackTitle=?',
-                        (original_clean, artist, album, track_title))
+                        'UPDATE have SET CleanName=%s, Matched=%s WHERE ArtistName=%s AND AlbumTitle=%s AND TrackTitle=%s',
+                        (original_clean, 'Failed', artist, album, track_title))
                     update_count += 1
             if update_count > 0:
                 librarysync.update_album_status(album_id)
             logger.info("Album: %s successfully restored to unmatched list" % album)
+        myDB.commit()
 
     @cherrypy.expose
     def markArtists(self, action=None, **args):
@@ -853,6 +873,7 @@ class WebInterface(object):
         if len(artistsToAdd) > 0:
             logger.debug("Refreshing artists: %s" % artistsToAdd)
             threading.Thread(target=importer.addArtistIDListToDB, args=[artistsToAdd]).start()
+        myDB.commit()
         raise cherrypy.HTTPRedirect("home")
 
     @cherrypy.expose
@@ -936,7 +957,8 @@ class WebInterface(object):
     def history(self):
         myDB = db.DBConnection()
         history = myDB.select(
-            '''SELECT AlbumID, Title, Size, URL, DateAdded, Status, Kind, ifnull(FolderName, '?') FolderName FROM snatched WHERE Status NOT LIKE "Seed%" ORDER BY DateAdded DESC''')
+            '''SELECT AlbumID, Title, Size, URL, DateAdded, Status, Kind, quote_nullable(FolderName) FolderName FROM snatched WHERE Status NOT LIKE %s ORDER BY DateAdded DESC''', ['Seed%'])
+        myDB.commit()
         return serve_template(templatename="history.html", title="History", history=history)
 
     @cherrypy.expose
@@ -998,22 +1020,29 @@ class WebInterface(object):
 
         sortcolumn = 'ArtistSortName'
         sortbyhavepercent = False
+        releasedate_type = "to_date(ReleaseDate,'YYYY-MM-DD')"
         if iSortCol_0 == '2':
             sortcolumn = 'Status'
         elif iSortCol_0 == '3':
-            sortcolumn = 'ReleaseDate'
+            sortcolumn = releasedate_type
         elif iSortCol_0 == '4':
             sortbyhavepercent = True
 
+        if sortcolumn == releasedate_type:
+            searchstr = "%s"
+        else:
+            searchstr = "lower(%s)"
+
         if sSearch == "":
-            query = 'SELECT * from artists order by %s COLLATE NOCASE %s' % (sortcolumn, sSortDir_0)
+            query = ('SELECT * from artists order by ' + searchstr + ' %s') % (sortcolumn, sSortDir_0)
             filtered = myDB.select(query)
             totalcount = len(filtered)
         else:
-            query = 'SELECT * from artists WHERE ArtistSortName LIKE "%' + sSearch + '%" OR LatestAlbum LIKE "%' + sSearch + '%"' + 'ORDER BY %s COLLATE NOCASE %s' % (
+            sTerm = '%' + sSearch + '%'
+            query = ('SELECT * from artists WHERE ArtistSortName LIKE %%s OR LatestAlbum LIKE %%s ORDER BY ' + searchstr + ' %s') % (
                 sortcolumn, sSortDir_0)
-            filtered = myDB.select(query)
-            totalcount = myDB.select('SELECT COUNT(*) from artists')[0][0]
+            filtered = myDB.select(query, [sTerm, sTerm])
+            totalcount = myDB.select('SELECT COUNT(*) as c from artists')[0]['c']
 
         if sortbyhavepercent:
             filtered.sort(key=lambda x: (
@@ -1022,7 +1051,7 @@ class WebInterface(object):
 
         # can't figure out how to change the datatables default sorting order when its using an ajax datasource so ill
         # just reverse it here and the first click on the "Latest Album" header will sort by descending release date
-        if sortcolumn == 'ReleaseDate':
+        if sortcolumn == releasedate_type:
             filtered.reverse()
 
         artists = filtered[iDisplayStart:(iDisplayStart + iDisplayLength)]
@@ -1055,6 +1084,7 @@ class WebInterface(object):
 
             rows.append(row)
 
+        myDB.commit()
         dict = {'iTotalDisplayRecords': len(filtered),
                 'iTotalRecords': totalcount,
                 'aaData': rows,
@@ -1068,10 +1098,11 @@ class WebInterface(object):
         myDB = db.DBConnection()
         album_json = {}
         counter = 0
-        album_list = myDB.select("SELECT AlbumTitle from albums WHERE ArtistName=?", [artist])
+        album_list = myDB.select("SELECT AlbumTitle from albums WHERE ArtistName=%s", [artist])
         for album in album_list:
             album_json[counter] = album['AlbumTitle']
             counter += 1
+        myDB.commit()
         json_albums = json.dumps(album_json)
 
         cherrypy.response.headers['Content-type'] = 'application/json'
@@ -1080,7 +1111,8 @@ class WebInterface(object):
     @cherrypy.expose
     def getArtistjson(self, ArtistID, **kwargs):
         myDB = db.DBConnection()
-        artist = myDB.action('SELECT * FROM artists WHERE ArtistID=?', [ArtistID]).fetchone()
+        artist = myDB.action('SELECT * FROM artists WHERE ArtistID=%s', [ArtistID]).fetchone()
+        myDB.commit()
         artist_json = json.dumps({
             'ArtistName': artist['ArtistName'],
             'Status': artist['Status']
@@ -1090,7 +1122,8 @@ class WebInterface(object):
     @cherrypy.expose
     def getAlbumjson(self, AlbumID, **kwargs):
         myDB = db.DBConnection()
-        album = myDB.action('SELECT * from albums WHERE AlbumID=?', [AlbumID]).fetchone()
+        album = myDB.action('SELECT * from albums WHERE AlbumID=%s', [AlbumID]).fetchone()
+        myDB.commit()
         album_json = json.dumps({
             'AlbumTitle': album['AlbumTitle'],
             'ArtistName': album['ArtistName'],
@@ -1104,15 +1137,16 @@ class WebInterface(object):
         if type:
             if type == 'all':
                 logger.info(u"Clearing all history")
-                myDB.action('DELETE from snatched WHERE Status NOT LIKE "Seed%"')
+                myDB.action('DELETE from snatched WHERE Status NOT LIKE %s', ['Seed%'])
             else:
                 logger.info(u"Clearing history where status is %s" % type)
-                myDB.action('DELETE from snatched WHERE Status=?', [type])
+                myDB.action('DELETE from snatched WHERE Status=%s', [type])
         else:
             logger.info(u"Deleting '%s' from history" % title)
             myDB.action(
-                'DELETE from snatched WHERE Status NOT LIKE "Seed%" AND Title=? AND DateAdded=?',
-                [title, date_added])
+                'DELETE from snatched WHERE Status NOT LIKE %s AND Title=%s AND DateAdded=%s',
+                ['Seed%', title, date_added])
+        myDB.commit()
         raise cherrypy.HTTPRedirect("history")
 
     @cherrypy.expose
@@ -1134,12 +1168,14 @@ class WebInterface(object):
         myDB.action('UPDATE artists SET HaveTracks=NULL')
         logger.info('Reset track counts for all artists')
         myDB.action(
-            'UPDATE albums SET Status="Skipped" WHERE Status="Skipped" OR Status="Downloaded"')
+            'UPDATE albums SET Status=%s WHERE Status=%s OR Status=%s',
+            ['Skipped', 'Skipped', 'Downloaded'])
         logger.info('Marking all unwanted albums as Skipped')
         try:
             threading.Thread(target=librarysync.libraryScan).start()
         except Exception as e:
             logger.error('Unable to complete the scan: %s' % e)
+        myDB.commit()
         raise cherrypy.HTTPRedirect("home")
 
     @cherrypy.expose
@@ -1623,6 +1659,7 @@ class WebInterface(object):
     def extras(self):
         myDB = db.DBConnection()
         cloudlist = myDB.select('SELECT * from lastfmcloud')
+        myDB.commit()
         return serve_template(templatename="extras.html", title="Extras", cloudlist=cloudlist)
 
     @cherrypy.expose

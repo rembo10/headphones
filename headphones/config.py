@@ -292,6 +292,8 @@ _CONFIG_DEFINITIONS = {
     'TWITTER_PREFIX': (str, 'Twitter', 'Headphones'),
     'TWITTER_USERNAME': (str, 'Twitter', ''),
     'UPDATE_DB_INTERVAL': (int, 'General', 24),
+    'USE_POSTGRES': (bool_int, 'Advanced', 0),
+    'POSTGRES_DSN': (str, 'Advanced', ''),
     'USENET_RETENTION': (int, 'General', '1500'),
     'UTORRENT_HOST': (str, 'uTorrent', ''),
     'UTORRENT_LABEL': (str, 'uTorrent', ''),
