@@ -34,7 +34,7 @@ from pygazelle import release_type as gazellerelease_type
 import headphones
 from headphones.common import USER_AGENT
 from headphones import logger, db, helpers, classes, sab, nzbget, request
-from headphones import utorrent, transmission, notifiers, rutracker, deluge, qbittorrent
+from headphones import utorrent, transmission, notifiers, rutracker, deluge, qbittorrent, realdebrid
 from bencode import bencode, bdecode
 
 # Magnet to torrent services, for Black hole. Stolen from CouchPotato.
@@ -1002,6 +1002,37 @@ def send_to_downloader(data, bestqual, album):
             seed_ratio = get_seed_ratio(bestqual[3])
             if seed_ratio is not None:
                 utorrent.setSeedRatio(torrentid, seed_ratio)
+        elif headphones.CONFIG.TORRENT_DOWNLOADER == 5:  # real-debrid
+            logger.info("Sending torrent to Real-Debrid")
+
+            # Add torrent
+            if bestqual[3] == 'rutracker.org':
+                ruobj.realdebrid_add_file(data)
+            else:
+                try:
+                    realdebrid.addTorrent(bestqual[2])
+                except ValueError as err:
+                    logger.error('Torrent could not be added: ' + str(err))
+
+            # Get hash
+            torrentid = calculate_torrent_hash(bestqual[2], data)
+            if not torrentid:
+                logger.error('Torrent id could not be determined')
+                return
+
+            if bestqual[3] != 'rutracker.org':
+                try:
+                    realdebrid.selectFiles(torrentid)
+                except ValueError as err:
+                    logger.error('Torrent files could not be selected: ' + str(err))
+
+            # Get folder
+            folder_name = realdebrid.getFolder(torrentid)
+            if folder_name:
+                logger.info('Torrent folder name: %s' % folder_name)
+            else:
+                logger.error('Torrent folder name could not be determined')
+                return
         else:  # if headphones.CONFIG.TORRENT_DOWNLOADER == 4:
             logger.info("Sending torrent to QBiTorrent")
 

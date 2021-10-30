@@ -27,7 +27,7 @@ from beets import config as beetsconfig
 from beets import logging as beetslogging
 from beets.mediafile import MediaFile, FileTypeError, UnreadableFileError
 from beetsplug import lyrics as beetslyrics
-from headphones import notifiers, utorrent, transmission, deluge, qbittorrent
+from headphones import notifiers, utorrent, transmission, deluge, qbittorrent, realdebrid
 from headphones import db, albumart, librarysync
 from headphones import logger, helpers, mb, music_encoder
 from headphones import metadata
@@ -61,6 +61,8 @@ def checkFolder():
                             torrent_folder_name, single = transmission.getFolder(album['TorrentHash'])
                         elif headphones.CONFIG.TORRENT_DOWNLOADER == 4:
                             torrent_folder_name, single = qbittorrent.getFolder(album['TorrentHash'])
+                        elif headphones.CONFIG.TORRENT_DOWNLOADER == 5:
+                            torrent_folder_name = realdebrid.getFolder(album['TorrentHash'])
                         if torrent_folder_name:
                             folder_name = torrent_folder_name
 
@@ -211,6 +213,21 @@ def verify(albumid, albumpath, Kind=None, forced=False, keep_original_folder=Fal
     downloaded_track_list = []
     downloaded_cuecount = 0
 
+    if Kind == 'torrent' and headphones.CONFIG.TORRENT_DOWNLOADER == 5:
+        # Real-Debrid is the torrent downloader, so we check if the download is complete
+        # here, because it won't actually download the files locally until we tell it to
+        snatched = myDB.action('SELECT * from snatched WHERE AlbumID=? and FolderName=?', [albumid, os.path.basename(albumpath)]).fetchone()
+        try:
+            done = realdebrid.checkStatus(snatched['TorrentHash'])
+        except LookupError:
+            myDB.action('DELETE FROM snatched WHERE TorrentHash=?', [snatched['TorrentHash']])
+
+        if not done:
+            logger.info(
+                    "Looks like " + os.path.basename(albumpath).decode(headphones.SYS_ENCODING,
+                                                                       'replace') + " isn't complete yet. Will try again on the next run")
+            return
+
     for r, d, f in os.walk(albumpath):
         for files in f:
             if any(files.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
@@ -231,6 +248,10 @@ def verify(albumid, albumpath, Kind=None, forced=False, keep_original_folder=Fal
     # Check to see if we're preserving the torrent dir
     if (headphones.CONFIG.KEEP_TORRENT_FILES and Kind == "torrent") or headphones.CONFIG.KEEP_ORIGINAL_FOLDER:
         keep_original_folder = True
+
+    # If we're using real-debrid, we don't want to keep the original
+    if headphones.CONFIG.TORRENT_DOWNLOADER == 5 and Kind == "torrent":
+        keep_original_folder = False
 
     # Split cue before metadata check
     if headphones.CONFIG.CUE_SPLIT and downloaded_cuecount and downloaded_cuecount >= len(
@@ -499,6 +520,8 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
                 torrent_removed = deluge.removeTorrent(hash, True)
             elif headphones.CONFIG.TORRENT_DOWNLOADER == 2:
                 torrent_removed = utorrent.removeTorrent(hash, True)
+            elif headphones.CONFIG.TORRENT_DOWNLOADER == 5:
+                torrent_removed = realdebrid.removeTorrent(hash)
             else:
                 torrent_removed = qbittorrent.removeTorrent(hash, True)
 

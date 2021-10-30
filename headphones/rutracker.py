@@ -227,6 +227,18 @@ class Rutracker(object):
         except Exception as e:
             logger.exception('Error adding file to utorrent %s', e)
 
+    # TODO get this working in utorrent.py
+    def realdebrid_add_file(self, data):
+        host = "https://api.real-debrid.com/rest/1.0"
+        apikey = headphones.CONFIG.REALDEBRID_APIKEY
+
+        url = host + "/torrents/addTorrent?auth_token=" + apikey
+
+        try:
+            self.session.post(url, data)
+        except Exception as e:
+            logger.exception('Error adding file to utorrent %s', e)
+
     # TODO get this working in qbittorrent.py
     def qbittorrent_add_file(self, data):
         host = headphones.CONFIG.QBITTORRENT_HOST
