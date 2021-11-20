@@ -280,6 +280,8 @@ _XLATE_MUSICBRAINZ = {
     u"…": '...',     # HORIZONTAL ELLIPSIS (U+2026)
     u"’": "'",       # APOSTROPHE (U+0027)
     u"‐": "-",       # EN DASH (U+2013)
+    u'\u8208','-',   # HYPHEN (U+8208)
+    u'\u8243','”',   # DOUBLE PRIME (U+8243)
 }
 
 
