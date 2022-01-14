@@ -387,8 +387,8 @@ class OggPage(object):
 
         # Number the new pages starting from the first old page.
         first = old_pages[0].sequence
-        for page, seq in izip(new_pages,
-                              xrange(first, first + len(new_pages))):
+        for page, seq in zip(new_pages,
+                              range(first, first + len(new_pages))):
             page.sequence = seq
             page.serial = old_pages[0].serial
 
@@ -416,7 +416,7 @@ class OggPage(object):
         offset_adjust = 0
         new_data_end = None
         assert len(old_pages) == len(new_data)
-        for old_page, data in izip(old_pages, new_data):
+        for old_page, data in zip(old_pages, new_data):
             offset = old_page.offset + offset_adjust
             data_size = len(data)
             resize_bytes(fileobj, old_page.size, data_size, offset)

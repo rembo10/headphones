@@ -76,7 +76,7 @@ class OggTheoraInfo(StreamInfo):
         self.length = frames / float(self.fps)
 
     def pprint(self):
-        return u"Ogg Theora, %.2f seconds, %d bps" % (self.length,
+        return "Ogg Theora, %.2f seconds, %d bps" % (self.length,
                                                       self.bitrate)
 
 

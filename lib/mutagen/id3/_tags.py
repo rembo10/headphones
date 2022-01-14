@@ -236,7 +236,7 @@ class ID3Tags(DictProxy, Tags):
             return [self[key]]
         else:
             key = key + ":"
-            return [v for s, v in self.items() if s.startswith(key)]
+            return [v for s, v in list(self.items()) if s.startswith(key)]
 
     def setall(self, key, values):
         """Delete frames of the given type and add frames in 'values'.
@@ -280,7 +280,7 @@ class ID3Tags(DictProxy, Tags):
             ``POPM=user@example.org=3 128/255``
         """
 
-        frames = sorted(Frame.pprint(s) for s in self.values())
+        frames = sorted(Frame.pprint(s) for s in list(self.values()))
         return "\n".join(frames)
 
     def _add(self, frame, strict):
@@ -371,7 +371,7 @@ class ID3Tags(DictProxy, Tags):
         # TDAT, TYER, and TIME have been turned into TDRC.
         try:
             date = text_type(self.get("TYER", ""))
-            if date.strip(u"\x00"):
+            if date.strip("\x00"):
                 self.pop("TYER")
                 dat = text_type(self.get("TDAT", ""))
                 if dat.strip("\x00"):
@@ -482,7 +482,7 @@ class ID3Tags(DictProxy, Tags):
     def _copy(self):
         """Creates a shallow copy of all tags"""
 
-        items = self.items()
+        items = list(self.items())
         subs = {}
         for f in (self.getall("CHAP") + self.getall("CTOC")):
             subs[f.HashKey] = f.sub_frames._copy()

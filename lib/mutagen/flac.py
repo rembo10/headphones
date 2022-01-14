@@ -259,7 +259,7 @@ class StreamInfo(MetadataBlock, mutagen.StreamInfo):
         return f.getvalue()
 
     def pprint(self):
-        return u"FLAC, %.2f seconds, %d Hz" % (self.length, self.sample_rate)
+        return "FLAC, %.2f seconds, %d Hz" % (self.length, self.sample_rate)
 
 
 class SeekPoint(tuple):
@@ -484,7 +484,7 @@ class CueSheet(MetadataBlock):
         self.lead_in_samples = lead_in_samples
         self.compact_disc = bool(flags & 0x80)
         self.tracks = []
-        for i in xrange(num_tracks):
+        for i in range(num_tracks):
             track = data.read(self.__CUESHEET_TRACK_SIZE)
             start_offset, track_number, isrc_padded, flags, num_indexes = \
                 struct.unpack(self.__CUESHEET_TRACK_FORMAT, track)
@@ -493,7 +493,7 @@ class CueSheet(MetadataBlock):
             pre_emphasis = bool(flags & 0x40)
             val = CueSheetTrack(
                 track_number, start_offset, isrc, type_, pre_emphasis)
-            for j in xrange(num_indexes):
+            for j in range(num_indexes):
                 index = data.read(self.__CUESHEET_TRACKINDEX_SIZE)
                 index_offset, index_number = struct.unpack(
                     self.__CUESHEET_TRACKINDEX_FORMAT, index)
@@ -574,8 +574,8 @@ class Picture(MetadataBlock):
 
     def __init__(self, data=None):
         self.type = 0
-        self.mime = u''
-        self.desc = u''
+        self.mime = ''
+        self.desc = ''
         self.width = 0
         self.height = 0
         self.depth = 0

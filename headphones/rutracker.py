@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import time
-from urlparse import urlparse
+from urllib.parse import urlparse
 import re
 
 import requests as requests
@@ -68,10 +68,10 @@ class Rutracker(object):
             return self.loggedin
 
     def has_bb_session_cookie(self, response):
-        if 'bb_session' in response.cookies.keys():
+        if 'bb_session' in list(response.cookies.keys()):
             return True
         # Rutracker randomly send a 302 redirect code, cookie may be present in response history
-        return next(('bb_session' in r.cookies.keys() for r in response.history), False)
+        return next(('bb_session' in list(r.cookies.keys()) for r in response.history), False)
 
     def searchurl(self, artist, album, year, format):
         """
@@ -99,10 +99,10 @@ class Rutracker(object):
         # sort by size, descending.
         sort = '&o=7&s=2'
         try:
-            searchurl = "%s?nm=%s%s%s" % (self.search_referer, urllib.quote(searchterm), format, sort)
+            searchurl = "%s?nm=%s%s%s" % (self.search_referer, urllib.parse.quote(searchterm), format, sort)
         except:
             searchterm = searchterm.encode('utf-8')
-            searchurl = "%s?nm=%s%s%s" % (self.search_referer, urllib.quote(searchterm), format, sort)
+            searchurl = "%s?nm=%s%s%s" % (self.search_referer, urllib.parse.quote(searchterm), format, sort)
         logger.info("Searching rutracker using term: %s", searchterm)
 
         return searchurl
@@ -114,7 +114,7 @@ class Rutracker(object):
         try:
             headers = {'Referer': self.search_referer}
             r = self.session.get(url=searchurl, headers=headers, timeout=self.timeout)
-            soup = BeautifulSoup(r.content, 'html5lib')
+            soup = BeautifulSoup(r.content, 'html.parser')
 
             # Debug
             # logger.debug (soup.prettify())
@@ -123,7 +123,7 @@ class Rutracker(object):
             if not self.still_logged_in(soup):
                 self.login()
                 r = self.session.get(url=searchurl, timeout=self.timeout)
-                soup = BeautifulSoup(r.content, 'html5lib')
+                soup = BeautifulSoup(r.content, 'html.parser')
                 if not self.still_logged_in(soup):
                     logger.error("Error getting rutracker data")
                     return None

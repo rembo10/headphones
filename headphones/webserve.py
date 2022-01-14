@@ -17,14 +17,14 @@
 
 from operator import itemgetter
 import threading
-import hashlib
+import secrets
 import random
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import json
 import time
-import cgi
 import sys
-import urllib2
+from html import escape as html_escape
+import urllib.request, urllib.error, urllib.parse
 
 import os
 import re
@@ -97,7 +97,7 @@ class WebInterface(object):
         # Serve the extras up as a dict to make things easier for new templates (append new extras to the end)
         extras_list = headphones.POSSIBLE_EXTRAS
         if artist['Extras']:
-            artist_extras = map(int, artist['Extras'].split(','))
+            artist_extras = list(map(int, artist['Extras'].split(',')))
         else:
             artist_extras = []
 
@@ -158,8 +158,8 @@ class WebInterface(object):
         else:
             searchresults = mb.findSeries(name, limit=100)
         return serve_template(templatename="searchresults.html",
-                              title='Search Results for: "' + cgi.escape(name) + '"',
-                              searchresults=searchresults, name=cgi.escape(name), type=type)
+                              title='Search Results for: "' + html_escape(name) + '"',
+                              searchresults=searchresults, name=html_escape(name), type=type)
 
     @cherrypy.expose
     def addArtist(self, artistid):
@@ -230,7 +230,7 @@ class WebInterface(object):
 
     @cherrypy.expose
     def pauseArtist(self, ArtistID):
-        logger.info(u"Pausing artist: " + ArtistID)
+        logger.info("Pausing artist: " + ArtistID)
         myDB = db.DBConnection()
         controlValueDict = {'ArtistID': ArtistID}
         newValueDict = {'Status': 'Paused'}
@@ -239,7 +239,7 @@ class WebInterface(object):
 
     @cherrypy.expose
     def resumeArtist(self, ArtistID):
-        logger.info(u"Resuming artist: " + ArtistID)
+        logger.info("Resuming artist: " + ArtistID)
         myDB = db.DBConnection()
         controlValueDict = {'ArtistID': ArtistID}
         newValueDict = {'Status': 'Active'}
@@ -252,9 +252,9 @@ class WebInterface(object):
         for name in namecheck:
             artistname = name['ArtistName']
         try:
-            logger.info(u"Deleting all traces of artist: " + artistname)
+            logger.info("Deleting all traces of artist: " + artistname)
         except TypeError:
-            logger.info(u"Deleting all traces of artist: null")
+            logger.info("Deleting all traces of artist: null")
         myDB.action('DELETE from artists WHERE ArtistID=?', [ArtistID])
 
         from headphones import cache
@@ -291,7 +291,7 @@ class WebInterface(object):
         myDB = db.DBConnection()
         artist_name = myDB.select('SELECT DISTINCT ArtistName FROM artists WHERE ArtistID=?', [ArtistID])[0][0]
 
-        logger.info(u"Scanning artist: %s", artist_name)
+        logger.info("Scanning artist: %s", artist_name)
 
         full_folder_format = headphones.CONFIG.FOLDER_FORMAT
         folder_format = re.findall(r'(.*?[Aa]rtist?)\.*', full_folder_format)[0]
@@ -314,7 +314,7 @@ class WebInterface(object):
             sortname = artist
 
         if sortname[0].isdigit():
-            firstchar = u'0-9'
+            firstchar = '0-9'
         else:
             firstchar = sortname[0]
 
@@ -363,7 +363,7 @@ class WebInterface(object):
 
     @cherrypy.expose
     def deleteEmptyArtists(self):
-        logger.info(u"Deleting all empty artists")
+        logger.info("Deleting all empty artists")
         myDB = db.DBConnection()
         emptyArtistIDs = [row['ArtistID'] for row in
                           myDB.select("SELECT ArtistID FROM artists WHERE LatestAlbum IS NULL")]
@@ -423,7 +423,7 @@ class WebInterface(object):
 
     @cherrypy.expose
     def queueAlbum(self, AlbumID, ArtistID=None, new=False, redirect=None, lossless=False):
-        logger.info(u"Marking album: " + AlbumID + " as wanted...")
+        logger.info("Marking album: " + AlbumID + " as wanted...")
         myDB = db.DBConnection()
         controlValueDict = {'AlbumID': AlbumID}
         if lossless:
@@ -438,10 +438,11 @@ class WebInterface(object):
         raise cherrypy.HTTPRedirect(redirect)
 
     @cherrypy.expose
+    @cherrypy.tools.json_out()
     def choose_specific_download(self, AlbumID):
         results = searcher.searchforalbum(AlbumID, choose_specific_download=True)
 
-        results_as_dicts = []
+        data = []
 
         for result in results:
             result_dict = {
@@ -452,35 +453,34 @@ class WebInterface(object):
                 'kind': result[4],
                 'matches': result[5]
             }
-            results_as_dicts.append(result_dict)
-        s = json.dumps(results_as_dicts)
-        cherrypy.response.headers['Content-type'] = 'application/json'
-        return s
+            data.append(result_dict)
+        return data
 
     @cherrypy.expose
+    @cherrypy.tools.json_out()
     def download_specific_release(self, AlbumID, title, size, url, provider, kind, **kwargs):
         # Handle situations where the torrent url contains arguments that are parsed
         if kwargs:
-            url = urllib2.quote(url, safe=":?/=&") + '&' + urllib.urlencode(kwargs)
+            url = urllib.parse.quote(url, safe=":?/=&") + '&' + urllib.parse.urlencode(kwargs)
         try:
             result = [(title, int(size), url, provider, kind)]
         except ValueError:
             result = [(title, float(size), url, provider, kind)]
 
-        logger.info(u"Making sure we can download the chosen result")
+        logger.info("Making sure we can download the chosen result")
         (data, bestqual) = searcher.preprocess(result)
 
         if data and bestqual:
             myDB = db.DBConnection()
             album = myDB.action('SELECT * from albums WHERE AlbumID=?', [AlbumID]).fetchone()
             searcher.send_to_downloader(data, bestqual, album)
-            return json.dumps({'result': 'success'})
+            return {'result': 'success'}
         else:
-            return json.dumps({'result': 'failure'})
+            return {'result': 'failure'}
 
     @cherrypy.expose
     def unqueueAlbum(self, AlbumID, ArtistID):
-        logger.info(u"Marking album: " + AlbumID + "as skipped...")
+        logger.info("Marking album: " + AlbumID + "as skipped...")
         myDB = db.DBConnection()
         controlValueDict = {'AlbumID': AlbumID}
         newValueDict = {'Status': 'Skipped'}
@@ -489,7 +489,7 @@ class WebInterface(object):
 
     @cherrypy.expose
     def deleteAlbum(self, AlbumID, ArtistID=None):
-        logger.info(u"Deleting all traces of album: " + AlbumID)
+        logger.info("Deleting all traces of album: " + AlbumID)
         myDB = db.DBConnection()
 
         myDB.action('DELETE from have WHERE Matched=?', [AlbumID])
@@ -528,7 +528,7 @@ class WebInterface(object):
 
     @cherrypy.expose
     def editSearchTerm(self, AlbumID, SearchTerm):
-        logger.info(u"Updating search term for albumid: " + AlbumID)
+        logger.info("Updating search term for albumid: " + AlbumID)
         myDB = db.DBConnection()
         controlValueDict = {'AlbumID': AlbumID}
         newValueDict = {'SearchTerm': SearchTerm}
@@ -959,6 +959,7 @@ class WebInterface(object):
         raise cherrypy.HTTPRedirect("logs")
 
     @cherrypy.expose
+    @cherrypy.tools.json_out()
     def getLog(self, iDisplayStart=0, iDisplayLength=100, iSortCol_0=0, sSortDir_0="desc",
                sSearch="", **kwargs):
         iDisplayStart = int(iDisplayStart)
@@ -981,13 +982,14 @@ class WebInterface(object):
         rows = filtered[iDisplayStart:(iDisplayStart + iDisplayLength)]
         rows = [[row[0], row[2], row[1]] for row in rows]
 
-        return json.dumps({
+        return {
             'iTotalDisplayRecords': len(filtered),
             'iTotalRecords': len(headphones.LOG_LIST),
             'aaData': rows,
-        })
+        }
 
     @cherrypy.expose
+    @cherrypy.tools.json_out()
     def getArtists_json(self, iDisplayStart=0, iDisplayLength=100, sSearch="", iSortCol_0='0',
                         sSortDir_0='asc', **kwargs):
         iDisplayStart = int(iDisplayStart)
@@ -1055,61 +1057,58 @@ class WebInterface(object):
 
             rows.append(row)
 
-        dict = {'iTotalDisplayRecords': len(filtered),
+        data = {'iTotalDisplayRecords': len(filtered),
                 'iTotalRecords': totalcount,
                 'aaData': rows,
                 }
-        s = json.dumps(dict)
-        cherrypy.response.headers['Content-type'] = 'application/json'
-        return s
+        return data
 
     @cherrypy.expose
+    @cherrypy.tools.json_out()
     def getAlbumsByArtist_json(self, artist=None):
         myDB = db.DBConnection()
-        album_json = {}
+        data = {}
         counter = 0
         album_list = myDB.select("SELECT AlbumTitle from albums WHERE ArtistName=?", [artist])
         for album in album_list:
-            album_json[counter] = album['AlbumTitle']
+            data[counter] = album['AlbumTitle']
             counter += 1
-        json_albums = json.dumps(album_json)
 
-        cherrypy.response.headers['Content-type'] = 'application/json'
-        return json_albums
+        return data 
 
     @cherrypy.expose
+    @cherrypy.tools.json_out()
     def getArtistjson(self, ArtistID, **kwargs):
         myDB = db.DBConnection()
         artist = myDB.action('SELECT * FROM artists WHERE ArtistID=?', [ArtistID]).fetchone()
-        artist_json = json.dumps({
+        return {
             'ArtistName': artist['ArtistName'],
             'Status': artist['Status']
-        })
-        return artist_json
+        }
 
     @cherrypy.expose
+    @cherrypy.tools.json_out()
     def getAlbumjson(self, AlbumID, **kwargs):
         myDB = db.DBConnection()
         album = myDB.action('SELECT * from albums WHERE AlbumID=?', [AlbumID]).fetchone()
-        album_json = json.dumps({
+        return {
             'AlbumTitle': album['AlbumTitle'],
             'ArtistName': album['ArtistName'],
             'Status': album['Status']
-        })
-        return album_json
+        }
 
     @cherrypy.expose
     def clearhistory(self, type=None, date_added=None, title=None):
         myDB = db.DBConnection()
         if type:
             if type == 'all':
-                logger.info(u"Clearing all history")
+                logger.info("Clearing all history")
                 myDB.action('DELETE from snatched WHERE Status NOT LIKE "Seed%"')
             else:
-                logger.info(u"Clearing history where status is %s" % type)
+                logger.info("Clearing history where status is %s" % type)
                 myDB.action('DELETE from snatched WHERE Status=?', [type])
         else:
-            logger.info(u"Deleting '%s' from history" % title)
+            logger.info("Deleting '%s' from history" % title)
             myDB.action(
                 'DELETE from snatched WHERE Status NOT LIKE "Seed%" AND Title=? AND DateAdded=?',
                 [title, date_added])
@@ -1117,7 +1116,7 @@ class WebInterface(object):
 
     @cherrypy.expose
     def generateAPI(self):
-        apikey = hashlib.sha224(str(random.getrandbits(256))).hexdigest()[0:32]
+        apikey = secrets.token_hex(nbytes=16)
         logger.info("New API generated")
         return apikey
 
@@ -1418,7 +1417,7 @@ class WebInterface(object):
             "join_deviceid": headphones.CONFIG.JOIN_DEVICEID
         }
 
-        for k, v in config.iteritems():
+        for k, v in config.items():
             if isinstance(v, headphones.config.path):
                 # need to apply SoftChroot to paths:
                 nv = headphones.SOFT_CHROOT.apply(v)
@@ -1435,7 +1434,7 @@ class WebInterface(object):
 
         extras_list = [extra_munges.get(x, x) for x in headphones.POSSIBLE_EXTRAS]
         if headphones.CONFIG.EXTRAS:
-            extras = map(int, headphones.CONFIG.EXTRAS.split(','))
+            extras = list(map(int, headphones.CONFIG.EXTRAS.split(',')))
         else:
             extras = []
 
@@ -1496,7 +1495,7 @@ class WebInterface(object):
             kwargs[plain_config] = kwargs[use_config]
             del kwargs[use_config]
 
-        for k, v in kwargs.iteritems():
+        for k, v in kwargs.items():
             # TODO : HUGE crutch. It is all because there is no way to deal with options...
             try:
                 _conf = headphones.CONFIG._define(k)
@@ -1648,12 +1647,13 @@ class WebInterface(object):
         return a.fetchData()
 
     @cherrypy.expose
+    @cherrypy.tools.json_out()
     def getInfo(self, ArtistID=None, AlbumID=None):
 
         from headphones import cache
         info_dict = cache.getInfo(ArtistID, AlbumID)
 
-        return json.dumps(info_dict)
+        return info_dict
 
     @cherrypy.expose
     def getArtwork(self, ArtistID=None, AlbumID=None):
@@ -1670,6 +1670,7 @@ class WebInterface(object):
     # If you just want to get the last.fm image links for an album, make sure
     # to pass a releaseid and not a releasegroupid
     @cherrypy.expose
+    @cherrypy.tools.json_out()
     def getImageLinks(self, ArtistID=None, AlbumID=None):
         from headphones import cache
         image_dict = cache.getImageLinks(ArtistID, AlbumID)
@@ -1687,7 +1688,7 @@ class WebInterface(object):
                 image_dict[
                     'thumbnail'] = "http://coverartarchive.org/release/%s/front-250.jpg" % AlbumID
 
-        return json.dumps(image_dict)
+        return image_dict
 
     @cherrypy.expose
     def twitterStep1(self):
@@ -1700,7 +1701,7 @@ class WebInterface(object):
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
         tweet = notifiers.TwitterNotifier()
         result = tweet._get_credentials(key)
-        logger.info(u"result: " + str(result))
+        logger.info("result: " + str(result))
         if result:
             return "Key verification successful"
         else:
@@ -1732,14 +1733,14 @@ class WebInterface(object):
 
     @cherrypy.expose
     def testPushover(self):
-        logger.info(u"Sending Pushover notification")
+        logger.info("Sending Pushover notification")
         pushover = notifiers.PUSHOVER()
         result = pushover.notify("hooray!", "This is a test")
         return str(result)
 
     @cherrypy.expose
     def testPlex(self):
-        logger.info(u"Testing plex update")
+        logger.info("Testing plex update")
         plex = notifiers.Plex()
         plex.update()
 

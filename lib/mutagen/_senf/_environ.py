@@ -86,23 +86,23 @@ def read_windows_environ():
     res = ctypes.cast(res, ctypes.POINTER(ctypes.c_wchar))
 
     done = []
-    current = u""
+    current = ""
     i = 0
     while 1:
         c = res[i]
         i += 1
-        if c == u"\x00":
+        if c == "\x00":
             if not current:
                 break
             done.append(current)
-            current = u""
+            current = ""
             continue
         current += c
 
     dict_ = {}
     for entry in done:
         try:
-            key, value = entry.split(u"=", 1)
+            key, value = entry.split("=", 1)
         except ValueError:
             continue
         key = _norm_key(key)

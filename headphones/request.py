@@ -138,7 +138,7 @@ def request_soup(url, **kwargs):
     no exceptions are raised.
     """
 
-    parser = kwargs.pop("parser", "html5lib")
+    parser = kwargs.pop("parser", "html.parser")
     response = request_response(url, **kwargs)
 
     if response is not None:
@@ -222,7 +222,7 @@ def server_message(response):
     if response.headers.get("content-type") and \
                     "text/html" in response.headers.get("content-type"):
         try:
-            soup = BeautifulSoup(response.content, "html5lib")
+            soup = BeautifulSoup(response.content, "html.parser")
         except Exception:
             pass
 

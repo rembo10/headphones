@@ -61,7 +61,7 @@ class LazyDict(DictMixin):
                     self._fill()
             finally:
                 _fill_lock.release()
-        return self.data.keys()
+        return list(self.data.keys())
 
 
 class LazyList(list):

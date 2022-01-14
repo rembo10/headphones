@@ -61,7 +61,7 @@ class Frame(object):
             # ask the sub class to fill in our data
             other._to_other(self)
         else:
-            for checker, val in izip(self._framespec, args):
+            for checker, val in zip(self._framespec, args):
                 setattr(self, checker.name, val)
             for checker in self._framespec[len(args):]:
                 setattr(self, checker.name,
@@ -329,11 +329,11 @@ class CHAP(Frame):
     __hash__ = Frame.__hash__
 
     def _pprint(self):
-        frame_pprint = u""
+        frame_pprint = ""
         for frame in itervalues(self.sub_frames):
             for line in frame.pprint().splitlines():
                 frame_pprint += "\n" + " " * 4 + line
-        return u"%s time=%d..%d offset=%d..%d%s" % (
+        return "%s time=%d..%d offset=%d..%d%s" % (
             self.element_id, self.start_time, self.end_time,
             self.start_offset, self.end_offset, frame_pprint)
 
@@ -368,13 +368,13 @@ class CTOC(Frame):
             self.child_element_ids == other.child_element_ids
 
     def _pprint(self):
-        frame_pprint = u""
+        frame_pprint = ""
         if getattr(self, "sub_frames", None):
             frame_pprint += "\n" + "\n".join(
-                [" " * 4 + f.pprint() for f in self.sub_frames.values()])
-        return u"%s flags=%d child_element_ids=%s%s" % (
+                [" " * 4 + f.pprint() for f in list(self.sub_frames.values())])
+        return "%s flags=%d child_element_ids=%s%s" % (
             self.element_id, int(self.flags),
-            u",".join(self.child_element_ids), frame_pprint)
+            ",".join(self.child_element_ids), frame_pprint)
 
 
 @swap_to_string
@@ -395,14 +395,14 @@ class TextFrame(Frame):
 
     _framespec = [
         EncodingSpec('encoding', default=Encoding.UTF16),
-        MultiSpec('text', EncodedTextSpec('text'), sep=u'\u0000', default=[]),
+        MultiSpec('text', EncodedTextSpec('text'), sep='\u0000', default=[]),
     ]
 
     def __bytes__(self):
         return text_type(self).encode('utf-8')
 
     def __str__(self):
-        return u'\u0000'.join(self.text)
+        return '\u0000'.join(self.text)
 
     def __eq__(self, other):
         if isinstance(other, bytes):
@@ -451,7 +451,7 @@ class NumericTextFrame(TextFrame):
 
     _framespec = [
         EncodingSpec('encoding', default=Encoding.UTF16),
-        MultiSpec('text', EncodedNumericTextSpec('text'), sep=u'\u0000',
+        MultiSpec('text', EncodedNumericTextSpec('text'), sep='\u0000',
                   default=[]),
     ]
 
@@ -472,7 +472,7 @@ class NumericPartTextFrame(TextFrame):
 
     _framespec = [
         EncodingSpec('encoding', default=Encoding.UTF16),
-        MultiSpec('text', EncodedNumericPartTextSpec('text'), sep=u'\u0000',
+        MultiSpec('text', EncodedNumericPartTextSpec('text'), sep='\u0000',
                   default=[]),
     ]
 
@@ -490,17 +490,17 @@ class TimeStampTextFrame(TextFrame):
 
     _framespec = [
         EncodingSpec('encoding', default=Encoding.UTF16),
-        MultiSpec('text', TimeStampSpec('stamp'), sep=u',', default=[]),
+        MultiSpec('text', TimeStampSpec('stamp'), sep=',', default=[]),
     ]
 
     def __bytes__(self):
         return text_type(self).encode('utf-8')
 
     def __str__(self):
-        return u','.join([stamp.text for stamp in self.text])
+        return ','.join([stamp.text for stamp in self.text])
 
     def _pprint(self):
-        return u" / ".join([stamp.text for stamp in self.text])
+        return " / ".join([stamp.text for stamp in self.text])
 
 
 @swap_to_string
@@ -574,11 +574,11 @@ class TCON(TextFrame):
                 try:
                     genres.append(self.GENRES[int(value)])
                 except IndexError:
-                    genres.append(u"Unknown")
+                    genres.append("Unknown")
             elif value == "CR":
-                genres.append(u"Cover")
+                genres.append("Cover")
             elif value == "RX":
-                genres.append(u"Remix")
+                genres.append("Remix")
             elif value:
                 newgenres = []
                 genreid, dummy, genrename = genre_re.match(value).groups()
@@ -589,11 +589,11 @@ class TCON(TextFrame):
                             gid = text_type(self.GENRES[int(gid)])
                             newgenres.append(gid)
                         elif gid == "CR":
-                            newgenres.append(u"Cover")
+                            newgenres.append("Cover")
                         elif gid == "RX":
-                            newgenres.append(u"Remix")
+                            newgenres.append("Remix")
                         else:
-                            newgenres.append(u"Unknown")
+                            newgenres.append("Unknown")
 
                 if genrename:
                     # "Unescaping" the first parenthesis
@@ -860,7 +860,7 @@ class TXXX(TextFrame):
     _framespec = [
         EncodingSpec('encoding'),
         EncodedTextSpec('desc'),
-        MultiSpec('text', EncodedTextSpec('text'), sep=u'\u0000', default=[]),
+        MultiSpec('text', EncodedTextSpec('text'), sep='\u0000', default=[]),
     ]
 
     @property
@@ -1045,7 +1045,7 @@ class USLT(Frame):
 
     _framespec = [
         EncodingSpec('encoding', default=Encoding.UTF16),
-        StringSpec('lang', length=3, default=u"XXX"),
+        StringSpec('lang', length=3, default="XXX"),
         EncodedTextSpec('desc'),
         EncodedTextSpec('text'),
     ]
@@ -1072,7 +1072,7 @@ class SYLT(Frame):
 
     _framespec = [
         EncodingSpec('encoding'),
-        StringSpec('lang', length=3, default=u"XXX"),
+        StringSpec('lang', length=3, default="XXX"),
         ByteSpec('format', default=1),
         ByteSpec('type', default=0),
         EncodedTextSpec('desc'),
@@ -1089,7 +1089,7 @@ class SYLT(Frame):
     __hash__ = Frame.__hash__
 
     def __str__(self):
-        return u"".join(text for (text, time) in self.text)
+        return "".join(text for (text, time) in self.text)
 
     def __bytes__(self):
         return text_type(self).encode("utf-8")
@@ -1106,7 +1106,7 @@ class COMM(TextFrame):
         EncodingSpec('encoding'),
         StringSpec('lang', length=3, default="XXX"),
         EncodedTextSpec('desc'),
-        MultiSpec('text', EncodedTextSpec('text'), sep=u'\u0000', default=[]),
+        MultiSpec('text', EncodedTextSpec('text'), sep='\u0000', default=[]),
     ]
 
     @property
@@ -1263,7 +1263,7 @@ class APIC(Frame):
         return '%s:%s' % (self.FrameID, self.desc)
 
     def _merge_frame(self, other):
-        other.desc += u" "
+        other.desc += " "
         return other
 
     def _pprint(self):
@@ -1550,7 +1550,7 @@ class USER(Frame):
 
     _framespec = [
         EncodingSpec('encoding'),
-        StringSpec('lang', length=3, default=u"XXX"),
+        StringSpec('lang', length=3, default="XXX"),
         EncodedTextSpec('text'),
     ]
 
@@ -1580,7 +1580,7 @@ class OWNE(Frame):
     _framespec = [
         EncodingSpec('encoding'),
         Latin1TextSpec('price'),
-        StringSpec('date', length=8, default=u"19700101"),
+        StringSpec('date', length=8, default="19700101"),
         EncodedTextSpec('seller'),
     ]
 
@@ -1602,7 +1602,7 @@ class COMR(Frame):
     _framespec = [
         EncodingSpec('encoding'),
         Latin1TextSpec('price'),
-        StringSpec('valid_until', length=8, default=u"19700101"),
+        StringSpec('valid_until', length=8, default="19700101"),
         Latin1TextSpec('contact'),
         ByteSpec('format', default=0),
         EncodedTextSpec('seller'),

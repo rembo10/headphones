@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 
 import six
 
@@ -7,7 +7,7 @@ from apscheduler.util import datetime_to_utc_timestamp, utc_timestamp_to_datetim
 from apscheduler.job import Job
 
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except ImportError:  # pragma: nocover
     import pickle
 

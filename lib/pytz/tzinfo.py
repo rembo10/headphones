@@ -548,7 +548,7 @@ def unpickler(zone, utcoffset=None, dstoffset=None, tzname=None):
     # See if we can find an entry differing only by tzname. Abbreviations
     # get changed from the initial guess by the database maintainers to
     # match reality when this information is discovered.
-    for localized_tz in tz._tzinfos.values():
+    for localized_tz in list(tz._tzinfos.values()):
         if (localized_tz._utcoffset == utcoffset
                 and localized_tz._dst == dstoffset):
             return localized_tz

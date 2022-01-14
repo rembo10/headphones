@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # This file is part of beets.
 # Copyright 2016, Adrian Sampson.
 #
@@ -14,7 +13,6 @@
 # included in all copies or substantial portions of the Software.
 
 """Glue between metadata sources and the matching logic."""
-from __future__ import division, absolute_import, print_function
 
 from collections import namedtuple
 from functools import total_ordering
@@ -27,14 +25,36 @@ from beets.util import as_string
 from beets.autotag import mb
 from jellyfish import levenshtein_distance
 from unidecode import unidecode
-import six
 
 log = logging.getLogger('beets')
 
+# The name of the type for patterns in re changed in Python 3.7.
+try:
+    Pattern = re._pattern_type
+except AttributeError:
+    Pattern = re.Pattern
+
 
 # Classes used to represent candidate options.
+class AttrDict(dict):
+    """A dictionary that supports attribute ("dot") access, so `d.field`
+    is equivalent to `d['field']`.
+    """
 
-class AlbumInfo(object):
+    def __getattr__(self, attr):
+        if attr in self:
+            return self.get(attr)
+        else:
+            raise AttributeError
+
+    def __setattr__(self, key, value):
+        self.__setitem__(key, value)
+
+    def __hash__(self):
+        return id(self)
+
+
+class AlbumInfo(AttrDict):
     """Describes a canonical release that may be used to match a release
     in the library. Consists of these data members:
 
@@ -43,38 +63,22 @@ class AlbumInfo(object):
     - ``artist``: name of the release's primary artist
     - ``artist_id``
     - ``tracks``: list of TrackInfo objects making up the release
-    - ``asin``: Amazon ASIN
-    - ``albumtype``: string describing the kind of release
-    - ``va``: boolean: whether the release has "various artists"
-    - ``year``: release year
-    - ``month``: release month
-    - ``day``: release day
-    - ``label``: music label responsible for the release
-    - ``mediums``: the number of discs in this release
-    - ``artist_sort``: name of the release's artist for sorting
-    - ``releasegroup_id``: MBID for the album's release group
-    - ``catalognum``: the label's catalog number for the release
-    - ``script``: character set used for metadata
-    - ``language``: human language of the metadata
-    - ``country``: the release country
-    - ``albumstatus``: MusicBrainz release status (Official, etc.)
-    - ``media``: delivery mechanism (Vinyl, etc.)
-    - ``albumdisambig``: MusicBrainz release disambiguation comment
-    - ``artist_credit``: Release-specific artist name
-    - ``data_source``: The original data source (MusicBrainz, Discogs, etc.)
-    - ``data_url``: The data source release URL.
 
-    The fields up through ``tracks`` are required. The others are
-    optional and may be None.
+    ``mediums`` along with the fields up through ``tracks`` are required.
+    The others are optional and may be None.
     """
-    def __init__(self, album, album_id, artist, artist_id, tracks, asin=None,
-                 albumtype=None, va=False, year=None, month=None, day=None,
-                 label=None, mediums=None, artist_sort=None,
-                 releasegroup_id=None, catalognum=None, script=None,
-                 language=None, country=None, albumstatus=None, media=None,
-                 albumdisambig=None, artist_credit=None, original_year=None,
-                 original_month=None, original_day=None, data_source=None,
-                 data_url=None):
+
+    def __init__(self, tracks, album=None, album_id=None, artist=None,
+                 artist_id=None, asin=None, albumtype=None, va=False,
+                 year=None, month=None, day=None, label=None, mediums=None,
+                 artist_sort=None, releasegroup_id=None, catalognum=None,
+                 script=None, language=None, country=None, style=None,
+                 genre=None, albumstatus=None, media=None, albumdisambig=None,
+                 releasegroupdisambig=None, artist_credit=None,
+                 original_year=None, original_month=None,
+                 original_day=None, data_source=None, data_url=None,
+                 discogs_albumid=None, discogs_labelid=None,
+                 discogs_artistid=None, **kwargs):
         self.album = album
         self.album_id = album_id
         self.artist = artist
@@ -94,15 +98,22 @@ class AlbumInfo(object):
         self.script = script
         self.language = language
         self.country = country
+        self.style = style
+        self.genre = genre
         self.albumstatus = albumstatus
         self.media = media
         self.albumdisambig = albumdisambig
+        self.releasegroupdisambig = releasegroupdisambig
         self.artist_credit = artist_credit
         self.original_year = original_year
         self.original_month = original_month
         self.original_day = original_day
         self.data_source = data_source
         self.data_url = data_url
+        self.discogs_albumid = discogs_albumid
+        self.discogs_labelid = discogs_labelid
+        self.discogs_artistid = discogs_artistid
+        self.update(kwargs)
 
     # Work around a bug in python-musicbrainz-ngs that causes some
     # strings to be bytes rather than Unicode.
@@ -112,53 +123,49 @@ class AlbumInfo(object):
         constituent `TrackInfo` objects, are decoded to Unicode.
         """
         for fld in ['album', 'artist', 'albumtype', 'label', 'artist_sort',
-                    'catalognum', 'script', 'language', 'country',
-                    'albumstatus', 'albumdisambig', 'artist_credit', 'media']:
+                    'catalognum', 'script', 'language', 'country', 'style',
+                    'genre', 'albumstatus', 'albumdisambig',
+                    'releasegroupdisambig', 'artist_credit',
+                    'media', 'discogs_albumid', 'discogs_labelid',
+                    'discogs_artistid']:
             value = getattr(self, fld)
             if isinstance(value, bytes):
                 setattr(self, fld, value.decode(codec, 'ignore'))
 
-        if self.tracks:
-            for track in self.tracks:
-                track.decode(codec)
+        for track in self.tracks:
+            track.decode(codec)
+
+    def copy(self):
+        dupe = AlbumInfo([])
+        dupe.update(self)
+        dupe.tracks = [track.copy() for track in self.tracks]
+        return dupe
 
 
-class TrackInfo(object):
+class TrackInfo(AttrDict):
     """Describes a canonical track present on a release. Appears as part
     of an AlbumInfo's ``tracks`` list. Consists of these data members:
 
     - ``title``: name of the track
     - ``track_id``: MusicBrainz ID; UUID fragment only
-    - ``artist``: individual track artist name
-    - ``artist_id``
-    - ``length``: float: duration of the track in seconds
-    - ``index``: position on the entire release
-    - ``media``: delivery mechanism (Vinyl, etc.)
-    - ``medium``: the disc number this track appears on in the album
-    - ``medium_index``: the track's position on the disc
-    - ``medium_total``: the number of tracks on the item's disc
-    - ``artist_sort``: name of the track artist for sorting
-    - ``disctitle``: name of the individual medium (subtitle)
-    - ``artist_credit``: Recording-specific artist name
-    - ``data_source``: The original data source (MusicBrainz, Discogs, etc.)
-    - ``data_url``: The data source release URL.
-    - ``lyricist``: individual track lyricist name
-    - ``composer``: individual track composer name
-    - ``arranger`: individual track arranger name
-    - ``track_alt``: alternative track number (tape, vinyl, etc.)
 
     Only ``title`` and ``track_id`` are required. The rest of the fields
     may be None. The indices ``index``, ``medium``, and ``medium_index``
     are all 1-based.
     """
-    def __init__(self, title, track_id, artist=None, artist_id=None,
-                 length=None, index=None, medium=None, medium_index=None,
-                 medium_total=None, artist_sort=None, disctitle=None,
-                 artist_credit=None, data_source=None, data_url=None,
-                 media=None, lyricist=None, composer=None, arranger=None,
-                 track_alt=None):
+
+    def __init__(self, title=None, track_id=None, release_track_id=None,
+                 artist=None, artist_id=None, length=None, index=None,
+                 medium=None, medium_index=None, medium_total=None,
+                 artist_sort=None, disctitle=None, artist_credit=None,
+                 data_source=None, data_url=None, media=None, lyricist=None,
+                 composer=None, composer_sort=None, arranger=None,
+                 track_alt=None, work=None, mb_workid=None,
+                 work_disambig=None, bpm=None, initial_key=None, genre=None,
+                 **kwargs):
         self.title = title
         self.track_id = track_id
+        self.release_track_id = release_track_id
         self.artist = artist
         self.artist_id = artist_id
         self.length = length
@@ -174,8 +181,16 @@ class TrackInfo(object):
         self.data_url = data_url
         self.lyricist = lyricist
         self.composer = composer
+        self.composer_sort = composer_sort
         self.arranger = arranger
         self.track_alt = track_alt
+        self.work = work
+        self.mb_workid = mb_workid
+        self.work_disambig = work_disambig
+        self.bpm = bpm
+        self.initial_key = initial_key
+        self.genre = genre
+        self.update(kwargs)
 
     # As above, work around a bug in python-musicbrainz-ngs.
     def decode(self, codec='utf-8'):
@@ -187,6 +202,11 @@ class TrackInfo(object):
             value = getattr(self, fld)
             if isinstance(value, bytes):
                 setattr(self, fld, value.decode(codec, 'ignore'))
+
+    def copy(self):
+        dupe = TrackInfo()
+        dupe.update(self)
+        return dupe
 
 
 # Candidate distance scoring.
@@ -215,8 +235,8 @@ def _string_dist_basic(str1, str2):
     transliteration/lowering to ASCII characters. Normalized by string
     length.
     """
-    assert isinstance(str1, six.text_type)
-    assert isinstance(str2, six.text_type)
+    assert isinstance(str1, str)
+    assert isinstance(str2, str)
     str1 = as_string(unidecode(str1))
     str2 = as_string(unidecode(str2))
     str1 = re.sub(r'[^a-z0-9]', '', str1.lower())
@@ -244,9 +264,9 @@ def string_dist(str1, str2):
     # "something, the".
     for word in SD_END_WORDS:
         if str1.endswith(', %s' % word):
-            str1 = '%s %s' % (word, str1[:-len(word) - 2])
+            str1 = '{} {}'.format(word, str1[:-len(word) - 2])
         if str2.endswith(', %s' % word):
-            str2 = '%s %s' % (word, str2[:-len(word) - 2])
+            str2 = '{} {}'.format(word, str2[:-len(word) - 2])
 
     # Perform a couple of basic normalizing substitutions.
     for pat, repl in SD_REPLACE:
@@ -284,11 +304,12 @@ def string_dist(str1, str2):
     return base_dist + penalty
 
 
-class LazyClassProperty(object):
+class LazyClassProperty:
     """A decorator implementing a read-only property that is *lazy* in
     the sense that the getter is only invoked once. Subsequent accesses
     through *any* instance use the cached result.
     """
+
     def __init__(self, getter):
         self.getter = getter
         self.computed = False
@@ -301,17 +322,17 @@ class LazyClassProperty(object):
 
 
 @total_ordering
-@six.python_2_unicode_compatible
-class Distance(object):
+class Distance:
     """Keeps track of multiple distance penalties. Provides a single
     weighted distance for all penalties as well as a weighted distance
     for each individual penalty.
     """
+
     def __init__(self):
         self._penalties = {}
 
     @LazyClassProperty
-    def _weights(cls):  # noqa
+    def _weights(cls):  # noqa: N805
         """A dictionary from keys to floating-point weights.
         """
         weights_view = config['match']['distance_weights']
@@ -389,7 +410,7 @@ class Distance(object):
         return other - self.distance
 
     def __str__(self):
-        return "{0:.2f}".format(self.distance)
+        return f"{self.distance:.2f}"
 
     # Behave like a dict.
 
@@ -416,7 +437,7 @@ class Distance(object):
         """
         if not isinstance(dist, Distance):
             raise ValueError(
-                u'`dist` must be a Distance object, not {0}'.format(type(dist))
+                '`dist` must be a Distance object, not {}'.format(type(dist))
             )
         for key, penalties in dist._penalties.items():
             self._penalties.setdefault(key, []).extend(penalties)
@@ -428,7 +449,7 @@ class Distance(object):
         be a compiled regular expression, in which case it will be
         matched against `value2`.
         """
-        if isinstance(value1, re._pattern_type):
+        if isinstance(value1, Pattern):
             return bool(value1.match(value2))
         return value1 == value2
 
@@ -440,7 +461,7 @@ class Distance(object):
         """
         if not 0.0 <= dist <= 1.0:
             raise ValueError(
-                u'`dist` must be between 0.0 and 1.0, not {0}'.format(dist)
+                f'`dist` must be between 0.0 and 1.0, not {dist}'
             )
         self._penalties.setdefault(key, []).append(dist)
 
@@ -534,7 +555,10 @@ def album_for_mbid(release_id):
     if the ID is not found.
     """
     try:
-        return mb.album_for_id(release_id)
+        album = mb.album_for_id(release_id)
+        if album:
+            plugins.send('albuminfo_received', info=album)
+        return album
     except mb.MusicBrainzAPIError as exc:
         exc.log(log)
 
@@ -544,12 +568,14 @@ def track_for_mbid(recording_id):
     if the ID is not found.
     """
     try:
-        return mb.track_for_id(recording_id)
+        track = mb.track_for_id(recording_id)
+        if track:
+            plugins.send('trackinfo_received', info=track)
+        return track
     except mb.MusicBrainzAPIError as exc:
         exc.log(log)
 
 
-@plugins.notify_info_yielded(u'albuminfo_received')
 def albums_for_id(album_id):
     """Get a list of albums for an ID."""
     a = album_for_mbid(album_id)
@@ -557,10 +583,10 @@ def albums_for_id(album_id):
         yield a
     for a in plugins.album_for_id(album_id):
         if a:
+            plugins.send('albuminfo_received', info=a)
             yield a
 
 
-@plugins.notify_info_yielded(u'trackinfo_received')
 def tracks_for_id(track_id):
     """Get a list of tracks for an ID."""
     t = track_for_mbid(track_id)
@@ -568,39 +594,43 @@ def tracks_for_id(track_id):
         yield t
     for t in plugins.track_for_id(track_id):
         if t:
+            plugins.send('trackinfo_received', info=t)
             yield t
 
 
-@plugins.notify_info_yielded(u'albuminfo_received')
-def album_candidates(items, artist, album, va_likely):
+@plugins.notify_info_yielded('albuminfo_received')
+def album_candidates(items, artist, album, va_likely, extra_tags):
     """Search for album matches. ``items`` is a list of Item objects
     that make up the album. ``artist`` and ``album`` are the respective
     names (strings), which may be derived from the item list or may be
     entered by the user. ``va_likely`` is a boolean indicating whether
-    the album is likely to be a "various artists" release.
+    the album is likely to be a "various artists" release. ``extra_tags``
+    is an optional dictionary of additional tags used to further
+    constrain the search.
     """
+
     # Base candidates if we have album and artist to match.
     if artist and album:
         try:
-            for candidate in mb.match_album(artist, album, len(items)):
-                yield candidate
+            yield from mb.match_album(artist, album, len(items),
+                                      extra_tags)
         except mb.MusicBrainzAPIError as exc:
             exc.log(log)
 
     # Also add VA matches from MusicBrainz where appropriate.
     if va_likely and album:
         try:
-            for candidate in mb.match_album(None, album, len(items)):
-                yield candidate
+            yield from mb.match_album(None, album, len(items),
+                                      extra_tags)
         except mb.MusicBrainzAPIError as exc:
             exc.log(log)
 
     # Candidates from plugins.
-    for candidate in plugins.candidates(items, artist, album, va_likely):
-        yield candidate
+    yield from plugins.candidates(items, artist, album, va_likely,
+                                  extra_tags)
 
 
-@plugins.notify_info_yielded(u'trackinfo_received')
+@plugins.notify_info_yielded('trackinfo_received')
 def item_candidates(item, artist, title):
     """Search for item matches. ``item`` is the Item to be matched.
     ``artist`` and ``title`` are strings and either reflect the item or
@@ -610,11 +640,9 @@ def item_candidates(item, artist, title):
     # MusicBrainz candidates.
     if artist and title:
         try:
-            for candidate in mb.match_track(artist, title):
-                yield candidate
+            yield from mb.match_track(artist, title)
         except mb.MusicBrainzAPIError as exc:
             exc.log(log)
 
     # Plugin candidates.
-    for candidate in plugins.item_candidates(item, artist, title):
-        yield candidate
+    yield from plugins.item_candidates(item, artist, title)

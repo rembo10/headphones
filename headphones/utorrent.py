@@ -13,13 +13,13 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import json
 import time
 from collections import namedtuple
-import urllib2
-import urlparse
-import cookielib
+import urllib.request, urllib.error, urllib.parse
+import urllib.parse
+import http.cookiejar
 
 import re
 import os
@@ -52,23 +52,23 @@ class utorrentclient(object):
 
     def _make_opener(self, realm, base_url, username, password):
         """uTorrent API need HTTP Basic Auth and cookie support for token verify."""
-        auth = urllib2.HTTPBasicAuthHandler()
+        auth = urllib.request.HTTPBasicAuthHandler()
         auth.add_password(realm=realm, uri=base_url, user=username, passwd=password)
-        opener = urllib2.build_opener(auth)
-        urllib2.install_opener(opener)
+        opener = urllib.request.build_opener(auth)
+        urllib.request.install_opener(opener)
 
-        cookie_jar = cookielib.CookieJar()
-        cookie_handler = urllib2.HTTPCookieProcessor(cookie_jar)
+        cookie_jar = http.cookiejar.CookieJar()
+        cookie_handler = urllib.request.HTTPCookieProcessor(cookie_jar)
 
         handlers = [auth, cookie_handler]
-        opener = urllib2.build_opener(*handlers)
+        opener = urllib.request.build_opener(*handlers)
         return opener
 
     def _get_token(self):
-        url = urlparse.urljoin(self.base_url, 'gui/token.html')
+        url = urllib.parse.urljoin(self.base_url, 'gui/token.html')
         try:
             response = self.opener.open(url)
-        except urllib2.HTTPError as err:
+        except urllib.error.HTTPError as err:
             logger.debug('URL: ' + str(url))
             logger.debug('Error getting Token. uTorrent responded with error: ' + str(err))
             return
@@ -77,7 +77,7 @@ class utorrentclient(object):
 
     def list(self, **kwargs):
         params = [('list', '1')]
-        params += kwargs.items()
+        params += list(kwargs.items())
         return self._action(params)
 
     def add_url(self, url):
@@ -150,8 +150,8 @@ class utorrentclient(object):
         if not self.token:
             return
 
-        url = self.base_url + '/gui/' + '?token=' + self.token + '&' + urllib.urlencode(params)
-        request = urllib2.Request(url)
+        url = self.base_url + '/gui/' + '?token=' + self.token + '&' + urllib.parse.urlencode(params)
+        request = urllib.request.Request(url)
 
         if body:
             request.add_data(body)
@@ -162,7 +162,7 @@ class utorrentclient(object):
         try:
             response = self.opener.open(request)
             return response.code, json.loads(response.read())
-        except urllib2.HTTPError as err:
+        except urllib.error.HTTPError as err:
             logger.debug('URL: ' + str(url))
             logger.debug('uTorrent webUI raised the following error: ' + str(err))
 

@@ -240,7 +240,7 @@ class Cache(object):
 
             # fallback to 1st album cover if none of the above
             elif 'albums' in data:
-                for mbid, art in data.get('albums', dict()).items():
+                for mbid, art in list(data.get('albums', dict()).items()):
                     if 'albumcover' in art:
                         image_url = art['albumcover'][0]['url']
                         break
@@ -352,7 +352,7 @@ class Cache(object):
 
             # fallback to 1st album cover if none of the above
             elif 'albums' in data:
-                for mbid, art in data.get('albums', dict()).items():
+                for mbid, art in list(data.get('albums', dict()).items()):
                     if 'albumcover' in art:
                         image_url = art['albumcover'][0]['url']
                         break

@@ -94,7 +94,7 @@ class FileType(DictMixin):
         if self.tags is None:
             return []
         else:
-            return self.tags.keys()
+            return list(self.tags.keys())
 
     @loadfile(writable=True)
     def delete(self, filething):
@@ -286,7 +286,7 @@ def File(filething, options=None, easy=False):
     results = [(Kind.score(filething.name, fileobj, header), Kind.__name__)
                for Kind in options]
 
-    results = list(izip(results, options))
+    results = list(zip(results, options))
     results.sort()
     (score, name), Kind = results[-1]
     if score > 0:

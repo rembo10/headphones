@@ -23,7 +23,7 @@ def levenshtein_distance(s1, s2):
         return rows-1
 
     prev = None
-    cur = range(cols)
+    cur = list(range(cols))
     for r in _range(1, rows):
         prev, cur = cur, [r] + [0]*(cols-1)
         for c in _range(1, cols):

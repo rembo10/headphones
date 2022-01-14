@@ -21,9 +21,9 @@ version here is for use with earlier Python versions.
 """
 import logging
 try:
-    import Queue as queue
+    import queue as queue
 except ImportError:
-    import queue
+    from . import queue
 import threading
 
 class QueueHandler(logging.Handler):

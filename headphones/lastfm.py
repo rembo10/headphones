@@ -91,7 +91,7 @@ def getSimilar():
     for artist, mbid in artistlist:
         count[artist, mbid] += 1
 
-    items = count.items()
+    items = list(count.items())
     top_list = sorted(items, key=lambda x: x[1], reverse=True)[:25]
 
     random.shuffle(top_list)

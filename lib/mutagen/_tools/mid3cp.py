@@ -52,14 +52,14 @@ def copy(src, dst, merge, write_v1=True, excluded_tags=None, verbose=False):
     try:
         id3 = mutagen.id3.ID3(src, translate=False)
     except mutagen.id3.ID3NoHeaderError:
-        print_(u"No ID3 header found in ", src, file=sys.stderr)
+        print_("No ID3 header found in ", src, file=sys.stderr)
         return 1
     except Exception as err:
         print_(str(err), file=sys.stderr)
         return 1
 
     if verbose:
-        print_(u"File", src, u"contains:", file=sys.stderr)
+        print_("File", src, "contains:", file=sys.stderr)
         print_(id3.pprint(), file=sys.stderr)
 
     for tag in excluded_tags:
@@ -75,7 +75,7 @@ def copy(src, dst, merge, write_v1=True, excluded_tags=None, verbose=False):
             print_(str(err), file=sys.stderr)
             return 1
         else:
-            for frame in id3.values():
+            for frame in list(id3.values()):
                 target.add(frame)
 
             id3 = target
@@ -91,12 +91,12 @@ def copy(src, dst, merge, write_v1=True, excluded_tags=None, verbose=False):
     try:
         id3.save(dst, v1=(2 if write_v1 else 0), v2_version=v2_version)
     except Exception as err:
-        print_(u"Error saving", dst, u":\n%s" % text_type(err),
+        print_("Error saving", dst, ":\n%s" % text_type(err),
                file=sys.stderr)
         return 1
     else:
         if verbose:
-            print_(u"Successfully saved", dst, file=sys.stderr)
+            print_("Successfully saved", dst, file=sys.stderr)
         return 0
 
 
@@ -120,12 +120,12 @@ def main(argv):
     (src, dst) = args
 
     if not os.path.isfile(src):
-        print_(u"File not found:", src, file=sys.stderr)
+        print_("File not found:", src, file=sys.stderr)
         parser.print_help(file=sys.stderr)
         return 1
 
     if not os.path.isfile(dst):
-        printerr(u"File not found:", dst, file=sys.stderr)
+        printerr("File not found:", dst, file=sys.stderr)
         parser.print_help(file=sys.stderr)
         return 1
 

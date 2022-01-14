@@ -1,21 +1,31 @@
 
-from error import *
+from .error import *
 
-from tokens import *
-from events import *
-from nodes import *
+from .tokens import *
+from .events import *
+from .nodes import *
 
-from loader import *
-from dumper import *
+from .loader import *
+from .dumper import *
 
-__version__ = '3.11'
-
+__version__ = '6.0'
 try:
-    from cyaml import *
+    from .cyaml import *
     __with_libyaml__ = True
 except ImportError:
     __with_libyaml__ = False
 
+import io
+
+#------------------------------------------------------------------------------
+# XXX "Warnings control" is now deprecated. Leaving in the API function to not
+# break code that uses it.
+#------------------------------------------------------------------------------
+def warnings(settings=None):
+    if settings is None:
+        return {}
+
+#------------------------------------------------------------------------------
 def scan(stream, Loader=Loader):
     """
     Scan a YAML stream and produce scanning tokens.
@@ -61,7 +71,7 @@ def compose_all(stream, Loader=Loader):
     finally:
         loader.dispose()
 
-def load(stream, Loader=Loader):
+def load(stream, Loader):
     """
     Parse the first YAML document in a stream
     and produce the corresponding Python object.
@@ -72,7 +82,7 @@ def load(stream, Loader=Loader):
     finally:
         loader.dispose()
 
-def load_all(stream, Loader=Loader):
+def load_all(stream, Loader):
     """
     Parse all YAML documents in a stream
     and produce corresponding Python objects.
@@ -84,11 +94,33 @@ def load_all(stream, Loader=Loader):
     finally:
         loader.dispose()
 
+def full_load(stream):
+    """
+    Parse the first YAML document in a stream
+    and produce the corresponding Python object.
+
+    Resolve all tags except those known to be
+    unsafe on untrusted input.
+    """
+    return load(stream, FullLoader)
+
+def full_load_all(stream):
+    """
+    Parse all YAML documents in a stream
+    and produce corresponding Python objects.
+
+    Resolve all tags except those known to be
+    unsafe on untrusted input.
+    """
+    return load_all(stream, FullLoader)
+
 def safe_load(stream):
     """
     Parse the first YAML document in a stream
     and produce the corresponding Python object.
-    Resolve only basic YAML tags.
+
+    Resolve only basic YAML tags. This is known
+    to be safe for untrusted input.
     """
     return load(stream, SafeLoader)
 
@@ -96,9 +128,31 @@ def safe_load_all(stream):
     """
     Parse all YAML documents in a stream
     and produce corresponding Python objects.
-    Resolve only basic YAML tags.
+
+    Resolve only basic YAML tags. This is known
+    to be safe for untrusted input.
     """
     return load_all(stream, SafeLoader)
+
+def unsafe_load(stream):
+    """
+    Parse the first YAML document in a stream
+    and produce the corresponding Python object.
+
+    Resolve all tags, even those known to be
+    unsafe on untrusted input.
+    """
+    return load(stream, UnsafeLoader)
+
+def unsafe_load_all(stream):
+    """
+    Parse all YAML documents in a stream
+    and produce corresponding Python objects.
+
+    Resolve all tags, even those known to be
+    unsafe on untrusted input.
+    """
+    return load_all(stream, UnsafeLoader)
 
 def emit(events, stream=None, Dumper=Dumper,
         canonical=None, indent=None, width=None,
@@ -109,8 +163,7 @@ def emit(events, stream=None, Dumper=Dumper,
     """
     getvalue = None
     if stream is None:
-        from StringIO import StringIO
-        stream = StringIO()
+        stream = io.StringIO()
         getvalue = stream.getvalue
     dumper = Dumper(stream, canonical=canonical, indent=indent, width=width,
             allow_unicode=allow_unicode, line_break=line_break)
@@ -125,7 +178,7 @@ def emit(events, stream=None, Dumper=Dumper,
 def serialize_all(nodes, stream=None, Dumper=Dumper,
         canonical=None, indent=None, width=None,
         allow_unicode=None, line_break=None,
-        encoding='utf-8', explicit_start=None, explicit_end=None,
+        encoding=None, explicit_start=None, explicit_end=None,
         version=None, tags=None):
     """
     Serialize a sequence of representation trees into a YAML stream.
@@ -134,10 +187,9 @@ def serialize_all(nodes, stream=None, Dumper=Dumper,
     getvalue = None
     if stream is None:
         if encoding is None:
-            from StringIO import StringIO
+            stream = io.StringIO()
         else:
-            from cStringIO import StringIO
-        stream = StringIO()
+            stream = io.BytesIO()
         getvalue = stream.getvalue
     dumper = Dumper(stream, canonical=canonical, indent=indent, width=width,
             allow_unicode=allow_unicode, line_break=line_break,
@@ -161,11 +213,11 @@ def serialize(node, stream=None, Dumper=Dumper, **kwds):
     return serialize_all([node], stream, Dumper=Dumper, **kwds)
 
 def dump_all(documents, stream=None, Dumper=Dumper,
-        default_style=None, default_flow_style=None,
+        default_style=None, default_flow_style=False,
         canonical=None, indent=None, width=None,
         allow_unicode=None, line_break=None,
-        encoding='utf-8', explicit_start=None, explicit_end=None,
-        version=None, tags=None):
+        encoding=None, explicit_start=None, explicit_end=None,
+        version=None, tags=None, sort_keys=True):
     """
     Serialize a sequence of Python objects into a YAML stream.
     If stream is None, return the produced string instead.
@@ -173,17 +225,16 @@ def dump_all(documents, stream=None, Dumper=Dumper,
     getvalue = None
     if stream is None:
         if encoding is None:
-            from StringIO import StringIO
+            stream = io.StringIO()
         else:
-            from cStringIO import StringIO
-        stream = StringIO()
+            stream = io.BytesIO()
         getvalue = stream.getvalue
     dumper = Dumper(stream, default_style=default_style,
             default_flow_style=default_flow_style,
             canonical=canonical, indent=indent, width=width,
             allow_unicode=allow_unicode, line_break=line_break,
             encoding=encoding, version=version, tags=tags,
-            explicit_start=explicit_start, explicit_end=explicit_end)
+            explicit_start=explicit_start, explicit_end=explicit_end, sort_keys=sort_keys)
     try:
         dumper.open()
         for data in documents:
@@ -218,42 +269,62 @@ def safe_dump(data, stream=None, **kwds):
     return dump_all([data], stream, Dumper=SafeDumper, **kwds)
 
 def add_implicit_resolver(tag, regexp, first=None,
-        Loader=Loader, Dumper=Dumper):
+        Loader=None, Dumper=Dumper):
     """
     Add an implicit scalar detector.
     If an implicit scalar value matches the given regexp,
     the corresponding tag is assigned to the scalar.
     first is a sequence of possible initial characters or None.
     """
-    Loader.add_implicit_resolver(tag, regexp, first)
+    if Loader is None:
+        loader.Loader.add_implicit_resolver(tag, regexp, first)
+        loader.FullLoader.add_implicit_resolver(tag, regexp, first)
+        loader.UnsafeLoader.add_implicit_resolver(tag, regexp, first)
+    else:
+        Loader.add_implicit_resolver(tag, regexp, first)
     Dumper.add_implicit_resolver(tag, regexp, first)
 
-def add_path_resolver(tag, path, kind=None, Loader=Loader, Dumper=Dumper):
+def add_path_resolver(tag, path, kind=None, Loader=None, Dumper=Dumper):
     """
     Add a path based resolver for the given tag.
     A path is a list of keys that forms a path
     to a node in the representation tree.
     Keys can be string values, integers, or None.
     """
-    Loader.add_path_resolver(tag, path, kind)
+    if Loader is None:
+        loader.Loader.add_path_resolver(tag, path, kind)
+        loader.FullLoader.add_path_resolver(tag, path, kind)
+        loader.UnsafeLoader.add_path_resolver(tag, path, kind)
+    else:
+        Loader.add_path_resolver(tag, path, kind)
     Dumper.add_path_resolver(tag, path, kind)
 
-def add_constructor(tag, constructor, Loader=Loader):
+def add_constructor(tag, constructor, Loader=None):
     """
     Add a constructor for the given tag.
     Constructor is a function that accepts a Loader instance
     and a node object and produces the corresponding Python object.
     """
-    Loader.add_constructor(tag, constructor)
+    if Loader is None:
+        loader.Loader.add_constructor(tag, constructor)
+        loader.FullLoader.add_constructor(tag, constructor)
+        loader.UnsafeLoader.add_constructor(tag, constructor)
+    else:
+        Loader.add_constructor(tag, constructor)
 
-def add_multi_constructor(tag_prefix, multi_constructor, Loader=Loader):
+def add_multi_constructor(tag_prefix, multi_constructor, Loader=None):
     """
     Add a multi-constructor for the given tag prefix.
     Multi-constructor is called for a node if its tag starts with tag_prefix.
     Multi-constructor accepts a Loader instance, a tag suffix,
     and a node object and produces the corresponding Python object.
     """
-    Loader.add_multi_constructor(tag_prefix, multi_constructor)
+    if Loader is None:
+        loader.Loader.add_multi_constructor(tag_prefix, multi_constructor)
+        loader.FullLoader.add_multi_constructor(tag_prefix, multi_constructor)
+        loader.UnsafeLoader.add_multi_constructor(tag_prefix, multi_constructor)
+    else:
+        Loader.add_multi_constructor(tag_prefix, multi_constructor)
 
 def add_representer(data_type, representer, Dumper=Dumper):
     """
@@ -280,36 +351,40 @@ class YAMLObjectMetaclass(type):
     def __init__(cls, name, bases, kwds):
         super(YAMLObjectMetaclass, cls).__init__(name, bases, kwds)
         if 'yaml_tag' in kwds and kwds['yaml_tag'] is not None:
-            cls.yaml_loader.add_constructor(cls.yaml_tag, cls.from_yaml)
+            if isinstance(cls.yaml_loader, list):
+                for loader in cls.yaml_loader:
+                    loader.add_constructor(cls.yaml_tag, cls.from_yaml)
+            else:
+                cls.yaml_loader.add_constructor(cls.yaml_tag, cls.from_yaml)
+
             cls.yaml_dumper.add_representer(cls, cls.to_yaml)
 
-class YAMLObject(object):
+class YAMLObject(metaclass=YAMLObjectMetaclass):
     """
     An object that can dump itself to a YAML stream
     and load itself from a YAML stream.
     """
 
-    __metaclass__ = YAMLObjectMetaclass
     __slots__ = ()  # no direct instantiation, so allow immutable subclasses
 
-    yaml_loader = Loader
+    yaml_loader = [Loader, FullLoader, UnsafeLoader]
     yaml_dumper = Dumper
 
     yaml_tag = None
     yaml_flow_style = None
 
+    @classmethod
     def from_yaml(cls, loader, node):
         """
         Convert a representation node to a Python object.
         """
         return loader.construct_yaml_object(node, cls)
-    from_yaml = classmethod(from_yaml)
 
+    @classmethod
     def to_yaml(cls, dumper, data):
         """
         Convert a Python object to a representation node.
         """
         return dumper.represent_yaml_object(cls.yaml_tag, data, cls,
                 flow_style=cls.yaml_flow_style)
-    to_yaml = classmethod(to_yaml)
 

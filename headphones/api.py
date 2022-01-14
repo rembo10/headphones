@@ -86,7 +86,7 @@ class Api(object):
             methodToCall = getattr(self, "_" + self.cmd)
             methodToCall(**self.kwargs)
             if 'callback' not in self.kwargs:
-                if isinstance(self.data, basestring):
+                if isinstance(self.data, str):
                     return self.data
                 else:
                     return json.dumps(self.data)
@@ -106,7 +106,7 @@ class Api(object):
         rows_as_dic = []
 
         for row in rows:
-            row_as_dic = dict(zip(row.keys(), row))
+            row_as_dic = dict(list(zip(list(row.keys()), row)))
             rows_as_dic.append(row_as_dic)
 
         return rows_as_dic
@@ -474,17 +474,17 @@ class Api(object):
         # Handle situations where the torrent url contains arguments that are
         # parsed
         if kwargs:
-            import urllib
-            import urllib2
-            url = urllib2.quote(
-                url, safe=":?/=&") + '&' + urllib.urlencode(kwargs)
+            import urllib.request, urllib.parse, urllib.error
+            import urllib.request, urllib.error, urllib.parse
+            url = urllib.parse.quote(
+                url, safe=":?/=&") + '&' + urllib.parse.urlencode(kwargs)
 
         try:
             result = [(title, int(size), url, provider, kind)]
         except ValueError:
             result = [(title, float(size), url, provider, kind)]
 
-        logger.info(u"Making sure we can download the chosen result")
+        logger.info("Making sure we can download the chosen result")
         (data, bestqual) = searcher.preprocess(result)
 
         if data and bestqual:

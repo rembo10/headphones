@@ -52,16 +52,16 @@ def is_valid_apev2_key(key):
             return False
 
     # PY26 - Change to set literal syntax (since set is faster than list here)
-    return ((2 <= len(key) <= 255) and (min(key) >= u' ') and
-            (max(key) <= u'~') and
-            (key not in [u"OggS", u"TAG", u"ID3", u"MP+"]))
+    return ((2 <= len(key) <= 255) and (min(key) >= ' ') and
+            (max(key) <= '~') and
+            (key not in ["OggS", "TAG", "ID3", "MP+"]))
 
 # There are three different kinds of APE tag values.
 # "0: Item contains text information coded in UTF-8
 #  1: Item contains binary information
 #  2: Item is a locator of external stored information [e.g. URL]
 #  3: reserved"
-TEXT, BINARY, EXTERNAL = xrange(3)
+TEXT, BINARY, EXTERNAL = range(3)
 
 HAS_HEADER = 1 << 31
 HAS_NO_FOOTER = 1 << 30
@@ -263,7 +263,7 @@ class _CIDictProxy(DictMixin):
         del(self.__dict[lower])
 
     def keys(self):
-        return [self.__casemap.get(key, key) for key in self.__dict.keys()]
+        return [self.__casemap.get(key, key) for key in list(self.__dict.keys())]
 
 
 class APEv2(_CIDictProxy, Metadata):
@@ -280,7 +280,7 @@ class APEv2(_CIDictProxy, Metadata):
         """Return tag key=value pairs in a human-readable format."""
 
         items = sorted(self.items())
-        return u"\n".join(u"%s=%s" % (k, v.pprint()) for k, v in items)
+        return "\n".join("%s=%s" % (k, v.pprint()) for k, v in items)
 
     @convert_error(IOError, error)
     @loadfile()
@@ -303,7 +303,7 @@ class APEv2(_CIDictProxy, Metadata):
 
         fileobj = cBytesIO(tag)
 
-        for i in xrange(count):
+        for i in range(count):
             tag_data = fileobj.read(8)
             # someone writes wrong item counts
             if not tag_data:
@@ -401,7 +401,7 @@ class APEv2(_CIDictProxy, Metadata):
                     items.append(v)
 
                 # list? text.
-                value = APEValue(u"\0".join(items), TEXT)
+                value = APEValue("\0".join(items), TEXT)
             else:
                 if PY3:
                     value = APEValue(value, BINARY)
@@ -441,7 +441,7 @@ class APEv2(_CIDictProxy, Metadata):
         fileobj.seek(0, 2)
 
         tags = []
-        for key, value in self.items():
+        for key, value in list(self.items()):
             # Packed format for an item:
             # 4B: Value length
             # 4B: Value type
@@ -627,13 +627,13 @@ class APETextValue(_APEUtf8Value, MutableSequence):
     def __iter__(self):
         """Iterate over the strings of the value (not the characters)"""
 
-        return iter(self.value.split(u"\0"))
+        return iter(self.value.split("\0"))
 
     def __getitem__(self, index):
-        return self.value.split(u"\0")[index]
+        return self.value.split("\0")[index]
 
     def __len__(self):
-        return self.value.count(u"\0") + 1
+        return self.value.count("\0") + 1
 
     def __setitem__(self, index, value):
         if not isinstance(value, text_type):
@@ -644,7 +644,7 @@ class APETextValue(_APEUtf8Value, MutableSequence):
 
         values = list(self)
         values[index] = value
-        self.value = u"\0".join(values)
+        self.value = "\0".join(values)
 
     def insert(self, index, value):
         if not isinstance(value, text_type):
@@ -655,15 +655,15 @@ class APETextValue(_APEUtf8Value, MutableSequence):
 
         values = list(self)
         values.insert(index, value)
-        self.value = u"\0".join(values)
+        self.value = "\0".join(values)
 
     def __delitem__(self, index):
         values = list(self)
         del values[index]
-        self.value = u"\0".join(values)
+        self.value = "\0".join(values)
 
     def pprint(self):
-        return u" / ".join(self)
+        return " / ".join(self)
 
 
 @swap_to_string
@@ -697,7 +697,7 @@ class APEBinaryValue(_APEValue):
         return self.value < other
 
     def pprint(self):
-        return u"[%d bytes]" % len(self)
+        return "[%d bytes]" % len(self)
 
 
 class APEExtValue(_APEUtf8Value):
@@ -709,7 +709,7 @@ class APEExtValue(_APEUtf8Value):
     kind = EXTERNAL
 
     def pprint(self):
-        return u"[External] %s" % self.value
+        return "[External] %s" % self.value
 
 
 class APEv2File(FileType):
@@ -731,7 +731,7 @@ class APEv2File(FileType):
 
         @staticmethod
         def pprint():
-            return u"Unknown format with APEv2 tag."
+            return "Unknown format with APEv2 tag."
 
     @loadfile()
     def load(self, filething):

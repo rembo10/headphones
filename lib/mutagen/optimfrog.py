@@ -62,7 +62,7 @@ class OptimFROGInfo(StreamInfo):
             self.length = 0.0
 
     def pprint(self):
-        return u"OptimFROG, %.2f seconds, %d Hz" % (self.length,
+        return "OptimFROG, %.2f seconds, %d Hz" % (self.length,
                                                     self.sample_rate)
 
 

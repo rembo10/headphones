@@ -1,7 +1,7 @@
 # Copyright 2009 Brian Quinlan. All Rights Reserved.
 # Licensed to PSF under a Contributor Agreement.
 
-from __future__ import with_statement
+
 import logging
 import threading
 import time

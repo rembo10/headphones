@@ -39,8 +39,8 @@ _HUGE_VAL = 1.79769313486231e+308
 def is_valid_chunk_id(id):
     assert isinstance(id, text_type)
 
-    return ((len(id) <= 4) and (min(id) >= u' ') and
-            (max(id) <= u'~'))
+    return ((len(id) <= 4) and (min(id) >= ' ') and
+            (max(id) <= '~'))
 
 
 def read_float(data):  # 10 bytes
@@ -140,7 +140,7 @@ class IFFFile(object):
         # AIFF Files always start with the FORM chunk which contains a 4 byte
         # ID before the start of other chunks
         fileobj.seek(0)
-        self.__chunks[u'FORM'] = IFFChunk(fileobj)
+        self.__chunks['FORM'] = IFFChunk(fileobj)
 
         # Skip past the 4 byte FORM id
         fileobj.seek(IFFChunk.HEADER_SIZE + 4)
@@ -153,7 +153,7 @@ class IFFFile(object):
         # Load all of the chunks
         while True:
             try:
-                chunk = IFFChunk(fileobj, self[u'FORM'])
+                chunk = IFFChunk(fileobj, self['FORM'])
             except InvalidChunk:
                 break
             self.__chunks[chunk.id.strip()] = chunk
@@ -209,8 +209,8 @@ class IFFFile(object):
         self.__fileobj.seek(self.__next_offset)
         self.__fileobj.write(pack('>4si', id_.ljust(4).encode('ascii'), 0))
         self.__fileobj.seek(self.__next_offset)
-        chunk = IFFChunk(self.__fileobj, self[u'FORM'])
-        self[u'FORM']._update_size(self[u'FORM'].data_size + chunk.size)
+        chunk = IFFChunk(self.__fileobj, self['FORM'])
+        self['FORM']._update_size(self['FORM'].data_size + chunk.size)
 
         self.__chunks[id_] = chunk
         self.__next_offset = chunk.offset + chunk.size
@@ -242,7 +242,7 @@ class AIFFInfo(StreamInfo):
 
         iff = IFFFile(fileobj)
         try:
-            common_chunk = iff[u'COMM']
+            common_chunk = iff['COMM']
         except KeyError as e:
             raise error(str(e))
 
@@ -260,7 +260,7 @@ class AIFFInfo(StreamInfo):
         self.length = frame_count / float(self.sample_rate)
 
     def pprint(self):
-        return u"%d channel AIFF @ %d bps, %s Hz, %.2f seconds" % (
+        return "%d channel AIFF @ %d bps, %s Hz, %.2f seconds" % (
             self.channels, self.bitrate, self.sample_rate, self.length)
 
 
@@ -269,7 +269,7 @@ class _IFFID3(ID3):
 
     def _pre_load_header(self, fileobj):
         try:
-            fileobj.seek(IFFFile(fileobj)[u'ID3'].data_offset)
+            fileobj.seek(IFFFile(fileobj)['ID3'].data_offset)
         except (InvalidChunk, KeyError):
             raise ID3NoHeaderError("No ID3 chunk")
 
@@ -282,10 +282,10 @@ class _IFFID3(ID3):
 
         iff_file = IFFFile(fileobj)
 
-        if u'ID3' not in iff_file:
-            iff_file.insert_chunk(u'ID3')
+        if 'ID3' not in iff_file:
+            iff_file.insert_chunk('ID3')
 
-        chunk = iff_file[u'ID3']
+        chunk = iff_file['ID3']
 
         try:
             data = self._prepare_data(
@@ -316,7 +316,7 @@ def delete(filething):
     """Completely removes the ID3 chunk from the AIFF file"""
 
     try:
-        del IFFFile(filething.fileobj)[u'ID3']
+        del IFFFile(filething.fileobj)['ID3']
     except KeyError:
         pass
 
