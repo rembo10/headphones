@@ -466,13 +466,30 @@ def _add_torrent_url(result):
 
 def _add_torrent_file(result):
     logger.debug('Deluge: Adding file')
+
+    options = {}
+
+    if headphones.CONFIG.DELUGE_DOWNLOAD_DIRECTORY:
+        options['download_location'] = headphones.CONFIG.DELUGE_DOWNLOAD_DIRECTORY
+
+    if headphones.CONFIG.DELUGE_DONE_DIRECTORY or headphones.CONFIG.DOWNLOAD_TORRENT_DIR:
+        options['move_completed'] = 1
+        if headphones.CONFIG.DELUGE_DONE_DIRECTORY:
+            options['move_completed_path'] = headphones.CONFIG.DELUGE_DONE_DIRECTORY
+        else:
+            options['move_completed_path'] = headphones.CONFIG.DOWNLOAD_TORRENT_DIR
+
+    if headphones.CONFIG.DELUGE_PAUSED:
+        options['add_paused'] = headphones.CONFIG.DELUGE_PAUSED
+
     if not any(delugeweb_auth):
         _get_auth()
     try:
         # content is torrent file contents that needs to be encoded to base64
         post_data = json.dumps({"method": "core.add_torrent_file",
                                 "params": [result['name'] + '.torrent',
-                                b64encode(result['content'].encode('utf8')), {}],
+                                b64encode(result['content'].encode('utf8')),
+                                options],
                                 "id": 2})
         response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth,
             verify=deluge_verify_cert, headers=headers)
@@ -486,7 +503,8 @@ def _add_torrent_file(result):
             logger.debug('Deluge: There was a decoding issue, let\'s try again')
             post_data = json.dumps({"method": "core.add_torrent_file",
                                     "params": [result['name'].decode('utf8') + '.torrent',
-                                    b64encode(result['content']), {}],
+                                    b64encode(result['content']),
+                                    options],
                                     "id": 22})
             response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth,
                 verify=deluge_verify_cert, headers=headers)
@@ -585,61 +603,3 @@ def setSeedRatio(result):
         return None
 
 
-def setTorrentPath(result):
-    logger.debug('Deluge: Setting download path')
-    if not any(delugeweb_auth):
-        _get_auth()
-
-    try:
-        if headphones.CONFIG.DELUGE_DONE_DIRECTORY or headphones.CONFIG.DOWNLOAD_TORRENT_DIR:
-            post_data = json.dumps({"method": "core.set_torrent_move_completed",
-                                    "params": [result['hash'], True],
-                                    "id": 7})
-            response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth,
-                verify=deluge_verify_cert, headers=headers)
-
-            if headphones.CONFIG.DELUGE_DONE_DIRECTORY:
-                move_to = headphones.CONFIG.DELUGE_DONE_DIRECTORY
-            else:
-                move_to = headphones.CONFIG.DOWNLOAD_TORRENT_DIR
-
-            if not os.path.exists(move_to):
-                logger.debug('Deluge: %s directory doesn\'t exist, let\'s create it' % move_to)
-                os.makedirs(move_to)
-            post_data = json.dumps({"method": "core.set_torrent_move_completed_path",
-                                    "params": [result['hash'], move_to],
-                                    "id": 8})
-            response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth,
-                verify=deluge_verify_cert, headers=headers)
-
-            return not json.loads(response.text)['error']
-
-        return True
-    except Exception as e:
-        logger.error('Deluge: Setting torrent move-to directory failed: %s' % str(e))
-        formatted_lines = traceback.format_exc().splitlines()
-        logger.error('; '.join(formatted_lines))
-        return None
-
-
-def setTorrentPause(result):
-    logger.debug('Deluge: Pausing torrent')
-    if not any(delugeweb_auth):
-        _get_auth()
-
-    try:
-        if headphones.CONFIG.DELUGE_PAUSED:
-            post_data = json.dumps({"method": "core.pause_torrent",
-                                    "params": [[result['hash']]],
-                                    "id": 9})
-            response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth,
-                verify=deluge_verify_cert, headers=headers)
-
-            return not json.loads(response.text)['error']
-
-        return True
-    except Exception as e:
-        logger.error('Deluge: Setting torrent paused failed: %s' % str(e))
-        formatted_lines = traceback.format_exc().splitlines()
-        logger.error('; '.join(formatted_lines))
-        return None
