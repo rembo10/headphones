@@ -472,32 +472,13 @@ def _add_torrent_file(result):
         # content is torrent file contents that needs to be encoded to base64
         post_data = json.dumps({"method": "core.add_torrent_file",
                                 "params": [result['name'] + '.torrent',
-                                b64encode(result['content'].encode('utf8')), {}],
+                                b64encode(result['content']).decode(), {}],
                                 "id": 2})
         response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth,
             verify=deluge_verify_cert, headers=headers)
         result['hash'] = json.loads(response.text)['result']
         logger.debug('Deluge: Response was %s' % str(json.loads(response.text)))
         return json.loads(response.text)['result']
-    except UnicodeDecodeError:
-        try:
-            # content is torrent file contents that needs to be encoded to base64
-            # this time let's try leaving the encoding as is
-            logger.debug('Deluge: There was a decoding issue, let\'s try again')
-            post_data = json.dumps({"method": "core.add_torrent_file",
-                                    "params": [result['name'].decode('utf8') + '.torrent',
-                                    b64encode(result['content']), {}],
-                                    "id": 22})
-            response = requests.post(delugeweb_url, data=post_data.encode('utf-8'), cookies=delugeweb_auth,
-                verify=deluge_verify_cert, headers=headers)
-            result['hash'] = json.loads(response.text)['result']
-            logger.debug('Deluge: Response was %s' % str(json.loads(response.text)))
-            return json.loads(response.text)['result']
-        except Exception as e:
-            logger.error('Deluge: Adding torrent file failed after decode: %s' % str(e))
-            formatted_lines = traceback.format_exc().splitlines()
-            logger.error('; '.join(formatted_lines))
-            return False
     except Exception as e:
         logger.error('Deluge: Adding torrent file failed: %s' % str(e))
         formatted_lines = traceback.format_exc().splitlines()
