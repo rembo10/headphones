@@ -1,6 +1,6 @@
 
 from abc import ABCMeta, abstractmethod
-from collections import MutableMapping
+from collections.abc import MutableMapping
 from threading import RLock
 from datetime import datetime
 from logging import getLogger

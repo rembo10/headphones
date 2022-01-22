@@ -5,7 +5,7 @@
 #
 # Loosely based on the API implementation from 'whatbetter', by Zachary Denton
 # See https://github.com/zacharydenton/whatbetter
-from html.parser import HTMLParser
+import html
 
 import sys
 import json
@@ -219,10 +219,10 @@ class GazelleAPI(object):
             else:
                 artist = Artist(id, self)
             if name:
-                artist.name = HTMLParser().unescape(name)
+                artist.name = html.unescape(name)
         elif name:
             artist = Artist(-1, self)
-            artist.name = HTMLParser().unescape(name)
+            artist.name = html.unescape(name)
         else:
             raise Exception("You must specify either an ID or a Name to get an artist.")
 

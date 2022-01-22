@@ -32,7 +32,7 @@ __all__ = ["APEv2", "APEv2File", "Open", "delete"]
 
 import sys
 import struct
-from collections import MutableSequence
+from collections.abc import MutableSequence
 
 from ._compat import (cBytesIO, PY3, text_type, PY2, reraise, swap_to_string,
                       xrange)
