@@ -1,4 +1,4 @@
-from collections import Iterable, Mapping
+from collections.abc import Iterable, Mapping
 from uuid import uuid4
 
 import six

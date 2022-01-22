@@ -38,8 +38,8 @@ class SoftChrootTest(TestCase):
             cf = SoftChroot(path)
         self.assertIsNone(cf)
 
-        self.assertRegexpMatches(str(exc.exception), r'No such directory')
-        self.assertRegexpMatches(str(exc.exception), path)
+        self.assertRegex(str(exc.exception), r'No such directory')
+        self.assertRegex(str(exc.exception), path)
 
     @mock.patch('headphones.softchroot.os', wrap=os, name='OsMock')
     def test_create_on_file(self, os_mock):
@@ -57,8 +57,8 @@ class SoftChrootTest(TestCase):
 
         self.assertTrue(os_mock.path.isdir.called)
 
-        self.assertRegexpMatches(str(exc.exception), r'No such directory')
-        self.assertRegexpMatches(str(exc.exception), path)
+        self.assertRegex(str(exc.exception), r'No such directory')
+        self.assertRegex(str(exc.exception), path)
 
     @TestArgs(
         (None, None),

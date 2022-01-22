@@ -7,13 +7,24 @@ FuManChu will personally hang you up by your thumbs and submit you
 to a public caning.
 """
 
+import functools
+import email.utils
+import re
+import builtins
 from binascii import b2a_base64
-from cherrypy._cpcompat import BaseHTTPRequestHandler, HTTPDate, ntob, ntou
-from cherrypy._cpcompat import basestring, bytestr, iteritems, nativestr
-from cherrypy._cpcompat import reversed, sorted, unicodestr, unquote_qs
+from cgi import parse_header
+from email.header import decode_header
+from http.server import BaseHTTPRequestHandler
+from urllib.parse import unquote_plus
+
+import jaraco.collections
+
+import cherrypy
+from cherrypy._cpcompat import ntob, ntou
+
 response_codes = BaseHTTPRequestHandler.responses.copy()
 
-# From https://bitbucket.org/cherrypy/cherrypy/issue/361
+# From https://github.com/cherrypy/cherrypy/issues/361
 response_codes[500] = ('Internal Server Error',
                        'The server encountered an unexpected condition '
                        'which prevented it from fulfilling the request.')
@@ -22,34 +33,34 @@ response_codes[503] = ('Service Unavailable',
                        'request due to a temporary overloading or '
                        'maintenance of the server.')
 
-import re
-import urllib
+
+HTTPDate = functools.partial(email.utils.formatdate, usegmt=True)
 
 
 def urljoin(*atoms):
-    """Return the given path \*atoms, joined into a single URL.
+    r"""Return the given path \*atoms, joined into a single URL.
 
     This will correctly join a SCRIPT_NAME and PATH_INFO into the
     original URL, even if either atom is blank.
     """
-    url = "/".join([x for x in atoms if x])
-    while "//" in url:
-        url = url.replace("//", "/")
+    url = '/'.join([x for x in atoms if x])
+    while '//' in url:
+        url = url.replace('//', '/')
     # Special-case the final url of "", and return "/" instead.
-    return url or "/"
+    return url or '/'
 
 
 def urljoin_bytes(*atoms):
-    """Return the given path *atoms, joined into a single URL.
+    """Return the given path `*atoms`, joined into a single URL.
 
     This will correctly join a SCRIPT_NAME and PATH_INFO into the
     original URL, even if either atom is blank.
     """
-    url = ntob("/").join([x for x in atoms if x])
-    while ntob("//") in url:
-        url = url.replace(ntob("//"), ntob("/"))
+    url = b'/'.join([x for x in atoms if x])
+    while b'//' in url:
+        url = url.replace(b'//', b'/')
     # Special-case the final url of "", and return "/" instead.
-    return url or ntob("/")
+    return url or b'/'
 
 
 def protocol_from_http(protocol_str):
@@ -72,9 +83,9 @@ def get_ranges(headervalue, content_length):
         return None
 
     result = []
-    bytesunit, byteranges = headervalue.split("=", 1)
-    for brange in byteranges.split(","):
-        start, stop = [x.strip() for x in brange.split("-", 1)]
+    bytesunit, byteranges = headervalue.split('=', 1)
+    for brange in byteranges.split(','):
+        start, stop = [x.strip() for x in brange.split('-', 1)]
         if start:
             if not stop:
                 stop = content_length - 1
@@ -108,9 +119,9 @@ def get_ranges(headervalue, content_length):
             #   If the entity is shorter than the specified suffix-length,
             #   the entire entity-body is used.
             if int(stop) > content_length:
-              result.append((0, content_length))
+                result.append((0, content_length))
             else:
-              result.append((content_length - int(stop), content_length))
+                result.append((content_length - int(stop), content_length))
 
     return result
 
@@ -126,14 +137,14 @@ class HeaderElement(object):
         self.params = params
 
     def __cmp__(self, other):
-        return cmp(self.value, other.value)
+        return builtins.cmp(self.value, other.value)
 
     def __lt__(self, other):
         return self.value < other.value
 
     def __str__(self):
-        p = [";%s=%s" % (k, v) for k, v in iteritems(self.params)]
-        return str("%s%s" % (self.value, "".join(p)))
+        p = [';%s=%s' % (k, v) for k, v in self.params.items()]
+        return str('%s%s' % (self.value, ''.join(p)))
 
     def __bytes__(self):
         return ntob(self.__str__())
@@ -141,32 +152,17 @@ class HeaderElement(object):
     def __unicode__(self):
         return ntou(self.__str__())
 
+    @staticmethod
     def parse(elementstr):
         """Transform 'token;key=val' to ('token', {'key': 'val'})."""
-        # Split the element into a value and parameters. The 'value' may
-        # be of the form, "token=token", but we don't split that here.
-        atoms = [x.strip() for x in elementstr.split(";") if x.strip()]
-        if not atoms:
-            initial_value = ''
-        else:
-            initial_value = atoms.pop(0).strip()
-        params = {}
-        for atom in atoms:
-            atom = [x.strip() for x in atom.split("=", 1) if x.strip()]
-            key = atom.pop(0)
-            if atom:
-                val = atom[0]
-            else:
-                val = ""
-            params[key] = val
+        initial_value, params = parse_header(elementstr)
         return initial_value, params
-    parse = staticmethod(parse)
 
+    @classmethod
     def from_str(cls, elementstr):
         """Construct an instance from a string of the form 'token;key=val'."""
         ival, params = cls.parse(elementstr)
         return cls(ival, params)
-    from_str = classmethod(from_str)
 
 
 q_separator = re.compile(r'; *q *=')
@@ -183,6 +179,7 @@ class AcceptElement(HeaderElement):
     have been the other way around, but it's too late to fix now.
     """
 
+    @classmethod
     def from_str(cls, elementstr):
         qvalue = None
         # The first "q" parameter (if any) separates the initial
@@ -196,21 +193,32 @@ class AcceptElement(HeaderElement):
 
         media_type, params = cls.parse(media_range)
         if qvalue is not None:
-            params["q"] = qvalue
+            params['q'] = qvalue
         return cls(media_type, params)
-    from_str = classmethod(from_str)
 
+    @property
     def qvalue(self):
-        val = self.params.get("q", "1")
+        'The qvalue, or priority, of this value.'
+        val = self.params.get('q', '1')
         if isinstance(val, HeaderElement):
             val = val.value
-        return float(val)
-    qvalue = property(qvalue, doc="The qvalue, or priority, of this value.")
+        try:
+            return float(val)
+        except ValueError as val_err:
+            """Fail client requests with invalid quality value.
+
+            Ref: https://github.com/cherrypy/cherrypy/issues/1370
+            """
+            raise cherrypy.HTTPError(
+                400,
+                'Malformed HTTP header: `{}`'.
+                format(str(self)),
+            ) from val_err
 
     def __cmp__(self, other):
-        diff = cmp(self.qvalue, other.qvalue)
+        diff = builtins.cmp(self.qvalue, other.qvalue)
         if diff == 0:
-            diff = cmp(str(self), str(other))
+            diff = builtins.cmp(str(self), str(other))
         return diff
 
     def __lt__(self, other):
@@ -219,7 +227,10 @@ class AcceptElement(HeaderElement):
         else:
             return self.qvalue < other.qvalue
 
+
 RE_HEADER_SPLIT = re.compile(',(?=(?:[^"]*"[^"]*")*[^"]*$)')
+
+
 def header_elements(fieldname, fieldvalue):
     """Return a sorted HeaderElement list from a comma-separated header string.
     """
@@ -228,7 +239,7 @@ def header_elements(fieldname, fieldvalue):
 
     result = []
     for element in RE_HEADER_SPLIT.split(fieldvalue):
-        if fieldname.startswith("Accept") or fieldname == 'TE':
+        if fieldname.startswith('Accept') or fieldname == 'TE':
             hv = AcceptElement.from_str(element)
         else:
             hv = HeaderElement.from_str(element)
@@ -238,14 +249,14 @@ def header_elements(fieldname, fieldvalue):
 
 
 def decode_TEXT(value):
-    r"""Decode :rfc:`2047` TEXT (e.g. "=?utf-8?q?f=C3=BCr?=" -> "f\xfcr")."""
-    try:
-        # Python 3
-        from email.header import decode_header
-    except ImportError:
-        from email.Header import decode_header
+    r"""
+    Decode :rfc:`2047` TEXT
+
+    >>> decode_TEXT("=?utf-8?q?f=C3=BCr?=") == b'f\xfcr'.decode('latin-1')
+    True
+    """
     atoms = decode_header(value)
-    decodedvalue = ""
+    decodedvalue = ''
     for atom, charset in atoms:
         if charset is not None:
             atom = atom.decode(charset)
@@ -253,41 +264,51 @@ def decode_TEXT(value):
     return decodedvalue
 
 
+def decode_TEXT_maybe(value):
+    """
+    Decode the text but only if '=?' appears in it.
+    """
+    return decode_TEXT(value) if '=?' in value else value
+
+
 def valid_status(status):
     """Return legal HTTP status Code, Reason-phrase and Message.
 
-    The status arg must be an int, or a str that begins with an int.
+    The status arg must be an int, a str that begins with an int
+    or the constant from ``http.client`` stdlib module.
 
-    If status is an int, or a str and no reason-phrase is supplied,
-    a default reason-phrase will be provided.
+    If status has no reason-phrase is supplied, a default reason-
+    phrase will be provided.
+
+    >>> import http.client
+    >>> from http.server import BaseHTTPRequestHandler
+    >>> valid_status(http.client.ACCEPTED) == (
+    ...     int(http.client.ACCEPTED),
+    ... ) + BaseHTTPRequestHandler.responses[http.client.ACCEPTED]
+    True
     """
 
     if not status:
         status = 200
 
-    status = str(status)
-    parts = status.split(" ", 1)
-    if len(parts) == 1:
-        # No reason supplied.
-        code, = parts
-        reason = None
-    else:
-        code, reason = parts
-        reason = reason.strip()
+    code, reason = status, None
+    if isinstance(status, str):
+        code, _, reason = status.partition(' ')
+        reason = reason.strip() or None
 
     try:
         code = int(code)
-    except ValueError:
-        raise ValueError("Illegal response status from server "
-                         "(%s is non-numeric)." % repr(code))
+    except (TypeError, ValueError):
+        raise ValueError('Illegal response status from server '
+                         '(%s is non-numeric).' % repr(code))
 
     if code < 100 or code > 599:
-        raise ValueError("Illegal response status from server "
-                         "(%s is out of range)." % repr(code))
+        raise ValueError('Illegal response status from server '
+                         '(%s is out of range).' % repr(code))
 
     if code not in response_codes:
         # code is unknown but not illegal
-        default_reason, message = "", ""
+        default_reason, message = '', ''
     else:
         default_reason, message = response_codes[code]
 
@@ -328,15 +349,15 @@ def _parse_qs(qs, keep_blank_values=0, strict_parsing=0, encoding='utf-8'):
         nv = name_value.split('=', 1)
         if len(nv) != 2:
             if strict_parsing:
-                raise ValueError("bad query field: %r" % (name_value,))
+                raise ValueError('bad query field: %r' % (name_value,))
             # Handle case of a control-name with no equal sign
             if keep_blank_values:
                 nv.append('')
             else:
                 continue
         if len(nv[1]) or keep_blank_values:
-            name = unquote_qs(nv[0], encoding)
-            value = unquote_qs(nv[1], encoding)
+            name = unquote_plus(nv[0], encoding, errors='strict')
+            value = unquote_plus(nv[1], encoding, errors='strict')
             if name in d:
                 if not isinstance(d[name], list):
                     d[name] = [d[name]]
@@ -346,7 +367,7 @@ def _parse_qs(qs, keep_blank_values=0, strict_parsing=0, encoding='utf-8'):
     return d
 
 
-image_map_pattern = re.compile(r"[0-9]+,[0-9]+")
+image_map_pattern = re.compile(r'[0-9]+,[0-9]+')
 
 
 def parse_query_string(query_string, keep_blank_values=True, encoding='utf-8'):
@@ -359,60 +380,26 @@ def parse_query_string(query_string, keep_blank_values=True, encoding='utf-8'):
     if image_map_pattern.match(query_string):
         # Server-side image map. Map the coords to 'x' and 'y'
         # (like CGI::Request does).
-        pm = query_string.split(",")
+        pm = query_string.split(',')
         pm = {'x': int(pm[0]), 'y': int(pm[1])}
     else:
         pm = _parse_qs(query_string, keep_blank_values, encoding=encoding)
     return pm
 
 
-class CaseInsensitiveDict(dict):
+class CaseInsensitiveDict(jaraco.collections.KeyTransformingDict):
 
     """A case-insensitive dict subclass.
 
-    Each key is changed on entry to str(key).title().
+    Each key is changed on entry to title case.
     """
 
-    def __getitem__(self, key):
-        return dict.__getitem__(self, str(key).title())
-
-    def __setitem__(self, key, value):
-        dict.__setitem__(self, str(key).title(), value)
-
-    def __delitem__(self, key):
-        dict.__delitem__(self, str(key).title())
-
-    def __contains__(self, key):
-        return dict.__contains__(self, str(key).title())
-
-    def get(self, key, default=None):
-        return dict.get(self, str(key).title(), default)
-
-    if hasattr({}, 'has_key'):
-        def has_key(self, key):
-            return str(key).title() in self
-
-    def update(self, E):
-        for k in E.keys():
-            self[str(k).title()] = E[k]
-
-    def fromkeys(cls, seq, value=None):
-        newdict = cls()
-        for k in seq:
-            newdict[str(k).title()] = value
-        return newdict
-    fromkeys = classmethod(fromkeys)
-
-    def setdefault(self, key, x=None):
-        key = str(key).title()
-        try:
-            return self[key]
-        except KeyError:
-            self[key] = x
-            return x
-
-    def pop(self, key, default):
-        return dict.pop(self, str(key).title(), default)
+    @staticmethod
+    def transform_key(key):
+        if key is None:
+            # TODO(#1830): why?
+            return 'None'
+        return key.title()
 
 
 #   TEXT = <any OCTET except CTLs, but including LWS>
@@ -420,10 +407,10 @@ class CaseInsensitiveDict(dict):
 # A CRLF is allowed in the definition of TEXT only as part of a header
 # field continuation. It is expected that the folding LWS will be
 # replaced with a single SP before interpretation of the TEXT value."
-if nativestr == bytestr:
-    header_translate_table = ''.join([chr(i) for i in xrange(256)])
+if str == bytes:
+    header_translate_table = ''.join([chr(i) for i in range(256)])
     header_translate_deletechars = ''.join(
-        [chr(i) for i in xrange(32)]) + chr(127)
+        [chr(i) for i in range(32)]) + chr(127)
 else:
     header_translate_table = None
     header_translate_deletechars = bytes(range(32)) + bytes([127])
@@ -440,7 +427,7 @@ class HeaderMap(CaseInsensitiveDict):
     """
 
     protocol = (1, 1)
-    encodings = ["ISO-8859-1"]
+    encodings = ['ISO-8859-1']
 
     # Someday, when http-bis is done, this will probably get dropped
     # since few servers, clients, or intermediaries do it. But until then,
@@ -451,9 +438,7 @@ class HeaderMap(CaseInsensitiveDict):
 
     def elements(self, key):
         """Return a sorted list of HeaderElements for the given header."""
-        key = str(key).title()
-        value = self.get(key)
-        return header_elements(key, value)
+        return header_elements(self.transform_key(key), self.get(key))
 
     def values(self, key):
         """Return a sorted list of HeaderElement.value for the given header."""
@@ -463,31 +448,29 @@ class HeaderMap(CaseInsensitiveDict):
         """Transform self into a list of (name, value) tuples."""
         return list(self.encode_header_items(self.items()))
 
+    @classmethod
     def encode_header_items(cls, header_items):
         """
         Prepare the sequence of name, value tuples into a form suitable for
         transmitting on the wire for HTTP.
         """
         for k, v in header_items:
-            if isinstance(k, unicodestr):
-                k = cls.encode(k)
-
-            if not isinstance(v, basestring):
+            if not isinstance(v, str) and not isinstance(v, bytes):
                 v = str(v)
 
-            if isinstance(v, unicodestr):
-                v = cls.encode(v)
+            yield tuple(map(cls.encode_header_item, (k, v)))
 
-            # See header_translate_* constants above.
-            # Replace only if you really know what you're doing.
-            k = k.translate(header_translate_table,
-                            header_translate_deletechars)
-            v = v.translate(header_translate_table,
-                            header_translate_deletechars)
+    @classmethod
+    def encode_header_item(cls, item):
+        if isinstance(item, str):
+            item = cls.encode(item)
 
-            yield (k, v)
-    encode_header_items = classmethod(encode_header_items)
+        # See header_translate_* constants above.
+        # Replace only if you really know what you're doing.
+        return item.translate(
+            header_translate_table, header_translate_deletechars)
 
+    @classmethod
     def encode(cls, v):
         """Return the given header name or value, encoded for HTTP output."""
         for enc in cls.encodings:
@@ -503,12 +486,11 @@ class HeaderMap(CaseInsensitiveDict):
             # because we never want to fold lines--folding has
             # been deprecated by the HTTP working group.
             v = b2a_base64(v.encode('utf-8'))
-            return (ntob('=?utf-8?b?') + v.strip(ntob('\n')) + ntob('?='))
+            return (b'=?utf-8?b?' + v.strip(b'\n') + b'?=')
 
-        raise ValueError("Could not encode header part %r using "
-                         "any of the encodings %r." %
+        raise ValueError('Could not encode header part %r using '
+                         'any of the encodings %r.' %
                          (v, cls.encodings))
-    encode = classmethod(encode)
 
 
 class Host(object):
@@ -521,9 +503,9 @@ class Host(object):
 
     """
 
-    ip = "0.0.0.0"
+    ip = '0.0.0.0'
     port = 80
-    name = "unknown.tld"
+    name = 'unknown.tld'
 
     def __init__(self, ip, port, name=None):
         self.ip = ip
@@ -533,4 +515,4 @@ class Host(object):
         self.name = name
 
     def __repr__(self):
-        return "httputil.Host(%r, %r, %r)" % (self.ip, self.port, self.name)
+        return 'httputil.Host(%r, %r, %r)' % (self.ip, self.port, self.name)

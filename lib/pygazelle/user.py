@@ -48,7 +48,7 @@ class User(object):
         self.passkey = index_json_response['passkey']
         self.notifications = index_json_response['notifications']
         if self.stats:
-            self.stats = dict(self.stats.items() + index_json_response['userstats'].items()) # merge in new info
+            self.stats = dict(list(self.stats.items()) + list(index_json_response['userstats'].items())) # merge in new info
         else:
             self.stats = index_json_response['userstats']
 
@@ -76,7 +76,7 @@ class User(object):
         self.is_friend = user_json_response['isFriend']
         self.profile_text = user_json_response['profileText']
         if self.stats:
-            self.stats = dict(self.stats.items() + user_json_response['stats'].items()) # merge in new info
+            self.stats = dict(list(self.stats.items()) + list(user_json_response['stats'].items())) # merge in new info
         else:
             self.stats = user_json_response['stats']
         self.ranks = user_json_response['ranks']

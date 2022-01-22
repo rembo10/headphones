@@ -22,7 +22,7 @@ import headphones.helpers as _hp
 from headphones.metadata import MetadataDict
 import datetime
 
-from unittestcompat import TestCase
+from .unittestcompat import TestCase
 
 
 __author__ = "Andrzej Ciarkowski <andrzej.ciarkowski@gmail.com>"
@@ -50,7 +50,7 @@ class _MockDatabaseRow(object):
         self._dict = dict(d)
 
     def keys(self):
-        return self._dict.iterkeys()
+        return iter(self._dict.keys())
 
     def __getitem__(self, item):
         return self._dict[item]
@@ -63,9 +63,9 @@ class MetadataTest(TestCase):
 
     def test_metadata_dict_ci(self):
         """MetadataDict: case-insensitive lookup"""
-        expected = u'naïve'
+        expected = 'naïve'
         key_var = '$TitlE'
-        m = MetadataDict({key_var.lower(): u'naïve'})
+        m = MetadataDict({key_var.lower(): 'naïve'})
         self.assertFalse('$track' in m)
         self.assertTrue('$tITLe' in m, "cross-case lookup with 'in'")
         self.assertEqual(m[key_var], expected, "cross-case lookup success")
@@ -74,7 +74,7 @@ class MetadataTest(TestCase):
 
     def test_metadata_dict_cs(self):
         """MetadataDice: case-preserving lookup"""
-        expected_var = u'NaïVe'
+        expected_var = 'NaïVe'
         key_var = '$TitlE'
         m = MetadataDict({
             key_var.lower(): expected_var.lower(),
@@ -171,5 +171,5 @@ class MetadataTest(TestCase):
         res = _hp.pattern_substitute(
             "/music/$First/$Artist/$Artist - $Album{ [$Year]}", md, True)
 
-        self.assertEqual(res, u"/music/A/artist/artist - Album",
+        self.assertEqual(res, "/music/A/artist/artist - Album",
                          "check correct rendering of None via pattern_substitute()")

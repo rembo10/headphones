@@ -155,7 +155,7 @@ def _print_windows(objects, sep, end, file, flush):
     if not isinstance(end, text_type):
         raise TypeError
 
-    if end == u"\n":
+    if end == "\n":
         end = os.linesep
 
     text = sep.join(parts) + end
@@ -225,7 +225,7 @@ def _readline_windows():
     buf = ctypes.create_string_buffer(buf_size * ctypes.sizeof(winapi.WCHAR))
     read = winapi.DWORD()
 
-    text = u""
+    text = ""
     while True:
         if winapi.ReadConsoleW(
                 h, buf, buf_size, ctypes.byref(read), None) == 0:
@@ -234,7 +234,7 @@ def _readline_windows():
             raise ctypes.WinError()
         data = buf[:read.value * ctypes.sizeof(winapi.WCHAR)]
         text += data.decode("utf-16-le", _surrogatepass)
-        if text.endswith(u"\r\n"):
+        if text.endswith("\r\n"):
             return text[:-2]
 
 
@@ -253,7 +253,7 @@ def _decode_codepage(codepage, data):
     assert isinstance(data, bytes)
 
     if not data:
-        return u""
+        return ""
 
     # get the required buffer length first
     length = winapi.MultiByteToWideChar(codepage, 0, data, len(data), None, 0)

@@ -89,7 +89,7 @@ class OggVorbisInfo(StreamInfo):
         self.length = page.position / float(self.sample_rate)
 
     def pprint(self):
-        return u"Ogg Vorbis, %.2f seconds, %d bps" % (
+        return "Ogg Vorbis, %.2f seconds, %d bps" % (
             self.length, self.bitrate)
 
 

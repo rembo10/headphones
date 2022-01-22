@@ -1,4 +1,4 @@
-from HTMLParser import HTMLParser
+import html
 
 class InvalidArtistException(Exception):
     pass
@@ -29,7 +29,7 @@ class Artist(object):
         if self.id > 0:
             response = self.parent_api.request(action='artist', id=self.id)
         elif self.name:
-            self.name = HTMLParser().unescape(self.name)
+            self.name = html.unescape(self.name)
             try:
                 response = self.parent_api.request(action='artist', artistname=self.name)
             except Exception:
@@ -47,7 +47,7 @@ class Artist(object):
             self.id = artist_json_response['id']
             self.parent_api.cached_artists[self.id] = self
 
-        self.name = HTMLParser().unescape(artist_json_response['name'])
+        self.name = html.unescape(artist_json_response['name'])
         self.notifications_enabled = artist_json_response['notificationsEnabled']
         self.has_bookmarked = artist_json_response['hasBookmarked']
         self.image = artist_json_response['image']

@@ -38,7 +38,7 @@ def getcwd():
     """
 
     if is_win and PY2:
-        return os.getcwdu()
+        return os.getcwd()
     return os.getcwd()
 
 

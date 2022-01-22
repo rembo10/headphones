@@ -21,7 +21,7 @@ def cry():
             main_thread = t
 
     # Loop over each thread's current frame, writing info about it
-    for tid, frame in sys._current_frames().iteritems():
+    for tid, frame in sys._current_frames().items():
         thread = tmap.get(tid, main_thread)
 
         lines = []

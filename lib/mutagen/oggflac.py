@@ -83,7 +83,7 @@ class OggFLACStreamInfo(StreamInfo):
         self.length = page.position / float(self.sample_rate)
 
     def pprint(self):
-        return u"Ogg FLAC, %.2f seconds, %d Hz" % (
+        return "Ogg FLAC, %.2f seconds, %d Hz" % (
             self.length, self.sample_rate)
 
 

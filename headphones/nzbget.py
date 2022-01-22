@@ -20,8 +20,8 @@
 
 
 from base64 import standard_b64encode
-import httplib
-import xmlrpclib
+import http.client
+import xmlrpc.client
 
 import headphones
 from headphones import logger
@@ -32,7 +32,7 @@ def sendNZB(nzb):
     nzbgetXMLrpc = "%(protocol)s://%(username)s:%(password)s@%(host)s/xmlrpc"
 
     if not headphones.CONFIG.NZBGET_HOST:
-        logger.error(u"No NZBget host found in configuration. Please configure it.")
+        logger.error("No NZBget host found in configuration. Please configure it.")
         return False
 
     if headphones.CONFIG.NZBGET_HOST.startswith('https://'):
@@ -46,25 +46,25 @@ def sendNZB(nzb):
                           "username": headphones.CONFIG.NZBGET_USERNAME,
                           "password": headphones.CONFIG.NZBGET_PASSWORD}
 
-    nzbGetRPC = xmlrpclib.ServerProxy(url)
+    nzbGetRPC = xmlrpc.client.ServerProxy(url)
     try:
         if nzbGetRPC.writelog("INFO", "headphones connected to drop of %s any moment now." % (
                 nzb.name + ".nzb")):
-            logger.debug(u"Successfully connected to NZBget")
+            logger.debug("Successfully connected to NZBget")
         else:
-            logger.info(u"Successfully connected to NZBget, but unable to send a message" % (
+            logger.info("Successfully connected to NZBget, but unable to send a message" % (
                 nzb.name + ".nzb"))
 
-    except httplib.socket.error:
+    except http.client.socket.error:
         logger.error(
-            u"Please check your NZBget host and port (if it is running). NZBget is not responding to this combination")
+            "Please check your NZBget host and port (if it is running). NZBget is not responding to this combination")
         return False
 
-    except xmlrpclib.ProtocolError, e:
+    except xmlrpc.client.ProtocolError as e:
         if e.errmsg == "Unauthorized":
-            logger.error(u"NZBget password is incorrect.")
+            logger.error("NZBget password is incorrect.")
         else:
-            logger.error(u"Protocol Error: " + e.errmsg)
+            logger.error("Protocol Error: " + e.errmsg)
         return False
 
     nzbcontent64 = None
@@ -72,8 +72,8 @@ def sendNZB(nzb):
         data = nzb.extraInfo[0]
         nzbcontent64 = standard_b64encode(data)
 
-    logger.info(u"Sending NZB to NZBget")
-    logger.debug(u"URL: " + url)
+    logger.info("Sending NZB to NZBget")
+    logger.debug("URL: " + url)
 
     dupekey = ""
     dupescore = 0
@@ -131,12 +131,12 @@ def sendNZB(nzb):
                                                     nzb.url)
 
         if nzbget_result:
-            logger.debug(u"NZB sent to NZBget successfully")
+            logger.debug("NZB sent to NZBget successfully")
             return True
         else:
-            logger.error(u"NZBget could not add %s to the queue" % (nzb.name + ".nzb"))
+            logger.error("NZBget could not add %s to the queue" % (nzb.name + ".nzb"))
             return False
     except:
         logger.error(
-            u"Connect Error to NZBget: could not add %s to the queue" % (nzb.name + ".nzb"))
+            "Connect Error to NZBget: could not add %s to the queue" % (nzb.name + ".nzb"))
         return False

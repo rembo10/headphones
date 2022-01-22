@@ -75,7 +75,7 @@ def _guess_xing_bitrate_mode(xing):
 
 
 # Mode values.
-STEREO, JOINTSTEREO, DUALCHANNEL, MONO = xrange(4)
+STEREO, JOINTSTEREO, DUALCHANNEL, MONO = range(4)
 
 
 class MPEGFrame(object):
@@ -95,7 +95,7 @@ class MPEGFrame(object):
     }
 
     __BITRATE[(2, 3)] = __BITRATE[(2, 2)]
-    for i in xrange(1, 4):
+    for i in range(1, 4):
         __BITRATE[(2.5, i)] = __BITRATE[(2, i)]
 
     # Map version to sample rates.
@@ -197,7 +197,7 @@ class MPEGFrame(object):
                 if xing.bytes != -1 and self.length:
                     self.bitrate = int((xing.bytes * 8) / self.length)
             if xing.lame_version_desc:
-                self.encoder_info = u"LAME %s" % xing.lame_version_desc
+                self.encoder_info = "LAME %s" % xing.lame_version_desc
             if lame is not None:
                 self.track_gain = lame.track_gain_adjustment
                 self.track_peak = lame.track_peak
@@ -213,7 +213,7 @@ class MPEGFrame(object):
             pass
         else:
             self.bitrate_mode = BitrateMode.VBR
-            self.encoder_info = u"FhG"
+            self.encoder_info = "FhG"
             self.sketchy = False
             self.length = float(frame_size * vbri.frames) / self.sample_rate
             if self.length:
@@ -323,8 +323,8 @@ class MPEGInfo(StreamInfo):
     """
 
     sketchy = False
-    encoder_info = u""
-    encoder_settings = u""
+    encoder_info = ""
+    encoder_settings = ""
     bitrate_mode = BitrateMode.UNKNOWN
     track_gain = track_peak = album_gain = album_peak = None
 
@@ -363,7 +363,7 @@ class MPEGInfo(StreamInfo):
             if max_syncs <= 0:
                 break
 
-            for _ in xrange(enough_frames):
+            for _ in range(enough_frames):
                 try:
                     frame = MPEGFrame(fileobj)
                 except HeaderNotFoundError:
@@ -411,16 +411,16 @@ class MPEGInfo(StreamInfo):
     def pprint(self):
         info = str(self.bitrate_mode).split(".", 1)[-1]
         if self.bitrate_mode == BitrateMode.UNKNOWN:
-            info = u"CBR?"
+            info = "CBR?"
         if self.encoder_info:
             info += ", %s" % self.encoder_info
         if self.encoder_settings:
             info += ", %s" % self.encoder_settings
-        s = u"MPEG %s layer %d, %d bps (%s), %s Hz, %d chn, %.2f seconds" % (
+        s = "MPEG %s layer %d, %d bps (%s), %s Hz, %d chn, %.2f seconds" % (
             self.version, self.layer, self.bitrate, info,
             self.sample_rate, self.channels, self.length)
         if self.sketchy:
-            s += u" (sketchy)"
+            s += " (sketchy)"
         return s
 
 

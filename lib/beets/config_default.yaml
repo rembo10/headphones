@@ -7,9 +7,12 @@ import:
     move: no
     link: no
     hardlink: no
+    reflink: no
     delete: no
     resume: ask
     incremental: no
+    incremental_skip_later: no
+    from_scratch: no
     quiet_fallback: skip
     none_rec_action: ask
     timid: no
@@ -25,6 +28,8 @@ import:
     pretend: false
     search_ids: []
     duplicate_action: ask
+    bell: no
+    set_fields: {}
 
 clutter: ["Thumbs.DB", ".DS_Store"]
 ignore: [".*", "*~", "System Volume Information", "lost+found"]
@@ -38,10 +43,21 @@ replace:
     '\.$': _
     '\s+$': ''
     '^\s+': ''
+    '^-': _
 path_sep_replace: _
+drive_sep_replace: _
 asciify_paths: false
 art_filename: cover
 max_filename_length: 0
+
+aunique:
+    keys: albumartist album
+    disambiguators: albumtype year label catalognum albumdisambig releasegroupdisambig
+    bracket: '[]'
+
+overwrite_null:
+  album: []
+  track: []
 
 plugins: []
 pluginpath: []
@@ -51,6 +67,7 @@ per_disc_numbering: no
 verbose: 0
 terminal_encoding:
 original_date: no
+artist_credit: no
 id3v23: no
 va_name: "Various Artists"
 
@@ -85,9 +102,12 @@ statefile: state.pickle
 
 musicbrainz:
     host: musicbrainz.org
+    https: no
     ratelimit: 1
     ratelimit_interval: 1.0
     searchlimit: 5
+    extra_tags: []
+    genres: no
 
 match:
     strong_rec_thresh: 0.04
@@ -122,5 +142,8 @@ match:
         original_year: no
     ignored: []
     required: []
+    ignored_media: []
+    ignore_data_tracks: yes
+    ignore_video_tracks: yes
     track_length_grace: 10
     track_length_max: 30

@@ -13,15 +13,15 @@ PY2 = sys.version_info[0] == 2
 PY3 = not PY2
 
 if PY2:
-    from StringIO import StringIO
+    from io import StringIO
     BytesIO = StringIO
-    from cStringIO import StringIO as cBytesIO
-    from itertools import izip
+    from io import StringIO as cBytesIO
+    
 
-    long_ = long
-    integer_types = (int, long)
-    string_types = (str, unicode)
-    text_type = unicode
+    long_ = int
+    integer_types = (int, int)
+    string_types = (str, str)
+    text_type = str
 
     xrange = xrange
     cmp = cmp
@@ -30,9 +30,9 @@ if PY2:
     def endswith(text, end):
         return text.endswith(end)
 
-    iteritems = lambda d: d.iteritems()
-    itervalues = lambda d: d.itervalues()
-    iterkeys = lambda d: d.iterkeys()
+    iteritems = lambda d: iter(d.items())
+    itervalues = lambda d: iter(d.values())
+    iterkeys = lambda d: iter(d.keys())
 
     iterbytes = lambda b: iter(b)
 
@@ -73,9 +73,9 @@ elif PY3:
                 end = end.encode("ascii")
         return text.endswith(end)
 
-    iteritems = lambda d: iter(d.items())
-    itervalues = lambda d: iter(d.values())
-    iterkeys = lambda d: iter(d.keys())
+    iteritems = lambda d: iter(list(d.items()))
+    itervalues = lambda d: iter(list(d.values()))
+    iterkeys = lambda d: iter(list(d.keys()))
 
     iterbytes = lambda b: (bytes([v]) for v in b)
 

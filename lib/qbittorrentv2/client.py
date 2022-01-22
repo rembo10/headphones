@@ -185,7 +185,7 @@ class Client(object):
         For example: qb.torrents(filter='downloading', sort='ratio').
         """
         params = {}
-        for name, value in filters.items():
+        for name, value in list(filters.items()):
             # make sure that old 'status' argument still works
             name = 'filter' if name == 'status' else name
             params[name] = value
@@ -345,7 +345,7 @@ class Client(object):
 
         # convert old option names to new option names
         options = kwargs.copy()
-        for old_arg, new_arg in old_arg_map.items():
+        for old_arg, new_arg in list(old_arg_map.items()):
             if options.get(old_arg) and not options.get(new_arg):
                 options[new_arg] = options[old_arg]
 

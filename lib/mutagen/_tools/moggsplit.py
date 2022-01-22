@@ -66,7 +66,7 @@ def main(argv):
                         if m3u:
                             m3u.write(new_filename + "\r\n")
                     fileobjs[page.serial].write(page.write())
-            for f in fileobjs.values():
+            for f in list(fileobjs.values()):
                 f.close()
 
 

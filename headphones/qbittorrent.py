@@ -13,9 +13,9 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-import urllib
-import urllib2
-import cookielib
+import urllib.request, urllib.parse, urllib.error
+import urllib.request, urllib.error, urllib.parse
+import http.cookiejar
 import json
 import time
 import mimetypes
@@ -61,23 +61,23 @@ class qbittorrentclient(object):
             self.version = 2
         except Exception as e:
             logger.warning("Error with qBittorrent v2 api, check settings or update, will try v1: %s" % e)
-            self.cookiejar = cookielib.CookieJar()
+            self.cookiejar = http.cookiejar.CookieJar()
             self.opener = self._make_opener()
             self._get_sid(self.base_url, self.username, self.password)
             self.version = 1
 
     def _make_opener(self):
         # create opener with cookie handler to carry QBitTorrent SID cookie
-        cookie_handler = urllib2.HTTPCookieProcessor(self.cookiejar)
+        cookie_handler = urllib.request.HTTPCookieProcessor(self.cookiejar)
         handlers = [cookie_handler]
-        return urllib2.build_opener(*handlers)
+        return urllib.request.build_opener(*handlers)
 
     def _get_sid(self, base_url, username, password):
         # login so we can capture SID cookie
-        login_data = urllib.urlencode({'username': username, 'password': password})
+        login_data = urllib.parse.urlencode({'username': username, 'password': password})
         try:
             self.opener.open(base_url + '/login', login_data)
-        except urllib2.URLError as err:
+        except urllib.error.URLError as err:
             logger.debug('Error getting SID. qBittorrent responded with error: ' + str(err.reason))
             return
         for cookie in self.cookiejar:
@@ -95,14 +95,14 @@ class qbittorrentclient(object):
             data, headers = encode_multipart(args, files)
         else:
             if args:
-                data = urllib.urlencode(args)
+                data = urllib.parse.urlencode(args)
             if content_type:
                 headers['Content-Type'] = content_type
 
         logger.debug('%s' % json.dumps(headers, indent=4))
         logger.debug('%s' % data)
 
-        request = urllib2.Request(url, data, headers)
+        request = urllib.request.Request(url, data, headers)
         try:
             response = self.opener.open(request)
             info = response.info()
@@ -117,7 +117,7 @@ class qbittorrentclient(object):
                         return response.code, json.loads(resp)
             logger.debug('response code: %s' % str(response.code))
             return response.code, None
-        except urllib2.URLError as err:
+        except urllib.error.URLError as err:
             logger.debug('Failed URL: %s' % url)
             logger.debug('QBitTorrent webUI raised the following error: %s' % str(err))
             return None, None
@@ -319,7 +319,7 @@ def encode_multipart(args, files, boundary=None):
     lines = []
 
     if args:
-        for name, value in args.items():
+        for name, value in list(args.items()):
             lines.extend((
                 '--{0}'.format(boundary),
                 'Content-Disposition: form-data; name="{0}"'.format(escape_quote(name)),
@@ -329,7 +329,7 @@ def encode_multipart(args, files, boundary=None):
     logger.debug(''.join(lines))
 
     if files:
-        for name, value in files.items():
+        for name, value in list(files.items()):
             filename = value['filename']
             if 'mimetype' in value:
                 mimetype = value['mimetype']

@@ -16,7 +16,7 @@
 import time
 import json
 import base64
-import urlparse
+import urllib.parse
 import os
 
 from headphones import logger, request
@@ -57,7 +57,7 @@ def addTorrent(link, data=None):
         else:
             retid = False
 
-        logger.info(u"Torrent sent to Transmission successfully")
+        logger.info("Torrent sent to Transmission successfully")
         return retid
 
     else:
@@ -167,7 +167,7 @@ def torrentAction(method, arguments):
 
     # Fix the URL. We assume that the user does not point to the RPC endpoint,
     # so add it if it is missing.
-    parts = list(urlparse.urlparse(host))
+    parts = list(urllib.parse.urlparse(host))
 
     if not parts[0] in ("http", "https"):
         parts[0] = "http"
@@ -175,7 +175,7 @@ def torrentAction(method, arguments):
     if not parts[2].endswith("/rpc"):
         parts[2] += "/transmission/rpc"
 
-    host = urlparse.urlunparse(parts)
+    host = urllib.parse.urlunparse(parts)
     data = {'method': method, 'arguments': arguments}
     data_json = json.dumps(data)
     auth = (username, password) if username and password else None
@@ -205,5 +205,5 @@ def torrentAction(method, arguments):
             continue
 
         resp_json = response.json()
-        print resp_json
+        print(resp_json)
         return resp_json

@@ -243,7 +243,7 @@ class ProgramConfigElement(object):
         elms = num_front_channel_elements + num_side_channel_elements + \
             num_back_channel_elements
         channels = 0
-        for i in xrange(elms):
+        for i in range(elms):
             channels += 1
             element_is_cpe = r.bits(1)
             if element_is_cpe:
@@ -323,7 +323,7 @@ class AACInfo(StreamInfo):
             self.channels = pce.channels
 
             # other pces..
-            for i in xrange(npce):
+            for i in range(npce):
                 ProgramConfigElement(r)
             r.align()
         except BitReaderError as e:
@@ -347,7 +347,7 @@ class AACInfo(StreamInfo):
         # Try up to X times to find a sync word and read up to Y frames.
         # If more than Z frames are valid we assume a valid stream
         offset = start_offset
-        for i in xrange(max_sync_tries):
+        for i in range(max_sync_tries):
             fileobj.seek(offset)
             s = _ADTSStream.find_stream(fileobj, max_initial_read)
             if s is None:
@@ -355,7 +355,7 @@ class AACInfo(StreamInfo):
             # start right after the last found offset
             offset += s.offset + 1
 
-            for i in xrange(frames_max):
+            for i in range(frames_max):
                 if not s.parse_frame():
                     break
                 if not s.sync(max_resync_read):
@@ -378,7 +378,7 @@ class AACInfo(StreamInfo):
         self.length = float(s.samples * stream_size) / (s.size * s.frequency)
 
     def pprint(self):
-        return u"AAC (%s), %d Hz, %.2f seconds, %d channel(s), %d bps" % (
+        return "AAC (%s), %d Hz, %.2f seconds, %d channel(s), %d bps" % (
             self._type, self.sample_rate, self.length, self.channels,
             self.bitrate)
 

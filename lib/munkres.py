@@ -781,6 +781,6 @@ if __name__ == '__main__':
         for r, c in indexes:
             x = cost_matrix[r][c]
             total_cost += x
-            print('(%d, %d) -> %d' % (r, c, x))
-        print('lowest cost=%d' % total_cost)
+            print(('(%d, %d) -> %d' % (r, c, x)))
+        print(('lowest cost=%d' % total_cost))
         assert expected_total == total_cost

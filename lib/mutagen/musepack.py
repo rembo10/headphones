@@ -44,7 +44,7 @@ def _parse_sv8_int(fileobj, limit=9):
     """
 
     num = 0
-    for i in xrange(limit):
+    for i in range(limit):
         c = fileobj.read(1)
         if len(c) != 1:
             raise EOFError
@@ -253,12 +253,12 @@ class MusepackInfo(StreamInfo):
     def pprint(self):
         rg_data = []
         if hasattr(self, "title_gain"):
-            rg_data.append(u"%+0.2f (title)" % self.title_gain)
+            rg_data.append("%+0.2f (title)" % self.title_gain)
         if hasattr(self, "album_gain"):
-            rg_data.append(u"%+0.2f (album)" % self.album_gain)
+            rg_data.append("%+0.2f (album)" % self.album_gain)
         rg_data = (rg_data and ", Gain: " + ", ".join(rg_data)) or ""
 
-        return u"Musepack SV%d, %.2f seconds, %d Hz, %d bps%s" % (
+        return "Musepack SV%d, %.2f seconds, %d Hz, %d bps%s" % (
             self.version, self.length, self.sample_rate, self.bitrate, rg_data)
 
 

@@ -74,7 +74,7 @@ class MonkeysAudioInfo(StreamInfo):
             self.length = float(total_blocks) / self.sample_rate
 
     def pprint(self):
-        return u"Monkey's Audio %.2f, %.2f seconds, %d Hz" % (
+        return "Monkey's Audio %.2f, %.2f seconds, %d Hz" % (
             self.version, self.length, self.sample_rate)
 
 

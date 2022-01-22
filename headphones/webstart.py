@@ -111,12 +111,9 @@ def initialize(options):
         })
         conf['/api'] = {'tools.auth_basic.on': False}
 
-    # Prevent time-outs
-    cherrypy.engine.timeout_monitor.unsubscribe()
     cherrypy.tree.mount(WebInterface(), str(options['http_root']), config=conf)
 
     try:
-        cherrypy.process.servers.check_port(str(options['http_host']), options['http_port'])
         cherrypy.server.start()
     except IOError:
         sys.stderr.write(

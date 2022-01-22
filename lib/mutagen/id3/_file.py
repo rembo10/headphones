@@ -154,7 +154,7 @@ class ID3(ID3Tags, mutagen.Metadata):
                 raise
 
             self.version = ID3Header._V11
-            for v in frames.values():
+            for v in list(frames.values()):
                 self.add(v)
         else:
             # XXX: attach to the header object so we have it in spec parsing..
@@ -352,7 +352,7 @@ class ID3FileType(mutagen.FileType):
 
         @staticmethod
         def pprint():
-            return u"Unknown format with ID3 tag"
+            return "Unknown format with ID3 tag"
 
     @staticmethod
     def score(filename, fileobj, header_data):

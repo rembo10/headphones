@@ -18,12 +18,12 @@
 #######################################
 
 
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
-from common import USER_AGENT
+from .common import USER_AGENT
 
 
-class HeadphonesURLopener(urllib.FancyURLopener):
+class HeadphonesURLopener(urllib.request.FancyURLopener):
     version = USER_AGENT
 
 
@@ -44,7 +44,7 @@ class AuthURLOpener(HeadphonesURLopener):
         self.numTries = 0
 
         # call the base class
-        urllib.FancyURLopener.__init__(self)
+        urllib.request.FancyURLopener.__init__(self)
 
     def prompt_user_passwd(self, host, realm):
         """

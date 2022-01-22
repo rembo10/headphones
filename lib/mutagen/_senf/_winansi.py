@@ -25,7 +25,7 @@ def ansi_parse(code):
     return code[-1:], tuple([int(v or "0") for v in code[2:-1].split(";")])
 
 
-def ansi_split(text, _re=re.compile(u"(\x1b\[(\d*;?)*\S)")):
+def ansi_split(text, _re=re.compile("(\x1b\[(\d*;?)*\S)")):
     """Yields (is_ansi, text)"""
 
     for part in _re.split(text):

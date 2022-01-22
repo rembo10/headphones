@@ -17,7 +17,7 @@
 # Stolen from Sick-Beard's db.py  #
 ###################################
 
-from __future__ import with_statement
+
 
 import time
 
@@ -116,7 +116,7 @@ class DBConnection:
 
                     break
 
-            except sqlite3.OperationalError, e:
+            except sqlite3.OperationalError as e:
                 if "unable to open database file" in e.message or "database is locked" in e.message:
                     dberror = e
                     if args is None:
@@ -128,7 +128,7 @@ class DBConnection:
                 else:
                     logger.error('Database error: %s', e)
                     raise
-            except sqlite3.DatabaseError, e:
+            except sqlite3.DatabaseError as e:
                 logger.error('Fatal Error executing %s :: %s', query, e)
                 raise
 
@@ -156,14 +156,14 @@ class DBConnection:
         If the table is not updated then the 'WHERE changes' will be 0 and the table inserted
         """
         def genParams(myDict):
-            return [x + " = ?" for x in myDict.keys()]
+            return [x + " = ?" for x in list(myDict.keys())]
 
         update_query = "UPDATE " + tableName + " SET " + ", ".join(genParams(valueDict)) + " WHERE " + " AND ".join(genParams(keyDict))
 
-        insert_query = ("INSERT INTO " + tableName + " (" + ", ".join(valueDict.keys() + keyDict.keys()) + ")" + " SELECT " + ", ".join(
-            ["?"] * len(valueDict.keys() + keyDict.keys())) + " WHERE changes()=0")
+        insert_query = ("INSERT INTO " + tableName + " (" + ", ".join(list(valueDict.keys()) + list(keyDict.keys())) + ")" + " SELECT " + ", ".join(
+            ["?"] * len(list(valueDict.keys()) + list(keyDict.keys()))) + " WHERE changes()=0")
 
         try:
-            self.action(update_query, valueDict.values() + keyDict.values(), upsert_insert_qry=insert_query)
+            self.action(update_query, list(valueDict.values()) + list(keyDict.values()), upsert_insert_qry=insert_query)
         except sqlite3.IntegrityError:
             logger.info('Queries failed: %s and %s', update_query, insert_query)

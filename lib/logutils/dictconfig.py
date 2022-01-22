@@ -7,13 +7,13 @@ import sys
 import types
 
 try:
-    basestring
+    str
 except NameError:
-    basestring = str
+    str = str
 try:
-    StandardError
+    Exception
 except NameError:
-    StandardError = Exception
+    Exception = Exception
    
 IDENTIFIER = re.compile('^[a-z_][a-z0-9_]*$', re.I)
 
@@ -228,7 +228,7 @@ class BaseConfigurator(object):
                  isinstance(value, tuple):
             value = ConvertingTuple(value)
             value.configurator = self
-        elif isinstance(value, basestring):
+        elif isinstance(value, str):
             m = self.CONVERT_PATTERN.match(value)
             if m:
                 d = m.groupdict()
@@ -243,14 +243,14 @@ class BaseConfigurator(object):
     def configure_custom(self, config):
         """Configure an object with a user-supplied factory."""
         c = config.pop('()')
-        if isinstance(c, basestring):
+        if isinstance(c, str):
             c = self.resolve(c)
         props = config.pop('.', None)
         # Check for valid identifiers
         kwargs = dict([(k, config[k]) for k in config if valid_ident(k)])
         result = c(**kwargs)
         if props:
-            for name, value in props.items():
+            for name, value in list(props.items()):
                 setattr(result, name, value)
         return result
 
@@ -304,7 +304,7 @@ class DictConfigurator(BaseConfigurator):
                                 level = handler_config.get('level', None)
                                 if level:
                                     handler.setLevel(_checkLevel(level))
-                            except StandardError:
+                            except Exception:
                                 e = sys.exc_info()[1]
                                 raise ValueError('Unable to configure handler '
                                                  '%r: %s' % (name, e))
@@ -312,7 +312,7 @@ class DictConfigurator(BaseConfigurator):
                 for name in loggers:
                     try:
                         self.configure_logger(name, loggers[name], True)
-                    except StandardError:
+                    except Exception:
                         e = sys.exc_info()[1]
                         raise ValueError('Unable to configure logger '
                                          '%r: %s' % (name, e))
@@ -320,7 +320,7 @@ class DictConfigurator(BaseConfigurator):
                 if root:
                     try:
                         self.configure_root(root, True)
-                    except StandardError:
+                    except Exception:
                         e = sys.exc_info()[1]
                         raise ValueError('Unable to configure root '
                                          'logger: %s' % e)
@@ -336,7 +336,7 @@ class DictConfigurator(BaseConfigurator):
                     try:
                         formatters[name] = self.configure_formatter(
                                                             formatters[name])
-                    except StandardError:
+                    except Exception:
                         e = sys.exc_info()[1]
                         raise ValueError('Unable to configure '
                                          'formatter %r: %s' % (name, e))
@@ -345,7 +345,7 @@ class DictConfigurator(BaseConfigurator):
                 for name in filters:
                     try:
                         filters[name] = self.configure_filter(filters[name])
-                    except StandardError:
+                    except Exception:
                         e = sys.exc_info()[1]
                         raise ValueError('Unable to configure '
                                          'filter %r: %s' % (name, e))
@@ -359,7 +359,7 @@ class DictConfigurator(BaseConfigurator):
                         handler = self.configure_handler(handlers[name])
                         handler.name = name
                         handlers[name] = handler
-                    except StandardError:
+                    except Exception:
                         e = sys.exc_info()[1]
                         raise ValueError('Unable to configure handler '
                                          '%r: %s' % (name, e))
@@ -398,7 +398,7 @@ class DictConfigurator(BaseConfigurator):
                         existing.remove(name)
                     try:
                         self.configure_logger(name, loggers[name])
-                    except StandardError:
+                    except Exception:
                         e = sys.exc_info()[1]
                         raise ValueError('Unable to configure logger '
                                          '%r: %s' % (name, e))
@@ -422,7 +422,7 @@ class DictConfigurator(BaseConfigurator):
                 if root:
                     try:
                         self.configure_root(root)                        
-                    except StandardError:
+                    except Exception:
                         e = sys.exc_info()[1]
                         raise ValueError('Unable to configure root '
                                          'logger: %s' % e)
@@ -466,7 +466,7 @@ class DictConfigurator(BaseConfigurator):
         for f in filters:
             try:
                 filterer.addFilter(self.config['filters'][f])
-            except StandardError:
+            except Exception:
                 e = sys.exc_info()[1]
                 raise ValueError('Unable to add filter %r: %s' % (f, e))
 
@@ -476,7 +476,7 @@ class DictConfigurator(BaseConfigurator):
         if formatter:
             try:
                 formatter = self.config['formatters'][formatter]
-            except StandardError:
+            except Exception:
                 e = sys.exc_info()[1]
                 raise ValueError('Unable to set formatter '
                                  '%r: %s' % (formatter, e))
@@ -484,7 +484,7 @@ class DictConfigurator(BaseConfigurator):
         filters = config.pop('filters', None)
         if '()' in config:
             c = config.pop('()')
-            if isinstance(c, basestring):
+            if isinstance(c, str):
                 c = self.resolve(c)
             factory = c
         else:
@@ -494,7 +494,7 @@ class DictConfigurator(BaseConfigurator):
                 'target' in config:
                 try:
                     config['target'] = self.config['handlers'][config['target']]
-                except StandardError:
+                except Exception:
                     e = sys.exc_info()[1]
                     raise ValueError('Unable to set target handler '
                                      '%r: %s' % (config['target'], e))
@@ -531,7 +531,7 @@ class DictConfigurator(BaseConfigurator):
         for h in handlers:
             try:
                 logger.addHandler(self.config['handlers'][h])
-            except StandardError:
+            except Exception:
                 e = sys.exc_info()[1]
                 raise ValueError('Unable to add handler %r: %s' % (h, e))
 

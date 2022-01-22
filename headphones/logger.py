@@ -153,7 +153,8 @@ def initLogger(console=False, log_dir=False, verbose=False):
         file_formatter = logging.Formatter(
             '%(asctime)s - %(levelname)-7s :: %(threadName)s : %(message)s', '%d-%b-%Y %H:%M:%S')
         file_handler = handlers.RotatingFileHandler(filename, maxBytes=MAX_SIZE,
-                                                    backupCount=MAX_FILES)
+                                                    backupCount=MAX_FILES,
+                                                    encoding='utf8')
         file_handler.setLevel(logging.DEBUG)
         file_handler.setFormatter(file_formatter)
 

@@ -20,7 +20,7 @@ class ConsoleCtrlHandler(plugins.SimplePlugin):
 
     def start(self):
         if self.is_set:
-            self.bus.log('Handler for console events already set.', level=40)
+            self.bus.log('Handler for console events already set.', level=20)
             return
 
         result = win32api.SetConsoleCtrlHandler(self.handle, 1)
@@ -28,12 +28,12 @@ class ConsoleCtrlHandler(plugins.SimplePlugin):
             self.bus.log('Could not SetConsoleCtrlHandler (error %r)' %
                          win32api.GetLastError(), level=40)
         else:
-            self.bus.log('Set handler for console events.', level=40)
+            self.bus.log('Set handler for console events.', level=20)
             self.is_set = True
 
     def stop(self):
         if not self.is_set:
-            self.bus.log('Handler for console events already off.', level=40)
+            self.bus.log('Handler for console events already off.', level=20)
             return
 
         try:
@@ -46,7 +46,7 @@ class ConsoleCtrlHandler(plugins.SimplePlugin):
             self.bus.log('Could not remove SetConsoleCtrlHandler (error %r)' %
                          win32api.GetLastError(), level=40)
         else:
-            self.bus.log('Removed handler for console events.', level=40)
+            self.bus.log('Removed handler for console events.', level=20)
             self.is_set = False
 
     def handle(self, event):
@@ -85,19 +85,20 @@ class Win32Bus(wspbus.Bus):
             return self.events[state]
         except KeyError:
             event = win32event.CreateEvent(None, 0, 0,
-                                           "WSPBus %s Event (pid=%r)" %
+                                           'WSPBus %s Event (pid=%r)' %
                                            (state.name, os.getpid()))
             self.events[state] = event
             return event
 
-    def _get_state(self):
+    @property
+    def state(self):
         return self._state
 
-    def _set_state(self, value):
+    @state.setter
+    def state(self, value):
         self._state = value
         event = self._get_state_event(value)
         win32event.PulseEvent(event)
-    state = property(_get_state, _set_state)
 
     def wait(self, state, interval=0.1, channel=None):
         """Wait for the given state(s), KeyboardInterrupt or SystemExit.
@@ -135,7 +136,8 @@ class _ControlCodes(dict):
         for key, val in self.items():
             if val is obj:
                 return key
-        raise ValueError("The given object could not be found: %r" % obj)
+        raise ValueError('The given object could not be found: %r' % obj)
+
 
 control_codes = _ControlCodes({'graceful': 138})
 
@@ -153,14 +155,14 @@ class PyWebService(win32serviceutil.ServiceFramework):
 
     """Python Web Service."""
 
-    _svc_name_ = "Python Web Service"
-    _svc_display_name_ = "Python Web Service"
+    _svc_name_ = 'Python Web Service'
+    _svc_display_name_ = 'Python Web Service'
     _svc_deps_ = None        # sequence of service names on which this depends
-    _exe_name_ = "pywebsvc"
+    _exe_name_ = 'pywebsvc'
     _exe_args_ = None        # Default to no arguments
 
     # Only exists on Windows 2000 or later, ignored on windows NT
-    _svc_description_ = "Python Web Service"
+    _svc_description_ = 'Python Web Service'
 
     def SvcDoRun(self):
         from cherrypy import process
@@ -173,6 +175,7 @@ class PyWebService(win32serviceutil.ServiceFramework):
         process.bus.exit()
 
     def SvcOther(self, control):
+        from cherrypy import process
         process.bus.publish(control_codes.key_for(control))
 
 

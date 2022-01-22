@@ -1,5 +1,5 @@
 try:
-    import _winreg as winreg
+    import winreg as winreg
 except ImportError:
     import winreg
 

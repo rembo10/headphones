@@ -278,7 +278,7 @@ class StringSpec(Spec):
 
     def __init__(self, name, length, default=None):
         if default is None:
-            default = u" " * length
+            default = " " * length
         super(StringSpec, self).__init__(name, default)
         self.len = length
 
@@ -402,7 +402,7 @@ class RVASpec(Spec):
 class FrameIDSpec(StringSpec):
 
     def __init__(self, name, length):
-        super(FrameIDSpec, self).__init__(name, length, u"X" * length)
+        super(FrameIDSpec, self).__init__(name, length, "X" * length)
 
     def validate(self, frame, value):
         value = super(FrameIDSpec, self).validate(frame, value)
@@ -464,7 +464,7 @@ class EncodedTextSpec(Spec):
         Encoding.UTF8: ('utf8', b'\x00'),
     }
 
-    def __init__(self, name, default=u""):
+    def __init__(self, name, default=""):
         super(EncodedTextSpec, self).__init__(name, default)
 
     def read(self, header, frame, data):
@@ -522,7 +522,7 @@ class MultiSpec(Spec):
                 data.append(self.specs[0].write(config, frame, v))
         else:
             for record in value:
-                for v, s in izip(record, self.specs):
+                for v, s in zip(record, self.specs):
                     data.append(s.write(config, frame, v))
         return b''.join(data)
 
@@ -534,14 +534,14 @@ class MultiSpec(Spec):
                 return [self.specs[0].validate(frame, v) for v in value]
             else:
                 return [
-                    [s.validate(frame, v) for (v, s) in izip(val, self.specs)]
+                    [s.validate(frame, v) for (v, s) in zip(val, self.specs)]
                     for val in value]
         raise ValueError('Invalid MultiSpec data: %r' % value)
 
     def _validate23(self, frame, value, **kwargs):
         if len(self.specs) != 1:
             return [[s._validate23(frame, v, **kwargs)
-                     for (v, s) in izip(val, self.specs)]
+                     for (v, s) in zip(val, self.specs)]
                     for val in value]
 
         spec = self.specs[0]
@@ -568,7 +568,7 @@ class EncodedNumericPartTextSpec(EncodedTextSpec):
 
 class Latin1TextSpec(Spec):
 
-    def __init__(self, name, default=u""):
+    def __init__(self, name, default=""):
         super(Latin1TextSpec, self).__init__(name, default)
 
     def read(self, header, frame, data):
@@ -602,7 +602,7 @@ class ID3FramesSpec(Spec):
         from ._tags import ID3Tags
 
         v = ID3Tags()
-        for frame in value.values():
+        for frame in list(value.values()):
             v.add(frame._get_v23_frame(**kwargs))
         return v
 
@@ -632,7 +632,7 @@ class Latin1TextListSpec(Spec):
     def read(self, header, frame, data):
         count, data = self._bspec.read(header, frame, data)
         entries = []
-        for i in xrange(count):
+        for i in range(count):
             entry, data = self._lspec.read(header, frame, data)
             entries.append(entry)
         return entries, data
@@ -683,7 +683,7 @@ class ID3TimeStamp(object):
             if part is None:
                 break
             pieces.append(self.__formats[i] % part + self.__seps[i])
-        return u''.join(pieces)[:-1]
+        return ''.join(pieces)[:-1]
 
     def set_text(self, text, splitre=re.compile('[-T:/.]|\s+')):
         year, month, day, hour, minute, second = \
@@ -736,7 +736,7 @@ class TimeStampSpec(EncodedTextSpec):
 
 class ChannelSpec(ByteSpec):
     (OTHER, MASTER, FRONTRIGHT, FRONTLEFT, BACKRIGHT, BACKLEFT, FRONTCENTRE,
-     BACKCENTRE, SUBWOOFER) = xrange(9)
+     BACKCENTRE, SUBWOOFER) = range(9)
 
 
 class VolumeAdjustmentSpec(Spec):
@@ -771,7 +771,7 @@ class VolumePeakSpec(Spec):
         if vol_bytes + 1 > len(data):
             raise SpecError("not enough frame data")
         shift = ((8 - (bits & 7)) & 7) + (4 - vol_bytes) * 8
-        for i in xrange(1, vol_bytes + 1):
+        for i in range(1, vol_bytes + 1):
             peak *= 256
             peak += data_array[i]
         peak *= 2 ** shift

@@ -17,8 +17,8 @@
 Track/album metadata handling routines.
 """
 
-from __future__ import print_function
-from beets.mediafile import MediaFile, UnreadableFileError
+
+from mediafile import MediaFile, UnreadableFileError
 import headphones
 from headphones import logger
 import os.path
@@ -60,7 +60,7 @@ class MetadataDict(dict):
             self._lower = {}
             if seq is not None:
                 try:
-                    self.add_items(seq.iteritems())
+                    self.add_items(iter(seq.items()))
                 except KeyError:
                     self.add_items(seq)
 
@@ -103,11 +103,11 @@ def _verify_var_type(val):
     """
     Check if type of value is allowed as a variable in pathname substitution.
     """
-    return isinstance(val, (basestring, int, float, datetime.date))
+    return isinstance(val, (str, int, float, datetime.date))
 
 
 def _as_str(val):
-    if isinstance(val, basestring):
+    if isinstance(val, str):
         return val
     else:
         return str(val)
@@ -134,7 +134,7 @@ def _row_to_dict(row, d):
     """
     Populate dict with database row fields.
     """
-    for fld in row.keys():
+    for fld in list(row.keys()):
         val = row[fld]
         if val is None:
             val = ''
@@ -184,9 +184,7 @@ def file_metadata(path, release):
     try:
         f = MediaFile(path)
     except UnreadableFileError as ex:
-        logger.info("MediaFile couldn't parse: %s (%s)",
-                    path.decode(headphones.SYS_ENCODING, 'replace'),
-                    str(ex))
+        logger.info(f"MediaFile couldn't parse {path}: {e}")
         return None, None
 
     res = MetadataDict()
@@ -207,8 +205,7 @@ def file_metadata(path, release):
         track_number = '%02d' % f.track
 
     if not f.title:
-        basename = os.path.basename(
-            path.decode(headphones.SYS_ENCODING, 'replace'))
+        basename = os.path.basename(path)
         title = os.path.splitext(basename)[0]
         from_metadata = False
     else:
@@ -242,7 +239,7 @@ def file_metadata(path, release):
         Vars.SORT_ARTIST_LOWER: _lower(sort_name),
         Vars.ALBUM_LOWER: _lower(album_title),
     }
-    res.add_items(override_values.iteritems())
+    res.add_items(iter(override_values.items()))
     return res, from_metadata
 
 
@@ -252,7 +249,7 @@ def _intersect(d1, d2):
     Create intersection (common part) of two dictionaries.
     """
     res = {}
-    for key, val in d1.iteritems():
+    for key, val in d1.items():
         if key in d2 and d2[key] == val:
             res[key] = val
     return res
@@ -284,21 +281,19 @@ def album_metadata(path, release, common_tags):
         sort_name = artist
 
     if not sort_name or sort_name[0].isdigit():
-        first_char = u'0-9'
+        first_char = '0-9'
     else:
         first_char = sort_name[0]
 
-    orig_folder = u''
+    orig_folder = ''
 
     # Get from temp path
     if "_@hp@_" in path:
         orig_folder = path.rsplit("headphones_", 1)[1].split("_@hp@_")[0]
-        orig_folder = orig_folder.decode(headphones.SYS_ENCODING, 'replace')
     else:
         for r, d, f in os.walk(path):
             try:
-                orig_folder = os.path.basename(
-                    os.path.normpath(r).decode(headphones.SYS_ENCODING, 'replace'))
+                orig_folder = os.path.basename(os.path.normpath(r))
                 break
             except:
                 pass
@@ -320,7 +315,7 @@ def album_metadata(path, release, common_tags):
         Vars.ORIGINAL_FOLDER_LOWER: _lower(orig_folder)
     }
     res = MetadataDict(common_tags)
-    res.add_items(override_values.iteritems())
+    res.add_items(iter(override_values.items()))
     return res
 
 
@@ -345,7 +340,7 @@ def albumart_metadata(release, common_tags):
         Vars.ALBUM_LOWER: _lower(album)
     }
     res = MetadataDict(common_tags)
-    res.add_items(override_values.iteritems())
+    res.add_items(iter(override_values.items()))
     return res
 
 

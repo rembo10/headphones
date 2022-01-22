@@ -17,6 +17,10 @@
 import os
 import sys
 
+if sys.version_info <= (3, 5):
+    sys.stdout.write("Headphones requires Python >= 3.5\n")
+    sys.exit(1)
+
 # Ensure lib added to path, before any other imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'lib/'))
 

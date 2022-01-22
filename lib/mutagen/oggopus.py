@@ -75,7 +75,7 @@ class OggOpusInfo(StreamInfo):
         self.length = (page.position - self.__pre_skip) / float(48000)
 
     def pprint(self):
-        return u"Ogg Opus, %.2f seconds" % (self.length)
+        return "Ogg Opus, %.2f seconds" % (self.length)
 
 
 class OggOpusVComment(VCommentDict):

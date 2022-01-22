@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # This file is part of beets.
 # Copyright 2016, Adrian Sampson.
 #
@@ -16,18 +15,58 @@
 """Facilities for automatically determining files' correct metadata.
 """
 
-from __future__ import division, absolute_import, print_function
 
 from beets import logging
 from beets import config
 
 # Parts of external interface.
-from .hooks import AlbumInfo, TrackInfo, AlbumMatch, TrackMatch  # noqa
+from .hooks import (  # noqa
+    AlbumInfo,
+    TrackInfo,
+    AlbumMatch,
+    TrackMatch,
+    Distance,
+)
 from .match import tag_item, tag_album, Proposal  # noqa
 from .match import Recommendation  # noqa
 
 # Global logger.
 log = logging.getLogger('beets')
+
+# Metadata fields that are already hardcoded, or where the tag name changes.
+SPECIAL_FIELDS = {
+    'album': (
+        'va',
+        'releasegroup_id',
+        'artist_id',
+        'album_id',
+        'mediums',
+        'tracks',
+        'year',
+        'month',
+        'day',
+        'artist',
+        'artist_credit',
+        'artist_sort',
+        'data_url'
+    ),
+    'track': (
+        'track_alt',
+        'artist_id',
+        'release_track_id',
+        'medium',
+        'index',
+        'medium_index',
+        'title',
+        'artist_credit',
+        'artist_sort',
+        'artist',
+        'track_id',
+        'medium_total',
+        'data_url',
+        'length'
+    )
+}
 
 
 # Additional utilities for the main interface.
@@ -40,17 +79,17 @@ def apply_item_metadata(item, track_info):
     item.artist_credit = track_info.artist_credit
     item.title = track_info.title
     item.mb_trackid = track_info.track_id
+    item.mb_releasetrackid = track_info.release_track_id
     if track_info.artist_id:
         item.mb_artistid = track_info.artist_id
-    if track_info.data_source:
-        item.data_source = track_info.data_source
 
-    if track_info.lyricist is not None:
-        item.lyricist = track_info.lyricist
-    if track_info.composer is not None:
-        item.composer = track_info.composer
-    if track_info.arranger is not None:
-        item.arranger = track_info.arranger
+    for field, value in track_info.items():
+        # We only overwrite fields that are not already hardcoded.
+        if field in SPECIAL_FIELDS['track']:
+            continue
+        if value is None:
+            continue
+        item[field] = value
 
     # At the moment, the other metadata is left intact (including album
     # and track number). Perhaps these should be emptied?
@@ -61,12 +100,19 @@ def apply_metadata(album_info, mapping):
     mapping from Items to TrackInfo objects.
     """
     for item, track_info in mapping.items():
-        # Album, artist, track count.
-        if track_info.artist:
-            item.artist = track_info.artist
+        # Artist or artist credit.
+        if config['artist_credit']:
+            item.artist = (track_info.artist_credit or
+                           track_info.artist or
+                           album_info.artist_credit or
+                           album_info.artist)
+            item.albumartist = (album_info.artist_credit or
+                                album_info.artist)
         else:
-            item.artist = album_info.artist
-        item.albumartist = album_info.artist
+            item.artist = (track_info.artist or album_info.artist)
+            item.albumartist = album_info.artist
+
+        # Album.
         item.album = album_info.album
 
         # Artist sort and credit names.
@@ -120,6 +166,7 @@ def apply_metadata(album_info, mapping):
 
         # MusicBrainz IDs.
         item.mb_trackid = track_info.track_id
+        item.mb_releasetrackid = track_info.release_track_id
         item.mb_albumid = album_info.album_id
         if track_info.artist_id:
             item.mb_artistid = track_info.artist_id
@@ -131,34 +178,24 @@ def apply_metadata(album_info, mapping):
         # Compilation flag.
         item.comp = album_info.va
 
-        # Miscellaneous metadata.
-        for field in ('albumtype',
-                      'label',
-                      'asin',
-                      'catalognum',
-                      'script',
-                      'language',
-                      'country',
-                      'albumstatus',
-                      'albumdisambig',
-                      'data_source',):
-            value = getattr(album_info, field)
-            if value is not None:
-                item[field] = value
-        if track_info.disctitle is not None:
-            item.disctitle = track_info.disctitle
-
-        if track_info.media is not None:
-            item.media = track_info.media
-
-        if track_info.lyricist is not None:
-            item.lyricist = track_info.lyricist
-        if track_info.composer is not None:
-            item.composer = track_info.composer
-        if track_info.arranger is not None:
-            item.arranger = track_info.arranger
-
+        # Track alt.
         item.track_alt = track_info.track_alt
 
-        # Headphones seal of approval
-        item.comments = 'tagged by headphones/beets'
+        # Don't overwrite fields with empty values unless the
+        # field is explicitly allowed to be overwritten
+        for field, value in album_info.items():
+            if field in SPECIAL_FIELDS['album']:
+                continue
+            clobber = field in config['overwrite_null']['album'].as_str_seq()
+            if value is None and not clobber:
+                continue
+            item[field] = value
+
+        for field, value in track_info.items():
+            if field in SPECIAL_FIELDS['track']:
+                continue
+            clobber = field in config['overwrite_null']['track'].as_str_seq()
+            value = getattr(track_info, field)
+            if value is None and not clobber:
+                continue
+            item[field] = value

@@ -4,7 +4,7 @@
 
 Example usage:
 >>> from unidecode import unidecode:
->>> unidecode(u"\u5317\u4EB0")
+>>> unidecode(u"\\u5317\\u4EB0")
 "Bei Jing "
 
 The transliteration uses a straightforward map, and doesn't have alternatives
@@ -22,11 +22,11 @@ Cache = {}
 def unidecode(string):
     """Transliterate an Unicode object into an ASCII string
 
-    >>> unidecode(u"\u5317\u4EB0")
+    >>> unidecode(u"\\u5317\\u4EB0")
     "Bei Jing "
     """
 
-    if version_info[0] < 3 and not isinstance(string, unicode):
+    if version_info[0] < 3 and not isinstance(string, str):
         warnings.warn(  "Argument %r is not an unicode object. "
                         "Passing an encoded string will likely have "
                         "unexpected results." % (type(string),),

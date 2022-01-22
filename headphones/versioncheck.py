@@ -43,7 +43,7 @@ def runGit(args):
                                  shell=True,
                                  cwd=headphones.PROG_DIR)
             output, err = p.communicate()
-            output = output.strip()
+            output = output.decode('utf-8').strip()
 
             logger.debug('Git output: ' + output)
         except OSError as e:

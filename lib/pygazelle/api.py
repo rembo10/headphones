@@ -5,7 +5,7 @@
 #
 # Loosely based on the API implementation from 'whatbetter', by Zachary Denton
 # See https://github.com/zacharydenton/whatbetter
-from HTMLParser import HTMLParser
+import html
 
 import sys
 import json
@@ -172,7 +172,7 @@ class GazelleAPI(object):
         id = int(id)
         if id == self.userid:
             return self.logged_in_user
-        elif id in self.cached_users.keys():
+        elif id in list(self.cached_users.keys()):
             return self.cached_users[id]
         else:
             return User(id, self)
@@ -214,15 +214,15 @@ class GazelleAPI(object):
         """
         if id:
             id = int(id)
-            if id in self.cached_artists.keys():
+            if id in list(self.cached_artists.keys()):
                 artist = self.cached_artists[id]
             else:
                 artist = Artist(id, self)
             if name:
-                artist.name = HTMLParser().unescape(name)
+                artist.name = html.unescape(name)
         elif name:
             artist = Artist(-1, self)
-            artist.name = HTMLParser().unescape(name)
+            artist.name = html.unescape(name)
         else:
             raise Exception("You must specify either an ID or a Name to get an artist.")
 
@@ -234,7 +234,7 @@ class GazelleAPI(object):
         pass it to update the object. There is no way to query the count directly from the API, but it can be retrieved
         from other calls such as 'artist', however.
         """
-        if name in self.cached_tags.keys():
+        if name in list(self.cached_tags.keys()):
             return self.cached_tags[name]
         else:
             return Tag(name, self)
@@ -245,7 +245,7 @@ class GazelleAPI(object):
         if the request hasn't already been cached. This is done on demand to reduce unnecessary API calls.
         """
         id = int(id)
-        if id in self.cached_requests.keys():
+        if id in list(self.cached_requests.keys()):
             return self.cached_requests[id]
         else:
             return Request(id, self)
@@ -255,7 +255,7 @@ class GazelleAPI(object):
         Returns a TorrentGroup for the passed ID, associated with this API object.
         """
         id = int(id)
-        if id in self.cached_torrent_groups.keys():
+        if id in list(self.cached_torrent_groups.keys()):
             return self.cached_torrent_groups[id]
         else:
             return TorrentGroup(id, self)
@@ -265,7 +265,7 @@ class GazelleAPI(object):
         Returns a Torrent for the passed ID, associated with this API object.
         """
         id = int(id)
-        if id in self.cached_torrents.keys():
+        if id in list(self.cached_torrents.keys()):
             return self.cached_torrents[id]
         else:
             return Torrent(id, self)
@@ -280,7 +280,7 @@ class GazelleAPI(object):
             return None
 
         id = int(response['torrent']['id'])
-        if id in self.cached_torrents.keys():
+        if id in list(self.cached_torrents.keys()):
             torrent = self.cached_torrents[id]
         else:
             torrent = Torrent(id, self)
@@ -293,7 +293,7 @@ class GazelleAPI(object):
         Returns a Category for the passed ID, associated with this API object.
         """
         id = int(id)
-        if id in self.cached_categories.keys():
+        if id in list(self.cached_categories.keys()):
             cat = self.cached_categories[id]
         else:
             cat = Category(id, self)
@@ -416,4 +416,4 @@ class GazelleAPI(object):
 if sys.version_info[0] == 3:
     text_type = str
 else:
-    text_type = unicode
+    text_type = str
