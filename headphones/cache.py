@@ -388,9 +388,9 @@ class Cache(object):
             else:
                 if dbalbum['Type'] != "part of":
                     data = lastfm.request_lastfm("album.getinfo",
-                                                artist=helpers.clean_musicbrainz_name(dbalbum['ArtistName']),
-                                                album=helpers.clean_musicbrainz_name(dbalbum['AlbumTitle']),
-                                                api_key=LASTFM_API_KEY)
+                                                 artist=helpers.clean_musicbrainz_name(dbalbum['ArtistName']),
+                                                 album=helpers.clean_musicbrainz_name(dbalbum['AlbumTitle']),
+                                                 api_key=LASTFM_API_KEY)
                 else:
 
                     # Series, use actual artist for the release-group
@@ -484,7 +484,7 @@ class Cache(object):
                                                 self.id + '_fanart_' + '.' + helpers.today() + ext)
                 else:
                     artwork_path = os.path.join(self.path_to_art_cache,
-                                            self.id + '.' + helpers.today() + ext)
+                                                self.id + '.' + helpers.today() + ext)
                 try:
                     with open(artwork_path, 'wb') as f:
                         f.write(artwork)

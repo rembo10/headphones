@@ -38,6 +38,7 @@ __author__ = "Andrzej Ciarkowski <andrzej.ciarkowski@gmail.com>"
 
 class _PatternElement(object):
     '''ABC for hierarchy of path name renderer pattern elements.'''
+
     def render(self, replacement):
         # type: (Mapping[str,str]) -> str
         '''Format this _PatternElement into string using provided substitution dictionary.'''
@@ -55,6 +56,7 @@ class _Generator(_PatternElement):
 
 class _Replacement(_Generator):
     '''Replacement variable, eg. $title.'''
+
     def __init__(self, pattern):
         # type: (str)
         self._pattern = pattern
@@ -81,6 +83,7 @@ class _Replacement(_Generator):
 
 class _LiteralText(_PatternElement):
     '''Just a plain piece of text to be rendered "as is".'''
+
     def __init__(self, text):
         # type: (str)
         self._text = text

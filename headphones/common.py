@@ -77,7 +77,7 @@ class Quality:
         toReturn = {}
         for x in list(Quality.qualityStrings.keys()):
             toReturn[Quality.compositeStatus(status, x)] = Quality.statusPrefixes[status] + " (" + \
-                                                           Quality.qualityStrings[x] + ")"
+                Quality.qualityStrings[x] + ")"
         return toReturn
 
     @staticmethod

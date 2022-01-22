@@ -14,9 +14,9 @@ class HelpersTest(TestCase):
             'Symphonęy Nº9': 'Symphoney No.9',
             'ÆæßðÞĲĳ': 'AeaessdThIJıj',
             'Obsessió (Cerebral Apoplexy remix)': 'obsessio cerebral '
-                                                    'apoplexy remix',
+            'apoplexy remix',
             'Doktór Hałabała i siedmiu zbojów': 'doktor halabala i siedmiu '
-                                                    'zbojow',
+            'zbojow',
             'Arbetets Söner och Döttrar': 'arbetets soner och dottrar',
             'Björk Guðmundsdóttir': 'bjork gudmundsdottir',
             'L\'Arc~en~Ciel': 'larc en ciel',

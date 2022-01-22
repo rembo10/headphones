@@ -152,7 +152,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
 
                 # track_list.append(track_dict)
                 check_exist_track = myDB.action("SELECT * FROM have WHERE Location=?",
-                                               [track_path]).fetchone()
+                                                [track_path]).fetchone()
                 # Only attempt to match tracks that are new, haven't yet been matched, or metadata has changed.
                 if not check_exist_track:
                     # This is a new track
@@ -167,7 +167,7 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
                         if f_artist and f_artist != check_exist_track['ArtistName']:
                             new_artists.append(f_artist)
                         elif f_artist and f_artist == check_exist_track['ArtistName'] and \
-                                        check_exist_track['Matched'] != "Ignored":
+                                check_exist_track['Matched'] != "Ignored":
                             new_artists.append(f_artist)
                         else:
                             continue
@@ -191,25 +191,22 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
     # Now we start track matching
     logger.info(f"{new_track_count} new/modified tracks found and added to the database")
     dbtracks = myDB.action(
-            "SELECT * FROM have WHERE Matched IS NULL AND LOCATION LIKE ?",
-            [f"{dir}%"]
-        )
+        "SELECT * FROM have WHERE Matched IS NULL AND LOCATION LIKE ?",
+        [f"{dir}%"]
+    )
     dbtracks_count = myDB.action(
-            "SELECT COUNT(*) FROM have WHERE Matched IS NULL AND LOCATION LIKE ?",
-            [f"{dir}%"]
-        ).fetchone()[0]
+        "SELECT COUNT(*) FROM have WHERE Matched IS NULL AND LOCATION LIKE ?",
+        [f"{dir}%"]
+    ).fetchone()[0]
     logger.info(f"Found {dbtracks_count} new/modified tracks in `{dir}`")
     logger.info("Matching tracks to the appropriate releases....")
 
-
-
     # Sort the track_list by most vague (e.g. no trackid or releaseid)
     # to most specific (both trackid & releaseid)
-    # When we insert into the database, the tracks with the most 
+    # When we insert into the database, the tracks with the most
     # specific information will overwrite the more general matches
 
     sorted_dbtracks = helpers.multikeysort(dbtracks, ['ArtistName', 'AlbumTitle'])
-
 
     # We'll use this to give a % completion, just because the
     # track matching might take a while
@@ -227,8 +224,8 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
 
         tracks_completed += 1
         completion_percentage = math.floor(
-                float(tracks_completed) / dbtracks_count * 1000
-            ) / 10
+            float(tracks_completed) / dbtracks_count * 1000
+        ) / 10
 
         if completion_percentage >= (last_completion_percentage + 10):
             logger.info("Track matching is " + str(completion_percentage) + "% complete")

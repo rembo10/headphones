@@ -220,7 +220,7 @@ def server_message(response):
 
     # First attempt is to 'read' the response as HTML
     if response.headers.get("content-type") and \
-                    "text/html" in response.headers.get("content-type"):
+            "text/html" in response.headers.get("content-type"):
         try:
             soup = BeautifulSoup(response.content, "html.parser")
         except Exception:

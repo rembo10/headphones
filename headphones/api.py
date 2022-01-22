@@ -474,8 +474,12 @@ class Api(object):
         # Handle situations where the torrent url contains arguments that are
         # parsed
         if kwargs:
-            import urllib.request, urllib.parse, urllib.error
-            import urllib.request, urllib.error, urllib.parse
+            import urllib.request
+            import urllib.parse
+            import urllib.error
+            import urllib.request
+            import urllib.error
+            import urllib.parse
             url = urllib.parse.quote(
                 url, safe=":?/=&") + '&' + urllib.parse.urlencode(kwargs)
 

@@ -38,6 +38,7 @@ class MetadataDict(dict):
     lowercase) in member variable self._lower. If case-sensitive lookup
     fails, another case-insensitive attempt is made.
     """
+
     def __setitem__(self, key, value):
         super(MetadataDict, self).__setitem__(key, value)
         self._lower.__setitem__(key.lower(), value)

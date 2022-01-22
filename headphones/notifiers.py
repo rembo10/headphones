@@ -1,5 +1,7 @@
 from urllib.parse import urlencode, quote_plus
-import urllib.request, urllib.parse, urllib.error
+import urllib.request
+import urllib.parse
+import urllib.error
 import subprocess
 import json
 from email.mime.text import MIMEText
@@ -7,7 +9,9 @@ import smtplib
 import email.utils
 from http.client import HTTPSConnection
 from urllib.parse import parse_qsl
-import urllib.request, urllib.error, urllib.parse
+import urllib.request
+import urllib.error
+import urllib.parse
 import requests as requests
 
 import os.path
@@ -17,7 +21,7 @@ import cherrypy
 import headphones
 import gntp.notifier
 #import oauth2 as oauth
-import twitter 
+import twitter
 
 
 class GROWL(object):
@@ -246,7 +250,7 @@ class XBMC(object):
 
                 if version < 12:  # Eden
                     notification = header + "," + message + "," + time + \
-                                   "," + albumartpath
+                        "," + albumartpath
                     notifycommand = {'command': 'ExecBuiltIn',
                                      'parameter': 'Notification(' +
                                                   notification + ')'}
@@ -440,7 +444,7 @@ class Plex(object):
 
                 if version < 12:  # Eden
                     notification = header + "," + message + "," + time + \
-                                   "," + albumartpath
+                        "," + albumartpath
                     notifycommand = {'command': 'ExecBuiltIn',
                                      'parameter': 'Notification(' +
                                                   notification + ')'}
@@ -604,12 +608,12 @@ class JOIN(object):
             self.url += '&deviceId={deviceid}'
 
         response = urllib.request.urlopen(self.url.format(apikey=self.apikey,
-                                                   title=quote_plus(event),
-                                                   text=quote_plus(
-                                                       message.encode(
-                                                           "utf-8")),
-                                                   icon=icon,
-                                                   deviceid=self.deviceid))
+                                                          title=quote_plus(event),
+                                                          text=quote_plus(
+                                                              message.encode(
+                                                                  "utf-8")),
+                                                          icon=icon,
+                                                          deviceid=self.deviceid))
 
         if response:
             logger.info("Join notifications sent.")
@@ -733,8 +737,8 @@ class TwitterNotifier(object):
     def notify_download(self, title):
         if headphones.CONFIG.TWITTER_ENABLED:
             self._notifyTwitter(common.notifyStrings[
-                                    common.NOTIFY_DOWNLOAD] + ': ' +
-                                title + ' at ' + helpers.now())
+                common.NOTIFY_DOWNLOAD] + ': ' +
+                title + ' at ' + helpers.now())
 
     def test_notify(self):
         return self._notifyTwitter(
@@ -798,7 +802,7 @@ class TwitterNotifier(object):
         if resp['status'] != '200':
             logger.info('The request for a token with did not succeed: ' + str(
                 resp['status']),
-                        logger.ERROR)
+                logger.ERROR)
             return False
         else:
             logger.info('Your Twitter Access Token key: %s' % access_token[
@@ -1020,7 +1024,7 @@ class TELEGRAM(object):
         # MusicBrainz link
         if rgid:
             message += '\n\n <a href="https://musicbrainz.org/' \
-                      'release-group/%s">MusicBrainz</a>' % rgid
+                'release-group/%s">MusicBrainz</a>' % rgid
 
         # Send image
         response = None

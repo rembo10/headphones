@@ -31,6 +31,7 @@ class path(str):
     def __repr__(self):
         return 'headphones.config.path(%s)' % self
 
+
 _CONFIG_DEFINITIONS = {
     'ADD_ALBUM_ART': (int, 'General', 0),
     'ADVANCEDENCODER': (str, 'General', ''),
@@ -365,7 +366,7 @@ class Config(object):
             my_val = definition_type(self._config[section][ini_key])
             # ConfigParser interprets empty strings in the config
             # literally, so we need to sanitize it. It's not really
-            # a config upgrade, since a user can at any time put 
+            # a config upgrade, since a user can at any time put
             # some_key = ''
             if my_val == '""' or my_val == "''":
                 my_val = ''
@@ -407,7 +408,7 @@ class Config(object):
         """ Return the extra newznab tuples """
         extra_newznabs = list(
             zip(*[itertools.islice(self.EXTRA_NEWZNABS, i, None, 3)
-                             for i in range(3)])
+                  for i in range(3)])
         )
         return extra_newznabs
 
@@ -426,7 +427,7 @@ class Config(object):
         """ Return the extra torznab tuples """
         extra_torznabs = list(
             zip(*[itertools.islice(self.EXTRA_TORZNABS, i, None, 4)
-                             for i in range(4)])
+                  for i in range(4)])
         )
         return extra_torznabs
 
@@ -503,7 +504,7 @@ class Config(object):
             if self.EXTRA_TORZNABS:
                 extra_torznabs = list(
                     zip(*[itertools.islice(self.EXTRA_TORZNABS, i, None, 3)
-                                     for i in range(3)])
+                          for i in range(3)])
                 )
                 new_torznabs = []
                 for torznab in extra_torznabs:

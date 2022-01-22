@@ -342,6 +342,7 @@ def verify(albumid, albumpath, Kind=None, forced=False, keep_original_folder=Fal
     logger.warn(f"Could not identify {albumpath}. It may not be the intended album")
     markAsUnprocessed(albumid, albumpath, keep_original_folder)
 
+
 def markAsUnprocessed(albumid, albumpath, keep_original_folder=False):
     myDB = db.DBConnection()
     myDB.action(
@@ -419,7 +420,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
                 logger.debug("Write check exact error: %s", e)
                 logger.error(
                     f"`{downloaded_track}` is not writable. This is required "
-                     "for some post processing steps. Not continuing."
+                    "for some post processing steps. Not continuing."
                 )
                 if new_folder:
                     shutil.rmtree(new_folder)
@@ -595,7 +596,7 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
         logger.info("Twitter notifications temporarily disabled")
         #logger.info("Sending Twitter notification")
         #twitter = notifiers.TwitterNotifier()
-        #twitter.notify_download(pushmessage)
+        # twitter.notify_download(pushmessage)
 
     if headphones.CONFIG.OSX_NOTIFY_ENABLED:
         from headphones import cache
@@ -786,7 +787,7 @@ def moveFiles(albumpath, release, metadata_dict):
                     newfolder = temp_folder + '[%i]' % i
                     lossless_destination_path = os.path.normpath(
                         os.path.join(
-                            headphones.CONFIG.LOSSLESS_DESTINATION_DIR, 
+                            headphones.CONFIG.LOSSLESS_DESTINATION_DIR,
                             newfolder
                         )
                     )
@@ -828,7 +829,7 @@ def moveFiles(albumpath, release, metadata_dict):
                     newfolder = temp_folder + '[%i]' % i
                     lossy_destination_path = os.path.normpath(
                         os.path.join(
-                            headphones.CONFIG.DESTINATION_DIR, 
+                            headphones.CONFIG.DESTINATION_DIR,
                             newfolder
                         )
                     )
@@ -877,7 +878,7 @@ def moveFiles(albumpath, release, metadata_dict):
                         os.remove(file_to_move)
                     except Exception as e:
                         logger.error(
-                            f"Error deleting `{file_to_move}` from source directory") 
+                            f"Error deleting `{file_to_move}` from source directory")
                 else:
                     logger.error(
                         f"Error copying `{file_to_move}`. "
@@ -1134,6 +1135,7 @@ def updateFilePermissions(albumpaths):
                 except:
                     logger.error(f"Could not change permissions for `{full_path}`")
                     continue
+
 
 def renameUnprocessedFolder(path, tag):
     """

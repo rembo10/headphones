@@ -19,12 +19,16 @@ from operator import itemgetter
 import threading
 import secrets
 import random
-import urllib.request, urllib.parse, urllib.error
+import urllib.request
+import urllib.parse
+import urllib.error
 import json
 import time
 import sys
 from html import escape as html_escape
-import urllib.request, urllib.error, urllib.parse
+import urllib.request
+import urllib.error
+import urllib.parse
 
 import os
 import re
@@ -785,7 +789,7 @@ class WebInterface(object):
                 track_title = tracks['TrackTitle']
                 if tracks['CleanName'] != original_clean:
                     artist_id_check = myDB.action('SELECT ArtistID FROM tracks WHERE CleanName = ?',
-                                                 [tracks['CleanName']]).fetchone()
+                                                  [tracks['CleanName']]).fetchone()
                     if artist_id_check:
                         artist_id = artist_id_check[0]
                     myDB.action(
@@ -1074,7 +1078,7 @@ class WebInterface(object):
             data[counter] = album['AlbumTitle']
             counter += 1
 
-        return data 
+        return data
 
     @cherrypy.expose
     @cherrypy.tools.json_out()

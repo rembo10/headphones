@@ -42,6 +42,7 @@ RE_FEATURING = re.compile(r"[fF]t\.|[fF]eaturing|[fF]eat\.|\b[wW]ith\b|&|vs\.")
 RE_CD_ALBUM = re.compile(r"\(?((CD|disc)\s*[0-9]+)\)?", re.I)
 RE_CD = re.compile(r"^(CD|dics)\s*[0-9]+$", re.I)
 
+
 def cmp(x, y):
     """
     Replacement for built-in function cmp that was removed in Python 3
@@ -53,6 +54,7 @@ def cmp(x, y):
     https://portingguide.readthedocs.io/en/latest/comparisons.html#the-cmp-function
     """
     return (x > y) - (x < y)
+
 
 def multikeysort(items, columns):
     comparers = [
@@ -232,7 +234,7 @@ def pattern_substitute(pattern, dic, normalize=False):
                         j = unicodedata.normalize('NFC', j)
                 except TypeError:
                     j = unicodedata.normalize('NFC',
-                        j.decode(headphones.SYS_ENCODING, 'replace'))
+                                              j.decode(headphones.SYS_ENCODING, 'replace'))
             new_dic[i] = j
         dic = new_dic
     return pathrender.render(pattern, dic)[0]
@@ -277,7 +279,7 @@ _XLATE_GRAPHICAL_AND_DIACRITICAL = {
     'Ǥ': 'G', 'ǥ': 'g', 'Ǳ': 'DZ', 'ǲ': 'Dz', 'ǳ': 'dz',
     'Ȥ': 'Z', 'ȥ': 'z', '№': 'No.',
     'º': 'o.',        # normalize Nº abbrev (popular w/ classical music),
-                       # this is 'masculine ordering indicator', not degree
+    # this is 'masculine ordering indicator', not degree
 }
 
 _XLATE_SPECIAL = {
@@ -882,7 +884,7 @@ def smartMove(src, dest, delete=True):
             shutil.copy(source_path, dest_path)
             return True
         except Exception as e:
-            logger.warn(f"Error copying {filename}: {e}") 
+            logger.warn(f"Error copying {filename}: {e}")
 
 
 def walk_directory(basedir, followlinks=True):

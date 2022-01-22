@@ -39,7 +39,7 @@ def is_exists(artistid):
 
     if any(artistid in x for x in artistlist):
         logger.info(artistlist[0][
-                        1] + " is already in the database. Updating 'have tracks', but not artist information")
+            1] + " is already in the database. Updating 'have tracks', but not artist information")
         return True
     else:
         return False

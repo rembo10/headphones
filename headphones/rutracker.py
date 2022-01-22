@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
-import urllib.request, urllib.parse, urllib.error
+import urllib.request
+import urllib.parse
+import urllib.error
 import time
 from urllib.parse import urlparse
 import re

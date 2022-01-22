@@ -19,7 +19,9 @@ from base64 import b16encode, b32decode
 from hashlib import sha1
 import string
 import random
-import urllib.request, urllib.parse, urllib.error
+import urllib.request
+import urllib.parse
+import urllib.error
 import datetime
 import subprocess
 import unicodedata
@@ -1081,7 +1083,7 @@ def send_to_downloader(data, bestqual, album):
         logger.info("Twitter notifications temporarily disabled")
         #logger.info("Sending Twitter notification")
         #twitter = notifiers.TwitterNotifier()
-        #twitter.notify_snatch(name)
+        # twitter.notify_snatch(name)
     if headphones.CONFIG.NMA_ENABLED and headphones.CONFIG.NMA_ONSNATCH:
         logger.info("Sending NMA notification")
         nma = notifiers.NMA()
@@ -1503,8 +1505,8 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
             try:
                 logger.info("Attempting to log in to Orpheus.network...")
                 orpheusobj = gazelleapi.GazelleAPI(headphones.CONFIG.ORPHEUS_USERNAME,
-                                                headphones.CONFIG.ORPHEUS_PASSWORD,
-                                                headphones.CONFIG.ORPHEUS_URL)
+                                                   headphones.CONFIG.ORPHEUS_PASSWORD,
+                                                   headphones.CONFIG.ORPHEUS_URL)
                 orpheusobj._login()
             except Exception as e:
                 orpheusobj = None
@@ -1550,13 +1552,13 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                 if usersearchterm:
                     all_torrents.extend(
                         orpheusobj.search_torrents(searchstr=usersearchterm, format=search_format,
-                                                encoding=bitrate_string, releasetype=album_type)['results'])
+                                                   encoding=bitrate_string, releasetype=album_type)['results'])
                 else:
                     all_torrents.extend(orpheusobj.search_torrents(artistname=semi_clean_artist_term,
-                                                                groupname=semi_clean_album_term,
-                                                                format=search_format,
-                                                                encoding=bitrate_string,
-                                                                releasetype=album_type)['results'])
+                                                                   groupname=semi_clean_album_term,
+                                                                   format=search_format,
+                                                                   encoding=bitrate_string,
+                                                                   releasetype=album_type)['results'])
 
             # filter on format, size, and num seeders
             logger.info("Filtering torrents by format, maximum size, and minimum seeders...")
@@ -1634,8 +1636,8 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
             try:
                 logger.info("Attempting to log in to Redacted...")
                 redobj = gazelleapi.GazelleAPI(headphones.CONFIG.REDACTED_USERNAME,
-                                                headphones.CONFIG.REDACTED_PASSWORD,
-                                                providerurl)
+                                               headphones.CONFIG.REDACTED_PASSWORD,
+                                               providerurl)
                 redobj._login()
             except Exception as e:
                 redobj = None
@@ -1649,12 +1651,12 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                 if usersearchterm:
                     all_torrents.extend(
                         redobj.search_torrents(searchstr=usersearchterm, format=search_format,
-                                                encoding=bitrate_string)['results'])
+                                               encoding=bitrate_string)['results'])
                 else:
                     all_torrents.extend(redobj.search_torrents(artistname=semi_clean_artist_term,
-                                                                groupname=semi_clean_album_term,
-                                                                format=search_format,
-                                                                encoding=bitrate_string)['results'])
+                                                               groupname=semi_clean_album_term,
+                                                               format=search_format,
+                                                               encoding=bitrate_string)['results'])
 
             # filter on format, size, and num seeders
             logger.info("Filtering torrents by format, maximum size, and minimum seeders...")
@@ -1791,7 +1793,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2243.2 Safari/537.36'}
         provider_url = fix_url(headphones.CONFIG.OLDPIRATEBAY_URL) + \
-                       "/search.php?" + urllib.parse.urlencode({"q": tpb_term, "iht": 6})
+            "/search.php?" + urllib.parse.urlencode({"q": tpb_term, "iht": 6})
 
         data = request.request_soup(url=provider_url, headers=headers)
 
