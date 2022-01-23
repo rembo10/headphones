@@ -1677,16 +1677,16 @@ class WebInterface(object):
 
         # Return the Cover Art Archive urls if not found on last.fm
         if AlbumID and not image_dict:
-            image_url = "http://coverartarchive.org/release/%s/front-500.jpg" % AlbumID
-            thumb_url = "http://coverartarchive.org/release/%s/front-250.jpg" % AlbumID
+            image_url = "https://coverartarchive.org/release/%s/front-500.jpg" % AlbumID
+            thumb_url = "https://coverartarchive.org/release/%s/front-250.jpg" % AlbumID
             image_dict = {'artwork': image_url, 'thumbnail': thumb_url}
         elif AlbumID and (not image_dict['artwork'] or not image_dict['thumbnail']):
             if not image_dict['artwork']:
                 image_dict[
-                    'artwork'] = "http://coverartarchive.org/release/%s/front-500.jpg" % AlbumID
+                    'artwork'] = "https://coverartarchive.org/release/%s/front-500.jpg" % AlbumID
             if not image_dict['thumbnail']:
                 image_dict[
-                    'thumbnail'] = "http://coverartarchive.org/release/%s/front-250.jpg" % AlbumID
+                    'thumbnail'] = "https://coverartarchive.org/release/%s/front-250.jpg" % AlbumID
 
         return image_dict
 

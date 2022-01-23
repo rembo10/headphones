@@ -124,11 +124,7 @@ def findArtist(name, limit=1):
                     'Cannot determine the best match from an artist/album search. Using top match instead')
                 artistlist.append({
                     # Just need the artist id if the limit is 1
-                    #    'name':             unicode(result['sort-name']),
-                    #    'uniquename':        uniquename,
                     'id': str(result['id']),
-                    #    'url':                 unicode("http://musicbrainz.org/artist/" + result['id']),#probably needs to be changed
-                    #    'score':            int(result['ext:score'])
                 })
             else:
                 artistlist.append(artistdict)
@@ -137,7 +133,7 @@ def findArtist(name, limit=1):
                 'name': str(result['sort-name']),
                 'uniquename': uniquename,
                 'id': str(result['id']),
-                'url': str("http://musicbrainz.org/artist/" + result['id']),
+                'url': str("https://musicbrainz.org/artist/" + result['id']),
                 # probably needs to be changed
                 'score': int(result['ext:score'])
             })
@@ -208,9 +204,9 @@ def findRelease(name, limit=1, artist=None):
             'id': str(result['artist-credit'][0]['artist']['id']),
             'albumid': str(result['id']),
             'url': str(
-                "http://musicbrainz.org/artist/" + result['artist-credit'][0]['artist']['id']),
+                "https://musicbrainz.org/artist/" + result['artist-credit'][0]['artist']['id']),
             # probably needs to be changed
-            'albumurl': str("http://musicbrainz.org/release/" + result['id']),
+            'albumurl': str("https://musicbrainz.org/release/" + result['id']),
             # probably needs to be changed
             'score': int(result['ext:score']),
             'date': str(result['date']) if 'date' in result else '',
@@ -248,7 +244,7 @@ def findSeries(name, limit=1):
             'name': str(result['name']),
             'type': str(result['type']),
             'id': str(result['id']),
-            'url': str("http://musicbrainz.org/series/" + result['id']),
+            'url': str("https://musicbrainz.org/series/" + result['id']),
             # probably needs to be changed
             'score': int(result['ext:score'])
         })
@@ -295,7 +291,7 @@ def getArtist(artistid, extrasonly=False):
             releasegroups.append({
                 'title': str(rg['title']),
                 'id': str(rg['id']),
-                'url': "http://musicbrainz.org/release-group/" + rg['id'],
+                'url': "https://musicbrainz.org/release-group/" + rg['id'],
                 'type': str(rg['type'])
             })
 
@@ -356,7 +352,7 @@ def getArtist(artistid, extrasonly=False):
                 releasegroups.append({
                     'title': str(rg['title']),
                     'id': str(rg['id']),
-                    'url': "http://musicbrainz.org/release-group/" + rg['id'],
+                    'url': "https://musicbrainz.org/release-group/" + rg['id'],
                     'type': str(rg_type)
                 })
     artist_dict['releasegroups'] = releasegroups
@@ -691,7 +687,7 @@ def getTracksFromRelease(release):
                 'number': totalTracks,
                 'title': track_title,
                 'id': str(track['recording']['id']),
-                'url': "http://musicbrainz.org/track/" + track['recording']['id'],
+                'url': "https://musicbrainz.org/track/" + track['recording']['id'],
                 'duration': int(track['length']) if 'length' in track else 0
             })
             totalTracks += 1
@@ -733,15 +729,7 @@ def findArtistbyAlbum(name):
     for releaseGroup in results:
         newArtist = releaseGroup['artist-credit'][0]['artist']
         # Only need the artist ID if we're doing an artist+album lookup
-        # if 'disambiguation' in newArtist:
-        #    uniquename = unicode(newArtist['sort-name'] + " (" + newArtist['disambiguation'] + ")")
-        # else:
-        #    uniquename = unicode(newArtist['sort-name'])
-        # artist_dict['name'] = unicode(newArtist['sort-name'])
-        # artist_dict['uniquename'] = uniquename
         artist_dict['id'] = str(newArtist['id'])
-        # artist_dict['url'] = u'http://musicbrainz.org/artist/' + newArtist['id']
-        # artist_dict['score'] = int(releaseGroup['ext:score'])
 
     return artist_dict
 
