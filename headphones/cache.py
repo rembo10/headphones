@@ -540,12 +540,17 @@ class Cache(object):
                         artwork_thumb = None
                         if 'fanart' in thumb_url:
                             # Create thumb using image resizing service
-                            artwork_path = '{0}?{1}'.format('http://images.weserv.nl/', urlencode({
-                                'url': thumb_url.replace('http://', ''),
-                                'w': 300,
-                            }))
-                            artwork_thumb = request.request_content(artwork_path, timeout=20, whitelist_status_code=404)
-
+                            url = "https://images.weserv.nl"
+                            params = {
+                                "url": thumb_url,
+                                "w": 300
+                            }
+                            artwork_thumb = request.request_content(
+                                url,
+                                params=params,
+                                timeout=20,
+                                whitelist_status_code=404
+                            )
                         if artwork_thumb:
                             with open(thumb_path, 'wb') as f:
                                 f.write(artwork_thumb)

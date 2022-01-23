@@ -28,7 +28,7 @@ def getAlbumArt(albumid):
 
     # CAA
     logger.info("Searching for artwork at CAA")
-    artwork_path = 'http://coverartarchive.org/release-group/%s/front' % albumid
+    artwork_path = 'https://coverartarchive.org/release-group/%s/front' % albumid
     artwork = getartwork(artwork_path)
     if artwork:
         logger.info("Artwork found at CAA")
@@ -41,7 +41,7 @@ def getAlbumArt(albumid):
         'SELECT ArtistName, AlbumTitle, ReleaseID, AlbumASIN FROM albums WHERE AlbumID=?',
         [albumid]).fetchone()
     if dbalbum['AlbumASIN']:
-        artwork_path = 'http://ec1.images-amazon.com/images/P/%s.01.LZZZZZZZ.jpg' % dbalbum['AlbumASIN']
+        artwork_path = 'https://ec1.images-amazon.com/images/P/%s.01.LZZZZZZZ.jpg' % dbalbum['AlbumASIN']
         artwork = getartwork(artwork_path)
         if artwork:
             logger.info("Artwork found at Amazon")
@@ -156,12 +156,19 @@ def getartwork(artwork_path):
                     break
                 elif maxwidth and img_width > maxwidth:
                     # Downsize using proxy service to max width
-                    artwork_path = '{0}?{1}'.format('http://images.weserv.nl/', urlencode({
-                        'url': artwork_path.replace('http://', ''),
-                        'w': maxwidth,
-                    }))
                     artwork = bytes()
-                    r = request.request_response(artwork_path, timeout=20, stream=True, whitelist_status_code=404)
+                    url = "https://images.weserv.nl"
+                    params = {
+                        "url": artwork_path,
+                        "w": maxwidth
+                    }
+                    r = request.request_response(
+                        url,
+                        params=params,
+                        timeout=20,
+                        stream=True,
+                        whitelist_status_code=404
+                    )
                     if r:
                         for chunk in r.iter_content(chunk_size=1024):
                             artwork += chunk
@@ -182,7 +189,7 @@ def getCachedArt(albumid):
     if not artwork_path:
         return
 
-    if artwork_path.startswith('http://'):
+    if artwork_path.startswith("http"):
         artwork = request.request_content(artwork_path, timeout=20)
 
         if not artwork:
