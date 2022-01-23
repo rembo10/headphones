@@ -1,6 +1,6 @@
-name: headphones_test_and_lint
+name: check 
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.6, 3.7, 3.8, 3.9]
+        python-version: [3.8, 3.9, 3.10]
 
     steps:
       - uses: actions/checkout@v2
@@ -24,7 +24,6 @@ jobs:
         run: |
           # stop the build if there are Python syntax errors or undefined names
           flake8 .
-          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-      - name: Test with pytest
+      - name: Test with nosetests 
         run: |
           nosetests
