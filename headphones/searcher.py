@@ -424,7 +424,6 @@ def sort_search_results(resultlist, album, new, albumlength):
 
     resultlist = temp_list
 
-    # if headphones.CONFIG.PREFERRED_QUALITY == 2 and headphones.CONFIG.PREFERRED_BITRATE and result[3] != 'Orpheus.network':
     if headphones.CONFIG.PREFERRED_QUALITY == 2 and headphones.CONFIG.PREFERRED_BITRATE:
 
         try:
@@ -472,14 +471,15 @@ def sort_search_results(resultlist, album, new, albumlength):
 
         finallist = sorted(resultlist, key=lambda title: (title[5], int(title[1])), reverse=True)
 
-        # keep number of seeders order for Orpheus.network
-        # if result[3] == 'Orpheus.network':
-        #    finallist = resultlist
-
     if not len(finallist):
         logger.info('No appropriate matches found for %s - %s', album['ArtistName'],
                     album['AlbumTitle'])
         return None
+
+    if result[3]:
+        if (result[3] == 'Orpheus.network') or (result[3] == 'Redacted'):
+            logger.info('Keeping torrents ordered by seeders for %s' % result[3])
+            finallist = resultlist
 
     return finallist
 
