@@ -25,7 +25,7 @@ def getLyrics(artist, song):
               "fmt": 'xml'
               }
 
-    url = 'http://lyrics.wikia.com/api.php'
+    url = 'https://lyrics.wikia.com/api.php'
     data = request.request_minidom(url, params=params)
 
     if not data:

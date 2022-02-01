@@ -40,7 +40,7 @@ from bencode import decode as bdecode
 
 # Magnet to torrent services, for Black hole. Stolen from CouchPotato.
 TORRENT_TO_MAGNET_SERVICES = [
-    'http://itorrents.org/torrent/%s.torrent',
+    'https://itorrents.org/torrent/%s.torrent',
     'https://cache.torrentgalaxy.org/get/%s',
     'https://www.seedpeer.me/torrent/%s'
 ]
@@ -611,7 +611,7 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None,
             provider = newznab_host[0]
 
             # Add a little mod for kere.ws
-            if newznab_host[0] == "http://kere.ws":
+            if newznab_host[0] == "https://kere.ws":
                 if categories == "3040":
                     categories = categories + ",4070"
                 elif categories == "3040,3010":
@@ -682,7 +682,7 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None,
         }
 
         data = request.request_feed(
-            url='http://beta.nzbs.org/api',
+            url='https://beta.nzbs.org/api',
             params=params, headers=headers,
             timeout=5
         )
@@ -731,7 +731,7 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None,
         }
 
         data = request.request_json(
-            url='http://api.omgwtfnzbs.me/json/',
+            url='https://api.omgwtfnzbs.me/json/',
             params=params, headers=headers
         )
 
@@ -1261,7 +1261,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
 
     def set_proxy(proxy_url):
         if not proxy_url.startswith('http'):
-            proxy_url = 'http://' + proxy_url
+            proxy_url = 'https://' + proxy_url
         if proxy_url.endswith('/'):
             proxy_url = proxy_url[:-1]
 
@@ -1467,7 +1467,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
 
     if headphones.CONFIG.ORPHEUS:
         provider = "Orpheus.network"
-        providerurl = "http://orpheus.network/"
+        providerurl = "https://orpheus.network/"
 
         bitrate = None
         bitrate_string = bitrate

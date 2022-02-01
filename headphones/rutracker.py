@@ -19,13 +19,13 @@ class Rutracker(object):
         self.timeout = 60
         self.loggedin = False
         self.maxsize = 0
-        self.search_referer = 'http://rutracker.org/forum/tracker.php'
+        self.search_referer = 'https://rutracker.org/forum/tracker.php'
 
     def logged_in(self):
         return self.loggedin
 
     def still_logged_in(self, html):
-        if not html or "action=\"http://rutracker.org/forum/login.php\">" in html:
+        if not html or "action=\"https://rutracker.org/forum/login.php\">" in html:
             return False
         else:
             return True
@@ -35,7 +35,7 @@ class Rutracker(object):
         Logs in user
         """
 
-        loginpage = 'http://rutracker.org/forum/login.php'
+        loginpage = 'https://rutracker.org/forum/login.php'
         post_params = {
             'login_username': headphones.CONFIG.RUTRACKER_USER,
             'login_password': headphones.CONFIG.RUTRACKER_PASSWORD,
@@ -159,7 +159,7 @@ class Rutracker(object):
                     # Torrent topic page
                     torrent_id = dict([part.split('=') for part in urlparse(url)[4].split('&')])[
                         't']
-                    topicurl = 'http://rutracker.org/forum/viewtopic.php?t=' + torrent_id
+                    topicurl = 'https://rutracker.org/forum/viewtopic.php?t=' + torrent_id
                     rulist.append((title, size, topicurl, 'rutracker.org', 'torrent', True))
                 else:
                     logger.info("%s is larger than the maxsize or has too little seeders for this category, "
@@ -179,7 +179,7 @@ class Rutracker(object):
         return the .torrent data
         """
         torrent_id = dict([part.split('=') for part in urlparse(url)[4].split('&')])['t']
-        downloadurl = 'http://rutracker.org/forum/dl.php?t=' + torrent_id
+        downloadurl = 'https://rutracker.org/forum/dl.php?t=' + torrent_id
         cookie = {'bb_dl': torrent_id}
         try:
             headers = {'Referer': url}

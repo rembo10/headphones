@@ -920,7 +920,7 @@ class BOXCAR(object):
     def notify(self, title, message, rgid=None):
         try:
             if rgid:
-                message += '<br></br><a href="http://musicbrainz.org/' \
+                message += '<br></br><a href="https://musicbrainz.org/' \
                            'release-group/%s">MusicBrainz</a>' % rgid
 
             data = urllib.parse.urlencode({
@@ -1019,7 +1019,7 @@ class TELEGRAM(object):
 
         # MusicBrainz link
         if rgid:
-            message += '\n\n <a href="http://musicbrainz.org/' \
+            message += '\n\n <a href="https://musicbrainz.org/' \
                       'release-group/%s">MusicBrainz</a>' % rgid
 
         # Send image

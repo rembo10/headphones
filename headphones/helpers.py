@@ -32,6 +32,7 @@ import functools
 import re
 import os
 from mediafile import MediaFile, FileTypeError, UnreadableFileError
+from unidecode import unidecode
 import headphones
 
 
@@ -951,6 +952,8 @@ def sab_sanitize_foldername(name):
 
     if not name:
         return
+
+    name = unidecode(name)
 
     lst = []
     for ch in name.strip():
