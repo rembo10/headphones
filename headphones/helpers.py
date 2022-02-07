@@ -52,7 +52,14 @@ def cmp(x, y):
 
     https://portingguide.readthedocs.io/en/latest/comparisons.html#the-cmp-function
     """
-    return (x > y) - (x < y)
+    if x is None and y is None:
+        return 0
+    elif x is None:
+        return -1
+    elif y is None:
+        return 1
+    else:
+        return (x > y) - (x < y)
 
 def multikeysort(items, columns):
     comparers = [
