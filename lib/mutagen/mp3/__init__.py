@@ -12,8 +12,7 @@ import struct
 
 from mutagen import StreamInfo
 from mutagen._util import MutagenError, enum, BitReader, BitReaderError, \
-    convert_error
-from mutagen._compat import endswith, xrange
+    convert_error, intround, endswith
 from mutagen.id3 import ID3FileType, delete
 from mutagen.id3._util import BitPaddedInt
 
@@ -165,11 +164,13 @@ class MPEGFrame(object):
         # Try to find/parse the Xing header, which trumps the above length
         # and bitrate calculation.
         if self.layer == 3:
-            self._parse_vbr_header(fileobj, self.frame_offset, frame_size)
+            self._parse_vbr_header(fileobj, self.frame_offset, frame_size,
+                                   frame_length)
 
         fileobj.seek(self.frame_offset + frame_length, 0)
 
-    def _parse_vbr_header(self, fileobj, frame_offset, frame_size):
+    def _parse_vbr_header(self, fileobj, frame_offset, frame_size,
+                          frame_length):
         """Does not raise"""
 
         # Xing
@@ -186,6 +187,12 @@ class MPEGFrame(object):
             self.encoder_settings = xing.get_encoder_settings()
             if xing.frames != -1:
                 samples = frame_size * xing.frames
+                if xing.bytes != -1 and samples > 0:
+                    # the first frame is only included in xing.bytes but
+                    # not in xing.frames, skip it.
+                    audio_bytes = max(0, xing.bytes - frame_length)
+                    self.bitrate = intround((
+                        audio_bytes * 8 * self.sample_rate) / float(samples))
                 if lame is not None:
                     samples -= lame.encoder_delay_start
                     samples -= lame.encoder_padding_end
@@ -194,10 +201,8 @@ class MPEGFrame(object):
                     # files with low bitrate
                     samples = 0
                 self.length = float(samples) / self.sample_rate
-                if xing.bytes != -1 and self.length:
-                    self.bitrate = int((xing.bytes * 8) / self.length)
             if xing.lame_version_desc:
-                self.encoder_info = "LAME %s" % xing.lame_version_desc
+                self.encoder_info = u"LAME %s" % xing.lame_version_desc
             if lame is not None:
                 self.track_gain = lame.track_gain_adjustment
                 self.track_peak = lame.track_peak
@@ -213,7 +218,7 @@ class MPEGFrame(object):
             pass
         else:
             self.bitrate_mode = BitrateMode.VBR
-            self.encoder_info = "FhG"
+            self.encoder_info = u"FhG"
             self.sketchy = False
             self.length = float(frame_size * vbri.frames) / self.sample_rate
             if self.length:
@@ -297,8 +302,10 @@ class MPEGInfo(StreamInfo):
     Attributes:
         length (`float`): audio length, in seconds
         channels (`int`): number of audio channels
-        bitrate (`int`): audio bitrate, in bits per second
-        sample_rate (`int`) audio sample rate, in Hz
+        bitrate (`int`): audio bitrate, in bits per second.
+            In case :attr:`bitrate_mode` is :attr:`BitrateMode.UNKNOWN` the
+            bitrate is guessed based on the first frame.
+        sample_rate (`int`): audio sample rate, in Hz
         encoder_info (`mutagen.text`): a string containing encoder name and
             possibly version. In case a lame tag is present this will start
             with ``"LAME "``, if unknown it is empty, otherwise the
@@ -318,13 +325,12 @@ class MPEGInfo(StreamInfo):
         layer (`int`): 1, 2, or 3
         mode (`int`): One of STEREO, JOINTSTEREO, DUALCHANNEL, or MONO (0-3)
         protected (`bool`): whether or not the file is "protected"
-        padding (`bool`) whether or not audio frames are padded
         sketchy (`bool`): if true, the file may not be valid MPEG audio
     """
 
     sketchy = False
-    encoder_info = ""
-    encoder_settings = ""
+    encoder_info = u""
+    encoder_settings = u""
     bitrate_mode = BitrateMode.UNKNOWN
     track_gain = track_peak = album_gain = album_peak = None
 
@@ -350,7 +356,7 @@ class MPEGInfo(StreamInfo):
 
         # find a sync in the first 1024K, give up after some invalid syncs
         max_read = 1024 * 1024
-        max_syncs = 1000
+        max_syncs = 1500
         enough_frames = 4
         min_frames = 2
 
@@ -411,16 +417,16 @@ class MPEGInfo(StreamInfo):
     def pprint(self):
         info = str(self.bitrate_mode).split(".", 1)[-1]
         if self.bitrate_mode == BitrateMode.UNKNOWN:
-            info = "CBR?"
+            info = u"CBR?"
         if self.encoder_info:
             info += ", %s" % self.encoder_info
         if self.encoder_settings:
             info += ", %s" % self.encoder_settings
-        s = "MPEG %s layer %d, %d bps (%s), %s Hz, %d chn, %.2f seconds" % (
+        s = u"MPEG %s layer %d, %d bps (%s), %s Hz, %d chn, %.2f seconds" % (
             self.version, self.layer, self.bitrate, info,
             self.sample_rate, self.channels, self.length)
         if self.sketchy:
-            s += " (sketchy)"
+            s += u" (sketchy)"
         return s
 
 

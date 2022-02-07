@@ -9,7 +9,6 @@
 from mutagen import Tags
 from mutagen._util import DictMixin, dict_match
 from mutagen.mp4 import MP4, MP4Tags, error, delete
-from ._compat import PY2, text_type, PY3
 
 
 __all__ = ["EasyMP4Tags", "EasyMP4", "delete", "error"]
@@ -42,10 +41,13 @@ class EasyMP4Tags(DictMixin, Tags):
         self.load = self.__mp4.load
         self.save = self.__mp4.save
         self.delete = self.__mp4.delete
-        self._padding = self.__mp4._padding
 
     filename = property(lambda s: s.__mp4.filename,
                         lambda s, fn: setattr(s.__mp4, 'filename', fn))
+
+    @property
+    def _padding(self):
+        return self.__mp4._padding
 
     @classmethod
     def RegisterKey(cls, key,
@@ -103,7 +105,7 @@ class EasyMP4Tags(DictMixin, Tags):
         """
 
         def getter(tags, key):
-            return list(map(text_type, tags[atomid]))
+            return list(map(str, tags[atomid]))
 
         def setter(tags, key, value):
             clamp = lambda x: int(min(max(min_value, x), max_value))
@@ -121,9 +123,9 @@ class EasyMP4Tags(DictMixin, Tags):
             ret = []
             for (track, total) in tags[atomid]:
                 if total:
-                    ret.append("%d/%d" % (track, total))
+                    ret.append(u"%d/%d" % (track, total))
                 else:
-                    ret.append(text_type(track))
+                    ret.append(str(track))
             return ret
 
         def setter(tags, key, value):
@@ -164,10 +166,8 @@ class EasyMP4Tags(DictMixin, Tags):
         def setter(tags, key, value):
             encoded = []
             for v in value:
-                if not isinstance(v, text_type):
-                    if PY3:
-                        raise TypeError("%r not str" % v)
-                    v = v.decode("utf-8")
+                if not isinstance(v, str):
+                    raise TypeError("%r not str" % v)
                 encoded.append(v.encode("utf-8"))
             tags[atomid] = encoded
 
@@ -187,12 +187,8 @@ class EasyMP4Tags(DictMixin, Tags):
     def __setitem__(self, key, value):
         key = key.lower()
 
-        if PY2:
-            if isinstance(value, str):
-                value = [value]
-        else:
-            if isinstance(value, text_type):
-                value = [value]
+        if isinstance(value, str):
+            value = [value]
 
         func = dict_match(self.Set, key)
         if func is not None:
@@ -210,7 +206,7 @@ class EasyMP4Tags(DictMixin, Tags):
 
     def keys(self):
         keys = []
-        for key in list(self.Get.keys()):
+        for key in self.Get.keys():
             if key in self.List:
                 keys.extend(self.List[key](self.__mp4, key))
             elif key in self:
@@ -226,7 +222,7 @@ class EasyMP4Tags(DictMixin, Tags):
                 strings.append("%s=%s" % (key, value))
         return "\n".join(strings)
 
-for atomid, key in list({
+for atomid, key in {
     '\xa9nam': 'title',
     '\xa9alb': 'album',
     '\xa9ART': 'artist',
@@ -242,10 +238,10 @@ for atomid, key in list({
     'soar': 'artistsort',
     'sonm': 'titlesort',
     'soco': 'composersort',
-}.items()):
+}.items():
     EasyMP4Tags.RegisterTextKey(key, atomid)
 
-for name, key in list({
+for name, key in {
     'MusicBrainz Artist Id': 'musicbrainz_artistid',
     'MusicBrainz Track Id': 'musicbrainz_trackid',
     'MusicBrainz Album Id': 'musicbrainz_albumid',
@@ -254,18 +250,18 @@ for name, key in list({
     'MusicBrainz Album Status': 'musicbrainz_albumstatus',
     'MusicBrainz Album Type': 'musicbrainz_albumtype',
     'MusicBrainz Release Country': 'releasecountry',
-}.items()):
+}.items():
     EasyMP4Tags.RegisterFreeformKey(key, name)
 
-for name, key in list({
+for name, key in {
     "tmpo": "bpm",
-}.items()):
+}.items():
     EasyMP4Tags.RegisterIntKey(key, name)
 
-for name, key in list({
+for name, key in {
     "trkn": "tracknumber",
     "disk": "discnumber",
-}.items()):
+}.items():
     EasyMP4Tags.RegisterIntPairKey(key, name)
 
 

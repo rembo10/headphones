@@ -6,10 +6,10 @@
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 
-from mutagen._compat import cBytesIO, xrange
+from io import BytesIO
+
 from mutagen.aac import ProgramConfigElement
 from mutagen._util import BitReader, BitReaderError, cdata
-from mutagen._compat import text_type
 from ._util import parse_full_atom
 from ._atom import Atom, AtomError
 
@@ -47,7 +47,7 @@ class AudioSampleEntry(object):
         if not ok:
             raise ASEntryError("too short %r atom" % atom.name)
 
-        fileobj = cBytesIO(data)
+        fileobj = BytesIO(data)
         r = BitReader(fileobj)
 
         try:
@@ -93,7 +93,7 @@ class AudioSampleEntry(object):
         ok, data = atom.read(fileobj)
         if not ok:
             raise ASEntryError("truncated %s atom" % atom.name)
-        fileobj = cBytesIO(data)
+        fileobj = BytesIO(data)
         r = BitReader(fileobj)
 
         # sample_rate in AudioSampleEntry covers values in
@@ -134,7 +134,7 @@ class AudioSampleEntry(object):
         if version != 0:
             raise ASEntryError("Unsupported version %d" % version)
 
-        fileobj = cBytesIO(data)
+        fileobj = BytesIO(data)
         r = BitReader(fileobj)
 
         try:
@@ -168,7 +168,7 @@ class AudioSampleEntry(object):
         if version != 0:
             raise ASEntryError("Unsupported version %d" % version)
 
-        fileobj = cBytesIO(data)
+        fileobj = BytesIO(data)
         r = BitReader(fileobj)
 
         try:
@@ -239,9 +239,13 @@ class BaseDescriptor(object):
         pos = fileobj.tell()
         instance = cls(fileobj, length)
         left = length - (fileobj.tell() - pos)
-        if left < 0:
-            raise DescriptorError("descriptor parsing read too much data")
-        fileobj.seek(left, 1)
+        if left > 0:
+            fileobj.seek(left, 1)
+        else:
+            # XXX: In case the instance length is shorted than the content
+            # assume the size is wrong and just continue parsing
+            # https://github.com/quodlibet/mutagen/issues/444
+            pass
         return instance
 
 
@@ -318,10 +322,10 @@ class DecoderConfigDescriptor(BaseDescriptor):
     def codec_param(self):
         """string"""
 
-        param = ".%X" % self.objectTypeIndication
+        param = u".%X" % self.objectTypeIndication
         info = self.decSpecificInfo
         if info is not None:
-            param += ".%d" % info.audioObjectType
+            param += u".%d" % info.audioObjectType
         return param
 
     @property
@@ -371,7 +375,7 @@ class DecoderSpecificInfo(BaseDescriptor):
             name += "+SBR"
         if self.psPresentFlag == 1:
             name += "+PS"
-        return text_type(name)
+        return str(name)
 
     @property
     def sample_rate(self):

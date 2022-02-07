@@ -9,14 +9,23 @@
 # permit persons to whom the Software is furnished to do so, subject to
 # the following conditions:
 #
-# The above copyright notice and this permission notice shall be
-# included in all copies or substantial portions of the Software.
+# The above copyright notice and this permission notice shall be included
+# in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+# IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+# CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+# TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import sys
 import os
 import ctypes
+import re
 
-from ._fsnative import _encoding, is_win, is_unix, _surrogatepass
+from ._fsnative import _encoding, is_win, is_unix, _surrogatepass, bytes2fsn
 from ._compat import text_type, PY2, PY3
 from ._winansi import AnsiState, ansi_split
 from . import _winapi as winapi
@@ -155,7 +164,7 @@ def _print_windows(objects, sep, end, file, flush):
     if not isinstance(end, text_type):
         raise TypeError
 
-    if end == "\n":
+    if end == u"\n":
         end = os.linesep
 
     text = sep.join(parts) + end
@@ -225,7 +234,7 @@ def _readline_windows():
     buf = ctypes.create_string_buffer(buf_size * ctypes.sizeof(winapi.WCHAR))
     read = winapi.DWORD()
 
-    text = ""
+    text = u""
     while True:
         if winapi.ReadConsoleW(
                 h, buf, buf_size, ctypes.byref(read), None) == 0:
@@ -234,7 +243,7 @@ def _readline_windows():
             raise ctypes.WinError()
         data = buf[:read.value * ctypes.sizeof(winapi.WCHAR)]
         text += data.decode("utf-16-le", _surrogatepass)
-        if text.endswith("\r\n"):
+        if text.endswith(u"\r\n"):
             return text[:-2]
 
 
@@ -253,7 +262,7 @@ def _decode_codepage(codepage, data):
     assert isinstance(data, bytes)
 
     if not data:
-        return ""
+        return u""
 
     # get the required buffer length first
     length = winapi.MultiByteToWideChar(codepage, 0, data, len(data), None, 0)
@@ -351,3 +360,65 @@ def input_(prompt=None):
         print_(prompt, end="")
 
     return _readline()
+
+
+def _get_file_name_for_handle(handle):
+    """(Windows only) Returns a file name for a file handle.
+
+    Args:
+        handle (winapi.HANDLE)
+    Returns:
+       `text` or `None` if no file name could be retrieved.
+    """
+
+    assert is_win
+    assert handle != winapi.INVALID_HANDLE_VALUE
+
+    size = winapi.FILE_NAME_INFO.FileName.offset + \
+        winapi.MAX_PATH * ctypes.sizeof(winapi.WCHAR)
+    buf = ctypes.create_string_buffer(size)
+
+    if winapi.GetFileInformationByHandleEx is None:
+        # Windows XP
+        return None
+
+    status = winapi.GetFileInformationByHandleEx(
+        handle, winapi.FileNameInfo, buf, size)
+    if status == 0:
+        return None
+
+    name_info = ctypes.cast(
+        buf, ctypes.POINTER(winapi.FILE_NAME_INFO)).contents
+    offset = winapi.FILE_NAME_INFO.FileName.offset
+    data = buf[offset:offset + name_info.FileNameLength]
+    return bytes2fsn(data, "utf-16-le")
+
+
+def supports_ansi_escape_codes(fd):
+    """Returns whether the output device is capable of interpreting ANSI escape
+    codes when :func:`print_` is used.
+
+    Args:
+        fd (int): file descriptor (e.g. ``sys.stdout.fileno()``)
+    Returns:
+        `bool`
+    """
+
+    if os.isatty(fd):
+        return True
+
+    if not is_win:
+        return False
+
+    # Check for cygwin/msys terminal
+    handle = winapi._get_osfhandle(fd)
+    if handle == winapi.INVALID_HANDLE_VALUE:
+        return False
+
+    if winapi.GetFileType(handle) != winapi.FILE_TYPE_PIPE:
+        return False
+
+    file_name = _get_file_name_for_handle(handle)
+    match = re.match(
+        "^\\\\(cygwin|msys)-[a-z0-9]+-pty[0-9]+-(from|to)-master$", file_name)
+    return match is not None

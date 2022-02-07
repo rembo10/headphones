@@ -15,9 +15,8 @@
 from mutagen import StreamInfo
 from mutagen._file import FileType
 from mutagen._util import BitReader, BitReaderError, MutagenError, loadfile, \
-    convert_error
+    convert_error, endswith
 from mutagen.id3._util import BitPaddedInt
-from mutagen._compat import endswith, xrange
 
 
 _FREQS = [
@@ -375,10 +374,13 @@ class AACInfo(StreamInfo):
         fileobj.seek(0, 2)
         stream_size = fileobj.tell() - (offset + s.offset)
         # approx
-        self.length = float(s.samples * stream_size) / (s.size * s.frequency)
+        self.length = 0.0
+        if s.frequency != 0:
+            self.length = \
+                float(s.samples * stream_size) / (s.size * s.frequency)
 
     def pprint(self):
-        return "AAC (%s), %d Hz, %.2f seconds, %d channel(s), %d bps" % (
+        return u"AAC (%s), %d Hz, %.2f seconds, %d channel(s), %d bps" % (
             self._type, self.sample_rate, self.length, self.channels,
             self.bitrate)
 

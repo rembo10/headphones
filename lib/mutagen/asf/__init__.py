@@ -13,7 +13,6 @@ __all__ = ["ASF", "Open"]
 
 from mutagen import FileType, Tags, StreamInfo
 from mutagen._util import resize_bytes, DictMixin, loadfile, convert_error
-from mutagen._compat import string_types, long_, PY3, izip
 
 from ._util import error, ASFError, ASFHeaderError
 from ._objects import HeaderObject, MetadataLibraryObject, MetadataObject, \
@@ -24,7 +23,7 @@ from ._attrs import ASFGUIDAttribute, ASFWordAttribute, ASFQWordAttribute, \
     ASFUnicodeAttribute, ASFBaseAttribute, ASFValue
 
 
-# pyflakes
+# flake8
 error, ASFError, ASFHeaderError, ASFValue
 
 
@@ -51,26 +50,26 @@ class ASFInfo(StreamInfo):
     sample_rate = 0
     bitrate = 0
     channels = 0
-    codec_type = ""
-    codec_name = ""
-    codec_description = ""
+    codec_type = u""
+    codec_name = u""
+    codec_description = u""
 
     def __init__(self):
         self.length = 0.0
         self.sample_rate = 0
         self.bitrate = 0
         self.channels = 0
-        self.codec_type = ""
-        self.codec_name = ""
-        self.codec_description = ""
+        self.codec_type = u""
+        self.codec_name = u""
+        self.codec_description = u""
 
     def pprint(self):
         """Returns:
             text: a stream information text summary
         """
 
-        s = "ASF (%s) %d bps, %s Hz, %d channels, %.2f seconds" % (
-            self.codec_type or self.codec_name or "???", self.bitrate,
+        s = u"ASF (%s) %d bps, %s Hz, %d channels, %.2f seconds" % (
+            self.codec_type or self.codec_name or u"???", self.bitrate,
             self.sample_rate, self.channels, self.length)
         return s
 
@@ -89,7 +88,6 @@ class ASFTags(list, DictMixin, Tags):
 
         """
 
-        # PY3 only
         if isinstance(key, slice):
             return list.__getitem__(self, key)
 
@@ -102,7 +100,6 @@ class ASFTags(list, DictMixin, Tags):
     def __delitem__(self, key):
         """Delete all values associated with the key."""
 
-        # PY3 only
         if isinstance(key, slice):
             return list.__delitem__(self, key)
 
@@ -129,7 +126,6 @@ class ASFTags(list, DictMixin, Tags):
         string.
         """
 
-        # PY3 only
         if isinstance(key, slice):
             return list.__setitem__(self, key, values)
 
@@ -139,16 +135,14 @@ class ASFTags(list, DictMixin, Tags):
         to_append = []
         for value in values:
             if not isinstance(value, ASFBaseAttribute):
-                if isinstance(value, string_types):
+                if isinstance(value, str):
                     value = ASFUnicodeAttribute(value)
-                elif PY3 and isinstance(value, bytes):
+                elif isinstance(value, bytes):
                     value = ASFByteArrayAttribute(value)
                 elif isinstance(value, bool):
                     value = ASFBoolAttribute(value)
                 elif isinstance(value, int):
                     value = ASFDWordAttribute(value)
-                elif isinstance(value, long_):
-                    value = ASFQWordAttribute(value)
                 else:
                     raise TypeError("Invalid type %r" % type(value))
             to_append.append((key, value))
@@ -252,14 +246,14 @@ class ASF(FileType):
 
     @convert_error(IOError, error)
     @loadfile(writable=True)
-    def save(self, filething, padding=None):
+    def save(self, filething=None, padding=None):
         """save(filething=None, padding=None)
 
         Save tag changes back to the loaded file.
 
         Args:
             filething (filething)
-            padding (PaddingFunction)
+            padding (:obj:`mutagen.PaddingFunction`)
         Raises:
             mutagen.MutagenError
         """
@@ -319,7 +313,7 @@ class ASF(FileType):
         raise ASFError
 
     @loadfile(writable=True)
-    def delete(self, filething):
+    def delete(self, filething=None):
         """delete(filething=None)
 
         Args:

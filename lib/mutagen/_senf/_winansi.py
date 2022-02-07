@@ -9,8 +9,16 @@
 # permit persons to whom the Software is furnished to do so, subject to
 # the following conditions:
 #
-# The above copyright notice and this permission notice shall be
-# included in all copies or substantial portions of the Software.
+# The above copyright notice and this permission notice shall be included
+# in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+# IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+# CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+# TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import ctypes
 import re
@@ -25,7 +33,7 @@ def ansi_parse(code):
     return code[-1:], tuple([int(v or "0") for v in code[2:-1].split(";")])
 
 
-def ansi_split(text, _re=re.compile("(\x1b\[(\d*;?)*\S)")):
+def ansi_split(text, _re=re.compile(u"(\x1b\\[(\\d*;?)*\\S)")):
     """Yields (is_ansi, text)"""
 
     for part in _re.split(text):

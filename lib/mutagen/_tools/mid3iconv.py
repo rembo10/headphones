@@ -16,7 +16,6 @@ import locale
 import mutagen
 import mutagen.id3
 from mutagen._senf import argv, print_, fsnative
-from mutagen._compat import text_type
 
 from ._util import SignalHandler, OptionParser
 
@@ -75,7 +74,7 @@ def update(options, filenames):
     for filename in filenames:
         with _sig.block():
             if verbose != "quiet":
-                print_("Updating", filename)
+                print_(u"Updating", filename)
 
             if has_id3v1(filename) and not noupdate and force_v1:
                 mutagen.id3.delete(filename, False, True)
@@ -84,13 +83,13 @@ def update(options, filenames):
                 id3 = mutagen.id3.ID3(filename)
             except mutagen.id3.ID3NoHeaderError:
                 if verbose != "quiet":
-                    print_("No ID3 header found; skipping...")
+                    print_(u"No ID3 header found; skipping...")
                 continue
             except Exception as err:
-                print_(text_type(err), file=sys.stderr)
+                print_(str(err), file=sys.stderr)
                 continue
 
-            for tag in [t for t in id3 if t.startswith(("T", "COMM"))]:
+            for tag in filter(lambda t: t.startswith(("T", "COMM")), id3):
                 frame = id3[tag]
                 if isinstance(frame, mutagen.id3.TimeStampTextFrame):
                     # non-unicode fields
@@ -105,7 +104,7 @@ def update(options, filenames):
                     continue
                 else:
                     frame.text = text
-                    if not text or min(list(map(isascii, text))):
+                    if not text or min(map(isascii, text)):
                         frame.encoding = 3
                     else:
                         frame.encoding = 1
@@ -122,7 +121,7 @@ def update(options, filenames):
 
 def has_id3v1(filename):
     try:
-        with open(filename, 'rb+') as f:
+        with open(filename, 'rb') as f:
             f.seek(-128, 2)
             return f.read(3) == b"TAG"
     except IOError:
@@ -154,9 +153,9 @@ def main(argv):
 
     for i, arg in enumerate(argv):
         if arg == "-v1":
-            argv[i] = fsnative("--force-v1")
+            argv[i] = fsnative(u"--force-v1")
         elif arg == "-removev1":
-            argv[i] = fsnative("--remove-v1")
+            argv[i] = fsnative(u"--remove-v1")
 
     (options, args) = parser.parse_args(argv[1:])
 

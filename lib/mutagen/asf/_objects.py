@@ -10,7 +10,6 @@
 import struct
 
 from mutagen._util import cdata, get_size
-from mutagen._compat import text_type, xrange, izip
 from mutagen._tags import PaddingInfo
 
 from ._util import guid2bytes, bytes2guid, CODECS, ASFError, ASFHeaderError
@@ -108,13 +107,16 @@ class HeaderObject(BaseObject):
 
             try:
                 data = fileobj.read(payload_size)
-            except OverflowError:
+            except (OverflowError, MemoryError):
                 # read doesn't take 64bit values
                 raise ASFHeaderError("invalid header size")
             if len(data) != payload_size:
                 raise ASFHeaderError("truncated")
 
-            obj.parse(asf, data)
+            try:
+                obj.parse(asf, data)
+            except struct.error:
+                raise ASFHeaderError("truncated")
             header.objects.append(obj)
 
         return header
@@ -151,7 +153,8 @@ class HeaderObject(BaseObject):
         # ask the user for padding adjustments
         file_size = get_size(fileobj)
         content_size = file_size - available
-        assert content_size >= 0
+        if content_size < 0:
+            raise ASFHeaderError("truncated content")
         info = PaddingInfo(available - needed_size, content_size)
 
         # add padding
@@ -180,11 +183,11 @@ class ContentDescriptionObject(BaseObject):
     GUID = guid2bytes("75B22633-668E-11CF-A6D9-00AA0062CE6C")
 
     NAMES = [
-        "Title",
-        "Author",
-        "Copyright",
-        "Description",
-        "Rating",
+        u"Title",
+        u"Author",
+        u"Copyright",
+        u"Description",
+        u"Rating",
     ]
 
     def parse(self, asf, data):
@@ -195,7 +198,7 @@ class ContentDescriptionObject(BaseObject):
         for length in lengths:
             end = pos + length
             if length > 0:
-                texts.append(data[pos:end].decode("utf-16-le").strip("\x00"))
+                texts.append(data[pos:end].decode("utf-16-le").strip(u"\x00"))
             else:
                 texts.append(None)
             pos = end
@@ -209,12 +212,12 @@ class ContentDescriptionObject(BaseObject):
         def render_text(name):
             value = asf.to_content_description.get(name)
             if value is not None:
-                return text_type(value).encode("utf-16-le") + b"\x00\x00"
+                return str(value).encode("utf-16-le") + b"\x00\x00"
             else:
                 return b""
 
         texts = [render_text(x) for x in self.NAMES]
-        data = struct.pack("<HHHHH", *list(map(len, texts))) + b"".join(texts)
+        data = struct.pack("<HHHHH", *map(len, texts)) + b"".join(texts)
         return self.GUID + struct.pack("<Q", 24 + len(data)) + data
 
 
@@ -242,7 +245,7 @@ class ExtendedContentDescriptionObject(BaseObject):
             asf._tags.setdefault(self.GUID, []).append((name, attr))
 
     def render(self, asf):
-        attrs = list(asf.to_extended_content_description.items())
+        attrs = asf.to_extended_content_description.items()
         data = b"".join(attr.render(name) for (name, attr) in attrs)
         data = struct.pack("<QH", 26 + len(data), len(attrs)) + data
         return self.GUID + data
@@ -256,6 +259,8 @@ class FilePropertiesObject(BaseObject):
 
     def parse(self, asf, data):
         super(FilePropertiesObject, self).parse(asf, data)
+        if len(data) < 64:
+            raise ASFError("invalid field property entry")
         length, _, preroll = struct.unpack("<QQQ", data[40:64])
         # there are files where preroll is larger than length, limit to >= 0
         asf.info.length = max((length / 10000000.0) - (preroll / 1000.0), 0.0)
@@ -292,7 +297,7 @@ class CodecListObject(BaseObject):
         try:
             name = data[offset:next_offset].decode("utf-16-le").strip("\x00")
         except UnicodeDecodeError:
-            name = ""
+            name = u""
         offset = next_offset
 
         units, offset = cdata.uint16_le_from(data, offset)
@@ -300,12 +305,12 @@ class CodecListObject(BaseObject):
         try:
             desc = data[offset:next_offset].decode("utf-16-le").strip("\x00")
         except UnicodeDecodeError:
-            desc = ""
+            desc = u""
         offset = next_offset
 
         bytes_, offset = cdata.uint16_le_from(data, offset)
         next_offset = offset + bytes_
-        codec = ""
+        codec = u""
         if bytes_ == 2:
             codec_id = cdata.uint16_le_from(data, offset)[0]
             if codec_id in CODECS:
@@ -377,6 +382,8 @@ class HeaderExtensionObject(BaseObject):
         while datapos < datasize:
             guid, size = struct.unpack(
                 "<16sQ", data[22 + datapos:22 + datapos + 24])
+            if size < 1:
+                raise ASFHeaderError("invalid size in header extension")
             obj = BaseObject._get_object(guid)
             obj.parse(asf, data[22 + datapos + 24:22 + datapos + size])
             self.objects.append(obj)
@@ -423,7 +430,7 @@ class MetadataObject(BaseObject):
             asf._tags.setdefault(self.GUID, []).append((name, attr))
 
     def render(self, asf):
-        attrs = list(asf.to_metadata.items())
+        attrs = asf.to_metadata.items()
         data = b"".join([attr.render_m(name) for (name, attr) in attrs])
         return (self.GUID + struct.pack("<QH", 26 + len(data), len(attrs)) +
                 data)

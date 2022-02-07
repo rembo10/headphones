@@ -43,7 +43,7 @@ class OggVorbisInfo(StreamInfo):
         length (`float`): File length in seconds, as a float
         channels (`int`): Number of channels
         bitrate (`int`): Nominal ('average') bitrate in bits per second
-        sample_Rate (`int`): Sample rate in Hz
+        sample_rate (`int`): Sample rate in Hz
 
     """
 
@@ -56,13 +56,20 @@ class OggVorbisInfo(StreamInfo):
         """Raises ogg.error, IOError"""
 
         page = OggPage(fileobj)
+        if not page.packets:
+            raise OggVorbisHeaderError("page has not packets")
         while not page.packets[0].startswith(b"\x01vorbis"):
             page = OggPage(fileobj)
         if not page.first:
             raise OggVorbisHeaderError(
                 "page has ID header, but doesn't start a stream")
+        if len(page.packets[0]) < 28:
+            raise OggVorbisHeaderError(
+                "page contains a packet too short to be valid")
         (self.channels, self.sample_rate, max_bitrate, nominal_bitrate,
-         min_bitrate) = struct.unpack("<B4i", page.packets[0][11:28])
+         min_bitrate) = struct.unpack("<BI3i", page.packets[0][11:28])
+        if self.sample_rate == 0:
+            raise OggVorbisHeaderError("sample rate can't be zero")
         self.serial = page.serial
 
         max_bitrate = max(0, max_bitrate)
@@ -83,13 +90,13 @@ class OggVorbisInfo(StreamInfo):
     def _post_tags(self, fileobj):
         """Raises ogg.error"""
 
-        page = OggPage.find_last(fileobj, self.serial)
+        page = OggPage.find_last(fileobj, self.serial, finishing=True)
         if page is None:
             raise OggVorbisHeaderError
         self.length = page.position / float(self.sample_rate)
 
     def pprint(self):
-        return "Ogg Vorbis, %.2f seconds, %d bps" % (
+        return u"Ogg Vorbis, %.2f seconds, %d bps" % (
             self.length, self.bitrate)
 
 

@@ -53,8 +53,8 @@ class ID3(ID3Tags, mutagen.Metadata):
         filething (filething): or `None`
 
     Attributes:
-        version (Tuple[int]): ID3 tag version as a tuple
-        unknown_frames (List[bytes]): raw frame data of any unknown frames
+        version (tuple[int]): ID3 tag version as a tuple
+        unknown_frames (list[bytes]): raw frame data of any unknown frames
             found
         size (int): the total size of the ID3 tag, including the header
     """
@@ -78,8 +78,6 @@ class ID3(ID3Tags, mutagen.Metadata):
 
     @property
     def version(self):
-        """`tuple`: ID3 tag version as a tuple (of the loaded file)"""
-
         if self._header is not None:
             return self._header.version
         return self._version
@@ -112,10 +110,9 @@ class ID3(ID3Tags, mutagen.Metadata):
 
     @convert_error(IOError, error)
     @loadfile()
-    def load(self, filething, known_frames=None, translate=True, v2_version=4):
-        """load(filething, known_frames=None, translate=True, v2_version=4)
-
-        Load tags from a filename.
+    def load(self, filething, known_frames=None, translate=True, v2_version=4,
+             load_v1=True):
+        """Load tags from a filename.
 
         Args:
             filename (filething): filename or file object to load tag data from
@@ -126,6 +123,11 @@ class ID3(ID3Tags, mutagen.Metadata):
                 call update_to_v23() / update_to_v24() manually.
             v2_version (int): if update_to_v23 or update_to_v24 get called
                 (3 or 4)
+            load_v1 (bool): Load tags from ID3v1 header if present. If both
+                ID3v1 and ID3v2 headers are present, combine the tags from
+                the two, with ID3v2 having precedence.
+
+                .. versionadded:: 1.42
 
         Example of loading a custom frame::
 
@@ -149,13 +151,17 @@ class ID3(ID3Tags, mutagen.Metadata):
         try:
             self._header = ID3Header(fileobj)
         except (ID3NoHeaderError, ID3UnsupportedVersionError):
-            frames, offset = find_id3v1(fileobj)
+            if not load_v1:
+                raise
+
+            frames, offset = find_id3v1(fileobj, v2_version, known_frames)
             if frames is None:
                 raise
 
             self.version = ID3Header._V11
-            for v in list(frames.values()):
-                self.add(v)
+            for v in frames.values():
+                if len(self.getall(v.HashKey)) == 0:
+                    self.add(v)
         else:
             # XXX: attach to the header object so we have it in spec parsing..
             if known_frames is not None:
@@ -164,6 +170,14 @@ class ID3(ID3Tags, mutagen.Metadata):
             data = read_full(fileobj, self.size - 10)
             remaining_data = self._read(self._header, data)
             self._padding = len(remaining_data)
+
+            if load_v1:
+                v1v2_ver = 4 if self.version[1] == 4 else 3
+                frames, offset = find_id3v1(fileobj, v1v2_ver, known_frames)
+                if frames:
+                    for v in frames.values():
+                        if len(self.getall(v.HashKey)) == 0:
+                            self.add(v)
 
         if translate:
             if v2_version == 3:
@@ -204,13 +218,14 @@ class ID3(ID3Tags, mutagen.Metadata):
 
     @convert_error(IOError, error)
     @loadfile(writable=True, create=True)
-    def save(self, filething, v1=1, v2_version=4, v23_sep='/', padding=None):
+    def save(self, filething=None, v1=1, v2_version=4, v23_sep='/',
+             padding=None):
         """save(filething=None, v1=1, v2_version=4, v23_sep='/', padding=None)
 
         Save changes to a file.
 
         Args:
-            filename (fspath):
+            filething (filething):
                 Filename to save the tag to. If no filename is given,
                 the one most recently loaded is used.
             v1 (ID3v1SaveOptions):
@@ -223,7 +238,7 @@ class ID3(ID3Tags, mutagen.Metadata):
                 the separator used to join multiple text values
                 if v2_version == 3. Defaults to '/' but if it's None
                 will be the ID3v2v2.4 null separator.
-            padding (PaddingFunction)
+            padding (:obj:`mutagen.PaddingFunction`)
 
         Raises:
             mutagen.MutagenError
@@ -268,7 +283,7 @@ class ID3(ID3Tags, mutagen.Metadata):
             f.truncate()
 
     @loadfile(writable=True)
-    def delete(self, filething, delete_v1=True, delete_v2=True):
+    def delete(self, filething=None, delete_v1=True, delete_v2=True):
         """delete(filething=None, delete_v1=True, delete_v2=True)
 
         Remove tags from a file.
@@ -352,7 +367,7 @@ class ID3FileType(mutagen.FileType):
 
         @staticmethod
         def pprint():
-            return "Unknown format with ID3 tag"
+            return u"Unknown format with ID3 tag"
 
     @staticmethod
     def score(filename, fileobj, header_data):

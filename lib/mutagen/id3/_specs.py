@@ -10,10 +10,8 @@ import struct
 import codecs
 from struct import unpack, pack
 
-from .._compat import text_type, chr_, PY3, swap_to_string, string_types, \
-    xrange
-from .._util import total_ordering, decode_terminated, enum, izip, flags, \
-    cdata, encode_endian
+from .._util import total_ordering, decode_terminated, enum, flags, \
+    cdata, encode_endian, intround, bchr
 from ._util import BitPaddedInt, is_valid_frame_id
 
 
@@ -87,7 +85,7 @@ class PictureType(object):
     """Publisher/Studio logotype"""
 
     def _pprint(self):
-        return text_type(self).split(".", 1)[-1].lower().replace("_", " ")
+        return str(self).split(".", 1)[-1].lower().replace("_", " ")
 
 
 @flags
@@ -165,11 +163,11 @@ class ByteSpec(Spec):
         return bytearray(data)[0], data[1:]
 
     def write(self, config, frame, value):
-        return chr_(value)
+        return bchr(value)
 
     def validate(self, frame, value):
         if value is not None:
-            chr_(value)
+            bchr(value)
         return value
 
 
@@ -278,7 +276,7 @@ class StringSpec(Spec):
 
     def __init__(self, name, length, default=None):
         if default is None:
-            default = " " * length
+            default = u" " * length
         super(StringSpec, self).__init__(name, default)
         self.len = length
 
@@ -289,26 +287,22 @@ class StringSpec(Spec):
         except UnicodeDecodeError:
             raise SpecError("not ascii")
         else:
-            if PY3:
-                chunk = ascii
+            chunk = ascii
 
         return chunk, data[s.len:]
 
     def write(self, config, frame, value):
-        if PY3:
-            value = value.encode("ascii")
+
+        value = value.encode("ascii")
         return (bytes(value) + b'\x00' * self.len)[:self.len]
 
     def validate(self, frame, value):
         if value is None:
             raise TypeError
-        if PY3:
-            if not isinstance(value, str):
-                raise TypeError("%s has to be str" % self.name)
-            value.encode("ascii")
-        else:
-            if not isinstance(value, bytes):
-                value = value.encode("ascii")
+
+        if not isinstance(value, str):
+            raise TypeError("%s has to be str" % self.name)
+        value.encode("ascii")
 
         if len(value) == self.len:
             return value
@@ -402,7 +396,7 @@ class RVASpec(Spec):
 class FrameIDSpec(StringSpec):
 
     def __init__(self, name, length):
-        super(FrameIDSpec, self).__init__(name, length, "X" * length)
+        super(FrameIDSpec, self).__init__(name, length, u"X" * length)
 
     def validate(self, frame, value):
         value = super(FrameIDSpec, self).validate(frame, value)
@@ -424,7 +418,7 @@ class BinaryDataSpec(Spec):
     def write(self, config, frame, value):
         if isinstance(value, bytes):
             return value
-        value = text_type(value).encode("ascii")
+        value = str(value).encode("ascii")
         return value
 
     def validate(self, frame, value):
@@ -432,10 +426,10 @@ class BinaryDataSpec(Spec):
             raise TypeError
         if isinstance(value, bytes):
             return value
-        elif PY3:
+        else:
             raise TypeError("%s has to be bytes" % self.name)
 
-        value = text_type(value).encode("ascii")
+        value = str(value).encode("ascii")
         return value
 
 
@@ -464,7 +458,7 @@ class EncodedTextSpec(Spec):
         Encoding.UTF8: ('utf8', b'\x00'),
     }
 
-    def __init__(self, name, default=""):
+    def __init__(self, name, default=u""):
         super(EncodedTextSpec, self).__init__(name, default)
 
     def read(self, header, frame, data):
@@ -493,7 +487,7 @@ class EncodedTextSpec(Spec):
             raise SpecError(e)
 
     def validate(self, frame, value):
-        return text_type(value)
+        return str(value)
 
 
 class MultiSpec(Spec):
@@ -527,7 +521,7 @@ class MultiSpec(Spec):
         return b''.join(data)
 
     def validate(self, frame, value):
-        if self.sep and isinstance(value, string_types):
+        if self.sep and isinstance(value, str):
             value = value.split(self.sep)
         if isinstance(value, list):
             if len(self.specs) == 1:
@@ -568,7 +562,7 @@ class EncodedNumericPartTextSpec(EncodedTextSpec):
 
 class Latin1TextSpec(Spec):
 
-    def __init__(self, name, default=""):
+    def __init__(self, name, default=u""):
         super(Latin1TextSpec, self).__init__(name, default)
 
     def read(self, header, frame, data):
@@ -582,7 +576,7 @@ class Latin1TextSpec(Spec):
         return value.encode('latin1') + b'\x00'
 
     def validate(self, frame, value):
-        return text_type(value)
+        return str(value)
 
 
 class ID3FramesSpec(Spec):
@@ -602,7 +596,7 @@ class ID3FramesSpec(Spec):
         from ._tags import ID3Tags
 
         v = ID3Tags()
-        for frame in list(value.values()):
+        for frame in value.values():
             v.add(frame._get_v23_frame(**kwargs))
         return v
 
@@ -647,7 +641,6 @@ class Latin1TextListSpec(Spec):
         return [self._lspec.validate(frame, v) for v in value]
 
 
-@swap_to_string
 @total_ordering
 class ID3TimeStamp(object):
     """A time stamp in ID3v2 format.
@@ -665,10 +658,8 @@ class ID3TimeStamp(object):
     def __init__(self, text):
         if isinstance(text, ID3TimeStamp):
             text = text.text
-        elif not isinstance(text, text_type):
-            if PY3:
-                raise TypeError("not a str")
-            text = text.decode("utf-8")
+        elif not isinstance(text, str):
+            raise TypeError("not a str")
 
         self.text = text
 
@@ -683,9 +674,9 @@ class ID3TimeStamp(object):
             if part is None:
                 break
             pieces.append(self.__formats[i] % part + self.__seps[i])
-        return ''.join(pieces)[:-1]
+        return u''.join(pieces)[:-1]
 
-    def set_text(self, text, splitre=re.compile('[-T:/.]|\s+')):
+    def set_text(self, text, splitre=re.compile('[-T:/.]|\\s+')):
         year, month, day, hour, minute, second = \
             splitre.split(text + ':::::')[:6]
         for a in 'year month day hour minute second'.split():
@@ -745,7 +736,7 @@ class VolumeAdjustmentSpec(Spec):
         return value / 512.0, data[2:]
 
     def write(self, config, frame, value):
-        number = int(round(value * 512))
+        number = intround(value * 512)
         # pack only fails in 2.7, do it manually in 2.6
         if not -32768 <= number <= 32767:
             raise SpecError("not in range")
@@ -778,7 +769,7 @@ class VolumePeakSpec(Spec):
         return (float(peak) / (2 ** 31 - 1)), data[1 + vol_bytes:]
 
     def write(self, config, frame, value):
-        number = int(round(value * 32768))
+        number = intround(value * 32768)
         # pack only fails in 2.7, do it manually in 2.6
         if not 0 <= number <= 65535:
             raise SpecError("not in range")

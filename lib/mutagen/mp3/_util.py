@@ -11,10 +11,11 @@ http://www.codeproject.com/Articles/8295/MPEG-Audio-Frame-Header
 http://wiki.hydrogenaud.io/index.php?title=MP3
 """
 
+from __future__ import division
 from functools import partial
+from io import BytesIO
 
-from mutagen._util import cdata, BitReader
-from mutagen._compat import xrange, iterbytes, cBytesIO
+from mutagen._util import cdata, BitReader, iterbytes
 
 
 class LAMEError(Exception):
@@ -37,7 +38,9 @@ class LAMEHeader(object):
     """VBR quality: 0..9"""
 
     track_peak = None
-    """Peak signal amplitude as float. None if unknown."""
+    """Peak signal amplitude as float. 1.0 is maximal signal amplitude
+    in decoded format. None if unknown.
+    """
 
     track_gain_origin = 0
     """see the docs"""
@@ -106,7 +109,7 @@ class LAMEHeader(object):
             raise LAMEError("Not enough data")
 
         # extended lame header
-        r = BitReader(cBytesIO(payload))
+        r = BitReader(BytesIO(payload))
         revision = r.bits(4)
         if revision != 0:
             raise LAMEError("unsupported header revision %d" % revision)
@@ -123,8 +126,7 @@ class LAMEHeader(object):
             self.track_peak = None
         else:
             # see PutLameVBR() in LAME's VbrTag.c
-            self.track_peak = (
-                cdata.uint32_be(track_peak_data) - 0.5) / 2 ** 23
+            self.track_peak = cdata.uint32_be(track_peak_data) / 2 ** 23
         track_gain_type = r.bits(3)
         self.track_gain_origin = r.bits(3)
         sign = r.bits(1)
@@ -194,64 +196,64 @@ class LAMEHeader(object):
         if self.vbr_method == 2:
             if version in ((3, 90), (3, 91), (3, 92)) and self.encoding_flags:
                 if self.bitrate < 255:
-                    return "--alt-preset %d" % self.bitrate
+                    return u"--alt-preset %d" % self.bitrate
                 else:
-                    return "--alt-preset %d+" % self.bitrate
+                    return u"--alt-preset %d+" % self.bitrate
             if self.preset_used != 0:
-                return "--preset %d" % self.preset_used
+                return u"--preset %d" % self.preset_used
             elif self.bitrate < 255:
-                return "--abr %d" % self.bitrate
+                return u"--abr %d" % self.bitrate
             else:
-                return "--abr %d+" % self.bitrate
+                return u"--abr %d+" % self.bitrate
         elif self.vbr_method == 1:
             if self.preset_used == 0:
                 if self.bitrate < 255:
-                    return "-b %d" % self.bitrate
+                    return u"-b %d" % self.bitrate
                 else:
-                    return "-b 255+"
+                    return u"-b 255+"
             elif self.preset_used == 1003:
-                return "--preset insane"
-            return "-b %d" % self.preset_used
+                return u"--preset insane"
+            return u"-b %d" % self.preset_used
         elif version in ((3, 90), (3, 91), (3, 92)):
             preset_key = (self.vbr_quality, self.quality, self.vbr_method,
                           self.lowpass_filter, self.ath_type)
             if preset_key == (1, 2, 4, 19500, 3):
-                return "--preset r3mix"
+                return u"--preset r3mix"
             if preset_key == (2, 2, 3, 19000, 4):
-                return "--alt-preset standard"
+                return u"--alt-preset standard"
             if preset_key == (2, 2, 3, 19500, 2):
-                return "--alt-preset extreme"
+                return u"--alt-preset extreme"
 
             if self.vbr_method == 3:
-                return "-V %s" % self.vbr_quality
+                return u"-V %s" % self.vbr_quality
             elif self.vbr_method in (4, 5):
-                return "-V %s --vbr-new" % self.vbr_quality
+                return u"-V %s --vbr-new" % self.vbr_quality
         elif version in ((3, 93), (3, 94), (3, 95), (3, 96), (3, 97)):
             if self.preset_used == 1001:
-                return "--preset standard"
+                return u"--preset standard"
             elif self.preset_used == 1002:
-                return "--preset extreme"
+                return u"--preset extreme"
             elif self.preset_used == 1004:
-                return "--preset fast standard"
+                return u"--preset fast standard"
             elif self.preset_used == 1005:
-                return "--preset fast extreme"
+                return u"--preset fast extreme"
             elif self.preset_used == 1006:
-                return "--preset medium"
+                return u"--preset medium"
             elif self.preset_used == 1007:
-                return "--preset fast medium"
+                return u"--preset fast medium"
 
             if self.vbr_method == 3:
-                return "-V %s" % self.vbr_quality
+                return u"-V %s" % self.vbr_quality
             elif self.vbr_method in (4, 5):
-                return "-V %s --vbr-new" % self.vbr_quality
+                return u"-V %s --vbr-new" % self.vbr_quality
         elif version == (3, 98):
             if self.vbr_method == 3:
-                return "-V %s --vbr-old" % self.vbr_quality
+                return u"-V %s --vbr-old" % self.vbr_quality
             elif self.vbr_method in (4, 5):
-                return "-V %s" % self.vbr_quality
+                return u"-V %s" % self.vbr_quality
         elif version >= (3, 99):
             if self.vbr_method == 3:
-                return "-V %s --vbr-old" % self.vbr_quality
+                return u"-V %s --vbr-old" % self.vbr_quality
             elif self.vbr_method in (4, 5):
                 p = self.vbr_quality
                 adjust_key = (p, self.bitrate, self.lowpass_filter)
@@ -261,9 +263,9 @@ class LAMEHeader(object):
                     (5, 8, 0): 8,
                     (6, 8, 0): 9,
                 }.get(adjust_key, p)
-                return "-V %s" % p
+                return u"-V %s" % p
 
-        return ""
+        return u""
 
     @classmethod
     def parse_version(cls, fileobj):
@@ -303,36 +305,36 @@ class LAMEHeader(object):
         if (major, minor) < (3, 90) or (
                 (major, minor) == (3, 90) and data[-11:-10] == b"("):
             flag = data.strip(b"\x00").rstrip().decode("ascii")
-            return (major, minor), "%d.%d%s" % (major, minor, flag), False
+            return (major, minor), u"%d.%d%s" % (major, minor, flag), False
 
         if len(data) < 11:
             raise LAMEError("Invalid version: too long")
 
         flag = data[:-11].rstrip(b"\x00")
 
-        flag_string = ""
-        patch = ""
+        flag_string = u""
+        patch = u""
         if flag == b"a":
-            flag_string = " (alpha)"
+            flag_string = u" (alpha)"
         elif flag == b"b":
-            flag_string = " (beta)"
+            flag_string = u" (beta)"
         elif flag == b"r":
-            patch = ".1+"
+            patch = u".1+"
         elif flag == b" ":
             if (major, minor) > (3, 96):
-                patch = ".0"
+                patch = u".0"
             else:
-                patch = ".0+"
+                patch = u".0+"
         elif flag == b"" or flag == b".":
-            patch = ".0+"
+            patch = u".0+"
         else:
-            flag_string = " (?)"
+            flag_string = u" (?)"
 
         # extended header, seek back to 9 bytes for the caller
         fileobj.seek(-11, 1)
 
         return (major, minor), \
-            "%d.%d%s%s" % (major, minor, patch, flag_string), True
+            u"%d.%d%s%s" % (major, minor, patch, flag_string), True
 
 
 class XingHeaderError(Exception):
@@ -369,7 +371,7 @@ class XingHeader(object):
     lame_version = (0, 0)
     """The LAME version as two element tuple (major, minor)"""
 
-    lame_version_desc = ""
+    lame_version_desc = u""
     """The version of the LAME encoder e.g. '3.99.0'. Empty if unknown"""
 
     is_info = False
@@ -425,7 +427,7 @@ class XingHeader(object):
         """Returns the guessed encoder settings"""
 
         if self.lame_header is None:
-            return ""
+            return u""
         return self.lame_header.guess_settings(*self.lame_version)
 
     @classmethod

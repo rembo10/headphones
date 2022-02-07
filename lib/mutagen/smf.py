@@ -12,8 +12,7 @@ import struct
 
 from mutagen import StreamInfo, MutagenError
 from mutagen._file import FileType
-from mutagen._util import loadfile
-from mutagen._compat import xrange, endswith
+from mutagen._util import loadfile, endswith
 
 
 class SMFError(MutagenError):
@@ -36,7 +35,7 @@ def _var_int(data, offset=0):
 def _read_track(chunk):
     """Retuns a list of midi events and tempo change events"""
 
-    TEMPO, MIDI = list(range(2))
+    TEMPO, MIDI = range(2)
 
     # Deviations: The running status should be reset on non midi events, but
     # some files contain meta events inbetween.
@@ -91,7 +90,7 @@ def _read_track(chunk):
 def _read_midi_length(fileobj):
     """Returns the duration in seconds. Can raise all kind of errors..."""
 
-    TEMPO, MIDI = list(range(2))
+    TEMPO, MIDI = range(2)
 
     def read_chunk(fileobj):
         info = fileobj.read(8)
@@ -178,7 +177,7 @@ class SMFInfo(StreamInfo):
         self.length = _read_midi_length(fileobj)
 
     def pprint(self):
-        return "SMF, %.2f seconds" % self.length
+        return u"SMF, %.2f seconds" % self.length
 
 
 class SMF(FileType):

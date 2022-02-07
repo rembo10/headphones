@@ -9,12 +9,23 @@
 # permit persons to whom the Software is furnished to do so, subject to
 # the following conditions:
 #
-# The above copyright notice and this permission notice shall be
-# included in all copies or substantial portions of the Software.
+# The above copyright notice and this permission notice shall be included
+# in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+# IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+# CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+# TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import os
 import ctypes
-import collections
+try:
+    from collections import abc
+except ImportError:
+    import collections as abc  # type: ignore
 
 from ._compat import text_type, PY2
 from ._fsnative import path2fsn, is_win, _fsn2legacy, fsnative
@@ -86,23 +97,23 @@ def read_windows_environ():
     res = ctypes.cast(res, ctypes.POINTER(ctypes.c_wchar))
 
     done = []
-    current = ""
+    current = u""
     i = 0
     while 1:
         c = res[i]
         i += 1
-        if c == "\x00":
+        if c == u"\x00":
             if not current:
                 break
             done.append(current)
-            current = ""
+            current = u""
             continue
         current += c
 
     dict_ = {}
     for entry in done:
         try:
-            key, value = entry.split("=", 1)
+            key, value = entry.split(u"=", 1)
         except ValueError:
             continue
         key = _norm_key(key)
@@ -122,7 +133,7 @@ def _norm_key(key):
     return key
 
 
-class Environ(collections.MutableMapping):
+class Environ(abc.MutableMapping):
     """Dict[`fsnative`, `fsnative`]: Like `os.environ` but contains unicode
     keys and values under Windows + Python 2.
 

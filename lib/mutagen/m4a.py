@@ -66,7 +66,7 @@ class M4ATags(DictProxy, Tags):
         raise error("deprecated")
 
     def pprint(self):
-        return ""
+        return u""
 
 
 class M4AInfo(StreamInfo):
@@ -77,7 +77,7 @@ class M4AInfo(StreamInfo):
         raise error("deprecated")
 
     def pprint(self):
-        return ""
+        return u""
 
 
 class M4A(FileType):

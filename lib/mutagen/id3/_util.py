@@ -8,7 +8,6 @@
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 
-from mutagen._compat import long_, integer_types, PY3
 from mutagen._util import MutagenError
 
 
@@ -110,7 +109,7 @@ class _BitPaddedMixin(object):
 
         mask = (((1 << (8 - bits)) - 1) << bits)
 
-        if isinstance(value, integer_types):
+        if isinstance(value, int):
             while value:
                 if value & mask:
                     return False
@@ -133,7 +132,7 @@ class BitPaddedInt(int, _BitPaddedMixin):
         numeric_value = 0
         shift = 0
 
-        if isinstance(value, integer_types):
+        if isinstance(value, int):
             if value < 0:
                 raise ValueError
             while value:
@@ -149,20 +148,11 @@ class BitPaddedInt(int, _BitPaddedMixin):
         else:
             raise TypeError
 
-        if isinstance(numeric_value, int):
-            self = int.__new__(BitPaddedInt, numeric_value)
-        else:
-            self = long_.__new__(BitPaddedLong, numeric_value)
+        self = int.__new__(BitPaddedInt, numeric_value)
 
         self.bits = bits
         self.bigendian = bigendian
         return self
-
-if PY3:
-    BitPaddedLong = BitPaddedInt
-else:
-    class BitPaddedLong(long_, _BitPaddedMixin):
-        pass
 
 
 class ID3BadUnsynchData(error, ValueError):

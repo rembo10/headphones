@@ -64,13 +64,13 @@ class OggSpeexInfo(StreamInfo):
         self.serial = page.serial
 
     def _post_tags(self, fileobj):
-        page = OggPage.find_last(fileobj, self.serial)
+        page = OggPage.find_last(fileobj, self.serial, finishing=True)
         if page is None:
             raise OggSpeexHeaderError
         self.length = page.position / float(self.sample_rate)
 
     def pprint(self):
-        return "Ogg Speex, %.2f seconds" % self.length
+        return u"Ogg Speex, %.2f seconds" % self.length
 
 
 class OggSpeexVComment(VCommentDict):

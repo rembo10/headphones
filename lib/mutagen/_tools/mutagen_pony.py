@@ -83,7 +83,7 @@ def check_dir(path):
     from mutagen.mp3 import MP3
 
     rep = Report(path)
-    print_("Scanning", path)
+    print_(u"Scanning", path)
     for path, dirs, files in os.walk(path):
         files.sort()
         for fn in files:
@@ -105,7 +105,7 @@ def check_dir(path):
 
 def main(argv):
     if len(argv) == 1:
-        print_("Usage:", argv[0], "directory ...")
+        print_(u"Usage:", argv[0], u"directory ...")
     else:
         for path in argv[1:]:
             check_dir(path)

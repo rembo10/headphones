@@ -9,18 +9,20 @@
 # permit persons to whom the Software is furnished to do so, subject to
 # the following conditions:
 #
-# The above copyright notice and this permission notice shall be
-# included in all copies or substantial portions of the Software.
-
-import os
-
-if os.name != "nt":
-    # make imports work
-    _winapi = object()
+# The above copyright notice and this permission notice shall be included
+# in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+# IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+# CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+# TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 from ._fsnative import fsnative, path2fsn, fsn2text, fsn2bytes, \
-    bytes2fsn, uri2fsn, fsn2uri, text2fsn
-from ._print import print_, input_
+    bytes2fsn, uri2fsn, fsn2uri, text2fsn, fsn2norm
+from ._print import print_, input_, supports_ansi_escape_codes
 from ._stdlib import sep, pathsep, curdir, pardir, altsep, extsep, devnull, \
     defpath, getcwd, expanduser, expandvars
 from ._argv import argv
@@ -30,10 +32,11 @@ from ._temp import mkstemp, gettempdir, gettempprefix, mkdtemp
 
 fsnative, print_, getcwd, getenv, unsetenv, putenv, environ, expandvars, \
     path2fsn, fsn2text, fsn2bytes, bytes2fsn, uri2fsn, fsn2uri, mkstemp, \
-    gettempdir, gettempprefix, mkdtemp, input_, expanduser, text2fsn
+    gettempdir, gettempprefix, mkdtemp, input_, expanduser, text2fsn, \
+    supports_ansi_escape_codes, fsn2norm
 
 
-version = (1, 2, 2)
+version = (1, 4, 2)
 """Tuple[`int`, `int`, `int`]: The version tuple (major, minor, micro)"""
 
 

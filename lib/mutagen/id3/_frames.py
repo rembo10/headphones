@@ -18,8 +18,6 @@ from ._specs import BinaryDataSpec, StringSpec, Latin1TextSpec, \
     KeyEventSpec, TimeStampSpec, EncodedNumericPartTextSpec, \
     EncodedNumericTextSpec, SpecError, PictureTypeSpec, ID3FramesSpec, \
     Latin1TextListSpec, CTOCFlagsSpec, FrameIDSpec, RVASpec
-from .._compat import text_type, string_types, swap_to_string, iteritems, \
-    izip, itervalues
 
 
 def _bytes2key(b):
@@ -265,7 +263,7 @@ class Frame(object):
             if tflags & Frame.FLAG24_COMPRESS:
                 try:
                     data = zlib.decompress(data)
-                except zlib.error as err:
+                except zlib.error:
                     # the initial mutagen that went out with QL 0.12 did not
                     # write the 4 bytes of uncompressed size. Compensate.
                     data = datalen_bytes + data
@@ -277,6 +275,8 @@ class Frame(object):
 
         elif header.version >= header._V23:
             if tflags & Frame.FLAG23_COMPRESS:
+                if len(data) < 4:
+                    raise ID3JunkFrameError('frame too small: %r' % data)
                 usize, = unpack('>L', data[:4])
                 data = data[4:]
             if tflags & Frame.FLAG23_ENCRYPT:
@@ -329,11 +329,11 @@ class CHAP(Frame):
     __hash__ = Frame.__hash__
 
     def _pprint(self):
-        frame_pprint = ""
-        for frame in itervalues(self.sub_frames):
+        frame_pprint = u""
+        for frame in self.sub_frames.values():
             for line in frame.pprint().splitlines():
                 frame_pprint += "\n" + " " * 4 + line
-        return "%s time=%d..%d offset=%d..%d%s" % (
+        return u"%s time=%d..%d offset=%d..%d%s" % (
             self.element_id, self.start_time, self.end_time,
             self.start_offset, self.end_offset, frame_pprint)
 
@@ -368,16 +368,15 @@ class CTOC(Frame):
             self.child_element_ids == other.child_element_ids
 
     def _pprint(self):
-        frame_pprint = ""
+        frame_pprint = u""
         if getattr(self, "sub_frames", None):
             frame_pprint += "\n" + "\n".join(
-                [" " * 4 + f.pprint() for f in list(self.sub_frames.values())])
-        return "%s flags=%d child_element_ids=%s%s" % (
+                [" " * 4 + f.pprint() for f in self.sub_frames.values()])
+        return u"%s flags=%d child_element_ids=%s%s" % (
             self.element_id, int(self.flags),
-            ",".join(self.child_element_ids), frame_pprint)
+            u",".join(self.child_element_ids), frame_pprint)
 
 
-@swap_to_string
 class TextFrame(Frame):
     """Text strings.
 
@@ -395,20 +394,20 @@ class TextFrame(Frame):
 
     _framespec = [
         EncodingSpec('encoding', default=Encoding.UTF16),
-        MultiSpec('text', EncodedTextSpec('text'), sep='\u0000', default=[]),
+        MultiSpec('text', EncodedTextSpec('text'), sep=u'\u0000', default=[]),
     ]
 
     def __bytes__(self):
-        return text_type(self).encode('utf-8')
+        return str(self).encode('utf-8')
 
     def __str__(self):
-        return '\u0000'.join(self.text)
+        return u'\u0000'.join(self.text)
 
     def __eq__(self, other):
         if isinstance(other, bytes):
             return bytes(self) == other
-        elif isinstance(other, text_type):
-            return text_type(self) == other
+        elif isinstance(other, str):
+            return str(self) == other
         return self.text == other
 
     __hash__ = Frame.__hash__
@@ -434,6 +433,7 @@ class TextFrame(Frame):
         for val in other[:]:
             if val not in self:
                 self.append(val)
+                self.encoding = max(self.encoding, other.encoding)
         return self
 
     def _pprint(self):
@@ -451,7 +451,7 @@ class NumericTextFrame(TextFrame):
 
     _framespec = [
         EncodingSpec('encoding', default=Encoding.UTF16),
-        MultiSpec('text', EncodedNumericTextSpec('text'), sep='\u0000',
+        MultiSpec('text', EncodedNumericTextSpec('text'), sep=u'\u0000',
                   default=[]),
     ]
 
@@ -472,7 +472,7 @@ class NumericPartTextFrame(TextFrame):
 
     _framespec = [
         EncodingSpec('encoding', default=Encoding.UTF16),
-        MultiSpec('text', EncodedNumericPartTextSpec('text'), sep='\u0000',
+        MultiSpec('text', EncodedNumericPartTextSpec('text'), sep=u'\u0000',
                   default=[]),
     ]
 
@@ -480,7 +480,6 @@ class NumericPartTextFrame(TextFrame):
         return int(self.text[0].split("/")[0])
 
 
-@swap_to_string
 class TimeStampTextFrame(TextFrame):
     """A list of time stamps.
 
@@ -490,20 +489,19 @@ class TimeStampTextFrame(TextFrame):
 
     _framespec = [
         EncodingSpec('encoding', default=Encoding.UTF16),
-        MultiSpec('text', TimeStampSpec('stamp'), sep=',', default=[]),
+        MultiSpec('text', TimeStampSpec('stamp'), sep=u',', default=[]),
     ]
 
     def __bytes__(self):
-        return text_type(self).encode('utf-8')
+        return str(self).encode('utf-8')
 
     def __str__(self):
-        return ','.join([stamp.text for stamp in self.text])
+        return u','.join([stamp.text for stamp in self.text])
 
     def _pprint(self):
-        return " / ".join([stamp.text for stamp in self.text])
+        return u" / ".join([stamp.text for stamp in self.text])
 
 
-@swap_to_string
 class UrlFrame(Frame):
     """A frame containing a URL string.
 
@@ -574,11 +572,11 @@ class TCON(TextFrame):
                 try:
                     genres.append(self.GENRES[int(value)])
                 except IndexError:
-                    genres.append("Unknown")
+                    genres.append(u"Unknown")
             elif value == "CR":
-                genres.append("Cover")
+                genres.append(u"Cover")
             elif value == "RX":
-                genres.append("Remix")
+                genres.append(u"Remix")
             elif value:
                 newgenres = []
                 genreid, dummy, genrename = genre_re.match(value).groups()
@@ -586,14 +584,14 @@ class TCON(TextFrame):
                 if genreid:
                     for gid in genreid[1:-1].split(")("):
                         if gid.isdigit() and int(gid) < len(self.GENRES):
-                            gid = text_type(self.GENRES[int(gid)])
+                            gid = str(self.GENRES[int(gid)])
                             newgenres.append(gid)
                         elif gid == "CR":
-                            newgenres.append("Cover")
+                            newgenres.append(u"Cover")
                         elif gid == "RX":
-                            newgenres.append("Remix")
+                            newgenres.append(u"Remix")
                         else:
-                            newgenres.append("Unknown")
+                            newgenres.append(u"Unknown")
 
                 if genrename:
                     # "Unescaping" the first parenthesis
@@ -607,7 +605,7 @@ class TCON(TextFrame):
         return genres
 
     def __set_genres(self, genres):
-        if isinstance(genres, string_types):
+        if isinstance(genres, str):
             genres = [genres]
         self.text = [self.__decode(g) for g in genres]
 
@@ -667,6 +665,14 @@ class MVIN(NumericPartTextFrame):
 
 class MVI(MVIN):
     "iTunes Movement Number/Count"
+
+
+class GRP1(TextFrame):
+    "iTunes Grouping"
+
+
+class GP1(GRP1):
+    "iTunes Grouping"
 
 
 class TDOR(TimeStampTextFrame):
@@ -860,7 +866,7 @@ class TXXX(TextFrame):
     _framespec = [
         EncodingSpec('encoding'),
         EncodedTextSpec('desc'),
-        MultiSpec('text', EncodedTextSpec('text'), sep='\u0000', default=[]),
+        MultiSpec('text', EncodedTextSpec('text'), sep=u'\u0000', default=[]),
     ]
 
     @property
@@ -1035,7 +1041,6 @@ class SYTC(Frame):
     __hash__ = Frame.__hash__
 
 
-@swap_to_string
 class USLT(Frame):
     """Unsynchronised lyrics/text transcription.
 
@@ -1045,7 +1050,7 @@ class USLT(Frame):
 
     _framespec = [
         EncodingSpec('encoding', default=Encoding.UTF16),
-        StringSpec('lang', length=3, default="XXX"),
+        StringSpec('lang', length=3, default=u"XXX"),
         EncodedTextSpec('desc'),
         EncodedTextSpec('text'),
     ]
@@ -1065,14 +1070,16 @@ class USLT(Frame):
 
     __hash__ = Frame.__hash__
 
+    def _pprint(self):
+        return "%s=%s=%s" % (self.desc, self.lang, self.text)
 
-@swap_to_string
+
 class SYLT(Frame):
     """Synchronised lyrics/text."""
 
     _framespec = [
         EncodingSpec('encoding'),
-        StringSpec('lang', length=3, default="XXX"),
+        StringSpec('lang', length=3, default=u"XXX"),
         ByteSpec('format', default=1),
         ByteSpec('type', default=0),
         EncodedTextSpec('desc'),
@@ -1083,16 +1090,21 @@ class SYLT(Frame):
     def HashKey(self):
         return '%s:%s:%s' % (self.FrameID, self.desc, self.lang)
 
+    def _pprint(self):
+        return str(self)
+
     def __eq__(self, other):
         return str(self) == other
 
     __hash__ = Frame.__hash__
 
     def __str__(self):
-        return "".join(text for (text, time) in self.text)
+        unit = 'fr' if self.format == 1 else 'ms'
+        return u"\n".join("[{0}{1}]: {2}".format(time, unit, text)
+                          for (text, time) in self.text)
 
     def __bytes__(self):
-        return text_type(self).encode("utf-8")
+        return str(self).encode("utf-8")
 
 
 class COMM(TextFrame):
@@ -1106,7 +1118,7 @@ class COMM(TextFrame):
         EncodingSpec('encoding'),
         StringSpec('lang', length=3, default="XXX"),
         EncodedTextSpec('desc'),
-        MultiSpec('text', EncodedTextSpec('text'), sep='\u0000', default=[]),
+        MultiSpec('text', EncodedTextSpec('text'), sep=u'\u0000', default=[]),
     ]
 
     @property
@@ -1263,11 +1275,11 @@ class APIC(Frame):
         return '%s:%s' % (self.FrameID, self.desc)
 
     def _merge_frame(self, other):
-        other.desc += " "
+        other.desc += u" "
         return other
 
     def _pprint(self):
-        type_desc = text_type(self.type)
+        type_desc = str(self.type)
         if hasattr(self.type, "_pprint"):
             type_desc = self.type._pprint()
 
@@ -1297,7 +1309,7 @@ class PCNT(Frame):
         return self.count
 
     def _pprint(self):
-        return text_type(self.count)
+        return str(self.count)
 
 
 class PCST(Frame):
@@ -1316,7 +1328,7 @@ class PCST(Frame):
         return self.value
 
     def _pprint(self):
-        return text_type(self.value)
+        return str(self.value)
 
 
 class POPM(Frame):
@@ -1420,7 +1432,6 @@ class RBUF(Frame):
         return self.size
 
 
-@swap_to_string
 class AENC(Frame):
     """Audio encryption.
 
@@ -1537,7 +1548,6 @@ class UFID(Frame):
         return "%s=%r" % (self.owner, self.data)
 
 
-@swap_to_string
 class USER(Frame):
     """Terms of use.
 
@@ -1550,7 +1560,7 @@ class USER(Frame):
 
     _framespec = [
         EncodingSpec('encoding'),
-        StringSpec('lang', length=3, default="XXX"),
+        StringSpec('lang', length=3, default=u"XXX"),
         EncodedTextSpec('text'),
     ]
 
@@ -1573,14 +1583,13 @@ class USER(Frame):
         return "%r=%s" % (self.lang, self.text)
 
 
-@swap_to_string
 class OWNE(Frame):
     """Ownership frame."""
 
     _framespec = [
         EncodingSpec('encoding'),
         Latin1TextSpec('price'),
-        StringSpec('date', length=8, default="19700101"),
+        StringSpec('date', length=8, default=u"19700101"),
         EncodedTextSpec('seller'),
     ]
 
@@ -1602,7 +1611,7 @@ class COMR(Frame):
     _framespec = [
         EncodingSpec('encoding'),
         Latin1TextSpec('price'),
-        StringSpec('valid_until', length=8, default="19700101"),
+        StringSpec('valid_until', length=8, default=u"19700101"),
         Latin1TextSpec('contact'),
         ByteSpec('format', default=0),
         EncodedTextSpec('seller'),
@@ -1624,7 +1633,6 @@ class COMR(Frame):
     __hash__ = Frame.__hash__
 
 
-@swap_to_string
 class ENCR(Frame):
     """Encryption method registration.
 
@@ -1651,7 +1659,6 @@ class ENCR(Frame):
     __hash__ = Frame.__hash__
 
 
-@swap_to_string
 class GRID(Frame):
     """Group identification registration."""
 
@@ -1680,7 +1687,6 @@ class GRID(Frame):
     __hash__ = Frame.__hash__
 
 
-@swap_to_string
 class PRIV(Frame):
     """Private frame."""
 
@@ -1706,7 +1712,6 @@ class PRIV(Frame):
     __hash__ = Frame.__hash__
 
 
-@swap_to_string
 class SIGN(Frame):
     """Signature frame."""
 
@@ -2118,7 +2123,7 @@ Frames_2_2 = {}
 
 
 k, v = None, None
-for k, v in iteritems(globals()):
+for k, v in globals().items():
     if isinstance(v, type) and issubclass(v, Frame):
         v.__module__ = "mutagen.id3"
 

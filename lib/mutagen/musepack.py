@@ -19,11 +19,10 @@ __all__ = ["Musepack", "Open", "delete"]
 
 import struct
 
-from ._compat import endswith, xrange
 from mutagen import StreamInfo
 from mutagen.apev2 import APEv2File, error, delete
 from mutagen.id3._util import BitPaddedInt
-from mutagen._util import cdata, convert_error
+from mutagen._util import cdata, convert_error, intround, endswith
 
 
 class MusepackHeaderError(error):
@@ -118,7 +117,7 @@ class MusepackInfo(StreamInfo):
 
         if not self.bitrate and self.length != 0:
             fileobj.seek(0, 2)
-            self.bitrate = int(round(fileobj.tell() * 8 / self.length))
+            self.bitrate = intround(fileobj.tell() * 8 / self.length)
 
     def __parse_sv8(self, fileobj):
         # SV8 http://trac.musepack.net/trac/wiki/SV8Specification
@@ -143,9 +142,13 @@ class MusepackInfo(StreamInfo):
             # packets can be at maximum data_size big and are padded with zeros
 
             if frame_type == b"SH":
+                if frame_type not in mandatory_packets:
+                    raise MusepackHeaderError("Duplicate SH packet")
                 mandatory_packets.remove(frame_type)
                 self.__parse_stream_header(fileobj, data_size)
             elif frame_type == b"RG":
+                if frame_type not in mandatory_packets:
+                    raise MusepackHeaderError("Duplicate RG packet")
                 mandatory_packets.remove(frame_type)
                 self.__parse_replaygain_packet(fileobj, data_size)
             else:
@@ -184,9 +187,13 @@ class MusepackInfo(StreamInfo):
         remaining_size -= l1 + l2
 
         data = fileobj.read(remaining_size)
-        if len(data) != remaining_size:
+        if len(data) != remaining_size or len(data) < 2:
             raise MusepackHeaderError("SH packet ended unexpectedly.")
-        self.sample_rate = RATES[bytearray(data)[0] >> 5]
+        rate_index = (bytearray(data)[0] >> 5)
+        try:
+            self.sample_rate = RATES[rate_index]
+        except IndexError:
+            raise MusepackHeaderError("Invalid sample rate")
         self.channels = (bytearray(data)[1] >> 4) + 1
 
     def __parse_replaygain_packet(self, fileobj, data_size):
@@ -253,12 +260,12 @@ class MusepackInfo(StreamInfo):
     def pprint(self):
         rg_data = []
         if hasattr(self, "title_gain"):
-            rg_data.append("%+0.2f (title)" % self.title_gain)
+            rg_data.append(u"%+0.2f (title)" % self.title_gain)
         if hasattr(self, "album_gain"):
-            rg_data.append("%+0.2f (album)" % self.album_gain)
+            rg_data.append(u"%+0.2f (album)" % self.album_gain)
         rg_data = (rg_data and ", Gain: " + ", ".join(rg_data)) or ""
 
-        return "Musepack SV%d, %.2f seconds, %d Hz, %d bps%s" % (
+        return u"Musepack SV%d, %.2f seconds, %d Hz, %d bps%s" % (
             self.version, self.length, self.sample_rate, self.bitrate, rg_data)
 
 

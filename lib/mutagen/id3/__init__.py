@@ -38,22 +38,30 @@ from ._frames import Frames, Frames_2_2, Frame, TextFrame, UrlFrame, \
 from ._util import ID3NoHeaderError, error, ID3UnsupportedVersionError
 from ._id3v1 import ParseID3v1, MakeID3v1
 from ._tags import ID3Tags
+from ._frames import (AENC, APIC, ASPI, BUF, CHAP, CNT, COM, COMM, COMR, CRA,
+    CRM, CTOC, ENCR, EQU2, ETC, ETCO, GEO, GEOB, GP1, GRID, GRP1, IPL, IPLS,
+    LINK, LNK, MCDI, MCI, MLL, MLLT, MVI, MVIN, MVN, MVNM, OWNE, PCNT, PCST,
+    PIC, POP, POPM, POSS, PRIV, RBUF, REV, RVA, RVA2, RVAD, RVRB, SEEK, SIGN,
+    SLT, STC, SYLT, SYTC, TAL, TALB, TBP, TBPM, TCAT, TCM, TCMP, TCO, TCOM,
+    TCON, TCOP, TCP, TCR, TDA, TDAT, TDEN, TDES, TDLY, TDOR, TDRC, TDRL, TDTG,
+    TDY, TEN, TENC, TEXT, TFLT, TFT, TGID, TIM, TIME, TIPL, TIT1, TIT2, TIT3,
+    TKE, TKEY, TKWD, TLA, TLAN, TLE, TLEN, TMCL, TMED, TMOO, TMT, TOA, TOAL,
+    TOF, TOFN, TOL, TOLY, TOPE, TOR, TORY, TOT, TOWN, TP1, TP2, TP3, TP4, TPA,
+    TPB, TPE1, TPE2, TPE3, TPE4, TPOS, TPRO, TPUB, TRC, TRCK, TRD, TRDA, TRK,
+    TRSN, TRSO, TS2, TSA, TSC, TSI, TSIZ, TSO2, TSOA, TSOC, TSOP, TSOT, TSP,
+    TSRC, TSS, TSSE, TSST, TST, TT1, TT2, TT3, TXT, TXX, TXXX, TYE, TYER, UFI,
+    UFID, ULT, USER, USLT, WAF, WAR, WAS, WCM, WCOM, WCOP, WCP, WFED, WOAF,
+    WOAR, WOAS, WORS, WPAY, WPB, WPUB, WXX, WXXX)
 
 # deprecated
 from ._util import ID3EncryptionUnsupportedError, ID3JunkFrameError, \
     ID3BadUnsynchData, ID3BadCompressedData, ID3TagError, ID3Warning, \
     BitPaddedInt as _BitPaddedIntForPicard
 
-
-for f in Frames:
-    globals()[f] = Frames[f]
-for f in Frames_2_2:
-    globals()[f] = Frames_2_2[f]
-
 # support open(filename) as interface
 Open = ID3
 
-# pyflakes
+# flake8
 ID3, ID3FileType, delete, ID3v1SaveOptions, Encoding, PictureType, CTOCFlags,
 ID3TimeStamp, Frames, Frames_2_2, Frame, TextFrame, UrlFrame, UrlFrameU,
 TimeStampTextFrame, BinaryFrame, NumericPartTextFrame, NumericTextFrame,
@@ -61,6 +69,20 @@ PairedTextFrame, ID3NoHeaderError, error, ID3UnsupportedVersionError,
 ParseID3v1, MakeID3v1, ID3Tags, ID3EncryptionUnsupportedError,
 ID3JunkFrameError, ID3BadUnsynchData, ID3BadCompressedData, ID3TagError,
 ID3Warning
+
+AENC, APIC, ASPI, BUF, CHAP, CNT, COM, COMM, COMR, CRA, CRM, CTOC, ENCR, EQU2,
+ETC, ETCO, GEO, GEOB, GP1, GRID, GRP1, IPL, IPLS, LINK, LNK, MCDI, MCI, MLL,
+MLLT, MVI, MVIN, MVN, MVNM, OWNE, PCNT, PCST, PIC, POP, POPM, POSS, PRIV,
+RBUF, REV, RVA, RVA2, RVAD, RVRB, SEEK, SIGN, SLT, STC, SYLT, SYTC, TAL, TALB,
+TBP, TBPM, TCAT, TCM, TCMP, TCO, TCOM, TCON, TCOP, TCP, TCR, TDA, TDAT, TDEN,
+TDES, TDLY, TDOR, TDRC, TDRL, TDTG, TDY, TEN, TENC, TEXT, TFLT, TFT, TGID,
+TIM, TIME, TIPL, TIT1, TIT2, TIT3, TKE, TKEY, TKWD, TLA, TLAN, TLE, TLEN,
+TMCL, TMED, TMOO, TMT, TOA, TOAL, TOF, TOFN, TOL, TOLY, TOPE, TOR, TORY, TOT,
+TOWN, TP1, TP2, TP3, TP4, TPA, TPB, TPE1, TPE2, TPE3, TPE4, TPOS, TPRO, TPUB,
+TRC, TRCK, TRD, TRDA, TRK, TRSN, TRSO, TS2, TSA, TSC, TSI, TSIZ, TSO2, TSOA,
+TSOC, TSOP, TSOT, TSP, TSRC, TSS, TSSE, TSST, TST, TT1, TT2, TT3, TXT, TXX,
+TXXX, TYE, TYER, UFI, UFID, ULT, USER, USLT, WAF, WAR, WAS, WCM, WCOM, WCOP,
+WCP, WFED, WOAF, WOAR, WOAS, WORS, WPAY, WPB, WPUB, WXX, WXXX
 
 
 # Workaround for http://tickets.musicbrainz.org/browse/PICARD-833

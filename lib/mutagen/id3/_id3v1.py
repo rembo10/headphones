@@ -11,22 +11,32 @@
 import errno
 from struct import error as StructError, unpack
 
-from mutagen._util import chr_, text_type
+from mutagen._util import bchr
 
-from ._frames import TCON, TRCK, COMM, TDRC, TALB, TPE1, TIT2
+from ._frames import TCON, TRCK, COMM, TDRC, TYER, TALB, TPE1, TIT2
 
 
-def find_id3v1(fileobj):
+def find_id3v1(fileobj, v2_version=4, known_frames=None):
     """Returns a tuple of (id3tag, offset_to_end) or (None, 0)
 
     offset mainly because we used to write too short tags in some cases and
     we need the offset to delete them.
+
+    v2_version: Decides whether ID3v2.3 or ID3v2.4 tags
+                should be returned. Must be 3 or 4.
+
+    known_frames (Dict[`mutagen.text`, `Frame`]): dict mapping frame
+        IDs to Frame objects
     """
+
+    if v2_version not in (3, 4):
+        raise ValueError("Only 3 and 4 possible for v2_version")
 
     # id3v1 is always at the end (after apev2)
 
     extra_read = b"APETAGEX".index(b"TAG")
 
+    old_pos = fileobj.tell()
     try:
         fileobj.seek(-128 - extra_read, 2)
     except IOError as e:
@@ -38,6 +48,7 @@ def find_id3v1(fileobj):
             raise
 
     data = fileobj.read(128 + extra_read)
+    fileobj.seek(old_pos, 0)
     try:
         idx = data.index(b"TAG")
     except ValueError:
@@ -53,7 +64,7 @@ def find_id3v1(fileobj):
             if idx == ape_idx + extra_read:
                 return (None, 0)
 
-        tag = ParseID3v1(data[idx:])
+        tag = ParseID3v1(data[idx:], v2_version, known_frames)
         if tag is None:
             return (None, 0)
 
@@ -62,11 +73,20 @@ def find_id3v1(fileobj):
 
 
 # ID3v1.1 support.
-def ParseID3v1(data):
-    """Parse an ID3v1 tag, returning a list of ID3v2.4 frames.
+def ParseID3v1(data, v2_version=4, known_frames=None):
+    """Parse an ID3v1 tag, returning a list of ID3v2 frames
 
     Returns a {frame_name: frame} dict or None.
+
+    v2_version: Decides whether ID3v2.3 or ID3v2.4 tags
+                should be returned. Must be 3 or 4.
+
+    known_frames (Dict[`mutagen.text`, `Frame`]): dict mapping frame
+        IDs to Frame objects
     """
+
+    if v2_version not in (3, 4):
+        raise ValueError("Only 3 and 4 possible for v2_version")
 
     try:
         data = data[data.index(b"TAG"):]
@@ -94,26 +114,48 @@ def ParseID3v1(data):
     def fix(data):
         return data.split(b"\x00")[0].strip().decode('latin1')
 
-    title, artist, album, year, comment = list(map(
-        fix, [title, artist, album, year, comment]))
+    title, artist, album, year, comment = map(
+        fix, [title, artist, album, year, comment])
+
+    frame_class = {
+        "TIT2": TIT2,
+        "TPE1": TPE1,
+        "TALB": TALB,
+        "TYER": TYER,
+        "TDRC": TDRC,
+        "COMM": COMM,
+        "TRCK": TRCK,
+        "TCON": TCON,
+    }
+    for key in frame_class:
+        if known_frames is not None:
+            if key in known_frames:
+                frame_class[key] = known_frames[key]
+            else:
+                frame_class[key] = None
 
     frames = {}
-    if title:
-        frames["TIT2"] = TIT2(encoding=0, text=title)
-    if artist:
-        frames["TPE1"] = TPE1(encoding=0, text=[artist])
-    if album:
-        frames["TALB"] = TALB(encoding=0, text=album)
+    if title and frame_class["TIT2"]:
+        frames["TIT2"] = frame_class["TIT2"](encoding=0, text=title)
+    if artist and frame_class["TPE1"]:
+        frames["TPE1"] = frame_class["TPE1"](encoding=0, text=[artist])
+    if album and frame_class["TALB"]:
+        frames["TALB"] = frame_class["TALB"](encoding=0, text=album)
     if year:
-        frames["TDRC"] = TDRC(encoding=0, text=year)
-    if comment:
-        frames["COMM"] = COMM(
+        if v2_version == 3 and frame_class["TYER"]:
+            frames["TYER"] = frame_class["TYER"](encoding=0, text=year)
+        elif frame_class["TDRC"]:
+            frames["TDRC"] = frame_class["TDRC"](encoding=0, text=year)
+    if comment and frame_class["COMM"]:
+        frames["COMM"] = frame_class["COMM"](
             encoding=0, lang="eng", desc="ID3v1 Comment", text=comment)
+
     # Don't read a track number if it looks like the comment was
     # padded with spaces instead of nulls (thanks, WinAmp).
-    if track and ((track != 32) or (data[-3] == b'\x00'[0])):
+    if (track and frame_class["TRCK"] and
+            ((track != 32) or (data[-3] == b'\x00'[0]))):
         frames["TRCK"] = TRCK(encoding=0, text=str(track))
-    if genre != 255:
+    if genre != 255 and frame_class["TCON"]:
         frames["TCON"] = TCON(encoding=0, text=str(genre))
     return frames
 
@@ -123,8 +165,8 @@ def MakeID3v1(id3):
 
     v1 = {}
 
-    for v2id, name in list({"TIT2": "title", "TPE1": "artist",
-                       "TALB": "album"}.items()):
+    for v2id, name in {"TIT2": "title", "TPE1": "artist",
+                       "TALB": "album"}.items():
         if v2id in id3:
             text = id3[v2id].text[0].encode('latin1', 'replace')[:30]
         else:
@@ -139,7 +181,7 @@ def MakeID3v1(id3):
 
     if "TRCK" in id3:
         try:
-            v1["track"] = chr_(+id3["TRCK"])
+            v1["track"] = bchr(+id3["TRCK"])
         except ValueError:
             v1["track"] = b"\x00"
     else:
@@ -152,14 +194,14 @@ def MakeID3v1(id3):
             pass
         else:
             if genre in TCON.GENRES:
-                v1["genre"] = chr_(TCON.GENRES.index(genre))
+                v1["genre"] = bchr(TCON.GENRES.index(genre))
     if "genre" not in v1:
         v1["genre"] = b"\xff"
 
     if "TDRC" in id3:
-        year = text_type(id3["TDRC"]).encode('ascii')
+        year = str(id3["TDRC"]).encode('ascii')
     elif "TYER" in id3:
-        year = text_type(id3["TYER"]).encode('ascii')
+        year = str(id3["TYER"]).encode('ascii')
     else:
         year = b""
     v1["year"] = (year + b"\x00\x00\x00\x00")[:4]
