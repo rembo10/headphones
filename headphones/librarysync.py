@@ -77,9 +77,9 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
                 if track['ArtistName']:
                     # Make sure deleted files get accounted for when updating artist track counts
                     new_artists.append(track['ArtistName'])
-                myDB.action('DELETE FROM have WHERE Location=?', [Track['Location']])
+                myDB.action('DELETE FROM have WHERE Location=?', [track['Location']])
                 logger.info(
-                    f"{Track['Location']} removed from Headphones, as it "
+                    f"{track['Location']} removed from Headphones, as it "
                     f"is no longer on disk"
                 )
 
