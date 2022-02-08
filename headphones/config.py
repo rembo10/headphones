@@ -157,7 +157,7 @@ _CONFIG_DEFINITIONS = {
     'LASTFM_USERNAME': (str, 'General', ''),
     'LAUNCH_BROWSER': (int, 'General', 1),
     'LIBRARYSCAN': (int, 'General', 1),
-    'LIBRARYSCAN_INTERVAL': (int, 'General', 300),
+    'LIBRARYSCAN_INTERVAL': (int, 'General', 24),
     'LMS_ENABLED': (int, 'LMS', 0),
     'LMS_HOST': (str, 'LMS', ''),
     'LOG_DIR': (path, 'General', ''),
