@@ -63,12 +63,12 @@ def request_lastfm(method, **kwargs):
 
 def getSimilar():
     myDB = db.DBConnection()
-    results = myDB.select("SELECT ArtistID from artists ORDER BY HaveTracks DESC")
+    results = myDB.select("SELECT ArtistID from artists ORDER BY HaveTracks DESC LIMIT 10")
 
     logger.info("Fetching similar artists from Last.FM for tag cloud")
     artistlist = []
 
-    for result in results[:12]:
+    for result in results:
         data = request_lastfm("artist.getsimilar", mbid=result["ArtistId"])
 
         if data and "similarartists" in data:
