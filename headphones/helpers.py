@@ -166,18 +166,17 @@ def now():
     return now.strftime("%Y-%m-%d %H:%M:%S")
 
 
-def get_age(date):
-    try:
-        split_date = date.split('-')
-    except:
+def is_valid_date(date):
+    if not date:
         return False
+    else:
+        return bool(re.match(r'\d{4}-\d{2}-\d{2}', date))
 
-    try:
-        days_old = int(split_date[0]) * 365 + int(split_date[1]) * 30 + int(split_date[2])
-    except (IndexError, ValueError):
-        days_old = False
 
-    return days_old
+def age(d):
+    '''Requires a valid date'''
+    delta = date.today() - date.fromisoformat(d)
+    return delta.days
 
 
 def bytes_to_mb(bytes):

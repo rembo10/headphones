@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from .unittestcompat import TestCase
-from headphones.helpers import clean_name
+from headphones.helpers import clean_name, is_valid_date, age
 
 
 class HelpersTest(TestCase):
@@ -46,3 +46,13 @@ class HelpersTest(TestCase):
         self.assertEqual(
             test, expected, "check clean_name() with narrow non-ascii input"
         )
+
+    def test_is_valid_date(date):
+        test_cases = [
+            ('2021-11-12', True, "check is_valid_date returns True for valid date"),
+            (None, False, "check is_valid_date returns False for None"),
+            ('2021-11', False, "check is_valid_date returns False for incomplete"),
+            ('2021', False, "check is_valid_date returns False for incomplete")
+        ]
+        for input, expected, desc in test_cases:
+            self.assertEqual(is_valid_date(input), expected, desc)

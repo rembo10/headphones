@@ -245,7 +245,7 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
         rgid = rg['id']
         skip_log = 0
         # Make a user configurable variable to skip update of albums with release dates older than this date (in days)
-        pause_delta = headphones.CONFIG.MB_IGNORE_AGE
+        ignore_age = headphones.CONFIG.MB_IGNORE_AGE
 
         rg_exists = myDB.action("SELECT * from albums WHERE AlbumID=?", [rg['id']]).fetchone()
 
@@ -279,13 +279,13 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
                         release_date = check_release_date + "-12-31"
                     else:
                         release_date = today
-                    if helpers.get_age(today) - helpers.get_age(release_date) < pause_delta:
+                    if helpers.age(release_date) < ignore_age:
                         logger.info("[%s] Now updating: %s (Release Date <%s Days)",
-                                    artist['artist_name'], rg['title'], pause_delta)
+                                    artist['artist_name'], rg['title'], ignore_age)
                         new_releases = mb.get_new_releases(rgid, includeExtras, True)
                     else:
                         logger.info("[%s] Skipping: %s (Release Date >%s Days)",
-                                    artist['artist_name'], rg['title'], pause_delta)
+                                    artist['artist_name'], rg['title'], ignore_age)
                         skip_log = 1
                         new_releases = 0
 
@@ -450,14 +450,9 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
 
                 if headphones.CONFIG.AUTOWANT_ALL:
                     newValueDict['Status'] = "Wanted"
-                elif album['ReleaseDate'] > today and headphones.CONFIG.AUTOWANT_UPCOMING:
-                    newValueDict['Status'] = "Wanted"
-                # Sometimes "new" albums are added to musicbrainz after their release date, so let's try to catch these
-                # The first test just makes sure we have year-month-day
-                elif helpers.get_age(album['ReleaseDate']) and helpers.get_age(
-                        today) - helpers.get_age(
-                        album['ReleaseDate']) < 21 and headphones.CONFIG.AUTOWANT_UPCOMING:
-                    newValueDict['Status'] = "Wanted"
+                elif headphones.CONFIG.AUTOWANT_UPCOMING:
+                    if helpers.is_valid_date(album['ReleaseDate']) and helpers.age(album['ReleaseDate']) < 21:
+                        newValueDict['Status'] = "Wanted"
                 else:
                     newValueDict['Status'] = "Skipped"
 
