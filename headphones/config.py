@@ -363,12 +363,12 @@ class Config(object):
 
         try:
             my_val = definition_type(self._config[section][ini_key])
-            # ConfigParser interprets empty strings in the config
+            # ConfigParser interprets quotes in the config
             # literally, so we need to sanitize it. It's not really
             # a config upgrade, since a user can at any time put 
-            # some_key = ''
-            if my_val == '""' or my_val == "''":
-                my_val = ''
+            # some_key = 'some_val'
+            if type(my_val) in [str, path]:
+                my_val = my_val.strip('"').strip("'")
         except Exception:
             my_val = default
             self._config[section][ini_key] = str(my_val)
