@@ -14,25 +14,25 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-from operator import itemgetter
-import unicodedata
-import datetime
+import os
+import re
 import shutil
-import time
 import sys
 import tempfile
-import glob
+import time
+import unicodedata
+from contextlib import contextmanager
+from datetime import datetime, date
+from fnmatch import fnmatch
+from functools import cmp_to_key
+from glob import glob
+from operator import itemgetter
 
 from beets import logging as beetslogging
-import six
-from contextlib import contextmanager
-
-import fnmatch
-import functools
-import re
-import os
 from mediafile import MediaFile, FileTypeError, UnreadableFileError
+from six import text_type
 from unidecode import unidecode
+
 import headphones
 
 
@@ -74,7 +74,7 @@ def multikeysort(items, columns):
         else:
             return 0
 
-    return sorted(items, key=functools.cmp_to_key(comparer))
+    return sorted(items, key=cmp_to_key(comparer))
 
 
 def checked(variable):
@@ -156,21 +156,19 @@ def convert_seconds(s):
 
 
 def today():
-    today = datetime.date.today()
-    yyyymmdd = datetime.date.isoformat(today)
-    return yyyymmdd
+    return date.isoformat(date.today())
 
 
 def now():
-    now = datetime.datetime.now()
+    now = datetime.now()
     return now.strftime("%Y-%m-%d %H:%M:%S")
 
 
-def is_valid_date(date):
-    if not date:
+def is_valid_date(d):
+    if not d:
         return False
     else:
-        return bool(re.match(r'\d{4}-\d{2}-\d{2}', date))
+        return bool(re.match(r'\d{4}-\d{2}-\d{2}', d))
 
 
 def age(d):
@@ -508,7 +506,7 @@ def path_match_patterns(path, patterns):
     """
 
     for pattern in patterns:
-        if fnmatch.fnmatch(path, pattern):
+        if fnmatch(path, pattern):
             return True
 
     # No match
@@ -714,7 +712,7 @@ def preserve_torrent_directory(albumpath, forced=False, single=False):
             workdir = os.path.join(tempdir, prefix)
             workdir = re.sub(r'\[', '[[]', workdir)
             workdir = re.sub(r'(?<!\[)\]', '[]]', workdir)
-            if len(glob.glob(workdir + '*/')) >= 3:
+            if len(glob(workdir + '*/')) >= 3:
                 logger.error(
                     "Looks like a temp directory has previously been created "
                     "for this albumpath, not continuing "
@@ -1033,7 +1031,7 @@ class BeetsLogCapture(beetslogging.Handler):
         self.messages = []
 
     def emit(self, record):
-        self.messages.append(six.text_type(record.msg))
+        self.messages.append(text_type(record.msg))
 
 
 @contextmanager
