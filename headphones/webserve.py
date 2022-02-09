@@ -15,34 +15,44 @@
 
 # NZBGet support added by CurlyMo <curlymoo1@gmail.com> as a part of XBian - XBMC on the Raspberry Pi
 
-from operator import itemgetter
-import threading
-import secrets
-import random
-import urllib.request, urllib.parse, urllib.error
 import json
-import time
-import sys
-from html import escape as html_escape
-import urllib.request, urllib.error, urllib.parse
-
 import os
+import random
 import re
-from headphones import logger, searcher, db, importer, mb, lastfm, librarysync, helpers, notifiers, crier
-from headphones.helpers import checked, radio, today, clean_name
-from mako.lookup import TemplateLookup
-from mako import exceptions
-import headphones
-import cherrypy
+import secrets
+import sys
+import threading
+import time
+from collections import OrderedDict
+from html import escape as html_escape
+from operator import itemgetter
+from urllib import parse
 
-try:
-    # pylint:disable=E0611
-    # ignore this error because we are catching the ImportError
-    from collections import OrderedDict
-    # pylint:enable=E0611
-except ImportError:
-    # Python 2.6.x fallback, from libs
-    from ordereddict import OrderedDict
+import cherrypy
+from mako import exceptions
+from mako.lookup import TemplateLookup
+
+import headphones
+from headphones import (
+    crier,
+    db,
+    importer,
+    lastfm,
+    librarysync,
+    logger,
+    mb,
+    notifiers,
+    searcher,
+)
+from headphones.helpers import (
+    checked,
+    clean_name,
+    have_pct_have_total,
+    pattern_substitute,
+    radio,
+    replace_illegal_chars,
+    today,
+)
 
 
 def serve_template(templatename, **kwargs):
@@ -326,9 +336,9 @@ class WebInterface(object):
                   '$first': firstchar.lower(),
                   }
 
-        folder = helpers.pattern_substitute(folder_format.strip(), values, normalize=True)
+        folder = pattern_substitute(folder_format.strip(), values, normalize=True)
 
-        folder = helpers.replace_illegal_chars(folder, type="folder")
+        folder = replace_illegal_chars(folder, type="folder")
         folder = folder.replace('./', '_/').replace('/.', '/_')
 
         if folder.endswith('.'):
@@ -461,7 +471,7 @@ class WebInterface(object):
     def download_specific_release(self, AlbumID, title, size, url, provider, kind, **kwargs):
         # Handle situations where the torrent url contains arguments that are parsed
         if kwargs:
-            url = urllib.parse.quote(url, safe=":?/=&") + '&' + urllib.parse.urlencode(kwargs)
+            url = parse.quote(url, safe=":?/=&") + '&' + parse.urlencode(kwargs)
         try:
             result = [(title, int(size), url, provider, kind)]
         except ValueError:
@@ -586,7 +596,7 @@ class WebInterface(object):
         for albums in have_albums:
             # Have to skip over manually matched tracks
             if albums['ArtistName'] and albums['AlbumTitle'] and albums['TrackTitle']:
-                original_clean = helpers.clean_name(
+                original_clean = clean_name(
                     albums['ArtistName'] + " " + albums['AlbumTitle'] + " " + albums['TrackTitle'])
                 # else:
                 #     original_clean = None
@@ -633,8 +643,8 @@ class WebInterface(object):
                 (artist, album))
 
         elif action == "matchArtist":
-            existing_artist_clean = helpers.clean_name(existing_artist).lower()
-            new_artist_clean = helpers.clean_name(new_artist).lower()
+            existing_artist_clean = clean_name(existing_artist).lower()
+            new_artist_clean = clean_name(new_artist).lower()
             if new_artist_clean != existing_artist_clean:
                 have_tracks = myDB.action(
                     'SELECT Matched, CleanName, Location, BitRate, Format FROM have WHERE ArtistName=?',
@@ -678,10 +688,10 @@ class WebInterface(object):
                     "Artist %s already named appropriately; nothing to modify" % existing_artist)
 
         elif action == "matchAlbum":
-            existing_artist_clean = helpers.clean_name(existing_artist).lower()
-            new_artist_clean = helpers.clean_name(new_artist).lower()
-            existing_album_clean = helpers.clean_name(existing_album).lower()
-            new_album_clean = helpers.clean_name(new_album).lower()
+            existing_artist_clean = clean_name(existing_artist).lower()
+            new_artist_clean = clean_name(new_artist).lower()
+            existing_album_clean = clean_name(existing_album).lower()
+            new_album_clean = clean_name(new_album).lower()
             existing_clean_string = existing_artist_clean + " " + existing_album_clean
             new_clean_string = new_artist_clean + " " + new_album_clean
             if existing_clean_string != new_clean_string:
@@ -737,7 +747,7 @@ class WebInterface(object):
             'SELECT ArtistName, AlbumTitle, TrackTitle, CleanName, Matched from have')
         for albums in manualalbums:
             if albums['ArtistName'] and albums['AlbumTitle'] and albums['TrackTitle']:
-                original_clean = helpers.clean_name(
+                original_clean = clean_name(
                     albums['ArtistName'] + " " + albums['AlbumTitle'] + " " + albums['TrackTitle'])
                 if albums['Matched'] == "Ignored" or albums['Matched'] == "Manual" or albums[
                         'CleanName'] != original_clean:
@@ -778,7 +788,7 @@ class WebInterface(object):
                 [artist])
             update_count = 0
             for tracks in update_clean:
-                original_clean = helpers.clean_name(
+                original_clean = clean_name(
                     tracks['ArtistName'] + " " + tracks['AlbumTitle'] + " " + tracks[
                         'TrackTitle']).lower()
                 album = tracks['AlbumTitle']
@@ -810,7 +820,7 @@ class WebInterface(object):
                 (artist, album))
             update_count = 0
             for tracks in update_clean:
-                original_clean = helpers.clean_name(
+                original_clean = clean_name(
                     tracks['ArtistName'] + " " + tracks['AlbumTitle'] + " " + tracks[
                         'TrackTitle']).lower()
                 track_title = tracks['TrackTitle']
@@ -1018,9 +1028,7 @@ class WebInterface(object):
             totalcount = myDB.select('SELECT COUNT(*) from artists')[0][0]
 
         if sortbyhavepercent:
-            filtered.sort(key=lambda x: (
-                float(x['HaveTracks']) / x['TotalTracks'] if x['TotalTracks'] > 0 else 0.0,
-                x['HaveTracks'] if x['HaveTracks'] else 0.0), reverse=sSortDir_0 == "asc")
+            filtered.sort(key=have_pct_have_total, reverse=sSortDir_0 == "asc")
 
         # can't figure out how to change the datatables default sorting order when its using an ajax datasource so ill
         # just reverse it here and the first click on the "Latest Album" header will sort by descending release date

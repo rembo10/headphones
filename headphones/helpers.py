@@ -1043,3 +1043,10 @@ def capture_beets_log(logger='beets'):
         yield capture.messages
     finally:
         log.removeHandler(capture)
+
+def have_pct_have_total(db_artist):
+    have_tracks = db_artist['HaveTracks'] or 0
+    total_tracks = db_artist['TotalTracks'] or 0 
+    have_pct = have_tracks / total_tracks if total_tracks else 0
+    return (have_pct, total_tracks)
+
