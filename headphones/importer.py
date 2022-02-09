@@ -102,12 +102,13 @@ def artistlist_to_mbids(artistlist, forced=False):
             myDB.action('DELETE from newartists WHERE ArtistName=?', [artist])
 
     # Update the similar artist tag cloud:
-    logger.info('Updating artist information from Last.fm')
+    # TODO: Fix last.fm api
+    # logger.info('Updating artist information from Last.fm')
 
-    try:
-        lastfm.getSimilar()
-    except Exception as e:
-        logger.warn('Failed to update artist information from Last.fm: %s' % e)
+    # try:
+    #     lastfm.getSimilar()
+    # except Exception as e:
+    #     logger.warn('Failed to update artist information from Last.fm: %s' % e)
 
 
 def addArtistIDListToDB(artistidlist):
