@@ -275,9 +275,9 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
                     if len(check_release_date) == 10:
                         release_date = check_release_date
                     elif len(check_release_date) == 7:
-                        release_date = check_release_date + "-31"
+                        release_date = check_release_date + "-27"
                     elif len(check_release_date) == 4:
-                        release_date = check_release_date + "-12-31"
+                        release_date = check_release_date + "-12-27"
                     else:
                         release_date = today
                     if helpers.age(release_date) < ignore_age:
