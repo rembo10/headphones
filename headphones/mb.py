@@ -91,7 +91,7 @@ def findArtist(name, limit=1):
         try:
             artistResults = musicbrainzngs.search_artists(limit=limit, **criteria)['artist-list']
         except ValueError as e:
-            if "at least one query term is required" in e.message:
+            if "at least one query term is required" in str(e):
                 logger.error(
                     "Tried to search without a term, or an empty one. Provided artist (probably emtpy): %s",
                     name)
