@@ -117,7 +117,7 @@ class DBConnection:
                     break
 
             except sqlite3.OperationalError as e:
-                if "unable to open database file" in e.message or "database is locked" in e.message:
+                if "unable to open database file" in str(e) or "database is locked" in str(e):
                     dberror = e
                     if args is None:
                         logger.debug('Database error: %s. Query: %s', e, query)
