@@ -327,7 +327,7 @@ class Config(object):
     def __init__(self, config_file):
         """ Initialize the config with values from a file """
         self._config_file = config_file
-        self._config = ConfigParser()
+        self._config = ConfigParser(interpolation=None)
         self._config.read(self._config_file)
         for key in list(_CONFIG_DEFINITIONS.keys()):
             self.check_setting(key)
@@ -376,7 +376,7 @@ class Config(object):
 
     def write(self):
         """ Make a copy of the stored config and write it to the configured file """
-        new_config = ConfigParser()
+        new_config = ConfigParser(interpolation=None)
 
         # first copy over everything from the old config, even if it is not
         # correctly defined to keep from losing data
