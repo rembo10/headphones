@@ -65,7 +65,6 @@ def checkFolder():
                             folder_name = torrent_folder_name
 
                 if folder_name:
-                    print(folder_name)
                     album_path = os.path.join(download_dir, folder_name)
                     logger.debug("Checking if %s exists" % album_path)
 
@@ -80,7 +79,6 @@ def checkFolder():
 
 
 def verify(albumid, albumpath, Kind=None, forced=False, keep_original_folder=False, single=False):
-    print(albumpath)
     myDB = db.DBConnection()
     release = myDB.action('SELECT * from albums WHERE AlbumID=?', [albumid]).fetchone()
     tracks = myDB.select('SELECT * from tracks WHERE AlbumID=?', [albumid])

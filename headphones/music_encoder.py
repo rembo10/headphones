@@ -30,7 +30,6 @@ from . import getXldProfile
 
 
 def encode(albumPath):
-    print(albumPath)
     use_xld = headphones.CONFIG.ENCODER == 'xld'
 
     # Return if xld details not found

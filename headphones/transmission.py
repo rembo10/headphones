@@ -205,5 +205,4 @@ def torrentAction(method, arguments):
             continue
 
         resp_json = response.json()
-        print(resp_json)
         return resp_json
