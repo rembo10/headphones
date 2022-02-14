@@ -809,7 +809,7 @@ def send_to_downloader(data, bestqual, album):
             try:
                 prev = os.umask(headphones.UMASK)
 
-                with open(download_path, 'w') as fp:
+                with open(download_path, 'wb') as fp:
                     fp.write(data)
 
                 os.umask(prev)
