@@ -70,7 +70,8 @@ def sendNZB(nzb):
     nzbcontent64 = None
     if nzb.resultType == "nzbdata":
         data = nzb.extraInfo[0]
-        nzbcontent64 = standard_b64encode(data)
+        # NZBGet needs a string, not bytes
+        nzbcontent64 = standard_b64encode(data).decode("utf-8")
 
     logger.info("Sending NZB to NZBget")
     logger.debug("URL: " + url)
