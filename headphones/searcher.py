@@ -82,8 +82,8 @@ def torrent_to_file(target_file, data):
             fp.write(data)
     except IOError as e:
         logger.error(
-            "Could not write torrent file '%s': %s. Skipping.",
-            target_file, e.message)
+            f"Could not write `{target_file}`: {str(e)}"
+        )
         return
 
     # Try to change permissions
