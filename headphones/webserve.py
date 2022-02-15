@@ -24,6 +24,7 @@ import sys
 import threading
 import time
 from collections import OrderedDict
+from dataclasses import asdict
 from html import escape as html_escape
 from operator import itemgetter
 from urllib import parse
@@ -53,6 +54,7 @@ from headphones.helpers import (
     replace_illegal_chars,
     today,
 )
+from headphones.types import Result
 
 
 def serve_template(templatename, **kwargs):
@@ -450,21 +452,8 @@ class WebInterface(object):
     @cherrypy.expose
     @cherrypy.tools.json_out()
     def choose_specific_download(self, AlbumID):
-        results = searcher.searchforalbum(AlbumID, choose_specific_download=True)
-
-        data = []
-
-        for result in results:
-            result_dict = {
-                'title': result[0],
-                'size': result[1],
-                'url': result[2],
-                'provider': result[3],
-                'kind': result[4],
-                'matches': result[5]
-            }
-            data.append(result_dict)
-        return data
+        results = searcher.searchforalbum(AlbumID, choose_specific_download=True) or []
+        return list(map(asdict, results))
 
     @cherrypy.expose
     @cherrypy.tools.json_out()
@@ -473,17 +462,17 @@ class WebInterface(object):
         if kwargs:
             url = parse.quote(url, safe=":?/=&") + '&' + parse.urlencode(kwargs)
         try:
-            result = [(title, int(size), url, provider, kind)]
+            result = [Result(title, int(size), url, provider, kind, True)]
         except ValueError:
-            result = [(title, float(size), url, provider, kind)]
+            result = [Result(title, float(size), url, provider, kind, True)]
 
         logger.info("Making sure we can download the chosen result")
-        (data, bestqual) = searcher.preprocess(result)
+        data, result = searcher.preprocess(result)
 
-        if data and bestqual:
+        if data and result:
             myDB = db.DBConnection()
             album = myDB.action('SELECT * from albums WHERE AlbumID=?', [AlbumID]).fetchone()
-            searcher.send_to_downloader(data, bestqual, album)
+            searcher.send_to_downloader(data, result, album)
             return {'result': 'success'}
         else:
             return {'result': 'failure'}

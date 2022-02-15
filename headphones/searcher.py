@@ -25,7 +25,6 @@ import subprocess
 import unicodedata
 import urllib.parse
 from base64 import b16encode, b32decode
-from dataclasses import dataclass
 from hashlib import sha1
 
 from bencode import encode as bencode
@@ -38,6 +37,7 @@ from unidecode import unidecode
 
 import headphones
 from headphones.common import USER_AGENT
+from headphones.types import Result
 from headphones import logger, db, helpers, classes, sab, nzbget, request
 from headphones import utorrent, transmission, notifiers, rutracker, deluge, qbittorrent
 
@@ -55,15 +55,6 @@ ruobj = None
 # Persistent RED API object
 redobj = None
 
-
-@dataclass(frozen=True)
-class Result:
-    title: str
-    size: int
-    url: str
-    provider: str
-    url_type: str
-    matches: bool
 
 
 def fix_url(s, charset="utf-8"):
@@ -150,7 +141,7 @@ def calculate_torrent_hash(link, data=None):
         if len(torrent_hash) == 32:
             torrent_hash = b16encode(b32decode(torrent_hash)).lower()
     elif data:
-        info = bdecode(data)["info"]
+        info = bdecode(data)[b"info"]
         torrent_hash = sha1(bencode(info)).hexdigest()
     else:
         raise ValueError("Cannot calculate torrent hash without magnet link "
@@ -335,12 +326,9 @@ def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
     results = [result for result in results if result.matches]
 
     # Sort the remaining results
-    print(f"Sorting {len(results)} search results")
     sorted_search_results = sort_search_results(results, album, new, albumlength)
-    print(f"Sorted")
 
     if not sorted_search_results:
-        print(len(sorted_search_results))
         return
 
     logger.info(
@@ -805,7 +793,7 @@ def send_to_downloader(data, result, album):
         f"{result.title}</a> - {helpers.bytes_to_mb(result.size)}"
     )
     # Get rid of any dodgy chars here so we can prevent sab from renaming our downloads
-    kind = result.url_type
+    kind = result.kind
     seed_ratio = None
     torrentid = None
 
@@ -1902,7 +1890,18 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
 
 def preprocess(resultlist):
     for result in resultlist:
-        if result.url_type == 'torrent':
+
+        if result.provider in ["The Pirate Bay", "Old Pirate Bay"]:
+            headers = {
+                'User-Agent':
+                    'Mozilla/5.0 (Windows NT 6.3; Win64; x64) \
+                    AppleWebKit/537.36 (KHTML, like Gecko) \
+                    Chrome/41.0.2243.2 Safari/537.36'
+            }
+        else:
+            headers = {'User-Agent': USER_AGENT}
+
+        if result.kind == 'torrent':
             # Get out of here if we're using Transmission or Deluge
             # if not a magnet link still need the .torrent to generate hash... uTorrent support labeling
             if headphones.CONFIG.TORRENT_DOWNLOADER in [1, 3]:
@@ -1938,34 +1937,22 @@ def preprocess(resultlist):
                                 result.size,
                                 link,
                                 result.provider,
-                                result.url_type,
+                                result.kind,
                                 result.matches
                             )
                             return True, result
                     else:
-                        return True, result
+                        return r.content, result
 
 
             # Download the torrent file
-            if result.provider in ["The Pirate Bay", "Old Pirate Bay"]:
-                headers = {
-                    'User-Agent':
-                        'Mozilla/5.0 (Windows NT 6.3; Win64; x64) \
-                         AppleWebKit/537.36 (KHTML, like Gecko) \
-                         Chrome/41.0.2243.2 Safari/537.36'
-                }
-            else:
-                headers = {'User-Agent': USER_AGENT}
-
             return request.request_content(url=result.url, headers=headers), result
 
-        if result.url_type == 'magnet':
+        if result.kind == 'magnet':
             magnet_link = result.url
             return "d10:magnet-uri%d:%se" % (len(magnet_link), magnet_link), result
 
         else:
-            headers = {'User-Agent': USER_AGENT}
-
             if result.provider == 'headphones':
                 return request.request_content(
                     url=result.url,
