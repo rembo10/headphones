@@ -79,6 +79,7 @@ class Vars:
     Metadata $variable names (only ones set explicitly by headphones).
     """
     DISC = '$Disc'
+    DISC_TOTAL = '$DiscTotal',
     TRACK = '$Track'
     TITLE = '$Title'
     ARTIST = '$Artist'
@@ -171,7 +172,7 @@ def _lower(s):
     return None
 
 
-def file_metadata(path, release):
+def file_metadata(path, release, single_disc_ignore=False):
     # type: (str,sqlite3.Row)->Tuple[Mapping[str,str],bool]
     """
     Prepare metadata dictionary for path substitution, based on file name,
@@ -194,7 +195,13 @@ def file_metadata(path, release):
     _row_to_dict(release, res)
 
     date, year = _date_year(release)
-    if not f.disc:
+
+    if not f.disctotal or (f.disctotal == 1 and single_disc_ignore):
+        disc_total = ''
+    else:
+        disc_total = '%d' % f.disctotal
+
+    if not f.disc or (f.disctotal == 1 and single_disc_ignore):
         disc_number = ''
     else:
         disc_number = '%d' % f.disc
@@ -226,6 +233,7 @@ def file_metadata(path, release):
     album_title = release['AlbumTitle']
     override_values = {
         Vars.DISC: disc_number,
+        Vars.DISC_TOTAL: disc_total,
         Vars.TRACK: track_number,
         Vars.TITLE: title,
         Vars.ARTIST: artist_name,

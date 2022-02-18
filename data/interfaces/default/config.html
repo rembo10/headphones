@@ -1370,17 +1370,20 @@
                             <div class="row">
                                 <label>File Format</label>
                                 <input type="text" name="file_format" value="${config['file_format']}" size="43">
-                                <small>Use: $Disc/$disc (disc #), $Track/$track (track #), $Title/$title, $Artist/$artist, $Album/$album and $Year/$year. Put optional variables in curly braces, use single-quote marks to escape curly braces literally ('{', '}').</small>
+                                <small>Use: In addition to the above, there is also $Title/$title (track title), $Track (track #), $Disc (disc #), $DiscTotal.</small>
                             </div>
-                            <div class="checkbox row clearfix">
+                            <div class="checkbox row left clearfix nopad">
                                 <input type="checkbox" name="file_underscores" id="file_underscores" value="1" ${config['file_underscores']}/><label>Use underscores instead of spaces</label>
+                            </div>
+                            <div class="checkbox row left clearfix nopad">
+                                <input type="checkbox" name="rename_single_disc_ignore" id="rename_single_disc_ignore" value="1" ${config['rename_single_disc_ignore']}/><label>Don't include disc# for single disc albums</label>
                             </div>
                         </fieldset>
 
                         <fieldset>
                             <legend>Re-Encoding Options</legend>
                             <small class="heading"><i class="fa fa-info-circle"></i> Note: this option requires the lame, ffmpeg or xld encoder</small>
-                            <div class="checkbox row clearfix">
+                            <div class="checkbox row left clearfix nopad">
                                 <input type="checkbox" name="music_encoder" id="music_encoder" value="1" ${config['music_encoder']}/><label>Re-encode downloads during postprocessing</label>
                             </div>
                             <div id="encoderoptions" class="row clearfix checkbox">

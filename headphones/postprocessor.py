@@ -1085,7 +1085,11 @@ def renameFiles(albumpath, downloaded_track_list, release):
     # Until tagging works better I'm going to rely on the already provided metadata
 
     for downloaded_track in downloaded_track_list:
-        md, from_metadata = metadata.file_metadata(downloaded_track, release)
+        md, from_metadata = metadata.file_metadata(
+            downloaded_track,
+            release,
+            headphones.CONFIG.RENAME_SINGLE_DISC_IGNORE
+        )
         if md is None:
             # unable to parse media file, skip file
             continue

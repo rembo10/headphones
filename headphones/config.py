@@ -240,6 +240,7 @@ _CONFIG_DEFINITIONS = {
     'QBITTORRENT_PASSWORD': (str, 'QBitTorrent', ''),
     'QBITTORRENT_USERNAME': (str, 'QBitTorrent', ''),
     'RENAME_FILES': (int, 'General', 0),
+    'RENAME_SINGLE_DISC_IGNORE': (int, 'General', 0),
     'RENAME_UNPROCESSED': (bool_int, 'General', 1),
     'RENAME_FROZEN': (bool_int, 'General', 1),
     'REPLACE_EXISTING_FOLDERS': (int, 'General', 0),
