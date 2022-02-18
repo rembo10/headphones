@@ -79,7 +79,7 @@ class Vars:
     Metadata $variable names (only ones set explicitly by headphones).
     """
     DISC = '$Disc'
-    DISC_TOTAL = '$DiscTotal',
+    DISC_TOTAL = '$DiscTotal'
     TRACK = '$Track'
     TITLE = '$Title'
     ARTIST = '$Artist'
