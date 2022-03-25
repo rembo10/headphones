@@ -43,7 +43,7 @@ class TestCase(TC):
 
     @_d
     def assertRegexpMatches(self, *args, **kw):
-        return super(TestCase, self).assertRegexpMatches(*args, **kw)
+        return super(TestCase, self).assertRegex(*args, **kw)
 
     @_d
     def assertItemsEqual(self, *args, **kw):

@@ -18,8 +18,7 @@ http://flac.sourceforge.net/ogg_mapping.html.
 __all__ = ["OggFLAC", "Open", "delete"]
 
 import struct
-
-from ._compat import cBytesIO
+from io import BytesIO
 
 from mutagen import StreamInfo
 from mutagen.flac import StreamInfo as FLACStreamInfo, error as FLACError
@@ -65,7 +64,7 @@ class OggFLACStreamInfo(StreamInfo):
         self.serial = page.serial
 
         # Skip over the block header.
-        stringobj = cBytesIO(page.packets[0][17:])
+        stringobj = BytesIO(page.packets[0][17:])
 
         try:
             flac_info = FLACStreamInfo(stringobj)
@@ -79,7 +78,9 @@ class OggFLACStreamInfo(StreamInfo):
     def _post_tags(self, fileobj):
         if self.length:
             return
-        page = OggPage.find_last(fileobj, self.serial)
+        page = OggPage.find_last(fileobj, self.serial, finishing=True)
+        if page is None:
+            raise OggFLACHeaderError
         self.length = page.position / float(self.sample_rate)
 
     def pprint(self):
@@ -99,7 +100,7 @@ class OggFLACVComment(VCommentDict):
             if page.serial == info.serial:
                 pages.append(page)
                 complete = page.complete or (len(page.packets) > 1)
-        comment = cBytesIO(OggPage.to_packets(pages)[0][4:])
+        comment = BytesIO(OggPage.to_packets(pages)[0][4:])
         super(OggFLACVComment, self).__init__(comment, framing=False)
 
     def _inject(self, fileobj, padding_func):

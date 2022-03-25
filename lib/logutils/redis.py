@@ -7,7 +7,7 @@ This module contains classes which help you work with Redis queues.
 
 from logutils.queue import QueueHandler, QueueListener
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except ImportError:
     import pickle
 
@@ -25,7 +25,7 @@ class RedisQueueHandler(QueueHandler):
     """
     def __init__(self, key='python.logging', redis=None, limit=0):
         if redis is None:
-            from redis import Redis
+            from .redis import Redis
             redis = Redis()
         self.key = key
         assert limit >= 0
@@ -51,7 +51,7 @@ class RedisQueueListener(QueueListener):
     def __init__(self, *handlers, **kwargs):
         redis = kwargs.get('redis')
         if redis is None:
-            from redis import Redis
+            from .redis import Redis
             redis = Redis()
         self.key = kwargs.get('key', 'python.logging')
         QueueListener.__init__(self, redis, *handlers)

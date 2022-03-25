@@ -111,7 +111,7 @@ class Formatter(logging.Formatter):
         """
         if style not in _STYLES:
             raise ValueError('Style must be one of: %s' % ','.join(
-                             _STYLES.keys()))
+                             list(_STYLES.keys())))
         self._style = _STYLES[style](fmt)
         self._fmt = self._style._fmt
         self.datefmt = datefmt

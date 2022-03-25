@@ -22,7 +22,7 @@ from headphones import db, logger, request
 
 TIMEOUT = 60.0  # seconds
 REQUEST_LIMIT = 1.0 / 5  # seconds
-ENTRY_POINT = "http://ws.audioscrobbler.com/2.0/"
+ENTRY_POINT = "https://ws.audioscrobbler.com/2.0/"
 API_KEY = "395e6ec6bb557382fc41fde867bce66f"
 
 # Required for API request limit
@@ -63,12 +63,12 @@ def request_lastfm(method, **kwargs):
 
 def getSimilar():
     myDB = db.DBConnection()
-    results = myDB.select("SELECT ArtistID from artists ORDER BY HaveTracks DESC")
+    results = myDB.select("SELECT ArtistID from artists ORDER BY HaveTracks DESC LIMIT 10")
 
     logger.info("Fetching similar artists from Last.FM for tag cloud")
     artistlist = []
 
-    for result in results[:12]:
+    for result in results:
         data = request_lastfm("artist.getsimilar", mbid=result["ArtistId"])
 
         if data and "similarartists" in data:
@@ -91,7 +91,7 @@ def getSimilar():
     for artist, mbid in artistlist:
         count[artist, mbid] += 1
 
-    items = count.items()
+    items = list(count.items())
     top_list = sorted(items, key=lambda x: x[1], reverse=True)[:25]
 
     random.shuffle(top_list)

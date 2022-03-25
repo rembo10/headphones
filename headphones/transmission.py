@@ -15,8 +15,8 @@
 
 import time
 import json
-import base64
-import urlparse
+from base64 import b64encode
+import urllib.parse
 import os
 
 from headphones import logger, request
@@ -36,10 +36,10 @@ def addTorrent(link, data=None):
 
     if link.endswith('.torrent') and not link.startswith(('http', 'magnet')) or data:
         if data:
-            metainfo = str(base64.b64encode(data))
+            metainfo = b64encode(data).decode("utf-8")
         else:
             with open(link, 'rb') as f:
-                metainfo = str(base64.b64encode(f.read()))
+                metainfo = b64encode(f.read()).decode("utf-8")
         arguments = {'metainfo': metainfo, 'download-dir': headphones.CONFIG.DOWNLOAD_TORRENT_DIR}
     else:
         arguments = {'filename': link, 'download-dir': headphones.CONFIG.DOWNLOAD_TORRENT_DIR}
@@ -57,7 +57,7 @@ def addTorrent(link, data=None):
         else:
             retid = False
 
-        logger.info(u"Torrent sent to Transmission successfully")
+        logger.info("Torrent sent to Transmission successfully")
         return retid
 
     else:
@@ -167,7 +167,7 @@ def torrentAction(method, arguments):
 
     # Fix the URL. We assume that the user does not point to the RPC endpoint,
     # so add it if it is missing.
-    parts = list(urlparse.urlparse(host))
+    parts = list(urllib.parse.urlparse(host))
 
     if not parts[0] in ("http", "https"):
         parts[0] = "http"
@@ -175,7 +175,7 @@ def torrentAction(method, arguments):
     if not parts[2].endswith("/rpc"):
         parts[2] += "/transmission/rpc"
 
-    host = urlparse.urlunparse(parts)
+    host = urllib.parse.urlunparse(parts)
     data = {'method': method, 'arguments': arguments}
     data_json = json.dumps(data)
     auth = (username, password) if username and password else None
@@ -205,5 +205,4 @@ def torrentAction(method, arguments):
             continue
 
         resp_json = response.json()
-        print resp_json
         return resp_json

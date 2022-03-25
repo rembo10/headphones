@@ -14,20 +14,14 @@
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from headphones import logger, db, helpers
+from collections import OrderedDict
+
+import musicbrainzngs
 
 import headphones
-import musicbrainzngs
 import headphones.lock
+from headphones import logger, db, helpers
 
-try:
-    # pylint:disable=E0611
-    # ignore this error because we are catching the ImportError
-    from collections import OrderedDict
-    # pylint:enable=E0611
-except ImportError:
-    # Python 2.6.x fallback, from libs
-    from ordereddict import OrderedDict
 
 mb_lock = headphones.lock.TimedLock(0)
 
@@ -97,7 +91,7 @@ def findArtist(name, limit=1):
         try:
             artistResults = musicbrainzngs.search_artists(limit=limit, **criteria)['artist-list']
         except ValueError as e:
-            if "at least one query term is required" in e.message:
+            if "at least one query term is required" in str(e):
                 logger.error(
                     "Tried to search without a term, or an empty one. Provided artist (probably emtpy): %s",
                     name)
@@ -112,9 +106,9 @@ def findArtist(name, limit=1):
         return False
     for result in artistResults:
         if 'disambiguation' in result:
-            uniquename = unicode(result['sort-name'] + " (" + result['disambiguation'] + ")")
+            uniquename = str(result['sort-name'] + " (" + result['disambiguation'] + ")")
         else:
-            uniquename = unicode(result['sort-name'])
+            uniquename = str(result['sort-name'])
         if result['name'] != uniquename and limit == 1:
             logger.info(
                 'Found an artist with a disambiguation: %s - doing an album based search' % name)
@@ -124,20 +118,16 @@ def findArtist(name, limit=1):
                     'Cannot determine the best match from an artist/album search. Using top match instead')
                 artistlist.append({
                     # Just need the artist id if the limit is 1
-                    #    'name':             unicode(result['sort-name']),
-                    #    'uniquename':        uniquename,
-                    'id': unicode(result['id']),
-                    #    'url':                 unicode("http://musicbrainz.org/artist/" + result['id']),#probably needs to be changed
-                    #    'score':            int(result['ext:score'])
+                    'id': str(result['id']),
                 })
             else:
                 artistlist.append(artistdict)
         else:
             artistlist.append({
-                'name': unicode(result['sort-name']),
+                'name': str(result['sort-name']),
                 'uniquename': uniquename,
-                'id': unicode(result['id']),
-                'url': unicode("http://musicbrainz.org/artist/" + result['id']),
+                'id': str(result['id']),
+                'url': str("https://musicbrainz.org/artist/" + result['id']),
                 # probably needs to be changed
                 'score': int(result['ext:score'])
             })
@@ -187,7 +177,7 @@ def findRelease(name, limit=1, artist=None):
                     if tracks:
                         tracks += ' + '
                     tracks += str(medium['track-count'])
-            for format, count in format_dict.items():
+            for format, count in list(format_dict.items()):
                 if formats:
                     formats += ' + '
                 if count > 1:
@@ -203,22 +193,22 @@ def findRelease(name, limit=1, artist=None):
                     rg_type = secondary_type
 
         releaselist.append({
-            'uniquename': unicode(result['artist-credit'][0]['artist']['name']),
-            'title': unicode(title),
-            'id': unicode(result['artist-credit'][0]['artist']['id']),
-            'albumid': unicode(result['id']),
-            'url': unicode(
-                "http://musicbrainz.org/artist/" + result['artist-credit'][0]['artist']['id']),
+            'uniquename': str(result['artist-credit'][0]['artist']['name']),
+            'title': str(title),
+            'id': str(result['artist-credit'][0]['artist']['id']),
+            'albumid': str(result['id']),
+            'url': str(
+                "https://musicbrainz.org/artist/" + result['artist-credit'][0]['artist']['id']),
             # probably needs to be changed
-            'albumurl': unicode("http://musicbrainz.org/release/" + result['id']),
+            'albumurl': str("https://musicbrainz.org/release/" + result['id']),
             # probably needs to be changed
             'score': int(result['ext:score']),
-            'date': unicode(result['date']) if 'date' in result else '',
-            'country': unicode(result['country']) if 'country' in result else '',
-            'formats': unicode(formats),
-            'tracks': unicode(tracks),
-            'rgid': unicode(result['release-group']['id']),
-            'rgtype': unicode(rg_type)
+            'date': str(result['date']) if 'date' in result else '',
+            'country': str(result['country']) if 'country' in result else '',
+            'formats': str(formats),
+            'tracks': str(tracks),
+            'rgid': str(result['release-group']['id']),
+            'rgtype': str(rg_type)
         })
     return releaselist
 
@@ -240,15 +230,15 @@ def findSeries(name, limit=1):
         return False
     for result in seriesResults:
         if 'disambiguation' in result:
-            uniquename = unicode(result['name'] + " (" + result['disambiguation'] + ")")
+            uniquename = str(result['name'] + " (" + result['disambiguation'] + ")")
         else:
-            uniquename = unicode(result['name'])
+            uniquename = str(result['name'])
         serieslist.append({
             'uniquename': uniquename,
-            'name': unicode(result['name']),
-            'type': unicode(result['type']),
-            'id': unicode(result['id']),
-            'url': unicode("http://musicbrainz.org/series/" + result['id']),
+            'name': str(result['name']),
+            'type': str(result['type']),
+            'id': str(result['id']),
+            'url': str("https://musicbrainz.org/series/" + result['id']),
             # probably needs to be changed
             'score': int(result['ext:score'])
         })
@@ -284,19 +274,19 @@ def getArtist(artistid, extrasonly=False):
     if not artist:
         return False
 
-    artist_dict['artist_name'] = unicode(artist['name'])
+    artist_dict['artist_name'] = str(artist['name'])
 
     releasegroups = []
 
     if not extrasonly:
         for rg in artist['release-group-list']:
-            if "secondary-type-list" in rg.keys():  # only add releases without a secondary type
+            if "secondary-type-list" in list(rg.keys()):  # only add releases without a secondary type
                 continue
             releasegroups.append({
-                'title': unicode(rg['title']),
-                'id': unicode(rg['id']),
-                'url': u"http://musicbrainz.org/release-group/" + rg['id'],
-                'type': unicode(rg['type'])
+                'title': str(rg['title']),
+                'id': str(rg['id']),
+                'url': "https://musicbrainz.org/release-group/" + rg['id'],
+                'type': str(rg['type'])
             })
 
     # See if we need to grab extras. Artist specific extras take precedence over global option
@@ -314,7 +304,7 @@ def getArtist(artistid, extrasonly=False):
 
         # Need to convert extras string from something like '2,5.6' to ['ep','live','remix'] (append new extras to end)
         if db_artist['Extras']:
-            extras = map(int, db_artist['Extras'].split(','))
+            extras = list(map(int, db_artist['Extras'].split(',')))
         else:
             extras = []
         extras_list = headphones.POSSIBLE_EXTRAS
@@ -354,10 +344,10 @@ def getArtist(artistid, extrasonly=False):
                         rg_type = secondary_type
 
                 releasegroups.append({
-                    'title': unicode(rg['title']),
-                    'id': unicode(rg['id']),
-                    'url': u"http://musicbrainz.org/release-group/" + rg['id'],
-                    'type': unicode(rg_type)
+                    'title': str(rg['title']),
+                    'id': str(rg['id']),
+                    'url': "https://musicbrainz.org/release-group/" + rg['id'],
+                    'type': str(rg_type)
                 })
     artist_dict['releasegroups'] = releasegroups
     return artist_dict
@@ -382,10 +372,10 @@ def getSeries(seriesid):
         return False
 
     if 'disambiguation' in series:
-        series_dict['artist_name'] = unicode(
-            series['name'] + " (" + unicode(series['disambiguation']) + ")")
+        series_dict['artist_name'] = str(
+            series['name'] + " (" + str(series['disambiguation']) + ")")
     else:
-        series_dict['artist_name'] = unicode(series['name'])
+        series_dict['artist_name'] = str(series['name'])
 
     releasegroups = []
 
@@ -448,42 +438,42 @@ def getRelease(releaseid, include_artist_info=True):
     if not results:
         return False
 
-    release['title'] = unicode(results['title'])
-    release['id'] = unicode(results['id'])
-    release['asin'] = unicode(results['asin']) if 'asin' in results else None
-    release['date'] = unicode(results['date']) if 'date' in results else None
+    release['title'] = str(results['title'])
+    release['id'] = str(results['id'])
+    release['asin'] = str(results['asin']) if 'asin' in results else None
+    release['date'] = str(results['date']) if 'date' in results else None
     try:
-        release['format'] = unicode(results['medium-list'][0]['format'])
+        release['format'] = str(results['medium-list'][0]['format'])
     except:
-        release['format'] = u'Unknown'
+        release['format'] = 'Unknown'
 
     try:
-        release['country'] = unicode(results['country'])
+        release['country'] = str(results['country'])
     except:
-        release['country'] = u'Unknown'
+        release['country'] = 'Unknown'
 
     if include_artist_info:
 
         if 'release-group' in results:
-            release['rgid'] = unicode(results['release-group']['id'])
-            release['rg_title'] = unicode(results['release-group']['title'])
+            release['rgid'] = str(results['release-group']['id'])
+            release['rg_title'] = str(results['release-group']['title'])
             try:
-                release['rg_type'] = unicode(results['release-group']['type'])
+                release['rg_type'] = str(results['release-group']['type'])
 
                 if release['rg_type'] == 'Album' and 'secondary-type-list' in results[
                         'release-group']:
-                    secondary_type = unicode(results['release-group']['secondary-type-list'][0])
+                    secondary_type = str(results['release-group']['secondary-type-list'][0])
                     if secondary_type != release['rg_type']:
                         release['rg_type'] = secondary_type
 
             except KeyError:
-                release['rg_type'] = u'Unknown'
+                release['rg_type'] = 'Unknown'
 
         else:
             logger.warn("Release " + releaseid + "had no ReleaseGroup associated")
 
-        release['artist_name'] = unicode(results['artist-credit'][0]['artist']['name'])
-        release['artist_id'] = unicode(results['artist-credit'][0]['artist']['id'])
+        release['artist_name'] = str(results['artist-credit'][0]['artist']['name'])
+        release['artist_id'] = str(results['artist-credit'][0]['artist']['id'])
 
     release['tracks'] = getTracksFromRelease(results)
 
@@ -529,7 +519,7 @@ def get_new_releases(rgid, includeExtras=False, forcefull=False):
     force_repackage1 = 0
     if len(results) != 0:
         for release_mark in results:
-            release_list.append(unicode(release_mark['id']))
+            release_list.append(str(release_mark['id']))
             release_title = release_mark['title']
         remove_missing_releases = myDB.action("SELECT ReleaseID FROM allalbums WHERE AlbumID=?",
                                               [rgid])
@@ -561,31 +551,31 @@ def get_new_releases(rgid, includeExtras=False, forcefull=False):
             # DELETE all references to this release since we're updating it anyway.
             myDB.action('DELETE from allalbums WHERE ReleaseID=?', [rel_id_check])
             myDB.action('DELETE from alltracks WHERE ReleaseID=?', [rel_id_check])
-            release['AlbumTitle'] = unicode(releasedata['title'])
-            release['AlbumID'] = unicode(rgid)
-            release['AlbumASIN'] = unicode(releasedata['asin']) if 'asin' in releasedata else None
-            release['ReleaseDate'] = unicode(releasedata['date']) if 'date' in releasedata else None
+            release['AlbumTitle'] = str(releasedata['title'])
+            release['AlbumID'] = str(rgid)
+            release['AlbumASIN'] = str(releasedata['asin']) if 'asin' in releasedata else None
+            release['ReleaseDate'] = str(releasedata['date']) if 'date' in releasedata else None
             release['ReleaseID'] = releasedata['id']
             if 'release-group' not in releasedata:
                 raise Exception('No release group associated with release id ' + releasedata[
                     'id'] + ' album id' + rgid)
-            release['Type'] = unicode(releasedata['release-group']['type'])
+            release['Type'] = str(releasedata['release-group']['type'])
 
             if release['Type'] == 'Album' and 'secondary-type-list' in releasedata['release-group']:
-                secondary_type = unicode(releasedata['release-group']['secondary-type-list'][0])
+                secondary_type = str(releasedata['release-group']['secondary-type-list'][0])
                 if secondary_type != release['Type']:
                     release['Type'] = secondary_type
 
             # making the assumption that the most important artist will be first in the list
             if 'artist-credit' in releasedata:
-                release['ArtistID'] = unicode(releasedata['artist-credit'][0]['artist']['id'])
-                release['ArtistName'] = unicode(releasedata['artist-credit-phrase'])
+                release['ArtistID'] = str(releasedata['artist-credit'][0]['artist']['id'])
+                release['ArtistName'] = str(releasedata['artist-credit-phrase'])
             else:
                 logger.warn('Release ' + releasedata['id'] + ' has no Artists associated.')
                 return False
 
-            release['ReleaseCountry'] = unicode(
-                releasedata['country']) if 'country' in releasedata else u'Unknown'
+            release['ReleaseCountry'] = str(
+                releasedata['country']) if 'country' in releasedata else 'Unknown'
             # assuming that the list will contain media and that the format will be consistent
             try:
                 additional_medium = ''
@@ -600,9 +590,9 @@ def get_new_releases(rgid, includeExtras=False, forcefull=False):
                     disc_number = str(medium_count) + 'x'
                 packaged_medium = disc_number + releasedata['medium-list'][0][
                     'format'] + additional_medium
-                release['ReleaseFormat'] = unicode(packaged_medium)
+                release['ReleaseFormat'] = str(packaged_medium)
             except:
-                release['ReleaseFormat'] = u'Unknown'
+                release['ReleaseFormat'] = 'Unknown'
 
             release['Tracks'] = getTracksFromRelease(releasedata)
 
@@ -684,14 +674,14 @@ def getTracksFromRelease(release):
     for medium in release['medium-list']:
         for track in medium['track-list']:
             try:
-                track_title = unicode(track['title'])
+                track_title = str(track['title'])
             except:
-                track_title = unicode(track['recording']['title'])
+                track_title = str(track['recording']['title'])
             tracks.append({
                 'number': totalTracks,
                 'title': track_title,
-                'id': unicode(track['recording']['id']),
-                'url': u"http://musicbrainz.org/track/" + track['recording']['id'],
+                'id': str(track['recording']['id']),
+                'url': "https://musicbrainz.org/track/" + track['recording']['id'],
                 'duration': int(track['length']) if 'length' in track else 0
             })
             totalTracks += 1
@@ -733,15 +723,7 @@ def findArtistbyAlbum(name):
     for releaseGroup in results:
         newArtist = releaseGroup['artist-credit'][0]['artist']
         # Only need the artist ID if we're doing an artist+album lookup
-        # if 'disambiguation' in newArtist:
-        #    uniquename = unicode(newArtist['sort-name'] + " (" + newArtist['disambiguation'] + ")")
-        # else:
-        #    uniquename = unicode(newArtist['sort-name'])
-        # artist_dict['name'] = unicode(newArtist['sort-name'])
-        # artist_dict['uniquename'] = uniquename
-        artist_dict['id'] = unicode(newArtist['id'])
-        # artist_dict['url'] = u'http://musicbrainz.org/artist/' + newArtist['id']
-        # artist_dict['score'] = int(releaseGroup['ext:score'])
+        artist_dict['id'] = str(newArtist['id'])
 
     return artist_dict
 
@@ -768,7 +750,7 @@ def findAlbumID(artist=None, album=None):
 
     if len(results) < 1:
         return False
-    rgid = unicode(results[0]['id'])
+    rgid = str(results[0]['id'])
     return rgid
 
 

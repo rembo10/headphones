@@ -11,10 +11,11 @@ http://www.codeproject.com/Articles/8295/MPEG-Audio-Frame-Header
 http://wiki.hydrogenaud.io/index.php?title=MP3
 """
 
+from __future__ import division
 from functools import partial
+from io import BytesIO
 
-from mutagen._util import cdata, BitReader
-from mutagen._compat import xrange, iterbytes, cBytesIO
+from mutagen._util import cdata, BitReader, iterbytes
 
 
 class LAMEError(Exception):
@@ -37,7 +38,9 @@ class LAMEHeader(object):
     """VBR quality: 0..9"""
 
     track_peak = None
-    """Peak signal amplitude as float. None if unknown."""
+    """Peak signal amplitude as float. 1.0 is maximal signal amplitude
+    in decoded format. None if unknown.
+    """
 
     track_gain_origin = 0
     """see the docs"""
@@ -106,7 +109,7 @@ class LAMEHeader(object):
             raise LAMEError("Not enough data")
 
         # extended lame header
-        r = BitReader(cBytesIO(payload))
+        r = BitReader(BytesIO(payload))
         revision = r.bits(4)
         if revision != 0:
             raise LAMEError("unsupported header revision %d" % revision)
@@ -123,8 +126,7 @@ class LAMEHeader(object):
             self.track_peak = None
         else:
             # see PutLameVBR() in LAME's VbrTag.c
-            self.track_peak = (
-                cdata.uint32_be(track_peak_data) - 0.5) / 2 ** 23
+            self.track_peak = cdata.uint32_be(track_peak_data) / 2 ** 23
         track_gain_type = r.bits(3)
         self.track_gain_origin = r.bits(3)
         sign = r.bits(1)
@@ -513,7 +515,7 @@ class VBRIHeader(object):
         else:
             raise VBRIHeaderError("Invalid TOC entry size")
 
-        self.toc = [unpack(i)[0] for i in xrange(0, toc_size, toc_entry_size)]
+        self.toc = [unpack(i)[0] for i in range(0, toc_size, toc_entry_size)]
 
     @classmethod
     def get_offset(cls, info):

@@ -1,28 +1,13 @@
-#  This file is part of Headphones.
-#
-#  Headphones is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  Headphones is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
-
-from urllib import urlencode, quote_plus
-import urllib
+from urllib.parse import urlencode, quote_plus
+import urllib.request, urllib.parse, urllib.error
 import subprocess
 import json
 from email.mime.text import MIMEText
 import smtplib
 import email.utils
-from httplib import HTTPSConnection
-from urlparse import parse_qsl
-import urllib2
+from http.client import HTTPSConnection
+from urllib.parse import parse_qsl
+import urllib.request, urllib.error, urllib.parse
 import requests as requests
 
 import os.path
@@ -31,8 +16,8 @@ from pynma import pynma
 import cherrypy
 import headphones
 import gntp.notifier
-import oauth2 as oauth
-import pythontwitter as twitter
+#import oauth2 as oauth
+import twitter 
 
 
 class GROWL(object):
@@ -81,10 +66,10 @@ class GROWL(object):
         try:
             growl.register()
         except gntp.notifier.errors.NetworkError:
-            logger.warning(u'Growl notification failed: network error')
+            logger.warning('Growl notification failed: network error')
             return
         except gntp.notifier.errors.AuthError:
-            logger.warning(u'Growl notification failed: authentication error')
+            logger.warning('Growl notification failed: authentication error')
             return
 
         # Fix message
@@ -105,10 +90,10 @@ class GROWL(object):
                 icon=image
             )
         except gntp.notifier.errors.NetworkError:
-            logger.warning(u'Growl notification failed: network error')
+            logger.warning('Growl notification failed: network error')
             return
 
-        logger.info(u"Growl notifications sent.")
+        logger.info("Growl notifications sent.")
 
     def updateLibrary(self):
         # For uniformity reasons not removed
@@ -157,13 +142,13 @@ class PROWL(object):
         request_status = response.status
 
         if request_status == 200:
-            logger.info(u"Prowl notifications sent.")
+            logger.info("Prowl notifications sent.")
             return True
         elif request_status == 401:
-            logger.info(u"Prowl auth failed: %s" % response.reason)
+            logger.info("Prowl auth failed: %s" % response.reason)
             return False
         else:
-            logger.info(u"Prowl notification failed.")
+            logger.info("Prowl notification failed.")
             return False
 
     def updateLibrary(self):
@@ -202,7 +187,7 @@ class XBMC(object):
         self.password = headphones.CONFIG.XBMC_PASSWORD
 
     def _sendhttp(self, host, command):
-        url_command = urllib.urlencode(command)
+        url_command = urllib.parse.urlencode(command)
         url = host + '/xbmcCmds/xbmcHttp/?' + url_command
 
         if self.password:
@@ -295,10 +280,10 @@ class LMS(object):
 
         content = {'Content-Type': 'application/json'}
 
-        req = urllib2.Request(host + '/jsonrpc.js', data, content)
+        req = urllib.request.Request(host + '/jsonrpc.js', data, content)
 
         try:
-            handle = urllib2.urlopen(req)
+            handle = urllib.request.urlopen(req)
         except Exception as e:
             logger.warn('Error opening LMS url: %s' % e)
             return
@@ -424,7 +409,7 @@ class Plex(object):
                 sections = r.getElementsByTagName('Directory')
 
                 if not sections:
-                    logger.info(u"Plex Media Server not running on: " + host)
+                    logger.info("Plex Media Server not running on: " + host)
                     return False
 
                 for s in sections:
@@ -483,9 +468,9 @@ class NMA(object):
         api = headphones.CONFIG.NMA_APIKEY
         nma_priority = headphones.CONFIG.NMA_PRIORITY
 
-        logger.debug(u"NMA title: " + title)
-        logger.debug(u"NMA API: " + api)
-        logger.debug(u"NMA Priority: " + str(nma_priority))
+        logger.debug("NMA title: " + title)
+        logger.debug("NMA API: " + api)
+        logger.debug("NMA Priority: " + str(nma_priority))
 
         if snatched:
             event = snatched + " snatched!"
@@ -495,8 +480,8 @@ class NMA(object):
             message = "Headphones has downloaded and postprocessed: " + \
                       artist + ' [' + album + ']'
 
-        logger.debug(u"NMA event: " + event)
-        logger.debug(u"NMA message: " + message)
+        logger.debug("NMA event: " + event)
+        logger.debug("NMA message: " + message)
 
         batch = False
 
@@ -510,8 +495,8 @@ class NMA(object):
         response = p.push(title, event, message, priority=nma_priority,
                           batch_mode=batch)
 
-        if not response[api][u'code'] == u'200':
-            logger.error(u'Could not send notification to NotifyMyAndroid')
+        if not response[api]['code'] == '200':
+            logger.error('Could not send notification to NotifyMyAndroid')
             return False
         else:
             return True
@@ -543,10 +528,10 @@ class PUSHBULLET(object):
                                         data=json.dumps(data))
 
         if response:
-            logger.info(u"PushBullet notifications sent.")
+            logger.info("PushBullet notifications sent.")
             return True
         else:
-            logger.info(u"PushBullet notification failed.")
+            logger.info("PushBullet notification failed.")
             return False
 
 
@@ -557,9 +542,9 @@ class PUSHALOT(object):
 
         pushalot_authorizationtoken = headphones.CONFIG.PUSHALOT_APIKEY
 
-        logger.debug(u"Pushalot event: " + event)
-        logger.debug(u"Pushalot message: " + message)
-        logger.debug(u"Pushalot api: " + pushalot_authorizationtoken)
+        logger.debug("Pushalot event: " + event)
+        logger.debug("Pushalot message: " + message)
+        logger.debug("Pushalot api: " + pushalot_authorizationtoken)
 
         http_handler = HTTPSConnection("pushalot.com")
 
@@ -576,18 +561,18 @@ class PUSHALOT(object):
         response = http_handler.getresponse()
         request_status = response.status
 
-        logger.debug(u"Pushalot response status: %r" % request_status)
-        logger.debug(u"Pushalot response headers: %r" % response.getheaders())
-        logger.debug(u"Pushalot response body: %r" % response.read())
+        logger.debug("Pushalot response status: %r" % request_status)
+        logger.debug("Pushalot response headers: %r" % response.getheaders())
+        logger.debug("Pushalot response body: %r" % response.read())
 
         if request_status == 200:
-            logger.info(u"Pushalot notifications sent.")
+            logger.info("Pushalot notifications sent.")
             return True
         elif request_status == 410:
-            logger.info(u"Pushalot auth failed: %s" % response.reason)
+            logger.info("Pushalot auth failed: %s" % response.reason)
             return False
         else:
-            logger.info(u"Pushalot notification failed.")
+            logger.info("Pushalot notification failed.")
             return False
 
 
@@ -618,7 +603,7 @@ class JOIN(object):
         else:
             self.url += '&deviceId={deviceid}'
 
-        response = urllib2.urlopen(self.url.format(apikey=self.apikey,
+        response = urllib.request.urlopen(self.url.format(apikey=self.apikey,
                                                    title=quote_plus(event),
                                                    text=quote_plus(
                                                        message.encode(
@@ -627,10 +612,10 @@ class JOIN(object):
                                                    deviceid=self.deviceid))
 
         if response:
-            logger.info(u"Join notifications sent.")
+            logger.info("Join notifications sent.")
             return True
         else:
-            logger.error(u"Join notification failed.")
+            logger.error("Join notification failed.")
             return False
 
 
@@ -669,7 +654,7 @@ class Synoindex(object):
             out, error = p.communicate()
             # synoindex never returns any codes other than '0',
             #  highly irritating
-        except OSError, e:
+        except OSError as e:
             logger.warn("Error sending notification: %s" % str(e))
 
     def notify_multiple(self, path_list):
@@ -710,10 +695,10 @@ class PUSHOVER(object):
                                             headers=headers, data=data)
 
         if response:
-            logger.info(u"Pushover notifications sent.")
+            logger.info("Pushover notifications sent.")
             return True
         else:
-            logger.error(u"Pushover notification failed.")
+            logger.error("Pushover notification failed.")
             return False
 
     def updateLibrary(self):
@@ -832,7 +817,7 @@ class TwitterNotifier(object):
         access_token_key = headphones.CONFIG.TWITTER_USERNAME
         access_token_secret = headphones.CONFIG.TWITTER_PASSWORD
 
-        logger.info(u"Sending tweet: " + message)
+        logger.info("Sending tweet: " + message)
 
         api = twitter.Api(username, password, access_token_key,
                           access_token_secret)
@@ -840,7 +825,7 @@ class TwitterNotifier(object):
         try:
             api.PostUpdate(message)
         except Exception as e:
-            logger.info(u"Error Sending Tweet: %s" % e)
+            logger.info("Error Sending Tweet: %s" % e)
             return False
 
         return True
@@ -935,10 +920,10 @@ class BOXCAR(object):
     def notify(self, title, message, rgid=None):
         try:
             if rgid:
-                message += '<br></br><a href="http://musicbrainz.org/' \
+                message += '<br></br><a href="https://musicbrainz.org/' \
                            'release-group/%s">MusicBrainz</a>' % rgid
 
-            data = urllib.urlencode({
+            data = urllib.parse.urlencode({
                 'user_credentials': headphones.CONFIG.BOXCAR_TOKEN,
                 'notification[title]': title.encode('utf-8'),
                 'notification[long_message]': message.encode('utf-8'),
@@ -947,12 +932,12 @@ class BOXCAR(object):
                                           "/headphoneslogo.png"
             })
 
-            req = urllib2.Request(self.url)
-            handle = urllib2.urlopen(req, data)
+            req = urllib.request.Request(self.url)
+            handle = urllib.request.urlopen(req, data)
             handle.close()
             return True
 
-        except urllib2.URLError as e:
+        except urllib.error.URLError as e:
             logger.warn('Error sending Boxcar2 Notification: %s' % e)
             return False
 
@@ -1011,7 +996,7 @@ class Email(object):
             mailserver.quit()
             return True
 
-        except Exception, e:
+        except Exception as e:
             logger.warn('Error sending Email: %s' % e)
             return False
 
@@ -1034,7 +1019,7 @@ class TELEGRAM(object):
 
         # MusicBrainz link
         if rgid:
-            message += '\n\n <a href="http://musicbrainz.org/' \
+            message += '\n\n <a href="https://musicbrainz.org/' \
                       'release-group/%s">MusicBrainz</a>' % rgid
 
         # Send image
@@ -1044,15 +1029,15 @@ class TELEGRAM(object):
             payload = {'chat_id': userid, 'parse_mode': "HTML", 'caption': status + message}
             try:
                 response = requests.post(TELEGRAM_API % (token, "sendPhoto"), data=payload, files=image_file)
-            except Exception, e:
-                logger.info(u'Telegram notify failed: ' + str(e))
+            except Exception as e:
+                logger.info('Telegram notify failed: ' + str(e))
         # Sent text
         else:
             payload = {'chat_id': userid, 'parse_mode': "HTML", 'text': status + message}
             try:
                 response = requests.post(TELEGRAM_API % (token, "sendMessage"), data=payload)
-            except Exception, e:
-                logger.info(u'Telegram notify failed: ' + str(e))
+            except Exception as e:
+                logger.info('Telegram notify failed: ' + str(e))
 
         # Error logging
         sent_successfuly = True
@@ -1060,7 +1045,7 @@ class TELEGRAM(object):
             logger.info("Could not send notification to TelegramBot (token=%s). Response: [%s]", token, response.text)
             sent_successfuly = False
 
-        logger.info(u"Telegram notifications sent.")
+        logger.info("Telegram notifications sent.")
         return sent_successfuly
 
 
@@ -1080,15 +1065,15 @@ class SLACK(object):
 
         try:
             response = requests.post(SLACK_URL, json=payload)
-        except Exception, e:
-            logger.info(u'Slack notify failed: ' + str(e))
+        except Exception as e:
+            logger.info('Slack notify failed: ' + str(e))
 
         sent_successfuly = True
         if not response.status_code == 200:
             logger.info(
-                u'Could not send notification to Slack. Response: [%s]',
+                'Could not send notification to Slack. Response: [%s]',
                 (response.text))
             sent_successfuly = False
 
-        logger.info(u"Slack notifications sent.")
+        logger.info("Slack notifications sent.")
         return sent_successfuly

@@ -16,7 +16,6 @@ import locale
 import mutagen
 import mutagen.id3
 from mutagen._senf import argv, print_, fsnative
-from mutagen._compat import text_type
 
 from ._util import SignalHandler, OptionParser
 
@@ -87,7 +86,7 @@ def update(options, filenames):
                     print_(u"No ID3 header found; skipping...")
                 continue
             except Exception as err:
-                print_(text_type(err), file=sys.stderr)
+                print_(str(err), file=sys.stderr)
                 continue
 
             for tag in filter(lambda t: t.startswith(("T", "COMM")), id3):
@@ -122,7 +121,7 @@ def update(options, filenames):
 
 def has_id3v1(filename):
     try:
-        with open(filename, 'rb+') as f:
+        with open(filename, 'rb') as f:
             f.seek(-128, 2)
             return f.read(3) == b"TAG"
     except IOError:

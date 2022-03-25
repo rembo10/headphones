@@ -16,7 +16,7 @@
 import time
 
 from headphones import logger, helpers, db, mb, lastfm, metacritic
-from beets.mediafile import MediaFile
+from mediafile import MediaFile
 import headphones
 
 blacklisted_special_artist_names = ['[anonymous]', '[data]', '[no artist]',
@@ -39,7 +39,7 @@ def is_exists(artistid):
 
     if any(artistid in x for x in artistlist):
         logger.info(artistlist[0][
-                        1] + u" is already in the database. Updating 'have tracks', but not artist information")
+                        1] + " is already in the database. Updating 'have tracks', but not artist information")
         return True
     else:
         return False
@@ -53,7 +53,7 @@ def artistlist_to_mbids(artistlist, forced=False):
 
         # If adding artists through Manage New Artists, they're coming through as non-unicode (utf-8?)
         # and screwing everything up
-        if not isinstance(artist, unicode):
+        if not isinstance(artist, str):
             try:
                 artist = artist.decode('utf-8', 'replace')
             except Exception:
@@ -102,12 +102,13 @@ def artistlist_to_mbids(artistlist, forced=False):
             myDB.action('DELETE from newartists WHERE ArtistName=?', [artist])
 
     # Update the similar artist tag cloud:
-    logger.info('Updating artist information from Last.fm')
+    # TODO: Fix last.fm api
+    # logger.info('Updating artist information from Last.fm')
 
-    try:
-        lastfm.getSimilar()
-    except Exception as e:
-        logger.warn('Failed to update artist information from Last.fm: %s' % e)
+    # try:
+    #     lastfm.getSimilar()
+    # except Exception as e:
+    #     logger.warn('Failed to update artist information from Last.fm: %s' % e)
 
 
 def addArtistIDListToDB(artistidlist):
@@ -184,7 +185,7 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
     else:
         sortname = artist['artist_name']
 
-    logger.info(u"Now adding/updating: " + artist['artist_name'])
+    logger.info("Now adding/updating: " + artist['artist_name'])
     controlValueDict = {"ArtistID": artistid}
     newValueDict = {"ArtistName": artist['artist_name'],
                     "ArtistSortName": sortname,
@@ -245,7 +246,7 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
         rgid = rg['id']
         skip_log = 0
         # Make a user configurable variable to skip update of albums with release dates older than this date (in days)
-        pause_delta = headphones.CONFIG.MB_IGNORE_AGE
+        ignore_age = headphones.CONFIG.MB_IGNORE_AGE
 
         rg_exists = myDB.action("SELECT * from albums WHERE AlbumID=?", [rg['id']]).fetchone()
 
@@ -263,8 +264,8 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
                 new_releases = mb.get_new_releases(rgid, includeExtras)
 
             else:
-                if check_release_date is None or check_release_date == u"None":
-                    if headphones.CONFIG.MB_IGNORE_AGE_MISSING is not 1:
+                if check_release_date is None or check_release_date == "None":
+                    if not headphones.CONFIG.MB_IGNORE_AGE_MISSING:
                         logger.info("[%s] Now updating: %s (No Release Date)" % (artist['artist_name'], rg['title']))
                         new_releases = mb.get_new_releases(rgid, includeExtras, True)
                     else:
@@ -274,18 +275,18 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
                     if len(check_release_date) == 10:
                         release_date = check_release_date
                     elif len(check_release_date) == 7:
-                        release_date = check_release_date + "-31"
+                        release_date = check_release_date + "-27"
                     elif len(check_release_date) == 4:
-                        release_date = check_release_date + "-12-31"
+                        release_date = check_release_date + "-12-27"
                     else:
                         release_date = today
-                    if helpers.get_age(today) - helpers.get_age(release_date) < pause_delta:
+                    if helpers.age(release_date) < ignore_age:
                         logger.info("[%s] Now updating: %s (Release Date <%s Days)",
-                                    artist['artist_name'], rg['title'], pause_delta)
+                                    artist['artist_name'], rg['title'], ignore_age)
                         new_releases = mb.get_new_releases(rgid, includeExtras, True)
                     else:
                         logger.info("[%s] Skipping: %s (Release Date >%s Days)",
-                                    artist['artist_name'], rg['title'], pause_delta)
+                                    artist['artist_name'], rg['title'], ignore_age)
                         skip_log = 1
                         new_releases = 0
 
@@ -450,14 +451,9 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
 
                 if headphones.CONFIG.AUTOWANT_ALL:
                     newValueDict['Status'] = "Wanted"
-                elif album['ReleaseDate'] > today and headphones.CONFIG.AUTOWANT_UPCOMING:
-                    newValueDict['Status'] = "Wanted"
-                # Sometimes "new" albums are added to musicbrainz after their release date, so let's try to catch these
-                # The first test just makes sure we have year-month-day
-                elif helpers.get_age(album['ReleaseDate']) and helpers.get_age(
-                        today) - helpers.get_age(
-                        album['ReleaseDate']) < 21 and headphones.CONFIG.AUTOWANT_UPCOMING:
-                    newValueDict['Status'] = "Wanted"
+                elif headphones.CONFIG.AUTOWANT_UPCOMING:
+                    if helpers.is_valid_date(album['ReleaseDate']) and helpers.age(album['ReleaseDate']) < 21:
+                        newValueDict['Status'] = "Wanted"
                 else:
                     newValueDict['Status'] = "Skipped"
 
@@ -517,7 +513,7 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
                     marked_as_downloaded = True
 
             logger.info(
-                u"[%s] Seeing if we need album art for %s" % (artist['artist_name'], rg['title']))
+                "[%s] Seeing if we need album art for %s" % (artist['artist_name'], rg['title']))
             try:
                 cache.getThumb(AlbumID=rg['id'])
             except Exception as e:
@@ -530,19 +526,19 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
                 album_searches.append(rg['id'])
         else:
             if skip_log == 0:
-                logger.info(u"[%s] No new releases, so no changes made to %s" % (
+                logger.info("[%s] No new releases, so no changes made to %s" % (
                             artist['artist_name'], rg['title']))
 
     time.sleep(3)
     finalize_update(artistid, artist['artist_name'], errors)
 
-    logger.info(u"Seeing if we need album art for: %s" % artist['artist_name'])
+    logger.info("Seeing if we need album art for: %s" % artist['artist_name'])
     try:
         cache.getThumb(ArtistID=artistid)
     except Exception as e:
         logger.error("Error getting album art: %s", e)
 
-    logger.info(u"Fetching Metacritic reviews for: %s" % artist['artist_name'])
+    logger.info("Fetching Metacritic reviews for: %s" % artist['artist_name'])
     try:
         metacritic.update(artistid, artist['artist_name'], artist['releasegroups'])
     except Exception as e:
@@ -554,7 +550,7 @@ def addArtisttoDB(artistid, extrasonly=False, forcefull=False, type="artist"):
                 artist['artist_name'], artist['artist_name']))
     else:
         myDB.action('DELETE FROM newartists WHERE ArtistName = ?', [artist['artist_name']])
-        logger.info(u"Updating complete for: %s" % artist['artist_name'])
+        logger.info("Updating complete for: %s" % artist['artist_name'])
 
     # Start searching for newly added albums
     if album_searches:
@@ -663,7 +659,7 @@ def addReleaseById(rid, rgid=None):
             sortname = release_dict['artist_name']
 
         logger.info(
-            u"Now manually adding: " + release_dict['artist_name'] + " - with status Paused")
+            "Now manually adding: " + release_dict['artist_name'] + " - with status Paused")
         controlValueDict = {"ArtistID": release_dict['artist_id']}
         newValueDict = {"ArtistName": release_dict['artist_name'],
                         "ArtistSortName": sortname,
@@ -696,7 +692,7 @@ def addReleaseById(rid, rgid=None):
 
     if not rg_exists and release_dict or status == 'Loading' and release_dict:  # it should never be the case that we have an rg and not the artist
         # but if it is this will fail
-        logger.info(u"Now adding-by-id album (" + release_dict['title'] + ") from id: " + rgid)
+        logger.info("Now adding-by-id album (" + release_dict['title'] + ") from id: " + rgid)
         controlValueDict = {"AlbumID": rgid}
         if status != 'Loading':
             status = 'Wanted'
@@ -772,7 +768,7 @@ def addReleaseById(rid, rgid=None):
 
         # Start a search for the album
         if headphones.CONFIG.AUTOWANT_MANUALLY_ADDED:
-            import searcher
+            from . import searcher
             searcher.searchforalbum(rgid, False)
 
     elif not rg_exists and not release_dict:

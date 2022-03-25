@@ -46,28 +46,28 @@ def main(argv):
         with _sig.block():
             fileobjs = {}
             format["base"] = os.path.splitext(os.path.basename(filename))[0]
-            fileobj = open(filename, "rb")
-            if options.m3u:
-                m3u = open(format["base"] + ".m3u", "w")
-                fileobjs["m3u"] = m3u
-            else:
-                m3u = None
-            while True:
-                try:
-                    page = OggPage(fileobj)
-                except EOFError:
-                    break
+            with open(filename, "rb") as fileobj:
+                if options.m3u:
+                    m3u = open(format["base"] + ".m3u", "w")
+                    fileobjs["m3u"] = m3u
                 else:
-                    format["stream"] = page.serial
-                    if page.serial not in fileobjs:
-                        new_filename = options.pattern % format
-                        new_fileobj = open(new_filename, "wb")
-                        fileobjs[page.serial] = new_fileobj
-                        if m3u:
-                            m3u.write(new_filename + "\r\n")
-                    fileobjs[page.serial].write(page.write())
-            for f in fileobjs.values():
-                f.close()
+                    m3u = None
+                while True:
+                    try:
+                        page = OggPage(fileobj)
+                    except EOFError:
+                        break
+                    else:
+                        format["stream"] = page.serial
+                        if page.serial not in fileobjs:
+                            new_filename = options.pattern % format
+                            new_fileobj = open(new_filename, "wb")
+                            fileobjs[page.serial] = new_fileobj
+                            if m3u:
+                                m3u.write(new_filename + "\r\n")
+                        fileobjs[page.serial].write(page.write())
+                for f in fileobjs.values():
+                    f.close()
 
 
 def entry_point():

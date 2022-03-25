@@ -1,6 +1,6 @@
 """This module contains several handy functions primarily meant for internal use."""
 
-from __future__ import division
+
 from datetime import date, datetime, time, timedelta, tzinfo
 from inspect import isfunction, ismethod, getargspec
 from calendar import timegm
@@ -23,7 +23,7 @@ __all__ = ('asint', 'asbool', 'astimezone', 'convert_to_datetime', 'datetime_to_
 
 
 class _Undefined(object):
-    def __nonzero__(self):
+    def __bool__(self):
         return False
 
     def __bool__(self):
@@ -116,7 +116,7 @@ def convert_to_datetime(input, tz, arg_name):
         m = _DATE_REGEX.match(input)
         if not m:
             raise ValueError('Invalid date string')
-        values = [(k, int(v or 0)) for k, v in m.groupdict().items()]
+        values = [(k, int(v or 0)) for k, v in list(m.groupdict().items())]
         values = dict(values)
         datetime_ = datetime(**values)
     else:

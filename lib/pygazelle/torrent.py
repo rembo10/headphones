@@ -1,4 +1,4 @@
-from HTMLParser import HTMLParser
+from html.parser import HTMLParser
 import re
 
 class InvalidTorrentException(Exception):

@@ -13,7 +13,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
-import htmlentitydefs
+import html.entities
 
 import re
 from headphones import logger, request
@@ -25,7 +25,7 @@ def getLyrics(artist, song):
               "fmt": 'xml'
               }
 
-    url = 'http://lyrics.wikia.com/api.php'
+    url = 'https://lyrics.wikia.com/api.php'
     data = request.request_minidom(url, params=params)
 
     if not data:
@@ -53,7 +53,7 @@ def getLyrics(artist, song):
             '''<div class='lyricbox'><span style="padding:1em"><a href="/Category:Instrumental" title="Instrumental">''').search(
             lyricspage)
         if m:
-            return u'(Instrumental)'
+            return '(Instrumental)'
         else:
             logger.warn('Cannot find lyrics on: %s' % lyricsurl)
             return
@@ -72,7 +72,7 @@ def convert_html_entities(s):
             name = hit[2:-1]
             try:
                 entnum = int(name)
-                s = s.replace(hit, unichr(entnum))
+                s = s.replace(hit, chr(entnum))
             except ValueError:
                 pass
 
@@ -83,7 +83,7 @@ def convert_html_entities(s):
         hits.remove(amp)
     for hit in hits:
         name = hit[1:-1]
-        if name in htmlentitydefs.name2codepoint:
-            s = s.replace(hit, unichr(htmlentitydefs.name2codepoint[name]))
+        if name in html.entities.name2codepoint:
+            s = s.replace(hit, chr(html.entities.name2codepoint[name]))
     s = s.replace(amp, "&")
     return s

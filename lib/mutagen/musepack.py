@@ -19,11 +19,10 @@ __all__ = ["Musepack", "Open", "delete"]
 
 import struct
 
-from ._compat import endswith, xrange
 from mutagen import StreamInfo
 from mutagen.apev2 import APEv2File, error, delete
 from mutagen.id3._util import BitPaddedInt
-from mutagen._util import cdata, convert_error
+from mutagen._util import cdata, convert_error, intround, endswith
 
 
 class MusepackHeaderError(error):
@@ -44,7 +43,7 @@ def _parse_sv8_int(fileobj, limit=9):
     """
 
     num = 0
-    for i in xrange(limit):
+    for i in range(limit):
         c = fileobj.read(1)
         if len(c) != 1:
             raise EOFError
@@ -118,7 +117,7 @@ class MusepackInfo(StreamInfo):
 
         if not self.bitrate and self.length != 0:
             fileobj.seek(0, 2)
-            self.bitrate = int(round(fileobj.tell() * 8 / self.length))
+            self.bitrate = intround(fileobj.tell() * 8 / self.length)
 
     def __parse_sv8(self, fileobj):
         # SV8 http://trac.musepack.net/trac/wiki/SV8Specification
@@ -143,9 +142,13 @@ class MusepackInfo(StreamInfo):
             # packets can be at maximum data_size big and are padded with zeros
 
             if frame_type == b"SH":
+                if frame_type not in mandatory_packets:
+                    raise MusepackHeaderError("Duplicate SH packet")
                 mandatory_packets.remove(frame_type)
                 self.__parse_stream_header(fileobj, data_size)
             elif frame_type == b"RG":
+                if frame_type not in mandatory_packets:
+                    raise MusepackHeaderError("Duplicate RG packet")
                 mandatory_packets.remove(frame_type)
                 self.__parse_replaygain_packet(fileobj, data_size)
             else:
@@ -184,9 +187,13 @@ class MusepackInfo(StreamInfo):
         remaining_size -= l1 + l2
 
         data = fileobj.read(remaining_size)
-        if len(data) != remaining_size:
+        if len(data) != remaining_size or len(data) < 2:
             raise MusepackHeaderError("SH packet ended unexpectedly.")
-        self.sample_rate = RATES[bytearray(data)[0] >> 5]
+        rate_index = (bytearray(data)[0] >> 5)
+        try:
+            self.sample_rate = RATES[rate_index]
+        except IndexError:
+            raise MusepackHeaderError("Invalid sample rate")
         self.channels = (bytearray(data)[1] >> 4) + 1
 
     def __parse_replaygain_packet(self, fileobj, data_size):

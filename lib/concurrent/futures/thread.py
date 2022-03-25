@@ -3,7 +3,7 @@
 
 """Implements ThreadPoolExecutor."""
 
-from __future__ import with_statement
+
 import atexit
 import threading
 import weakref
@@ -14,7 +14,7 @@ from concurrent.futures import _base
 try:
     import queue
 except ImportError:
-    import Queue as queue
+    import queue as queue
 
 __author__ = 'Brian Quinlan (brian@sweetapp.com)'
 

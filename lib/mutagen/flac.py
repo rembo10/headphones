@@ -23,12 +23,12 @@ http://flac.sourceforge.net/format.html
 __all__ = ["FLAC", "Open", "delete"]
 
 import struct
+from io import BytesIO
 from ._vorbis import VCommentDict
 import mutagen
 
-from ._compat import cBytesIO, endswith, chr_, xrange
 from mutagen._util import resize_bytes, MutagenError, get_size, loadfile, \
-    convert_error
+    convert_error, bchr, endswith
 from mutagen._tags import PaddingInfo
 from mutagen.id3._util import BitPaddedInt
 from functools import reduce
@@ -101,7 +101,7 @@ class MetadataBlock(object):
         if data is not None:
             if not isinstance(data, StrictFileObject):
                 if isinstance(data, bytes):
-                    data = cBytesIO(data)
+                    data = BytesIO(data)
                 elif not hasattr(data, 'read'):
                     raise TypeError(
                         "StreamInfo requires string data or a file-like")
@@ -201,7 +201,7 @@ class StreamInfo(MetadataBlock, mutagen.StreamInfo):
                     self.channels == other.channels and
                     self.bits_per_sample == other.bits_per_sample and
                     self.total_samples == other.total_samples)
-        except:
+        except Exception:
             return False
 
     __hash__ = MetadataBlock.__hash__
@@ -232,7 +232,7 @@ class StreamInfo(MetadataBlock, mutagen.StreamInfo):
         self.md5_signature = to_int_be(data.read(16))
 
     def write(self):
-        f = cBytesIO()
+        f = BytesIO()
         f.write(struct.pack(">I", self.min_blocksize)[-2:])
         f.write(struct.pack(">I", self.max_blocksize)[-2:])
         f.write(struct.pack(">I", self.min_framesize)[-3:])
@@ -244,11 +244,11 @@ class StreamInfo(MetadataBlock, mutagen.StreamInfo):
         byte = (self.sample_rate & 0xF) << 4
         byte += ((self.channels - 1) & 7) << 1
         byte += ((self.bits_per_sample - 1) >> 4) & 1
-        f.write(chr_(byte))
+        f.write(bchr(byte))
         # 4 bits of bps, 4 of sample count
         byte = ((self.bits_per_sample - 1) & 0xF) << 4
         byte += (self.total_samples >> 32) & 0xF
-        f.write(chr_(byte))
+        f.write(bchr(byte))
         # last 32 of sample count
         f.write(struct.pack(">I", self.total_samples & 0xFFFFFFFF))
         # MD5 signature
@@ -283,6 +283,9 @@ class SeekPoint(tuple):
     def __new__(cls, first_sample, byte_offset, num_samples):
         return super(cls, SeekPoint).__new__(
             cls, (first_sample, byte_offset, num_samples))
+
+    def __getnewargs__(self):
+        return self.first_sample, self.byte_offset, self.num_samples
 
     first_sample = property(lambda self: self[0])
     byte_offset = property(lambda self: self[1])
@@ -322,7 +325,7 @@ class SeekTable(MetadataBlock):
             sp = data.tryread(self.__SEEKPOINT_SIZE)
 
     def write(self):
-        f = cBytesIO()
+        f = BytesIO()
         for seekpoint in self.seekpoints:
             packed = struct.pack(
                 self.__SEEKPOINT_FORMAT,
@@ -391,10 +394,10 @@ class CueSheetTrack(object):
     Attributes:
         track_number (`int`): track number
         start_offset (`int`): track offset in samples from start of FLAC stream
-        isrc (`text`): ISRC code, exactly 12 characters
+        isrc (`mutagen.text`): ISRC code, exactly 12 characters
         type (`int`): 0 for audio, 1 for digital data
         pre_emphasis (`bool`): true if the track is recorded with pre-emphasis
-        indexes (List[`mutagen.flac.CueSheetTrackIndex`]):
+        indexes (list[CueSheetTrackIndex]):
             list of CueSheetTrackIndex objects
     """
 
@@ -437,14 +440,14 @@ class CueSheet(MetadataBlock):
     in the cue sheet.
 
     Attributes:
-        media_catalog_number (`text`): media catalog number in ASCII,
+        media_catalog_number (`mutagen.text`): media catalog number in ASCII,
             up to 128 characters
         lead_in_samples (`int`): number of lead-in samples
         compact_disc (`bool`): true if the cuesheet corresponds to a
             compact disc
-        tracks (List[`mutagen.flac.CueSheetTrack`]):
+        tracks (list[CueSheetTrack]):
             list of CueSheetTrack objects
-        lead_out (`mutagen.flac.CueSheetTrack` or `None`):
+        lead_out (`CueSheetTrack` or `None`):
             lead-out as CueSheetTrack or None if lead-out was not found
     """
 
@@ -484,7 +487,7 @@ class CueSheet(MetadataBlock):
         self.lead_in_samples = lead_in_samples
         self.compact_disc = bool(flags & 0x80)
         self.tracks = []
-        for i in xrange(num_tracks):
+        for i in range(num_tracks):
             track = data.read(self.__CUESHEET_TRACK_SIZE)
             start_offset, track_number, isrc_padded, flags, num_indexes = \
                 struct.unpack(self.__CUESHEET_TRACK_FORMAT, track)
@@ -493,7 +496,7 @@ class CueSheet(MetadataBlock):
             pre_emphasis = bool(flags & 0x40)
             val = CueSheetTrack(
                 track_number, start_offset, isrc, type_, pre_emphasis)
-            for j in xrange(num_indexes):
+            for j in range(num_indexes):
                 index = data.read(self.__CUESHEET_TRACKINDEX_SIZE)
                 index_offset, index_number = struct.unpack(
                     self.__CUESHEET_TRACKINDEX_FORMAT, index)
@@ -502,7 +505,7 @@ class CueSheet(MetadataBlock):
             self.tracks.append(val)
 
     def write(self):
-        f = cBytesIO()
+        f = BytesIO()
         flags = 0
         if self.compact_disc:
             flags |= 0x80
@@ -608,7 +611,7 @@ class Picture(MetadataBlock):
         self.data = data.read(length)
 
     def write(self):
-        f = cBytesIO()
+        f = BytesIO()
         mime = self.mime.encode('UTF-8')
         f.write(struct.pack('>2I', self.type, len(mime)))
         f.write(mime)
@@ -678,7 +681,7 @@ class FLAC(mutagen.FileType):
     Attributes:
         cuesheet (`CueSheet`): if any or `None`
         seektable (`SeekTable`): if any or `None`
-        pictures (List[`Picture`]): list of embedded pictures
+        pictures (list[Picture]): list of embedded pictures
         info (`StreamInfo`)
         tags (`mutagen._vorbis.VCommentDict`)
     """
@@ -732,7 +735,9 @@ class FLAC(mutagen.FileType):
             if self.tags is None:
                 self.tags = block
             else:
-                raise FLACVorbisError("> 1 Vorbis comment block found")
+                # https://github.com/quodlibet/mutagen/issues/377
+                # Something writes multiple and metaflac doesn't care
+                pass
         elif block.code == CueSheet.code:
             if self.cuesheet is None:
                 self.cuesheet = block
@@ -756,19 +761,21 @@ class FLAC(mutagen.FileType):
 
     add_vorbiscomment = add_tags
 
+    @convert_error(IOError, error)
     @loadfile(writable=True)
-    def delete(self, filething):
+    def delete(self, filething=None):
         """Remove Vorbis comments from a file.
 
         If no filename is given, the one most recently loaded is used.
         """
 
         if self.tags is not None:
-            self.metadata_blocks.remove(self.tags)
-            try:
-                self.save(filething, padding=lambda x: 0)
-            finally:
-                self.metadata_blocks.append(self.tags)
+            temp_blocks = [
+                b for b in self.metadata_blocks if b.code != VCFLACDict.code]
+            self._save(filething, temp_blocks, False, padding=lambda x: 0)
+            self.metadata_blocks[:] = [
+                b for b in self.metadata_blocks
+                if b.code != VCFLACDict.code or b is self.tags]
             self.tags.clear()
 
     vc = property(lambda s: s.tags, doc="Alias for tags; don't use this.")
@@ -823,26 +830,24 @@ class FLAC(mutagen.FileType):
 
     @property
     def pictures(self):
-        """
-        Returns:
-            List[`Picture`]: List of embedded pictures
-        """
-
         return [b for b in self.metadata_blocks if b.code == Picture.code]
 
     @convert_error(IOError, error)
     @loadfile(writable=True)
-    def save(self, filething, deleteid3=False, padding=None):
+    def save(self, filething=None, deleteid3=False, padding=None):
         """Save metadata blocks to a file.
 
         Args:
             filething (filething)
             deleteid3 (bool): delete id3 tags while at it
-            padding (PaddingFunction)
+            padding (:obj:`mutagen.PaddingFunction`)
 
         If no filename is given, the one most recently loaded is used.
         """
 
+        self._save(filething, self.metadata_blocks, deleteid3, padding)
+
+    def _save(self, filething, metadata_blocks, deleteid3, padding):
         f = StrictFileObject(filething.fileobj)
         header = self.__check_header(f, filething.name)
         audio_offset = self.__find_audio_offset(f)
@@ -857,7 +862,7 @@ class FLAC(mutagen.FileType):
         content_size = get_size(f) - audio_offset
         assert content_size >= 0
         data = MetadataBlock._writeblocks(
-            self.metadata_blocks, available, content_size, padding)
+            metadata_blocks, available, content_size, padding)
         data_size = len(data)
 
         resize_bytes(filething.fileobj, available, data_size, header)

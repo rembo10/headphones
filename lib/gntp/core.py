@@ -258,12 +258,12 @@ class _GNTPBase(object):
 		buff.writeln(self._format_info())
 
 		#Headers
-		for k, v in self.headers.items():
+		for k, v in list(self.headers.items()):
 			buff.writeheader(k, v)
 		buff.writeln()
 
 		#Resources
-		for resource, data in self.resources.items():
+		for resource, data in list(self.resources.items()):
 			buff.writeheader('Identifier', resource)
 			buff.writeheader('Length', len(data))
 			buff.writeln()
@@ -355,19 +355,19 @@ class GNTPRegister(_GNTPBase):
 		buff.writeln(self._format_info())
 
 		#Headers
-		for k, v in self.headers.items():
+		for k, v in list(self.headers.items()):
 			buff.writeheader(k, v)
 		buff.writeln()
 
 		#Notifications
 		if len(self.notifications) > 0:
 			for notice in self.notifications:
-				for k, v in notice.items():
+				for k, v in list(notice.items()):
 					buff.writeheader(k, v)
 				buff.writeln()
 
 		#Resources
-		for resource, data in self.resources.items():
+		for resource, data in list(self.resources.items()):
 			buff.writeheader('Identifier', resource)
 			buff.writeheader('Length', len(data))
 			buff.writeln()

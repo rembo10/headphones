@@ -4,7 +4,7 @@ Locking-related classes
 
 import time
 import threading
-import Queue
+import queue
 
 import headphones.logger
 
@@ -29,7 +29,7 @@ class TimedLock(object):
         self.lock = threading.Lock()
         self.last_used = 0
         self.minimum_delta = minimum_delta
-        self.queue = Queue.Queue()
+        self.queue = queue.Queue()
 
     def __enter__(self):
         """
@@ -47,7 +47,7 @@ class TimedLock(object):
                 seconds = self.queue.get(False)
                 headphones.logger.debug('Sleeping %s (queued)', seconds)
                 time.sleep(seconds)
-            except Queue.Empty:
+            except queue.Empty:
                 continue
             self.queue.task_done()
 

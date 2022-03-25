@@ -6,7 +6,7 @@ import sys
 # Ensure that we use the Headphones provided libraries.
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../lib"))
 
-import urlparse
+import urllib.parse
 
 
 def can_import(module):
@@ -89,7 +89,7 @@ def main():
         url = sys.argv[1]
 
     # Check if it is a HTTPS website.
-    parts = urlparse.urlparse(url)
+    parts = urllib.parse.urlparse(url)
 
     if parts.scheme.lower() != "https":
         sys.stderr.write(

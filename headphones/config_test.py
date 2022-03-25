@@ -2,8 +2,8 @@ import mock
 from mock import MagicMock
 import headphones.config
 import re
-import unittestcompat
-from unittestcompat import TestCase, TestArgs
+from . import unittestcompat
+from .unittestcompat import TestCase, TestArgs
 
 
 class ConfigApiTest(TestCase):
@@ -101,7 +101,7 @@ class ConfigApiTest(TestCase):
         # call methods
         c = headphones.config.Config(path)
         # assertions:
-        with self.assertRaisesRegexp(KeyError, exc_regex):
+        with self.assertRaisesRegex(KeyError, exc_regex):
             c.check_setting(setting_name)
         pass
 

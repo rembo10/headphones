@@ -35,7 +35,7 @@ def update(artistid, artist_name, release_groups):
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2243.2 Safari/537.36'}
 
-    url = "http://www.metacritic.com/person/" + mc_artist_name + "?filter-options=music&sort_options=date&num_items=100"
+    url = "https://www.metacritic.com/person/" + mc_artist_name + "?filter-options=music&sort_options=date&num_items=100"
 
     res = request.request_soup(url, headers=headers, whitelist_status_code=404)
 

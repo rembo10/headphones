@@ -16,13 +16,21 @@ from musicbrainzngs import musicbrainz
 from musicbrainzngs.util import _unicode
 
 hostname = "coverartarchive.org"
+https = True
 
 
-def set_caa_hostname(new_hostname):
+def set_caa_hostname(new_hostname, use_https=False):
     """Set the base hostname for Cover Art Archive requests.
-    Defaults to 'coverartarchive.org'."""
+    Defaults to 'coverartarchive.org', accessing over https.
+    For backwards compatibility, `use_https` is False by default.
+
+    :param str new_hostname: The hostname (and port) of the CAA server to connect to
+    :param bool use_https: `True` if the host should be accessed using https. Default is `False`
+"""
     global hostname
+    global https
     hostname = new_hostname
+    https = use_https
 
 
 def _caa_request(mbid, imageid=None, size=None, entitytype="release"):
@@ -32,7 +40,7 @@ def _caa_request(mbid, imageid=None, size=None, entitytype="release"):
                     with :meth:`get_image_list`.
     :type imageid: str
 
-    :param size: 250, 500
+    :param size: "250", "500", "1200"
     :type size: str or None
 
     :param entitytype: ``release`` or ``release-group``
@@ -46,7 +54,7 @@ def _caa_request(mbid, imageid=None, size=None, entitytype="release"):
     elif imageid:
         path.append(imageid)
     url = compat.urlunparse((
-        'http',
+        'https' if https else 'http',
         hostname,
         '/%s' % '/'.join(path),
         '',
@@ -93,8 +101,9 @@ def get_image_list(releaseid):
     If an error occurs then a :class:`~musicbrainzngs.ResponseError` will
     be raised with one of the following HTTP codes:
 
-    * 400: `Releaseid` is not a valid UUID
-    * 404: No release exists with an MBID of `releaseid`
+    * 400: `releaseid` is not a valid UUID
+    * 404: The release with an MBID of `releaseid` does not exist or
+           there is no cover art available for it.
     * 503: Ratelimit exceeded
     """
     return _caa_request(releaseid)
@@ -110,8 +119,9 @@ def get_release_group_image_list(releasegroupid):
     If an error occurs then a :class:`~musicbrainzngs.ResponseError` will
     be raised with one of the following HTTP codes:
 
-    * 400: `Releaseid` is not a valid UUID
-    * 404: No release exists with an MBID of `releaseid`
+    * 400: `releasegroupid` is not a valid UUID
+    * 404: The release group with an MBID of `releasegroupid` does not exist or
+           there is no cover art available for it.
     * 503: Ratelimit exceeded
     """
     return _caa_request(releasegroupid, entitytype="release-group")
@@ -123,7 +133,7 @@ def get_release_group_image_front(releasegroupid, size=None):
     :meth:`get_image`.
     """
     return get_image(releasegroupid, "front", size=size,
-                              entitytype="release-group")
+                     entitytype="release-group")
 
 
 def get_image_front(releaseid, size=None):
@@ -152,18 +162,19 @@ def get_image(mbid, coverid, size=None, entitytype="release"):
     If an error occurs then a :class:`~musicbrainzngs.ResponseError`
     will be raised with one of the following HTTP codes:
 
-    * 400: `Releaseid` is not a valid UUID or `coverid` is invalid
-    * 404: No release exists with an MBID of `releaseid`
+    * 400: `releaseid` is not a valid UUID or `coverid` is invalid
+    * 404: The release with an MBID of `releaseid` does not exist or no cover
+           art with an id of `coverid` exists.
     * 503: Ratelimit exceeded
 
-    :param coverid: ``front``, ``back`` or a number from the listing obtained with
-                    :meth:`get_image_list`
+    :param coverid: ``front``, ``back`` or a number from the listing obtained
+                    with :meth:`get_image_list`
     :type coverid: int or str
 
-    :param size: 250, 500 or None. If it is None, the largest available picture
-                 will be downloaded. If the image originally uploaded to the
-                 Cover Art Archive was smaller than the requested size, only
-                 the original image will be returned.
+    :param size: "250", "500", "1200" or None. If it is None, the largest
+                 available picture will be downloaded. If the image originally
+                 uploaded to the Cover Art Archive was smaller than the
+                 requested size, only the original image will be returned.
     :type size: str or None
 
     :param entitytype: The type of entity for which to download the cover art.

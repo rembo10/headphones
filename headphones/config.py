@@ -2,15 +2,16 @@ import itertools
 
 import os
 import re
+import ast
+from configparser import ConfigParser
 import headphones.logger
-from configobj import ConfigObj
 
 
 def bool_int(value):
     """
     Casts a config value into a 0 or 1
     """
-    if isinstance(value, basestring):
+    if isinstance(value, str):
         if value.lower() in ('', '0', 'false', 'f', 'no', 'n', 'off'):
             value = 0
     return int(bool(value))
@@ -156,7 +157,7 @@ _CONFIG_DEFINITIONS = {
     'LASTFM_USERNAME': (str, 'General', ''),
     'LAUNCH_BROWSER': (int, 'General', 1),
     'LIBRARYSCAN': (int, 'General', 1),
-    'LIBRARYSCAN_INTERVAL': (int, 'General', 300),
+    'LIBRARYSCAN_INTERVAL': (int, 'General', 24),
     'LMS_ENABLED': (int, 'LMS', 0),
     'LMS_HOST': (str, 'LMS', ''),
     'LOG_DIR': (path, 'General', ''),
@@ -239,6 +240,7 @@ _CONFIG_DEFINITIONS = {
     'QBITTORRENT_PASSWORD': (str, 'QBitTorrent', ''),
     'QBITTORRENT_USERNAME': (str, 'QBitTorrent', ''),
     'RENAME_FILES': (int, 'General', 0),
+    'RENAME_SINGLE_DISC_IGNORE': (int, 'General', 0),
     'RENAME_UNPROCESSED': (bool_int, 'General', 1),
     'RENAME_FROZEN': (bool_int, 'General', 1),
     'REPLACE_EXISTING_FOLDERS': (int, 'General', 0),
@@ -328,8 +330,9 @@ class Config(object):
     def __init__(self, config_file):
         """ Initialize the config with values from a file """
         self._config_file = config_file
-        self._config = ConfigObj(self._config_file, encoding='utf-8')
-        for key in _CONFIG_DEFINITIONS.keys():
+        self._config = ConfigParser(interpolation=None)
+        self._config.read(self._config_file)
+        for key in list(_CONFIG_DEFINITIONS.keys()):
             self.check_setting(key)
         self.ENCODER_MULTICORE_COUNT = max(0, self.ENCODER_MULTICORE_COUNT)
         self._upgrade()
@@ -346,7 +349,7 @@ class Config(object):
 
     def check_section(self, section):
         """ Check if INI section exists, if not create it """
-        if section not in self._config:
+        if not self._config.has_section(section):
             self._config[section] = {}
             return True
         else:
@@ -356,28 +359,38 @@ class Config(object):
         """ Cast any value in the config to the right type or use the default """
         key, definition_type, section, ini_key, default = self._define(key)
         self.check_section(section)
+
+        # ConfigParser values are strings, so need to convert to actual list
+        if definition_type == list:
+            definition_type = ast.literal_eval
+
         try:
             my_val = definition_type(self._config[section][ini_key])
+            # ConfigParser interprets quotes in the config
+            # literally, so we need to sanitize it. It's not really
+            # a config upgrade, since a user can at any time put 
+            # some_key = 'some_val'
+            if type(my_val) in [str, path]:
+                my_val = my_val.strip('"').strip("'")
         except Exception:
-            my_val = definition_type(default)
-            self._config[section][ini_key] = my_val
+            my_val = default
+            self._config[section][ini_key] = str(my_val)
         return my_val
 
     def write(self):
         """ Make a copy of the stored config and write it to the configured file """
-        new_config = ConfigObj(encoding="UTF-8")
-        new_config.filename = self._config_file
+        new_config = ConfigParser(interpolation=None)
 
         # first copy over everything from the old config, even if it is not
         # correctly defined to keep from losing data
-        for key, subkeys in self._config.items():
+        for key, subkeys in list(self._config.items()):
             if key not in new_config:
                 new_config[key] = {}
-            for subkey, value in subkeys.items():
+            for subkey, value in list(subkeys.items()):
                 new_config[key][subkey] = value
 
         # next make sure that everything we expect to have defined is so
-        for key in _CONFIG_DEFINITIONS.keys():
+        for key in list(_CONFIG_DEFINITIONS.keys()):
             key, definition_type, section, ini_key, default = self._define(key)
             self.check_setting(key)
             if section not in new_config:
@@ -388,14 +401,15 @@ class Config(object):
         headphones.logger.info("Writing configuration to file")
 
         try:
-            new_config.write()
+            with open(self._config_file, 'w') as configfile:
+                new_config.write(configfile)
         except IOError as e:
             headphones.logger.error("Error writing configuration file: %s", e)
 
     def get_extra_newznabs(self):
         """ Return the extra newznab tuples """
         extra_newznabs = list(
-            itertools.izip(*[itertools.islice(self.EXTRA_NEWZNABS, i, None, 3)
+            zip(*[itertools.islice(self.EXTRA_NEWZNABS, i, None, 3)
                              for i in range(3)])
         )
         return extra_newznabs
@@ -414,7 +428,7 @@ class Config(object):
     def get_extra_torznabs(self):
         """ Return the extra torznab tuples """
         extra_torznabs = list(
-            itertools.izip(*[itertools.islice(self.EXTRA_TORZNABS, i, None, 4)
+            zip(*[itertools.islice(self.EXTRA_TORZNABS, i, None, 4)
                              for i in range(4)])
         )
         return extra_torznabs
@@ -450,20 +464,21 @@ class Config(object):
             return value
         else:
             key, definition_type, section, ini_key, default = self._define(name)
-            self._config[section][ini_key] = definition_type(value)
+            self._config[section][ini_key] = str(value)
             return self._config[section][ini_key]
 
     def process_kwargs(self, kwargs):
         """
         Given a big bunch of key value pairs, apply them to the ini.
         """
-        for name, value in kwargs.items():
+        for name, value in list(kwargs.items()):
             key, definition_type, section, ini_key, default = self._define(name)
-            self._config[section][ini_key] = definition_type(value)
+            self._config[section][ini_key] = str(value)
 
     def _upgrade(self):
         """
-        Bring old configs up to date
+        Bring old configs up to date. Although this is kind of a dumb
+        way to do it because it doesn't handle multi-step upgrades
         """
         if self.CONFIG_VERSION == '2':
             # Update the config to use direct path to the encoder rather than the encoder folder
@@ -490,12 +505,12 @@ class Config(object):
             # Add Seed Ratio to Torznabs
             if self.EXTRA_TORZNABS:
                 extra_torznabs = list(
-                    itertools.izip(*[itertools.islice(self.EXTRA_TORZNABS, i, None, 3)
+                    zip(*[itertools.islice(self.EXTRA_TORZNABS, i, None, 3)
                                      for i in range(3)])
                 )
                 new_torznabs = []
                 for torznab in extra_torznabs:
-                    new_torznabs.extend([torznab[0], torznab[1], u'', torznab[2]])
+                    new_torznabs.extend([torznab[0], torznab[1], '', torznab[2]])
                 if new_torznabs:
                     self.EXTRA_TORZNABS = new_torznabs
 

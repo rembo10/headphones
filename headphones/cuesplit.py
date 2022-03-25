@@ -87,7 +87,7 @@ def check_splitter(command):
 
 def split_baby(split_file, split_cmd):
     '''Let's split baby'''
-    logger.info('Splitting %s...', split_file.decode(headphones.SYS_ENCODING, 'replace'))
+    logger.info(f"Splitting {split_file}...")
     logger.debug(subprocess.list2cmdline(split_cmd))
 
     # Prevent Windows from opening a terminal window
@@ -108,16 +108,16 @@ def split_baby(split_file, split_cmd):
 
     process = subprocess.Popen(split_cmd, startupinfo=startupinfo,
                                stdin=open(os.devnull, 'rb'), stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE, env=env)
+                               stderr=subprocess.PIPE, env=env, text=True)
     stdout, stderr = process.communicate()
 
     if process.returncode:
-        logger.error('Split failed for %s', split_file.decode(headphones.SYS_ENCODING, 'replace'))
-        out = stdout if stdout else stderr
-        logger.error('Error details: %s', out.decode(headphones.SYS_ENCODING, 'replace'))
+        logger.error(f"Split failed for {split_file}")
+        out = stdout or stderr
+        logger.error(f"Error details: {out}")
         return False
     else:
-        logger.info('Split success %s', split_file.decode(headphones.SYS_ENCODING, 'replace'))
+        logger.info(f"Split succeeded for {split_file}")
         return True
 
 
@@ -232,7 +232,7 @@ class Directory:
         for i in list_dir:
             if not check_match(i):
                 # music file
-                if os.path.splitext(i)[-1] in WAVE_FILE_TYPE_BY_EXTENSION.keys():
+                if os.path.splitext(i)[-1] in list(WAVE_FILE_TYPE_BY_EXTENSION.keys()):
                     track_nr = identify_track_number(i)
                     if track_nr:
                         self.content.append(WaveFile(self.path + os.sep + i, track_nr=track_nr))
@@ -378,7 +378,7 @@ class CueFile(File):
             except:
                 raise ValueError('Cant encode CUE Sheet.')
 
-        if self.content[0] == u'\ufeff':
+        if self.content[0] == '\ufeff':
             self.content = self.content[1:]
 
         header = header_parser()
@@ -581,7 +581,7 @@ def split(albumpath):
 
     # use xld profile to split cue
     if headphones.CONFIG.ENCODER == 'xld' and headphones.CONFIG.MUSIC_ENCODER and headphones.CONFIG.XLDPROFILE:
-        import getXldProfile
+        from . import getXldProfile
         xldprofile, xldformat, _ = getXldProfile.getXldProfile(headphones.CONFIG.XLDPROFILE)
         if not xldformat:
             raise ValueError(
@@ -601,7 +601,7 @@ def split(albumpath):
         raise ValueError('Command not found, ensure shntool or xld installed')
 
     # Determine if file can be split
-    if wave.name_ext not in WAVE_FILE_TYPE_BY_EXTENSION.keys():
+    if wave.name_ext not in list(WAVE_FILE_TYPE_BY_EXTENSION.keys()):
         raise ValueError('Cannot split, audio file has unsupported extension')
 
     # Split with xld

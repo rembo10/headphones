@@ -1,5 +1,20 @@
 # Changelog
 
+## v0.5.20
+Released 15 October 2021
+
+Highlights:
+* Improved: Last.fm & metacrtic api fixes
+* Improved: Various database fixes
+* Added: qBitTorrent
+* Added: Telegram notifications
+* Improved: Many more since the last release. Check the list
+
+Many thanks to @AdeHub for keeping the ship afloat
+and to everyone else who contributed.
+
+The full list of commits can be found [here](https://github.com/rembo10/headphones/compare/v0.5.19...v0.5.20).
+
 ## v0.5.19
 Released 27 March 2018
 

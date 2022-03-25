@@ -9,7 +9,6 @@
 from mutagen import Tags
 from mutagen._util import DictMixin, dict_match
 from mutagen.mp4 import MP4, MP4Tags, error, delete
-from ._compat import PY2, text_type, PY3
 
 
 __all__ = ["EasyMP4Tags", "EasyMP4", "delete", "error"]
@@ -42,10 +41,13 @@ class EasyMP4Tags(DictMixin, Tags):
         self.load = self.__mp4.load
         self.save = self.__mp4.save
         self.delete = self.__mp4.delete
-        self._padding = self.__mp4._padding
 
     filename = property(lambda s: s.__mp4.filename,
                         lambda s, fn: setattr(s.__mp4, 'filename', fn))
+
+    @property
+    def _padding(self):
+        return self.__mp4._padding
 
     @classmethod
     def RegisterKey(cls, key,
@@ -103,7 +105,7 @@ class EasyMP4Tags(DictMixin, Tags):
         """
 
         def getter(tags, key):
-            return list(map(text_type, tags[atomid]))
+            return list(map(str, tags[atomid]))
 
         def setter(tags, key, value):
             clamp = lambda x: int(min(max(min_value, x), max_value))
@@ -123,7 +125,7 @@ class EasyMP4Tags(DictMixin, Tags):
                 if total:
                     ret.append(u"%d/%d" % (track, total))
                 else:
-                    ret.append(text_type(track))
+                    ret.append(str(track))
             return ret
 
         def setter(tags, key, value):
@@ -164,10 +166,8 @@ class EasyMP4Tags(DictMixin, Tags):
         def setter(tags, key, value):
             encoded = []
             for v in value:
-                if not isinstance(v, text_type):
-                    if PY3:
-                        raise TypeError("%r not str" % v)
-                    v = v.decode("utf-8")
+                if not isinstance(v, str):
+                    raise TypeError("%r not str" % v)
                 encoded.append(v.encode("utf-8"))
             tags[atomid] = encoded
 
@@ -187,12 +187,8 @@ class EasyMP4Tags(DictMixin, Tags):
     def __setitem__(self, key, value):
         key = key.lower()
 
-        if PY2:
-            if isinstance(value, basestring):
-                value = [value]
-        else:
-            if isinstance(value, text_type):
-                value = [value]
+        if isinstance(value, str):
+            value = [value]
 
         func = dict_match(self.Set, key)
         if func is not None:

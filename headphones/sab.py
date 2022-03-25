@@ -17,7 +17,7 @@
 # Stolen from Sick-Beard's sab.py #
 ###################################
 
-import cookielib
+import http.cookiejar
 
 import headphones
 from headphones.common import USER_AGENT
@@ -74,29 +74,28 @@ def sendNZB(nzb):
 
     # if we get a raw data result we want to upload it to SAB
     elif nzb.resultType == "nzbdata":
-        # Sanitize the file a bit, since we can only use ascii chars with MultiPartPostHandler
-        nzbdata = helpers.latinToAscii(nzb.extraInfo[0])
+        nzbdata = nzb.extraInfo[0]
         params['mode'] = 'addfile'
-        files = {"nzbfile": (helpers.latinToAscii(nzb.name) + ".nzb", nzbdata)}
+        files = {"nzbfile": (nzb.name + ".nzb", nzbdata)}
         headers = {'User-Agent': USER_AGENT}
 
     logger.info("Attempting to connect to SABnzbd on url: %s" % headphones.CONFIG.SAB_HOST)
     if nzb.resultType == "nzb":
         response = sab_api_call('send_nzb', params=params)
     elif nzb.resultType == "nzbdata":
-        cookies = cookielib.CookieJar()
+        cookies = http.cookiejar.CookieJar()
         response = sab_api_call('send_nzb', params=params, method="post", files=files,
                                 cookies=cookies, headers=headers)
 
     if not response:
-        logger.info(u"No data returned from SABnzbd, NZB not sent")
+        logger.info("No data returned from SABnzbd, NZB not sent")
         return False
 
     if response['status']:
-        logger.info(u"NZB sent to SABnzbd successfully")
+        logger.info("NZB sent to SABnzbd successfully")
         return True
     else:
-        logger.error(u"Error sending NZB to SABnzbd: %s" % response['error'])
+        logger.error("Error sending NZB to SABnzbd: %s" % response['error'])
         return False
 
 

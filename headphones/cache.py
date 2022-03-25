@@ -19,8 +19,7 @@ from six.moves.urllib.parse import urlencode
 import headphones
 from headphones import db, helpers, logger, lastfm, request, mb
 
-# LASTFM_API_KEY = "a1c959f36a912a165d73c4dc5b9520f5"
-LASTFM_API_KEY = "6168e725d96eef5856fbf679954abf2b"
+LASTFM_API_KEY = "8d983789c771afaeb7412ac358d4bad0"
 
 FANART_URL = 'https://webservice.fanart.tv/v3/music/'
 FANART_PROJECT_KEY = '22b73c9603eba09d0c855f2d2bdba31c'
@@ -241,7 +240,7 @@ class Cache(object):
 
             # fallback to 1st album cover if none of the above
             elif 'albums' in data:
-                for mbid, art in data.get('albums', dict()).items():
+                for mbid, art in list(data.get('albums', dict()).items()):
                     if 'albumcover' in art:
                         image_url = art['albumcover'][0]['url']
                         break
@@ -353,7 +352,7 @@ class Cache(object):
 
             # fallback to 1st album cover if none of the above
             elif 'albums' in data:
-                for mbid, art in data.get('albums', dict()).items():
+                for mbid, art in list(data.get('albums', dict()).items()):
                     if 'albumcover' in art:
                         image_url = art['albumcover'][0]['url']
                         break
@@ -541,12 +540,17 @@ class Cache(object):
                         artwork_thumb = None
                         if 'fanart' in thumb_url:
                             # Create thumb using image resizing service
-                            artwork_path = '{0}?{1}'.format('http://images.weserv.nl/', urlencode({
-                                'url': thumb_url.replace('http://', ''),
-                                'w': 300,
-                            }))
-                            artwork_thumb = request.request_content(artwork_path, timeout=20, whitelist_status_code=404)
-
+                            url = "https://images.weserv.nl"
+                            params = {
+                                "url": thumb_url,
+                                "w": 300
+                            }
+                            artwork_thumb = request.request_content(
+                                url,
+                                params=params,
+                                timeout=20,
+                                whitelist_status_code=404
+                            )
                         if artwork_thumb:
                             with open(thumb_path, 'wb') as f:
                                 f.write(artwork_thumb)

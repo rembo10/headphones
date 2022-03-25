@@ -32,24 +32,17 @@ __all__ = ["APEv2", "APEv2File", "Open", "delete"]
 
 import sys
 import struct
-from collections import MutableSequence
+from io import BytesIO
+from collections.abc import MutableSequence
 
-from ._compat import (cBytesIO, PY3, text_type, PY2, reraise, swap_to_string,
-                      xrange)
 from mutagen import Metadata, FileType, StreamInfo
 from mutagen._util import DictMixin, cdata, delete_bytes, total_ordering, \
-    MutagenError, loadfile, convert_error, seek_end, get_size
+    MutagenError, loadfile, convert_error, seek_end, get_size, reraise
 
 
 def is_valid_apev2_key(key):
-    if not isinstance(key, text_type):
-        if PY3:
-            raise TypeError("APEv2 key must be str")
-
-        try:
-            key = key.decode('ascii')
-        except UnicodeDecodeError:
-            return False
+    if not isinstance(key, str):
+        raise TypeError("APEv2 key must be str")
 
     # PY26 - Change to set literal syntax (since set is faster than list here)
     return ((2 <= len(key) <= 255) and (min(key) >= u' ') and
@@ -61,7 +54,7 @@ def is_valid_apev2_key(key):
 #  1: Item contains binary information
 #  2: Item is a locator of external stored information [e.g. URL]
 #  3: reserved"
-TEXT, BINARY, EXTERNAL = xrange(3)
+TEXT, BINARY, EXTERNAL = range(3)
 
 HAS_HEADER = 1 << 31
 HAS_NO_FOOTER = 1 << 30
@@ -301,9 +294,9 @@ class APEv2(_CIDictProxy, Metadata):
     def __parse_tag(self, tag, count):
         """Raises IOError and APEBadItemError"""
 
-        fileobj = cBytesIO(tag)
+        fileobj = BytesIO(tag)
 
-        for i in xrange(count):
+        for i in range(count):
             tag_data = fileobj.read(8)
             # someone writes wrong item counts
             if not tag_data:
@@ -330,11 +323,10 @@ class APEv2(_CIDictProxy, Metadata):
             if key[-1:] == b"\x00":
                 key = key[:-1]
 
-            if PY3:
-                try:
-                    key = key.decode("ascii")
-                except UnicodeError as err:
-                    reraise(APEBadItemError, err, sys.exc_info()[2])
+            try:
+                key = key.decode("ascii")
+            except UnicodeError as err:
+                reraise(APEBadItemError, err, sys.exc_info()[2])
             value = fileobj.read(size)
             if len(value) != size:
                 raise APEBadItemError
@@ -346,16 +338,12 @@ class APEv2(_CIDictProxy, Metadata):
     def __getitem__(self, key):
         if not is_valid_apev2_key(key):
             raise KeyError("%r is not a valid APEv2 key" % key)
-        if PY2:
-            key = key.encode('ascii')
 
         return super(APEv2, self).__getitem__(key)
 
     def __delitem__(self, key):
         if not is_valid_apev2_key(key):
             raise KeyError("%r is not a valid APEv2 key" % key)
-        if PY2:
-            key = key.encode('ascii')
 
         super(APEv2, self).__delitem__(key)
 
@@ -383,43 +371,28 @@ class APEv2(_CIDictProxy, Metadata):
         if not is_valid_apev2_key(key):
             raise KeyError("%r is not a valid APEv2 key" % key)
 
-        if PY2:
-            key = key.encode('ascii')
-
         if not isinstance(value, _APEValue):
             # let's guess at the content if we're not already a value...
-            if isinstance(value, text_type):
+            if isinstance(value, str):
                 # unicode? we've got to be text.
                 value = APEValue(value, TEXT)
             elif isinstance(value, list):
                 items = []
                 for v in value:
-                    if not isinstance(v, text_type):
-                        if PY3:
-                            raise TypeError("item in list not str")
-                        v = v.decode("utf-8")
+                    if not isinstance(v, str):
+                        raise TypeError("item in list not str")
                     items.append(v)
 
                 # list? text.
                 value = APEValue(u"\0".join(items), TEXT)
             else:
-                if PY3:
-                    value = APEValue(value, BINARY)
-                else:
-                    try:
-                        value.decode("utf-8")
-                    except UnicodeError:
-                        # invalid UTF8 text, probably binary
-                        value = APEValue(value, BINARY)
-                    else:
-                        # valid UTF8, probably text
-                        value = APEValue(value, TEXT)
+                value = APEValue(value, BINARY)
 
         super(APEv2, self).__setitem__(key, value)
 
     @convert_error(IOError, error)
     @loadfile(writable=True, create=True)
-    def save(self, filething):
+    def save(self, filething=None):
         """Save changes to a file.
 
         If no filename is given, the one most recently loaded is used.
@@ -459,7 +432,7 @@ class APEv2(_CIDictProxy, Metadata):
         # "APE tags items should be sorted ascending by size... This is
         # not a MUST, but STRONGLY recommended. Actually the items should
         # be sorted by importance/byte, but this is not feasible."
-        tags.sort(key=len)
+        tags.sort(key=lambda tag: (len(tag), tag))
         num_tags = len(tags)
         tags = b"".join(tags)
 
@@ -481,7 +454,7 @@ class APEv2(_CIDictProxy, Metadata):
 
     @convert_error(IOError, error)
     @loadfile(writable=True)
-    def delete(self, filething):
+    def delete(self, filething=None):
         """Remove tags from a file."""
 
         fileobj = filething.fileobj
@@ -578,7 +551,6 @@ class _APEValue(object):
         return "%s(%r, %d)" % (type(self).__name__, self.value, self.kind)
 
 
-@swap_to_string
 @total_ordering
 class _APEUtf8Value(_APEValue):
 
@@ -589,11 +561,8 @@ class _APEUtf8Value(_APEValue):
             reraise(APEBadItemError, e, sys.exc_info()[2])
 
     def _validate(self, value):
-        if not isinstance(value, text_type):
-            if PY3:
-                raise TypeError("value not str")
-            else:
-                value = value.decode("utf-8")
+        if not isinstance(value, str):
+            raise TypeError("value not str")
         return value
 
     def _write(self):
@@ -636,22 +605,16 @@ class APETextValue(_APEUtf8Value, MutableSequence):
         return self.value.count(u"\0") + 1
 
     def __setitem__(self, index, value):
-        if not isinstance(value, text_type):
-            if PY3:
-                raise TypeError("value not str")
-            else:
-                value = value.decode("utf-8")
+        if not isinstance(value, str):
+            raise TypeError("value not str")
 
         values = list(self)
         values[index] = value
         self.value = u"\0".join(values)
 
     def insert(self, index, value):
-        if not isinstance(value, text_type):
-            if PY3:
-                raise TypeError("value not str")
-            else:
-                value = value.decode("utf-8")
+        if not isinstance(value, str):
+            raise TypeError("value not str")
 
         values = list(self)
         values.insert(index, value)
@@ -666,7 +629,6 @@ class APETextValue(_APEUtf8Value, MutableSequence):
         return u" / ".join(self)
 
 
-@swap_to_string
 @total_ordering
 class APEBinaryValue(_APEValue):
     """An APEv2 binary value."""

@@ -7,29 +7,26 @@ import re
 import xml.etree.ElementTree as ET
 import logging
 
-from musicbrainzngs import util
+from . import util
 
-try:
-    from ET import fixtag
-except:
-    # Python < 2.7
-    def fixtag(tag, namespaces):
-        # given a decorated tag (of the form {uri}tag), return prefixed
-        # tag and namespace declaration, if any
-        if isinstance(tag, ET.QName):
-            tag = tag.text
-        namespace_uri, tag = tag[1:].split("}", 1)
-        prefix = namespaces.get(namespace_uri)
-        if prefix is None:
-            prefix = "ns%d" % len(namespaces)
-            namespaces[namespace_uri] = prefix
-            if prefix == "xml":
-                xmlns = None
-            else:
-                xmlns = ("xmlns:%s" % prefix, namespace_uri)
-        else:
+
+def fixtag(tag, namespaces):
+    # given a decorated tag (of the form {uri}tag), return prefixed
+    # tag and namespace declaration, if any
+    if isinstance(tag, ET.QName):
+        tag = tag.text
+    namespace_uri, tag = tag[1:].split("}", 1)
+    prefix = namespaces.get(namespace_uri)
+    if prefix is None:
+        prefix = "ns%d" % len(namespaces)
+        namespaces[namespace_uri] = prefix
+        if prefix == "xml":
             xmlns = None
-        return "%s:%s" % (prefix, tag), xmlns
+        else:
+            xmlns = ("xmlns:%s" % prefix, namespace_uri)
+    else:
+        xmlns = None
+    return "%s:%s" % (prefix, tag), xmlns
 
 
 NS_MAP = {"http://musicbrainz.org/ns/mmd-2.0#": "ws2",
@@ -377,7 +374,7 @@ def parse_relation(relation):
     result.update(parse_elements(elements, inner_els, relation))
     # We parse attribute-list again to get attributes that have both
     # text and attribute values
-    result.update(parse_elements([], {"attribute-list": parse_relation_attribute_list}, relation))
+    result.update(parse_elements(['target-credit'], {"attribute-list": parse_relation_attribute_list}, relation))
 
     return result
 
@@ -505,7 +502,6 @@ def parse_recording(recording):
                  "user-tag-list": parse_tag_list,
                  "rating": parse_rating,
                  "isrc-list": parse_external_id_list,
-                 "echoprint-list": parse_external_id_list,
                  "relation-list": parse_relation_list,
                  "annotation": parse_annotation}
 

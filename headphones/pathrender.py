@@ -30,7 +30,7 @@ syntax elements are supported:
   nonempty value only if any variable or optional inside returned
   nonempty value, ignoring literals (like {'{'$That'}'}).
 """
-from __future__ import print_function
+
 from enum import Enum
 
 __author__ = "Andrzej Ciarkowski <andrzej.ciarkowski@gmail.com>"
@@ -111,9 +111,9 @@ class _OptionalBlock(_Generator):
         # type: (Mapping[str,str]) -> str
         res = [(isinstance(x, _Generator), x.render(replacement)) for x in self._scope]
         if any((t[0] and t[1] is not None and len(t[1]) != 0) for t in res):
-            return u"".join(t[1] for t in res)
+            return "".join(t[1] for t in res)
         else:
-            return u""
+            return ""
 
     def __eq__(self, other):
         """
@@ -122,15 +122,15 @@ class _OptionalBlock(_Generator):
         return isinstance(other, _OptionalBlock) and self._scope == other._scope
 
 
-_OPTIONAL_START = u'{'
-_OPTIONAL_END = u'}'
-_ESCAPE_CHAR = u'\''
-_REPLACEMENT_START = u'$'
+_OPTIONAL_START = '{'
+_OPTIONAL_END = '}'
+_ESCAPE_CHAR = '\''
+_REPLACEMENT_START = '$'
 
 
 def _is_replacement_valid(c):
     # type: (str) -> bool
-    return c.isalnum() or c == u'_'
+    return c.isalnum() or c == '_'
 
 
 class _State(Enum):
@@ -243,7 +243,7 @@ class Pattern(object):
     def __call__(self, replacement):
         # type: (Mapping[str,str]) -> str
         '''Execute path rendering/substitution based on replacement dictionary.'''
-        return u"".join(p.render(replacement) for p in self._pattern)
+        return "".join(p.render(replacement) for p in self._pattern)
 
     def _get_warnings(self):
         # type: () -> str
@@ -262,6 +262,6 @@ def render(pattern, replacement):
 
 if __name__ == "__main__":
     # primitive test ;)
-    p = Pattern(u"{$Disc.}$Track - $Artist - $Title{ [$Year]}")
-    d = {'$Disc': '', '$Track': '05', '$Artist': u'Grzegżółka', '$Title': u'Błona kapłona', '$Year': '2019'}
-    assert p(d) == u"05 - Grzegżółka - Błona kapłona [2019]"
+    p = Pattern("{$Disc.}$Track - $Artist - $Title{ [$Year]}")
+    d = {'$Disc': '', '$Track': '05', '$Artist': 'Grzegżółka', '$Title': 'Błona kapłona', '$Year': '2019'}
+    assert p(d) == "05 - Grzegżółka - Błona kapłona [2019]"

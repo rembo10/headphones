@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import time
-from urlparse import urlparse
+from urllib.parse import urlparse
 import re
 
 import requests as requests
@@ -11,6 +11,7 @@ from bs4 import BeautifulSoup
 
 import headphones
 from headphones import logger
+from headphones.types import Result
 
 
 class Rutracker(object):
@@ -19,13 +20,13 @@ class Rutracker(object):
         self.timeout = 60
         self.loggedin = False
         self.maxsize = 0
-        self.search_referer = 'http://rutracker.org/forum/tracker.php'
+        self.search_referer = 'https://rutracker.org/forum/tracker.php'
 
     def logged_in(self):
         return self.loggedin
 
     def still_logged_in(self, html):
-        if not html or "action=\"http://rutracker.org/forum/login.php\">" in html:
+        if not html or "action=\"https://rutracker.org/forum/login.php\">" in html:
             return False
         else:
             return True
@@ -35,7 +36,7 @@ class Rutracker(object):
         Logs in user
         """
 
-        loginpage = 'http://rutracker.org/forum/login.php'
+        loginpage = 'https://rutracker.org/forum/login.php'
         post_params = {
             'login_username': headphones.CONFIG.RUTRACKER_USER,
             'login_password': headphones.CONFIG.RUTRACKER_PASSWORD,
@@ -68,10 +69,10 @@ class Rutracker(object):
             return self.loggedin
 
     def has_bb_session_cookie(self, response):
-        if 'bb_session' in response.cookies.keys():
+        if 'bb_session' in list(response.cookies.keys()):
             return True
         # Rutracker randomly send a 302 redirect code, cookie may be present in response history
-        return next(('bb_session' in r.cookies.keys() for r in response.history), False)
+        return next(('bb_session' in list(r.cookies.keys()) for r in response.history), False)
 
     def searchurl(self, artist, album, year, format):
         """
@@ -99,10 +100,10 @@ class Rutracker(object):
         # sort by size, descending.
         sort = '&o=7&s=2'
         try:
-            searchurl = "%s?nm=%s%s%s" % (self.search_referer, urllib.quote(searchterm), format, sort)
+            searchurl = "%s?nm=%s%s%s" % (self.search_referer, urllib.parse.quote(searchterm), format, sort)
         except:
             searchterm = searchterm.encode('utf-8')
-            searchurl = "%s?nm=%s%s%s" % (self.search_referer, urllib.quote(searchterm), format, sort)
+            searchurl = "%s?nm=%s%s%s" % (self.search_referer, urllib.parse.quote(searchterm), format, sort)
         logger.info("Searching rutracker using term: %s", searchterm)
 
         return searchurl
@@ -114,7 +115,7 @@ class Rutracker(object):
         try:
             headers = {'Referer': self.search_referer}
             r = self.session.get(url=searchurl, headers=headers, timeout=self.timeout)
-            soup = BeautifulSoup(r.content, 'html5lib')
+            soup = BeautifulSoup(r.content, 'html.parser')
 
             # Debug
             # logger.debug (soup.prettify())
@@ -123,7 +124,7 @@ class Rutracker(object):
             if not self.still_logged_in(soup):
                 self.login()
                 r = self.session.get(url=searchurl, timeout=self.timeout)
-                soup = BeautifulSoup(r.content, 'html5lib')
+                soup = BeautifulSoup(r.content, 'html.parser')
                 if not self.still_logged_in(soup):
                     logger.error("Error getting rutracker data")
                     return None
@@ -159,8 +160,8 @@ class Rutracker(object):
                     # Torrent topic page
                     torrent_id = dict([part.split('=') for part in urlparse(url)[4].split('&')])[
                         't']
-                    topicurl = 'http://rutracker.org/forum/viewtopic.php?t=' + torrent_id
-                    rulist.append((title, size, topicurl, 'rutracker.org', 'torrent', True))
+                    topicurl = 'https://rutracker.org/forum/viewtopic.php?t=' + torrent_id
+                    rulist.append(Result(title, size, url, 'rutracker.org', 'torrent', True))
                 else:
                     logger.info("%s is larger than the maxsize or has too little seeders for this category, "
                                 "skipping. (Size: %i bytes, Seeders: %i)" % (title, size, int(seeds)))
@@ -179,7 +180,7 @@ class Rutracker(object):
         return the .torrent data
         """
         torrent_id = dict([part.split('=') for part in urlparse(url)[4].split('&')])['t']
-        downloadurl = 'http://rutracker.org/forum/dl.php?t=' + torrent_id
+        downloadurl = 'https://rutracker.org/forum/dl.php?t=' + torrent_id
         cookie = {'bb_dl': torrent_id}
         try:
             headers = {'Referer': url}

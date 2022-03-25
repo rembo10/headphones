@@ -9,7 +9,6 @@
 """Full tag list for any given file."""
 
 from mutagen._senf import print_, argv
-from mutagen._compat import text_type
 
 from ._util import SignalHandler, OptionParser
 
@@ -36,7 +35,7 @@ def main(argv):
         except AttributeError:
             print_(u"- Unknown file type")
         except Exception as err:
-            print_(text_type(err))
+            print_(str(err))
         print_(u"")
 
 

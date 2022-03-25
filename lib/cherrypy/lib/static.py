@@ -1,23 +1,56 @@
+"""Module with helpers for serving static files."""
+
 import os
+import platform
 import re
 import stat
 import mimetypes
+import urllib.parse
+import unicodedata
 
-try:
-    from io import UnsupportedOperation
-except ImportError:
-    UnsupportedOperation = object()
+from email.generator import _make_boundary as make_boundary
+from io import UnsupportedOperation
 
 import cherrypy
-from cherrypy._cpcompat import ntob, unquote
+from cherrypy._cpcompat import ntob
 from cherrypy.lib import cptools, httputil, file_generator_limited
 
 
-mimetypes.init()
-mimetypes.types_map['.dwg'] = 'image/x-dwg'
-mimetypes.types_map['.ico'] = 'image/x-icon'
-mimetypes.types_map['.bz2'] = 'application/x-bzip2'
-mimetypes.types_map['.gz'] = 'application/x-gzip'
+def _setup_mimetypes():
+    """Pre-initialize global mimetype map."""
+    if not mimetypes.inited:
+        mimetypes.init()
+    mimetypes.types_map['.dwg'] = 'image/x-dwg'
+    mimetypes.types_map['.ico'] = 'image/x-icon'
+    mimetypes.types_map['.bz2'] = 'application/x-bzip2'
+    mimetypes.types_map['.gz'] = 'application/x-gzip'
+
+
+_setup_mimetypes()
+
+
+def _make_content_disposition(disposition, file_name):
+    """Create HTTP header for downloading a file with a UTF-8 filename.
+
+    This function implements the recommendations of :rfc:`6266#appendix-D`.
+    See this and related answers: https://stackoverflow.com/a/8996249/2173868.
+    """
+    # As normalization algorithm for `unicodedata` is used composed form (NFC
+    # and NFKC) with compatibility equivalence criteria (NFK), so "NFKC" is the
+    # one. It first applies the compatibility decomposition, followed by the
+    # canonical composition. Should be displayed in the same manner, should be
+    # treated in the same way by applications such as alphabetizing names or
+    # searching, and may be substituted for each other.
+    # See: https://en.wikipedia.org/wiki/Unicode_equivalence.
+    ascii_name = (
+        unicodedata.normalize('NFKC', file_name).
+        encode('ascii', errors='ignore').decode()
+    )
+    header = '{}; filename="{}"'.format(disposition, ascii_name)
+    if ascii_name != file_name:
+        quoted_name = urllib.parse.quote(file_name)
+        header += '; filename*=UTF-8\'\'{}'.format(quoted_name)
+    return header
 
 
 def serve_file(path, content_type=None, disposition=None, name=None,
@@ -29,11 +62,11 @@ def serve_file(path, content_type=None, disposition=None, name=None,
     of the 'path' argument.
 
     If disposition is not None, the Content-Disposition header will be set
-    to "<disposition>; filename=<name>". If name is None, it will be set
-    to the basename of path. If disposition is None, no Content-Disposition
-    header will be written.
+    to "<disposition>; filename=<name>; filename*=utf-8''<name>"
+    as described in :rfc:`6266#appendix-D`.
+    If name is None, it will be set to the basename of path.
+    If disposition is None, no Content-Disposition header will be written.
     """
-
     response = cherrypy.serving.response
 
     # If path is relative, users should fix it by making path absolute.
@@ -49,7 +82,10 @@ def serve_file(path, content_type=None, disposition=None, name=None,
 
     try:
         st = os.stat(path)
-    except OSError:
+    except (OSError, TypeError, ValueError):
+        # OSError when file fails to stat
+        # TypeError on Python 2 when there's a null byte
+        # ValueError on Python 3 when there's a null byte
         if debug:
             cherrypy.log('os.stat(%r) failed' % path, 'TOOLS.STATIC')
         raise cherrypy.NotFound()
@@ -68,7 +104,7 @@ def serve_file(path, content_type=None, disposition=None, name=None,
 
     if content_type is None:
         # Set content-type based on filename extension
-        ext = ""
+        ext = ''
         i = path.rfind('.')
         if i != -1:
             ext = path[i:].lower()
@@ -82,8 +118,8 @@ def serve_file(path, content_type=None, disposition=None, name=None,
     if disposition is not None:
         if name is None:
             name = os.path.basename(path)
-        cd = '%s; filename="%s"' % (disposition, name)
-        response.headers["Content-Disposition"] = cd
+        cd = _make_content_disposition(disposition, name)
+        response.headers['Content-Disposition'] = cd
     if debug:
         cherrypy.log('Content-Disposition: %r' % cd, 'TOOLS.STATIC')
 
@@ -101,9 +137,10 @@ def serve_fileobj(fileobj, content_type=None, disposition=None, name=None,
     The Content-Type header will be set to the content_type arg, if provided.
 
     If disposition is not None, the Content-Disposition header will be set
-    to "<disposition>; filename=<name>". If name is None, 'filename' will
-    not be set. If disposition is None, no Content-Disposition header will
-    be written.
+    to "<disposition>; filename=<name>; filename*=utf-8''<name>"
+    as described in :rfc:`6266#appendix-D`.
+    If name is None, 'filename' will not be set.
+    If disposition is None, no Content-Disposition header will be written.
 
     CAUTION: If the request contains a 'Range' header, one or more seek()s will
     be performed on the file object.  This may cause undesired behavior if
@@ -112,7 +149,6 @@ def serve_fileobj(fileobj, content_type=None, disposition=None, name=None,
     serve_fileobj(), expecting that the data would be served starting from that
     position.
     """
-
     response = cherrypy.serving.response
 
     try:
@@ -140,8 +176,8 @@ def serve_fileobj(fileobj, content_type=None, disposition=None, name=None,
         if name is None:
             cd = disposition
         else:
-            cd = '%s; filename="%s"' % (disposition, name)
-        response.headers["Content-Disposition"] = cd
+            cd = _make_content_disposition(disposition, name)
+        response.headers['Content-Disposition'] = cd
     if debug:
         cherrypy.log('Content-Disposition: %r' % cd, 'TOOLS.STATIC')
 
@@ -155,12 +191,12 @@ def _serve_fileobj(fileobj, content_type, content_length, debug=False):
     # HTTP/1.0 didn't have Range/Accept-Ranges headers, or the 206 code
     request = cherrypy.serving.request
     if request.protocol >= (1, 1):
-        response.headers["Accept-Ranges"] = "bytes"
+        response.headers['Accept-Ranges'] = 'bytes'
         r = httputil.get_ranges(request.headers.get('Range'), content_length)
         if r == []:
-            response.headers['Content-Range'] = "bytes */%s" % content_length
-            message = ("Invalid Range (first-byte-pos greater than "
-                       "Content-Length)")
+            response.headers['Content-Range'] = 'bytes */%s' % content_length
+            message = ('Invalid Range (first-byte-pos greater than '
+                       'Content-Length)')
             if debug:
                 cherrypy.log(message, 'TOOLS.STATIC')
             raise cherrypy.HTTPError(416, message)
@@ -176,31 +212,25 @@ def _serve_fileobj(fileobj, content_type, content_length, debug=False):
                     cherrypy.log(
                         'Single part; start: %r, stop: %r' % (start, stop),
                         'TOOLS.STATIC')
-                response.status = "206 Partial Content"
+                response.status = '206 Partial Content'
                 response.headers['Content-Range'] = (
-                    "bytes %s-%s/%s" % (start, stop - 1, content_length))
+                    'bytes %s-%s/%s' % (start, stop - 1, content_length))
                 response.headers['Content-Length'] = r_len
                 fileobj.seek(start)
                 response.body = file_generator_limited(fileobj, r_len)
             else:
                 # Return a multipart/byteranges response.
-                response.status = "206 Partial Content"
-                try:
-                    # Python 3
-                    from email.generator import _make_boundary as make_boundary
-                except ImportError:
-                    # Python 2
-                    from mimetools import choose_boundary as make_boundary
+                response.status = '206 Partial Content'
                 boundary = make_boundary()
-                ct = "multipart/byteranges; boundary=%s" % boundary
+                ct = 'multipart/byteranges; boundary=%s' % boundary
                 response.headers['Content-Type'] = ct
-                if "Content-Length" in response.headers:
+                if 'Content-Length' in response.headers:
                     # Delete Content-Length header so finalize() recalcs it.
-                    del response.headers["Content-Length"]
+                    del response.headers['Content-Length']
 
                 def file_ranges():
                     # Apache compatibility:
-                    yield ntob("\r\n")
+                    yield b'\r\n'
 
                     for start, stop in r:
                         if debug:
@@ -208,23 +238,23 @@ def _serve_fileobj(fileobj, content_type, content_length, debug=False):
                                 'Multipart; start: %r, stop: %r' % (
                                     start, stop),
                                 'TOOLS.STATIC')
-                        yield ntob("--" + boundary, 'ascii')
-                        yield ntob("\r\nContent-type: %s" % content_type,
+                        yield ntob('--' + boundary, 'ascii')
+                        yield ntob('\r\nContent-type: %s' % content_type,
                                    'ascii')
                         yield ntob(
-                            "\r\nContent-range: bytes %s-%s/%s\r\n\r\n" % (
+                            '\r\nContent-range: bytes %s-%s/%s\r\n\r\n' % (
                                 start, stop - 1, content_length),
                             'ascii')
                         fileobj.seek(start)
                         gen = file_generator_limited(fileobj, stop - start)
                         for chunk in gen:
                             yield chunk
-                        yield ntob("\r\n")
+                        yield b'\r\n'
                     # Final boundary
-                    yield ntob("--" + boundary + "--", 'ascii')
+                    yield ntob('--' + boundary + '--', 'ascii')
 
                     # Apache compatibility:
-                    yield ntob("\r\n")
+                    yield b'\r\n'
                 response.body = file_ranges()
             return response.body
         else:
@@ -241,7 +271,7 @@ def _serve_fileobj(fileobj, content_type, content_length, debug=False):
 def serve_download(path, name=None):
     """Serve 'path' as an application/x-download attachment."""
     # This is such a common idiom I felt it deserved its own wrapper.
-    return serve_file(path, "application/x-download", "attachment", name)
+    return serve_file(path, 'application/x-download', 'attachment', name)
 
 
 def _attempt(filename, content_types, debug=False):
@@ -265,7 +295,7 @@ def _attempt(filename, content_types, debug=False):
         return False
 
 
-def staticdir(section, dir, root="", match="", content_types=None, index="",
+def staticdir(section, dir, root='', match='', content_types=None, index='',
               debug=False):
     """Serve a static resource from the given (root +) dir.
 
@@ -303,7 +333,7 @@ def staticdir(section, dir, root="", match="", content_types=None, index="",
     # If dir is relative, make absolute using "root".
     if not os.path.isabs(dir):
         if not root:
-            msg = "Static dir requires an absolute dir (or root)."
+            msg = 'Static dir requires an absolute dir (or root).'
             if debug:
                 cherrypy.log(msg, 'TOOLS.STATICDIR')
             raise ValueError(msg)
@@ -312,10 +342,18 @@ def staticdir(section, dir, root="", match="", content_types=None, index="",
     # Determine where we are in the object tree relative to 'section'
     # (where the static tool was defined).
     if section == 'global':
-        section = "/"
-    section = section.rstrip(r"\/")
+        section = '/'
+    section = section.rstrip(r'\/')
     branch = request.path_info[len(section) + 1:]
-    branch = unquote(branch.lstrip(r"\/"))
+    branch = urllib.parse.unquote(branch.lstrip(r'\/'))
+
+    # Requesting a file in sub-dir of the staticdir results
+    # in mixing of delimiter styles, e.g. C:\static\js/script.js.
+    # Windows accepts this form except not when the path is
+    # supplied in extended-path notation, e.g. \\?\C:\static\js/script.js.
+    # http://bit.ly/1vdioCX
+    if platform.system() == 'Windows':
+        branch = branch.replace('/', '\\')
 
     # If branch is "", filename will end in a slash
     filename = os.path.join(dir, branch)
@@ -335,11 +373,11 @@ def staticdir(section, dir, root="", match="", content_types=None, index="",
         if index:
             handled = _attempt(os.path.join(filename, index), content_types)
             if handled:
-                request.is_index = filename[-1] in (r"\/")
+                request.is_index = filename[-1] in (r'\/')
     return handled
 
 
-def staticfile(filename, root=None, match="", content_types=None, debug=False):
+def staticfile(filename, root=None, match='', content_types=None, debug=False):
     """Serve a static resource from the given (root +) filename.
 
     match

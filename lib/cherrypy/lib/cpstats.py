@@ -187,9 +187,17 @@ To format statistics reports::
 
 """
 
+import logging
+import os
+import sys
+import threading
+import time
+
+import cherrypy
+from cherrypy._json import json
+
 # ------------------------------- Statistics -------------------------------- #
 
-import logging
 if not hasattr(logging, 'statistics'):
     logging.statistics = {}
 
@@ -197,7 +205,7 @@ if not hasattr(logging, 'statistics'):
 def extrapolate_statistics(scope):
     """Return an extrapolated copy of the given scope."""
     c = {}
-    for k, v in list(scope.items()):
+    for k, v in scope.copy().items():
         if isinstance(v, dict):
             v = extrapolate_statistics(v)
         elif isinstance(v, (list, tuple)):
@@ -209,11 +217,6 @@ def extrapolate_statistics(scope):
 
 
 # -------------------- CherryPy Applications Statistics --------------------- #
-
-import threading
-import time
-
-import cherrypy
 
 appstats = logging.statistics.setdefault('CherryPy Applications', {})
 appstats.update({
@@ -245,7 +248,9 @@ appstats.update({
     'Requests': {},
 })
 
-proc_time = lambda s: time.time() - s['Start Time']
+
+def proc_time(s):
+    return time.time() - s['Start Time']
 
 
 class ByteCountWrapper(object):
@@ -291,7 +296,14 @@ class ByteCountWrapper(object):
         return data
 
 
-average_uriset_time = lambda s: s['Count'] and (s['Sum'] / s['Count']) or 0
+def average_uriset_time(s):
+    return s['Count'] and (s['Sum'] / s['Count']) or 0
+
+
+def _get_threading_ident():
+    if sys.version_info >= (3, 3):
+        return threading.get_ident()
+    return threading._get_ident()
 
 
 class StatsTool(cherrypy.Tool):
@@ -322,7 +334,7 @@ class StatsTool(cherrypy.Tool):
 
         appstats['Current Requests'] += 1
         appstats['Total Requests'] += 1
-        appstats['Requests'][threading._get_ident()] = {
+        appstats['Requests'][_get_threading_ident()] = {
             'Bytes Read': None,
             'Bytes Written': None,
             # Use a lambda so the ip gets updated by tools.proxy later
@@ -339,7 +351,7 @@ class StatsTool(cherrypy.Tool):
             debug=False, **kwargs):
         """Record the end of a request."""
         resp = cherrypy.serving.response
-        w = appstats['Requests'][threading._get_ident()]
+        w = appstats['Requests'][_get_threading_ident()]
 
         r = cherrypy.request.rfile.bytes_read
         w['Bytes Read'] = r
@@ -352,8 +364,8 @@ class StatsTool(cherrypy.Tool):
             w['Bytes Written'] = cl
             appstats['Total Bytes Written'] += cl
 
-        w['Response Status'] = getattr(
-            resp, 'output_status', None) or resp.status
+        w['Response Status'] = \
+            getattr(resp, 'output_status', resp.status).decode()
 
         w['End Time'] = time.time()
         p = w['End Time'] - w['Start Time']
@@ -384,28 +396,22 @@ class StatsTool(cherrypy.Tool):
                 sq.pop(0)
 
 
-import cherrypy
 cherrypy.tools.cpstats = StatsTool()
 
 
 # ---------------------- CherryPy Statistics Reporting ---------------------- #
 
-import os
 thisdir = os.path.abspath(os.path.dirname(__file__))
-
-try:
-    import json
-except ImportError:
-    try:
-        import simplejson as json
-    except ImportError:
-        json = None
-
 
 missing = object()
 
-locale_date = lambda v: time.strftime('%c', time.gmtime(v))
-iso_format = lambda v: time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(v))
+
+def locale_date(v):
+    return time.strftime('%c', time.gmtime(v))
+
+
+def iso_format(v):
+    return time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(v))
 
 
 def pause_resume(ns):
@@ -469,6 +475,7 @@ class StatsPage(object):
         },
     }
 
+    @cherrypy.expose
     def index(self):
         # Transform the raw data into pretty output for HTML
         yield """
@@ -572,7 +579,6 @@ table.stats2 th {
 </body>
 </html>
 """
-    index.exposed = True
 
     def get_namespaces(self):
         """Yield (title, scalars, collections) for each namespace."""
@@ -605,7 +611,8 @@ table.stats2 th {
         """Return ([headers], [rows]) for the given collection."""
         # E.g., the 'Requests' dict.
         headers = []
-        for record in v.itervalues():
+        vals = v.values()
+        for record in vals:
             for k3 in record:
                 format = formatting.get(k3, missing)
                 if format is None:
@@ -666,22 +673,22 @@ table.stats2 th {
         return headers, subrows
 
     if json is not None:
+        @cherrypy.expose
         def data(self):
             s = extrapolate_statistics(logging.statistics)
             cherrypy.response.headers['Content-Type'] = 'application/json'
-            return json.dumps(s, sort_keys=True, indent=4)
-        data.exposed = True
+            return json.dumps(s, sort_keys=True, indent=4).encode('utf-8')
 
+    @cherrypy.expose
     def pause(self, namespace):
         logging.statistics.get(namespace, {})['Enabled'] = False
         raise cherrypy.HTTPRedirect('./')
-    pause.exposed = True
     pause.cp_config = {'tools.allow.on': True,
                        'tools.allow.methods': ['POST']}
 
+    @cherrypy.expose
     def resume(self, namespace):
         logging.statistics.get(namespace, {})['Enabled'] = True
         raise cherrypy.HTTPRedirect('./')
-    resume.exposed = True
     resume.cp_config = {'tools.allow.on': True,
                         'tools.allow.methods': ['POST']}

@@ -14,6 +14,7 @@
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
 import time
+import datetime
 import shutil
 import subprocess
 import multiprocessing
@@ -21,11 +22,11 @@ import multiprocessing
 import os
 import headphones
 from headphones import logger
-from beets.mediafile import MediaFile
+from mediafile import MediaFile
 
 
 # xld
-import getXldProfile
+from . import getXldProfile
 
 
 def encode(albumPath):
@@ -63,8 +64,7 @@ def encode(albumPath):
         for music in f:
             if any(music.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
                 if not use_xld:
-                    encoderFormat = headphones.CONFIG.ENCODEROUTPUTFORMAT.encode(
-                        headphones.SYS_ENCODING)
+                    encoderFormat = headphones.CONFIG.ENCODEROUTPUTFORMAT
                 else:
                     xldMusicFile = os.path.join(r, music)
                     xldInfoMusic = MediaFile(xldMusicFile)
@@ -86,7 +86,7 @@ def encode(albumPath):
                     musicTempFiles.append(os.path.join(tempDirEncode, musicTemp))
 
     if headphones.CONFIG.ENCODER_PATH:
-        encoder = headphones.CONFIG.ENCODER_PATH.encode(headphones.SYS_ENCODING)
+        encoder = headphones.CONFIG.ENCODER_PATH
     else:
         if use_xld:
             encoder = os.path.join('/Applications', 'xld')
@@ -117,18 +117,17 @@ def encode(albumPath):
 
         if use_xld:
             if xldBitrate and (infoMusic.bitrate / 1000 <= xldBitrate):
-                logger.info('%s has bitrate <= %skb, will not be re-encoded',
-                            music.decode(headphones.SYS_ENCODING, 'replace'), xldBitrate)
+                logger.info(f"{music} has bitrate <= {xldBitrate}kb, will not be re-encoded")
             else:
                 encode = True
         elif headphones.CONFIG.ENCODER == 'lame':
             if not any(
-                    music.decode(headphones.SYS_ENCODING, 'replace').lower().endswith('.' + x) for x
+                    music.lower().endswith('.' + x) for x
                     in ["mp3", "wav"]):
                 logger.warn('Lame cannot encode %s format for %s, use ffmpeg',
                             os.path.splitext(music)[1], music)
             else:
-                if music.decode(headphones.SYS_ENCODING, 'replace').lower().endswith('.mp3') and (
+                if music.lower().endswith('.mp3') and (
                         int(infoMusic.bitrate / 1000) <= headphones.CONFIG.BITRATE):
                     logger.info('%s has bitrate <= %skb, will not be re-encoded', music,
                                 headphones.CONFIG.BITRATE)
@@ -136,13 +135,12 @@ def encode(albumPath):
                     encode = True
         else:
             if headphones.CONFIG.ENCODEROUTPUTFORMAT == 'ogg':
-                if music.decode(headphones.SYS_ENCODING, 'replace').lower().endswith('.ogg'):
-                    logger.warn('Cannot re-encode .ogg %s',
-                                music.decode(headphones.SYS_ENCODING, 'replace'))
+                if music.lower().endswith('.ogg'):
+                    logger.warn(f"Cannot re-encode .ogg {music}")
                 else:
                     encode = True
             else:
-                if music.decode(headphones.SYS_ENCODING, 'replace').lower().endswith('.' + headphones.CONFIG.ENCODEROUTPUTFORMAT) and (int(infoMusic.bitrate / 1000) <= headphones.CONFIG.BITRATE):
+                if music.lower().endswith('.' + headphones.CONFIG.ENCODEROUTPUTFORMAT) and (int(infoMusic.bitrate / 1000) <= headphones.CONFIG.BITRATE):
                     logger.info('%s has bitrate <= %skb, will not be re-encoded', music, headphones.CONFIG.BITRATE)
                 else:
                     encode = True
@@ -185,13 +183,13 @@ def encode(albumPath):
                 # Retrieve the results
                 results = results.get()
         else:
-            results = map(command_map, jobs)
+            results = list(map(command_map, jobs))
 
         # The results are either True or False, so determine if one is False
         encoder_failed = not all(results)
 
-    musicFiles = filter(None, musicFiles)
-    musicTempFiles = filter(None, musicTempFiles)
+    musicFiles = [_f for _f in musicFiles if _f]
+    musicTempFiles = [_f for _f in musicTempFiles if _f]
 
     # check all files to be encoded now exist in temp directory
     if not encoder_failed and musicTempFiles:
@@ -352,36 +350,31 @@ def command(encoder, musicSource, musicDest, albumPath, xldProfile):
             startupinfo.dwFlags |= subprocess._subprocess.STARTF_USESHOWWINDOW
 
     # Encode
-    logger.info('Encoding %s...' % (musicSource.decode(headphones.SYS_ENCODING, 'replace')))
+    logger.info(f"Encoding {musicSource}")
     logger.debug(subprocess.list2cmdline(cmd))
 
     process = subprocess.Popen(cmd, startupinfo=startupinfo,
                                stdin=open(os.devnull, 'rb'), stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE)
+                               stderr=subprocess.PIPE, text=True)
     stdout, stderr = process.communicate(headphones.CONFIG.ENCODER)
 
     # Error if return code not zero
     if process.returncode:
-        logger.error(
-            'Encoding failed for %s' % (musicSource.decode(headphones.SYS_ENCODING, 'replace')))
-        out = stdout if stdout else stderr
-        out = out.decode(headphones.SYS_ENCODING, 'replace')
+        logger.error(f"Encoding failed for {musicSource}")
+        out = stdout or stderr
         outlast2lines = '\n'.join(out.splitlines()[-2:])
-        logger.error('%s error details: %s' % (headphones.CONFIG.ENCODER, outlast2lines))
+        logger.error(f"{headphones.CONFIG.ENCODER} error details: {outlast2lines}")
         out = out.rstrip("\n")
         logger.debug(out)
         encoded = False
     else:
-        logger.info('%s encoded in %s', musicSource, getTimeEncode(startMusicTime))
+        logger.info(f"{musicSource} encoded in {getTimeEncode(startMusicTime)}")
         encoded = True
 
     return encoded
 
 
 def getTimeEncode(start):
-    seconds = int(time.time() - start)
-    hours = seconds / 3600
-    seconds -= 3600 * hours
-    minutes = seconds / 60
-    seconds -= 60 * minutes
-    return "%02d:%02d:%02d" % (hours, minutes, seconds)
+    finish = time.time()
+    seconds = int(finish - start)
+    return datetime.timedelta(seconds=seconds)

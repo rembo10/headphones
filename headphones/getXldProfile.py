@@ -1,6 +1,6 @@
 import os.path
 
-import biplist
+import plistlib
 from headphones import logger
 
 
@@ -14,8 +14,9 @@ def getXldProfile(xldProfile):
 
     # Get xld preferences plist
     try:
-        preferences = biplist.readPlist(expanded)
-    except (biplist.InvalidPlistException, biplist.NotBinaryPlistException), e:
+        with open(expanded, 'rb') as _f:
+            preferences = plistlib.load(_f)
+    except Exception as e:
         logger.error("Error reading xld preferences plist: %s", e)
         return (xldProfileNotFound, None, None)
 

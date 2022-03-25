@@ -114,16 +114,16 @@ class TorrentGroup(object):
             tag = self.parent_api.get_tag(tag_name)
             self.tags.append(tag)
         # some of the below keys aren't in things like comics...should probably watch out for this elsewhere
-        if 'bookmarked' in search_json_response.keys():
+        if 'bookmarked' in list(search_json_response.keys()):
             self.has_bookmarked = search_json_response['bookmarked']
-        if 'vanityHouse' in search_json_response.keys():
+        if 'vanityHouse' in list(search_json_response.keys()):
             self.vanity_house = search_json_response['vanityHouse']
-        if 'groupYear' in search_json_response.keys():
+        if 'groupYear' in list(search_json_response.keys()):
             self.year = search_json_response['groupYear']
-        if 'releaseType' in search_json_response.keys():
+        if 'releaseType' in list(search_json_response.keys()):
             self.release_type = search_json_response['releaseType']
         self.time = search_json_response['groupTime']
-        if 'torrentId' in search_json_response.keys():
+        if 'torrentId' in list(search_json_response.keys()):
             search_json_response['torrents'] = [{'torrentId': search_json_response['torrentId']}]
 
         new_torrents = []

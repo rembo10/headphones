@@ -19,7 +19,7 @@ Test module for pathrender.
 import headphones.pathrender as _pr
 from headphones.pathrender import Pattern, Warnings
 
-from unittestcompat import TestCase
+from .unittestcompat import TestCase
 
 
 __author__ = "Andrzej Ciarkowski <andrzej.ciarkowski@gmail.com>"
@@ -32,21 +32,21 @@ class PathRenderTest(TestCase):
 
     def test_parsing(self):
         """pathrender: pattern parsing"""
-        pattern = Pattern(u"{$Disc.}$Track - $Artist - $Title{ [$Year]}")
+        pattern = Pattern("{$Disc.}$Track - $Artist - $Title{ [$Year]}")
         expected = [
             _pr._OptionalBlock([
-                _pr._Replacement(u"$Disc"),
-                _pr._LiteralText(u".")
+                _pr._Replacement("$Disc"),
+                _pr._LiteralText(".")
             ]),
-            _pr._Replacement(u"$Track"),
-            _pr._LiteralText(u" - "),
-            _pr._Replacement(u"$Artist"),
-            _pr._LiteralText(u" - "),
-            _pr._Replacement(u"$Title"),
+            _pr._Replacement("$Track"),
+            _pr._LiteralText(" - "),
+            _pr._Replacement("$Artist"),
+            _pr._LiteralText(" - "),
+            _pr._Replacement("$Title"),
             _pr._OptionalBlock([
-                _pr._LiteralText(u" ["),
-                _pr._Replacement(u"$Year"),
-                _pr._LiteralText(u"]")
+                _pr._LiteralText(" ["),
+                _pr._Replacement("$Year"),
+                _pr._LiteralText("]")
             ])
         ]
         self.assertEqual(expected, pattern._pattern)
@@ -54,27 +54,27 @@ class PathRenderTest(TestCase):
 
     def test_parsing_warnings(self):
         """pathrender: pattern parsing with warnings"""
-        pattern = Pattern(u"{$Disc.}$Track - $Artist - $Title{ [$Year]")
+        pattern = Pattern("{$Disc.}$Track - $Artist - $Title{ [$Year]")
         self.assertEqual(set([Warnings.UNCLOSED_OPTIONAL]), pattern.warnings)
-        pattern = Pattern(u"{$Disc.}$Track - $Artist - $Title{ [$Year]'}")
+        pattern = Pattern("{$Disc.}$Track - $Artist - $Title{ [$Year]'}")
         self.assertEqual(set([Warnings.UNCLOSED_ESCAPE, Warnings.UNCLOSED_OPTIONAL]), pattern.warnings)
 
     def test_replacement(self):
         """pathrender: _Replacement variable substitution"""
-        r = _pr._Replacement(u"$Title")
+        r = _pr._Replacement("$Title")
         subst = {'$Title': 'foo', '$Track': 'bar'}
         res = r.render(subst)
-        self.assertEqual(res, u'foo', 'check valid replacement')
+        self.assertEqual(res, 'foo', 'check valid replacement')
         subst = {}
         res = r.render(subst)
-        self.assertEqual(res, u'$Title', 'check missing replacement')
+        self.assertEqual(res, '$Title', 'check missing replacement')
         subst = {'$Title': None}
         res = r.render(subst)
         self.assertEqual(res, '', 'check render() works with None')
 
     def test_literal(self):
         """pathrender: _Literal text rendering"""
-        l = _pr._LiteralText(u"foo")
+        l = _pr._LiteralText("foo")
         subst = {'$foo': 'bar'}
         res = l.render(subst)
         self.assertEqual(res, 'foo')
@@ -82,12 +82,12 @@ class PathRenderTest(TestCase):
     def test_optional(self):
         """pathrender: _OptionalBlock element processing"""
         o = _pr._OptionalBlock([
-            _pr._Replacement(u"$Title"),
-            _pr._LiteralText(u".foobar")
+            _pr._Replacement("$Title"),
+            _pr._LiteralText(".foobar")
         ])
         subst = {'$Title': 'foo', '$Track': 'bar'}
         res = o.render(subst)
-        self.assertEqual(res, u'foo.foobar', 'check non-empty replacement')
+        self.assertEqual(res, 'foo.foobar', 'check non-empty replacement')
         subst = {'$Title': ''}
         res = o.render(subst)
         self.assertEqual(res, '', 'check empty replacement')

@@ -10,7 +10,6 @@
 import struct
 
 from mutagen._util import cdata, get_size
-from mutagen._compat import text_type, xrange, izip
 from mutagen._tags import PaddingInfo
 
 from ._util import guid2bytes, bytes2guid, CODECS, ASFError, ASFHeaderError
@@ -89,7 +88,7 @@ class HeaderObject(BaseObject):
         remaining_header, num_objects = cls.parse_size(fileobj)
         remaining_header -= 30
 
-        for i in xrange(num_objects):
+        for i in range(num_objects):
             obj_header_size = 24
             if remaining_header < obj_header_size:
                 raise ASFHeaderError("invalid header size")
@@ -108,13 +107,16 @@ class HeaderObject(BaseObject):
 
             try:
                 data = fileobj.read(payload_size)
-            except OverflowError:
+            except (OverflowError, MemoryError):
                 # read doesn't take 64bit values
                 raise ASFHeaderError("invalid header size")
             if len(data) != payload_size:
                 raise ASFHeaderError("truncated")
 
-            obj.parse(asf, data)
+            try:
+                obj.parse(asf, data)
+            except struct.error:
+                raise ASFHeaderError("truncated")
             header.objects.append(obj)
 
         return header
@@ -151,7 +153,8 @@ class HeaderObject(BaseObject):
         # ask the user for padding adjustments
         file_size = get_size(fileobj)
         content_size = file_size - available
-        assert content_size >= 0
+        if content_size < 0:
+            raise ASFHeaderError("truncated content")
         info = PaddingInfo(available - needed_size, content_size)
 
         # add padding
@@ -200,7 +203,7 @@ class ContentDescriptionObject(BaseObject):
                 texts.append(None)
             pos = end
 
-        for key, value in izip(self.NAMES, texts):
+        for key, value in zip(self.NAMES, texts):
             if value is not None:
                 value = ASFUnicodeAttribute(value=value)
                 asf._tags.setdefault(self.GUID, []).append((key, value))
@@ -209,7 +212,7 @@ class ContentDescriptionObject(BaseObject):
         def render_text(name):
             value = asf.to_content_description.get(name)
             if value is not None:
-                return text_type(value).encode("utf-16-le") + b"\x00\x00"
+                return str(value).encode("utf-16-le") + b"\x00\x00"
             else:
                 return b""
 
@@ -228,7 +231,7 @@ class ExtendedContentDescriptionObject(BaseObject):
         super(ExtendedContentDescriptionObject, self).parse(asf, data)
         num_attributes, = struct.unpack("<H", data[0:2])
         pos = 2
-        for i in xrange(num_attributes):
+        for i in range(num_attributes):
             name_length, = struct.unpack("<H", data[pos:pos + 2])
             pos += 2
             name = data[pos:pos + name_length]
@@ -256,6 +259,8 @@ class FilePropertiesObject(BaseObject):
 
     def parse(self, asf, data):
         super(FilePropertiesObject, self).parse(asf, data)
+        if len(data) < 64:
+            raise ASFError("invalid field property entry")
         length, _, preroll = struct.unpack("<QQQ", data[40:64])
         # there are files where preroll is larger than length, limit to >= 0
         asf.info.length = max((length / 10000000.0) - (preroll / 1000.0), 0.0)
@@ -319,7 +324,7 @@ class CodecListObject(BaseObject):
 
         offset = 16
         count, offset = cdata.uint32_le_from(data, offset)
-        for i in xrange(count):
+        for i in range(count):
             try:
                 offset, type_, name, desc, codec = \
                     self._parse_entry(data, offset)
@@ -377,6 +382,8 @@ class HeaderExtensionObject(BaseObject):
         while datapos < datasize:
             guid, size = struct.unpack(
                 "<16sQ", data[22 + datapos:22 + datapos + 24])
+            if size < 1:
+                raise ASFHeaderError("invalid size in header extension")
             obj = BaseObject._get_object(guid)
             obj.parse(asf, data[22 + datapos + 24:22 + datapos + size])
             self.objects.append(obj)
@@ -407,7 +414,7 @@ class MetadataObject(BaseObject):
         super(MetadataObject, self).parse(asf, data)
         num_attributes, = struct.unpack("<H", data[0:2])
         pos = 2
-        for i in xrange(num_attributes):
+        for i in range(num_attributes):
             (reserved, stream, name_length, value_type,
              value_length) = struct.unpack("<HHHHI", data[pos:pos + 12])
             pos += 12
@@ -439,7 +446,7 @@ class MetadataLibraryObject(BaseObject):
         super(MetadataLibraryObject, self).parse(asf, data)
         num_attributes, = struct.unpack("<H", data[0:2])
         pos = 2
-        for i in xrange(num_attributes):
+        for i in range(num_attributes):
             (language, stream, name_length, value_type,
              value_length) = struct.unpack("<HHHHI", data[pos:pos + 12])
             pos += 12

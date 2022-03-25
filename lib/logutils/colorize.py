@@ -6,9 +6,9 @@ import logging
 import os
 
 try:
-    unicode
+    str
 except NameError:
-    unicode = None
+    str = None
 
 class ColorizingStreamHandler(logging.StreamHandler):
     """
@@ -63,7 +63,7 @@ class ColorizingStreamHandler(logging.StreamHandler):
         try:
             message = self.format(record)
             stream = self.stream
-            if unicode and isinstance(message, unicode):
+            if str and isinstance(message, str):
                 enc = getattr(stream, 'encoding', 'utf-8')
                 message = message.encode(enc, 'replace')
             if not self.is_tty:

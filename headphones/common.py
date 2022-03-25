@@ -24,6 +24,7 @@ import operator
 import os
 import re
 from headphones import version
+from functools import reduce
 
 
 # Identify Our Application
@@ -74,7 +75,7 @@ class Quality:
     @staticmethod
     def _getStatusStrings(status):
         toReturn = {}
-        for x in Quality.qualityStrings.keys():
+        for x in list(Quality.qualityStrings.keys()):
             toReturn[Quality.compositeStatus(status, x)] = Quality.statusPrefixes[status] + " (" + \
                                                            Quality.qualityStrings[x] + ")"
         return toReturn
@@ -93,7 +94,7 @@ class Quality:
     def splitQuality(quality):
         anyQualities = []
         bestQualities = []
-        for curQual in Quality.qualityStrings.keys():
+        for curQual in list(Quality.qualityStrings.keys()):
             if curQual & quality:
                 anyQualities.append(curQual)
             if curQual << 16 & quality:
@@ -151,7 +152,7 @@ class Quality:
     @staticmethod
     def splitCompositeStatus(status):
         """Returns a tuple containing (status, quality)"""
-        for x in sorted(Quality.qualityStrings.keys(), reverse=True):
+        for x in sorted(list(Quality.qualityStrings.keys()), reverse=True):
             if status > x * 100:
                 return (status - x * 100, x)
 
@@ -169,10 +170,10 @@ class Quality:
     SNATCHED_PROPER = None
 
 
-Quality.DOWNLOADED = [Quality.compositeStatus(DOWNLOADED, x) for x in Quality.qualityStrings.keys()]
-Quality.SNATCHED = [Quality.compositeStatus(SNATCHED, x) for x in Quality.qualityStrings.keys()]
+Quality.DOWNLOADED = [Quality.compositeStatus(DOWNLOADED, x) for x in list(Quality.qualityStrings.keys())]
+Quality.SNATCHED = [Quality.compositeStatus(SNATCHED, x) for x in list(Quality.qualityStrings.keys())]
 Quality.SNATCHED_PROPER = [Quality.compositeStatus(SNATCHED_PROPER, x) for x in
-                           Quality.qualityStrings.keys()]
+                           list(Quality.qualityStrings.keys())]
 
 MP3 = Quality.combineQualities([Quality.B192, Quality.B256, Quality.B320, Quality.VBR], [])
 LOSSLESS = Quality.combineQualities([Quality.FLAC], [])
