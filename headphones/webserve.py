@@ -1385,6 +1385,7 @@ class WebInterface(object):
             "custompass": headphones.CONFIG.CUSTOMPASS,
             "hpuser": headphones.CONFIG.HPUSER,
             "hppass": headphones.CONFIG.HPPASS,
+            "lastfm_apikey": headphones.CONFIG.LASTFM_APIKEY,
             "songkick_enabled": checked(headphones.CONFIG.SONGKICK_ENABLED),
             "songkick_apikey": headphones.CONFIG.SONGKICK_APIKEY,
             "songkick_location": headphones.CONFIG.SONGKICK_LOCATION,

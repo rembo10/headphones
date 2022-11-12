@@ -23,7 +23,7 @@ from headphones import db, logger, request
 TIMEOUT = 60.0  # seconds
 REQUEST_LIMIT = 1.0 / 5  # seconds
 ENTRY_POINT = "https://ws.audioscrobbler.com/2.0/"
-API_KEY = "395e6ec6bb557382fc41fde867bce66f"
+APP_API_KEY = "395e6ec6bb557382fc41fde867bce66f"
 
 # Required for API request limit
 lastfm_lock = headphones.lock.TimedLock(REQUEST_LIMIT)
@@ -40,7 +40,7 @@ def request_lastfm(method, **kwargs):
 
     # Prepare request
     kwargs["method"] = method
-    kwargs.setdefault("api_key", API_KEY)
+    kwargs.setdefault("api_key", headphones.CONFIG.LASTFM_APIKEY or APP_API_KEY)
     kwargs.setdefault("format", "json")
 
     # Send request

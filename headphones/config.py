@@ -155,6 +155,7 @@ _CONFIG_DEFINITIONS = {
     'KEEP_TORRENT_FILES': (int, 'General', 0),
     'KEEP_TORRENT_FILES_DIR': (path, 'General', ''),
     'LASTFM_USERNAME': (str, 'General', ''),
+    'LASTFM_APIKEY': (str, 'General', ''),
     'LAUNCH_BROWSER': (int, 'General', 1),
     'LIBRARYSCAN': (int, 'General', 1),
     'LIBRARYSCAN_INTERVAL': (int, 'General', 24),
