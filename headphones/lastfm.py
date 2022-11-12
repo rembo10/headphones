@@ -62,6 +62,13 @@ def request_lastfm(method, **kwargs):
 
 
 def getSimilar():
+    if not headphones.CONFIG.LASTFM_APIKEY:
+        logger.info(
+            'To update the Similar Artists cloud tag, create a Last.fm application api key '
+            'and add it under the Advanced config tab'
+        )
+        return
+
     myDB = db.DBConnection()
     results = myDB.select("SELECT ArtistID from artists ORDER BY HaveTracks DESC LIMIT 10")
 
