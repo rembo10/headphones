@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.6.0
+Released 13 November 2022
+
+Highlights:
+* Updated to python 3
+
+The full list of commits can be found [here](https://github.com/rembo10/headphones/compare/v0.5.20...v0.6.0).
+
 ## v0.5.20
 Released 15 October 2021
 
