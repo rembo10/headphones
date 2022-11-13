@@ -11,6 +11,7 @@ from bs4 import BeautifulSoup
 
 import headphones
 from headphones import logger
+from headphones.types import Result
 
 
 class Rutracker(object):
@@ -160,7 +161,7 @@ class Rutracker(object):
                     torrent_id = dict([part.split('=') for part in urlparse(url)[4].split('&')])[
                         't']
                     topicurl = 'https://rutracker.org/forum/viewtopic.php?t=' + torrent_id
-                    rulist.append((title, size, topicurl, 'rutracker.org', 'torrent', True))
+                    rulist.append(Result(title, size, url, 'rutracker.org', 'torrent', True))
                 else:
                     logger.info("%s is larger than the maxsize or has too little seeders for this category, "
                                 "skipping. (Size: %i bytes, Seeders: %i)" % (title, size, int(seeds)))

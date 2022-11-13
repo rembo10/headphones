@@ -15,7 +15,7 @@
 
 import time
 import json
-import base64
+from base64 import b64encode
 import urllib.parse
 import os
 
@@ -36,10 +36,10 @@ def addTorrent(link, data=None):
 
     if link.endswith('.torrent') and not link.startswith(('http', 'magnet')) or data:
         if data:
-            metainfo = str(base64.b64encode(data))
+            metainfo = b64encode(data).decode("utf-8")
         else:
             with open(link, 'rb') as f:
-                metainfo = str(base64.b64encode(f.read()))
+                metainfo = b64encode(f.read()).decode("utf-8")
         arguments = {'metainfo': metainfo, 'download-dir': headphones.CONFIG.DOWNLOAD_TORRENT_DIR}
     else:
         arguments = {'filename': link, 'download-dir': headphones.CONFIG.DOWNLOAD_TORRENT_DIR}

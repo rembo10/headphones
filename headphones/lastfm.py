@@ -23,7 +23,7 @@ from headphones import db, logger, request
 TIMEOUT = 60.0  # seconds
 REQUEST_LIMIT = 1.0 / 5  # seconds
 ENTRY_POINT = "https://ws.audioscrobbler.com/2.0/"
-API_KEY = "395e6ec6bb557382fc41fde867bce66f"
+APP_API_KEY = "395e6ec6bb557382fc41fde867bce66f"
 
 # Required for API request limit
 lastfm_lock = headphones.lock.TimedLock(REQUEST_LIMIT)
@@ -31,7 +31,7 @@ lastfm_lock = headphones.lock.TimedLock(REQUEST_LIMIT)
 
 def request_lastfm(method, **kwargs):
     """
-    Call a Last.FM API method. Automatically sets the method and API key. Method
+    Call a Last.fm API method. Automatically sets the method and API key. Method
     will return the result if no error occured.
 
     By default, this method will request the JSON format, since it is more
@@ -40,32 +40,39 @@ def request_lastfm(method, **kwargs):
 
     # Prepare request
     kwargs["method"] = method
-    kwargs.setdefault("api_key", API_KEY)
+    kwargs.setdefault("api_key", headphones.CONFIG.LASTFM_APIKEY or APP_API_KEY)
     kwargs.setdefault("format", "json")
 
     # Send request
-    logger.debug("Calling Last.FM method: %s", method)
-    logger.debug("Last.FM call parameters: %s", kwargs)
+    logger.debug("Calling Last.fm method: %s", method)
+    logger.debug("Last.fm call parameters: %s", kwargs)
 
     data = request.request_json(ENTRY_POINT, timeout=TIMEOUT, params=kwargs, lock=lastfm_lock)
 
     # Parse response and check for errors.
     if not data:
-        logger.error("Error calling Last.FM method: %s", method)
+        logger.error("Error calling Last.fm method: %s", method)
         return
 
     if "error" in data:
-        logger.debug("Last.FM returned an error: %s", data["message"])
+        logger.debug("Last.fm returned an error: %s", data["message"])
         return
 
     return data
 
 
 def getSimilar():
+    if not headphones.CONFIG.LASTFM_APIKEY:
+        logger.info(
+            'To update the Similar Artists cloud tag, create a Last.fm application api key '
+            'and add it under the Advanced config tab'
+        )
+        return
+
     myDB = db.DBConnection()
     results = myDB.select("SELECT ArtistID from artists ORDER BY HaveTracks DESC LIMIT 10")
 
-    logger.info("Fetching similar artists from Last.FM for tag cloud")
+    logger.info("Fetching similar artists from Last.fm for tag cloud")
     artistlist = []
 
     for result in results:
@@ -85,7 +92,7 @@ def getSimilar():
                     artistlist.append((artist_name, artist_mbid))
 
     # Add new artists to tag cloud
-    logger.debug("Fetched %d artists from Last.FM", len(artistlist))
+    logger.debug("Fetched %d artists from Last.fm", len(artistlist))
     count = defaultdict(int)
 
     for artist, mbid in artistlist:
@@ -103,7 +110,7 @@ def getSimilar():
 
         myDB.action("INSERT INTO lastfmcloud VALUES( ?, ?, ?)", [artist_name, artist_mbid, count])
 
-    logger.debug("Inserted %d artists into Last.FM tag cloud", len(top_list))
+    logger.debug("Inserted %d artists into Last.fm tag cloud", len(top_list))
 
 
 def getArtists():
@@ -111,16 +118,16 @@ def getArtists():
     results = myDB.select("SELECT ArtistID from artists")
 
     if not headphones.CONFIG.LASTFM_USERNAME:
-        logger.warn("Last.FM username not set, not importing artists.")
+        logger.warn("Last.fm username not set, not importing artists.")
         return
 
-    logger.info("Fetching artists from Last.FM for username: %s", headphones.CONFIG.LASTFM_USERNAME)
+    logger.info("Fetching artists from Last.fm for username: %s", headphones.CONFIG.LASTFM_USERNAME)
     data = request_lastfm("library.getartists", limit=1000, user=headphones.CONFIG.LASTFM_USERNAME)
 
     if data and "artists" in data:
         artistlist = []
         artists = data["artists"]["artist"]
-        logger.debug("Fetched %d artists from Last.FM", len(artists))
+        logger.debug("Fetched %d artists from Last.fm", len(artists))
 
         for artist in artists:
             artist_mbid = artist["mbid"]
@@ -133,20 +140,20 @@ def getArtists():
         for artistid in artistlist:
             importer.addArtisttoDB(artistid)
 
-        logger.info("Imported %d new artists from Last.FM", len(artistlist))
+        logger.info("Imported %d new artists from Last.fm", len(artistlist))
 
 
 def getTagTopArtists(tag, limit=50):
     myDB = db.DBConnection()
     results = myDB.select("SELECT ArtistID from artists")
 
-    logger.info("Fetching top artists from Last.FM for tag: %s", tag)
+    logger.info("Fetching top artists from Last.fm for tag: %s", tag)
     data = request_lastfm("tag.gettopartists", limit=limit, tag=tag)
 
     if data and "topartists" in data:
         artistlist = []
         artists = data["topartists"]["artist"]
-        logger.debug("Fetched %d artists from Last.FM", len(artists))
+        logger.debug("Fetched %d artists from Last.fm", len(artists))
 
         for artist in artists:
             try:
@@ -162,4 +169,4 @@ def getTagTopArtists(tag, limit=50):
         for artistid in artistlist:
             importer.addArtisttoDB(artistid)
 
-        logger.debug("Added %d new artists from Last.FM", len(artistlist))
+        logger.debug("Added %d new artists from Last.fm", len(artistlist))

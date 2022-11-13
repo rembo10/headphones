@@ -1655,6 +1655,16 @@
                             </fieldset>
 
                             <fieldset>
+                                <legend>Last.fm</legend>
+                                <div id="lastfmoptions">
+                                    <div class="row">
+                                        <label>API Key</label>
+                                        <input type="text" name="lastfm_apikey" value="${config['lastfm_apikey']}" size="40" />
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <fieldset>
                                 <legend>Songkick</legend>
                                 <div class="row checkbox">
                                     <input type="checkbox" name="songkick_enabled" id="songkick" value="1" ${config['songkick_enabled']} /><label>Show concert info</label>

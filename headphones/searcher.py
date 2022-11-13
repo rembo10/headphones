@@ -1055,12 +1055,28 @@ def send_to_downloader(data, result, album):
             result.title,
             result.size,
             result.url,
-            "Seed_Snatched" if seed_ratio and torrentid else "Snatched",
+            "Snatched",
             folder_name,
             kind,
             torrentid
         ]
     )
+
+    # Additional record for post processing or scheduled job to remove the torrent when finished seeding
+    if seed_ratio is not None and seed_ratio != 0 and torrentid:
+        myDB.action(
+            "INSERT INTO snatched VALUES (?, ?, ?, ?, DATETIME('NOW', 'localtime'), "
+            "?, ?, ?, ?)", [
+                album['AlbumID'],
+                result.title,
+                result.size,
+                result.url,
+                "Seed_Snatched",
+                folder_name,
+                kind,
+                torrentid
+            ]
+        )
 
     # notify
     artist = album[1]
@@ -1902,14 +1918,6 @@ def preprocess(resultlist):
             headers = {'User-Agent': USER_AGENT}
 
         if result.kind == 'torrent':
-            # Get out of here if we're using Transmission or Deluge
-            # if not a magnet link still need the .torrent to generate hash... uTorrent support labeling
-            if headphones.CONFIG.TORRENT_DOWNLOADER in [1, 3]:
-                return True, result
-
-            # Get out of here if it's a magnet link
-            if result.url.lower().startswith("magnet:"):
-                return True, result
 
             # rutracker always needs the torrent data
             if result.provider == 'rutracker.org':
@@ -1944,6 +1952,14 @@ def preprocess(resultlist):
                     else:
                         return r.content, result
 
+            # Get out of here if we're using Transmission or Deluge
+            # if not a magnet link still need the .torrent to generate hash... uTorrent support labeling
+            if headphones.CONFIG.TORRENT_DOWNLOADER in [1, 3]:
+                return True, result
+
+            # Get out of here if it's a magnet link
+            if result.url.lower().startswith("magnet:"):
+                return True, result
 
             # Download the torrent file
             return request.request_content(url=result.url, headers=headers), result
