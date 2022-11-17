@@ -350,7 +350,7 @@ function doAjaxCall(url,elem,reload,form) {
 	  			}
 	  			if ( form ) {
 	  				// Change the option to 'choose...'
-	  				$(formID + " select").children('option[disabled=disabled]').attr('selected','selected');
+	  				$(formID + " select").children('option[disabled=disabled]').prop('selected',true);
 	  			}
 	  		})
 	  	},2000);

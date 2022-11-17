@@ -23,6 +23,7 @@ if sys.version_info <= (3, 6):
 
 # Ensure lib added to path, before any other imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'lib/'))
+sys.path.append('/usr/local/bin')
 
 from headphones import webstart, logger
 
