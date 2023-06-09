@@ -1,17 +1,24 @@
-
+from __future__ import absolute_import
 
 from apscheduler.schedulers.base import BaseScheduler
 
 try:
     from PyQt5.QtCore import QObject, QTimer
-except ImportError:  # pragma: nocover
+except (ImportError, RuntimeError):  # pragma: nocover
     try:
         from PyQt4.QtCore import QObject, QTimer
     except ImportError:
         try:
-            from PySide.QtCore import QObject, QTimer  # flake8: noqa
+            from PySide6.QtCore import QObject, QTimer  # noqa
         except ImportError:
-            raise ImportError('QtScheduler requires either PyQt5, PyQt4 or PySide installed')
+            try:
+                from PySide2.QtCore import QObject, QTimer  # noqa
+            except ImportError:
+                try:
+                    from PySide.QtCore import QObject, QTimer  # noqa
+                except ImportError:
+                    raise ImportError('QtScheduler requires either PyQt5, PyQt4, PySide6, PySide2 '
+                                      'or PySide installed')
 
 
 class QtScheduler(BaseScheduler):
@@ -19,18 +26,15 @@ class QtScheduler(BaseScheduler):
 
     _timer = None
 
-    def start(self):
-        super(QtScheduler, self).start()
-        self.wakeup()
-
-    def shutdown(self, wait=True):
-        super(QtScheduler, self).shutdown(wait)
+    def shutdown(self, *args, **kwargs):
+        super(QtScheduler, self).shutdown(*args, **kwargs)
         self._stop_timer()
 
     def _start_timer(self, wait_seconds):
         self._stop_timer()
         if wait_seconds is not None:
-            self._timer = QTimer.singleShot(wait_seconds * 1000, self._process_jobs)
+            wait_time = min(int(wait_seconds * 1000), 2147483647)
+            self._timer = QTimer.singleShot(wait_time, self._process_jobs)
 
     def _stop_timer(self):
         if self._timer:

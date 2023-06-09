@@ -1,28 +1,24 @@
-
-from functools import wraps
+from __future__ import absolute_import
+import asyncio
+from functools import wraps, partial
 
 from apscheduler.schedulers.base import BaseScheduler
 from apscheduler.util import maybe_ref
-
-try:
-    import asyncio
-except ImportError:  # pragma: nocover
-    try:
-        import trollius as asyncio
-    except ImportError:
-        raise ImportError('AsyncIOScheduler requires either Python 3.4 or the asyncio package installed')
 
 
 def run_in_event_loop(func):
     @wraps(func)
     def wrapper(self, *args, **kwargs):
-        self._eventloop.call_soon_threadsafe(func, self, *args, **kwargs)
+        wrapped = partial(func, self, *args, **kwargs)
+        self._eventloop.call_soon_threadsafe(wrapped)
     return wrapper
 
 
 class AsyncIOScheduler(BaseScheduler):
     """
     A scheduler that runs on an asyncio (:pep:`3156`) event loop.
+
+    The default executor can run jobs based on native coroutines (``async def``).
 
     Extra options:
 
@@ -34,9 +30,11 @@ class AsyncIOScheduler(BaseScheduler):
     _eventloop = None
     _timeout = None
 
-    def start(self):
-        super(AsyncIOScheduler, self).start()
-        self.wakeup()
+    def start(self, paused=False):
+        if not self._eventloop:
+            self._eventloop = asyncio.get_event_loop()
+
+        super(AsyncIOScheduler, self).start(paused)
 
     @run_in_event_loop
     def shutdown(self, wait=True):
@@ -44,7 +42,7 @@ class AsyncIOScheduler(BaseScheduler):
         self._stop_timer()
 
     def _configure(self, config):
-        self._eventloop = maybe_ref(config.pop('event_loop', None)) or asyncio.get_event_loop()
+        self._eventloop = maybe_ref(config.pop('event_loop', None))
         super(AsyncIOScheduler, self)._configure(config)
 
     def _start_timer(self, wait_seconds):

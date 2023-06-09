@@ -1,5 +1,7 @@
+from __future__ import absolute_import
+from datetime import datetime
 
-
+from pytz import utc
 import six
 
 from apscheduler.jobstores.base import BaseJobStore, JobLookupError, ConflictingIdError
@@ -7,26 +9,28 @@ from apscheduler.util import datetime_to_utc_timestamp, utc_timestamp_to_datetim
 from apscheduler.job import Job
 
 try:
-    import pickle as pickle
+    import cPickle as pickle
 except ImportError:  # pragma: nocover
     import pickle
 
 try:
-    from redis import StrictRedis
+    from redis import Redis
 except ImportError:  # pragma: nocover
     raise ImportError('RedisJobStore requires redis installed')
 
 
 class RedisJobStore(BaseJobStore):
     """
-    Stores jobs in a Redis database. Any leftover keyword arguments are directly passed to redis's StrictRedis.
+    Stores jobs in a Redis database. Any leftover keyword arguments are directly passed to redis's
+    :class:`~redis.StrictRedis`.
 
     Plugin alias: ``redis``
 
     :param int db: the database number to store jobs in
     :param str jobs_key: key to store jobs in
     :param str run_times_key: key to store the jobs' run times in
-    :param int pickle_protocol: pickle protocol level to use (for serialization), defaults to the highest available
+    :param int pickle_protocol: pickle protocol level to use (for serialization), defaults to the
+        highest available
     """
 
     def __init__(self, db=0, jobs_key='apscheduler.jobs', run_times_key='apscheduler.run_times',
@@ -43,7 +47,7 @@ class RedisJobStore(BaseJobStore):
         self.pickle_protocol = pickle_protocol
         self.jobs_key = jobs_key
         self.run_times_key = run_times_key
-        self.redis = StrictRedis(db=int(db), **connect_args)
+        self.redis = Redis(db=int(db), **connect_args)
 
     def lookup_job(self, job_id):
         job_state = self.redis.hget(self.jobs_key, job_id)
@@ -65,7 +69,8 @@ class RedisJobStore(BaseJobStore):
     def get_all_jobs(self):
         job_states = self.redis.hgetall(self.jobs_key)
         jobs = self._reconstitute_jobs(six.iteritems(job_states))
-        return sorted(jobs, key=lambda job: job.next_run_time)
+        paused_sort_key = datetime(9999, 12, 31, tzinfo=utc)
+        return sorted(jobs, key=lambda job: job.next_run_time or paused_sort_key)
 
     def add_job(self, job):
         if self.redis.hexists(self.jobs_key, job.id):
@@ -73,8 +78,12 @@ class RedisJobStore(BaseJobStore):
 
         with self.redis.pipeline() as pipe:
             pipe.multi()
-            pipe.hset(self.jobs_key, job.id, pickle.dumps(job.__getstate__(), self.pickle_protocol))
-            pipe.zadd(self.run_times_key, datetime_to_utc_timestamp(job.next_run_time), job.id)
+            pipe.hset(self.jobs_key, job.id, pickle.dumps(job.__getstate__(),
+                                                          self.pickle_protocol))
+            if job.next_run_time:
+                pipe.zadd(self.run_times_key,
+                          {job.id: datetime_to_utc_timestamp(job.next_run_time)})
+
             pipe.execute()
 
     def update_job(self, job):
@@ -82,11 +91,14 @@ class RedisJobStore(BaseJobStore):
             raise JobLookupError(job.id)
 
         with self.redis.pipeline() as pipe:
-            pipe.hset(self.jobs_key, job.id, pickle.dumps(job.__getstate__(), self.pickle_protocol))
+            pipe.hset(self.jobs_key, job.id, pickle.dumps(job.__getstate__(),
+                                                          self.pickle_protocol))
             if job.next_run_time:
-                pipe.zadd(self.run_times_key, datetime_to_utc_timestamp(job.next_run_time), job.id)
+                pipe.zadd(self.run_times_key,
+                          {job.id: datetime_to_utc_timestamp(job.next_run_time)})
             else:
                 pipe.zrem(self.run_times_key, job.id)
+
             pipe.execute()
 
     def remove_job(self, job_id):
@@ -121,7 +133,7 @@ class RedisJobStore(BaseJobStore):
         for job_id, job_state in job_states:
             try:
                 jobs.append(self._reconstitute_job(job_state))
-            except:
+            except BaseException:
                 self._logger.exception('Unable to restore job "%s" -- removing it', job_id)
                 failed_job_ids.append(job_id)
 
