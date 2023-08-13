@@ -307,13 +307,24 @@ class Api(object):
             lossless = False
 
         myDB = db.DBConnection()
-        controlValueDict = {'AlbumID': self.id}
-        if lossless:
-            newValueDict = {'Status': 'Wanted Lossless'}
+        
+        # Validate that albums are already in db
+        album = myDB.action('SELECT * from albums WHERE AlbumID=?', [self.id]).fetchone()
+        logger.info('Typeof album %s is %s' % (
+                        self.id, type(album).__name__))
+
+        if album is None:
+            logger.info('Album %s is of type none, adding release' % (
+                self.id))
+            importer.addReleaseById(self.id)
         else:
-            newValueDict = {'Status': 'Wanted'}
-        myDB.upsert("albums", newValueDict, controlValueDict)
-        searcher.searchforalbum(self.id, new)
+            controlValueDict = {'AlbumID': self.id}
+            if lossless:
+                newValueDict = {'Status': 'Wanted Lossless'}
+            else:
+                newValueDict = {'Status': 'Wanted'}
+            myDB.upsert("albums", newValueDict, controlValueDict)
+            searcher.searchforalbum(self.id, new)
 
     def _unqueueAlbum(self, **kwargs):
 
