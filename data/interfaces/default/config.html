@@ -310,6 +310,16 @@
                                     <input type="text" name="usenet_retention" value="${config['usenet_retention']}" size="5">
                                 </div>
                             </fieldset>
+                            <fieldset title="Method for downloading Bandcamp.com files.">
+                                <legend>Bandcamp</legend>
+                                <div class="row">
+                                    <label title="Path to folder where Headphones can store raw downloads from Bandcamp.com.">
+                                        Bandcamp Directory
+                                    </label>
+                                    <input type="text" name="bandcamp_dir" value="${config['bandcamp_dir']}" size="50">
+                                    <small>Full path where raw MP3s will be stored, e.g. /Users/name/Downloads/bandcamp</small>
+                                </div>
+                            </fieldset>
                         </td>
                         <td>
                             <fieldset title="Method for downloading torrent files.">
@@ -578,6 +588,15 @@
                                         <input type="text" name="omgwtfnzbs_apikey" value="${config['omgwtfnzbs_apikey']}" size="30">
                                     </div>
                                 </div>
+                            </fieldset>
+
+                            <fieldset>
+                                <legend>Other</legend>
+                                <fieldset>
+                                    <div class="row checkbox left">
+                                        <input id="use_bandcamp" type="checkbox" class="bigcheck" name="use_bandcamp" value="1" ${config['use_bandcamp']} /><label for="use_bandcamp"><span class="option">Bandcamp</span></label>
+                                    </div>
+                                </fieldset>
                             </fieldset>
                         </td>
                         <td>
