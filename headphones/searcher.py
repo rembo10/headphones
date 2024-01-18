@@ -58,7 +58,6 @@ from headphones import (
     transmission, 
     utorrent, 
     )
-from bencode import bencode, bdecode
 
 # Magnet to torrent services, for Black hole. Stolen from CouchPotato.
 TORRENT_TO_MAGNET_SERVICES = [
