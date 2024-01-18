@@ -291,7 +291,7 @@ def verify(albumid, albumpath, Kind=None, forced=False, keep_original_folder=Fal
     logger.debug('Metadata check failed. Verifying filenames...')
     for downloaded_track in downloaded_track_list:
         track_name = os.path.splitext(downloaded_track)[0]
-        split_track_name = re.sub('[\.\-\_]', ' ', track_name).lower()
+        split_track_name = re.sub(r'[\.\-\_]', r' ', track_name).lower()
         for track in tracks:
 
             if not track['TrackTitle']:
