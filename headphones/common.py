@@ -103,36 +103,6 @@ class Quality:
         return (anyQualities, bestQualities)
 
     @staticmethod
-    def nameQuality(name):
-
-        def checkName(list, func):
-            return func([re.search(x, name, re.I) for x in list])
-
-        name = os.path.basename(name)
-
-        # if we have our exact text then assume we put it there
-        for x in Quality.qualityStrings:
-            if x == Quality.UNKNOWN:
-                continue
-
-            regex = '\W' + Quality.qualityStrings[x].replace(' ', '\W') + '\W'
-            regex_match = re.search(regex, name, re.I)
-            if regex_match:
-                return x
-
-        # TODO: fix quality checking here
-        if checkName(["mp3", "192"], any) and not checkName(["flac"], all):
-            return Quality.B192
-        elif checkName(["mp3", "256"], any) and not checkName(["flac"], all):
-            return Quality.B256
-        elif checkName(["mp3", "vbr"], any) and not checkName(["flac"], all):
-            return Quality.VBR
-        elif checkName(["mp3", "320"], any) and not checkName(["flac"], all):
-            return Quality.B320
-        else:
-            return Quality.UNKNOWN
-
-    @staticmethod
     def assumeQuality(name):
         if name.lower().endswith(".mp3"):
             return Quality.MP3
@@ -157,13 +127,6 @@ class Quality:
                 return (status - x * 100, x)
 
         return (Quality.NONE, status)
-
-    @staticmethod
-    def statusFromName(name, assume=True):
-        quality = Quality.nameQuality(name)
-        if assume and quality == Quality.UNKNOWN:
-            quality = Quality.assumeQuality(name)
-        return Quality.compositeStatus(DOWNLOADED, quality)
 
     DOWNLOADED = None
     SNATCHED = None
