@@ -1,3 +1,11 @@
-packaging==21.2
-pyparsing==2.2.1
-appdirs==1.4.3
+packaging==23.1
+
+platformdirs==2.6.2
+# required for platformdirs on Python < 3.8
+typing_extensions==4.4.0
+
+jaraco.text==3.7.0
+# required for jaraco.text on older Pythons
+importlib_resources==5.10.2
+# required for importlib_resources on older Pythons
+zipp==3.7.0
