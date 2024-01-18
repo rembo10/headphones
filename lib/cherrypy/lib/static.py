@@ -1,19 +1,18 @@
 """Module with helpers for serving static files."""
 
+import mimetypes
 import os
 import platform
 import re
 import stat
-import mimetypes
-import urllib.parse
 import unicodedata
-
+import urllib.parse
 from email.generator import _make_boundary as make_boundary
 from io import UnsupportedOperation
 
 import cherrypy
 from cherrypy._cpcompat import ntob
-from cherrypy.lib import cptools, httputil, file_generator_limited
+from cherrypy.lib import cptools, file_generator_limited, httputil
 
 
 def _setup_mimetypes():
@@ -57,15 +56,15 @@ def serve_file(path, content_type=None, disposition=None, name=None,
                debug=False):
     """Set status, headers, and body in order to serve the given path.
 
-    The Content-Type header will be set to the content_type arg, if provided.
-    If not provided, the Content-Type will be guessed by the file extension
-    of the 'path' argument.
+    The Content-Type header will be set to the content_type arg, if
+    provided. If not provided, the Content-Type will be guessed by the
+    file extension of the 'path' argument.
 
-    If disposition is not None, the Content-Disposition header will be set
-    to "<disposition>; filename=<name>; filename*=utf-8''<name>"
-    as described in :rfc:`6266#appendix-D`.
-    If name is None, it will be set to the basename of path.
-    If disposition is None, no Content-Disposition header will be written.
+    If disposition is not None, the Content-Disposition header will be
+    set to "<disposition>; filename=<name>; filename*=utf-8''<name>" as
+    described in :rfc:`6266#appendix-D`. If name is None, it will be set
+    to the basename of path. If disposition is None, no Content-
+    Disposition header will be written.
     """
     response = cherrypy.serving.response
 
@@ -185,7 +184,10 @@ def serve_fileobj(fileobj, content_type=None, disposition=None, name=None,
 
 
 def _serve_fileobj(fileobj, content_type, content_length, debug=False):
-    """Internal. Set response.body to the given file object, perhaps ranged."""
+    """Set ``response.body`` to the given file object, perhaps ranged.
+
+    Internal helper.
+    """
     response = cherrypy.serving.response
 
     # HTTP/1.0 didn't have Range/Accept-Ranges headers, or the 206 code
