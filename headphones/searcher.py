@@ -37,9 +37,27 @@ from unidecode import unidecode
 
 import headphones
 from headphones.common import USER_AGENT
+from headphones.helpers import (
+    bytes_to_mb, 
+    has_token, 
+    piratesize, 
+    replace_all,
+    replace_illegal_chars, 
+    sab_replace_dots, 
+    sab_replace_spaces, 
+    sab_sanitize_foldername,
+    )
 from headphones.types import Result
-from headphones import logger, db, helpers, classes, sab, nzbget, request
-from headphones import utorrent, transmission, notifiers, rutracker, deluge, qbittorrent, bandcamp
+from headphones import logger, db, classes, sab, nzbget, request
+from headphones import (
+    bandcamp,
+    deluge, 
+    notifiers, 
+    qbittorrent, 
+    rutracker, 
+    transmission, 
+    utorrent, 
+    )
 from bencode import bencode, bdecode
 
 # Magnet to torrent services, for Black hole. Stolen from CouchPotato.
@@ -137,7 +155,7 @@ def calculate_torrent_hash(link, data=None):
     """
 
     if link.startswith("magnet:"):
-        torrent_hash = re.findall("urn:btih:([\w]{32,40})", link)[0]
+        torrent_hash = re.findall(r"urn:btih:([\w]{32,40})", link)[0]
         if len(torrent_hash) == 32:
             torrent_hash = b16encode(b32decode(torrent_hash)).lower()
     elif data:
@@ -553,8 +571,8 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None,
             term = cleanartist + ' ' + cleanalbum
 
     # Replace bad characters in the term
-    term = re.sub('[\.\-\/]', ' ', term)
-    artistterm = re.sub('[\.\-\/]', ' ', cleanartist)
+    term = re.sub(r'[\.\-\/]', r' ', term)
+    artistterm = re.sub(r'[\.\-\/]', r' ', cleanartist)
 
     # If Preferred Bitrate and High Limit and Allow Lossless then get both lossy and lossless
     if headphones.CONFIG.PREFERRED_QUALITY == 2 and headphones.CONFIG.PREFERRED_BITRATE and headphones.CONFIG.PREFERRED_BITRATE_HIGH_BUFFER and headphones.CONFIG.PREFERRED_BITRATE_ALLOW_LOSSLESS:
@@ -1172,7 +1190,7 @@ def send_to_downloader(data, result, album):
 
 
 def verifyresult(title, artistterm, term, lossless):
-    title = re.sub('[\.\-\/\_]', ' ', title)
+    title = re.sub(r'[\.\-\/\_]', r' ', title)
 
     # if artistterm != 'Various Artists':
     #
@@ -1235,23 +1253,23 @@ def verifyresult(title, artistterm, term, lossless):
                             title, each_word)
                 return False
 
-    tokens = re.split('\W', term, re.IGNORECASE | re.UNICODE)
+    tokens = re.split(r'\W', term, re.IGNORECASE | re.UNICODE)
+
     for token in tokens:
 
         if not token:
             continue
         if token == 'Various' or token == 'Artists' or token == 'VA':
             continue
-        if not re.search('(?:\W|^)+' + token + '(?:\W|$)+', title, re.IGNORECASE | re.UNICODE):
+        if not has_token(title, token):
             cleantoken = ''.join(c for c in token if c not in string.punctuation)
-            if not not re.search('(?:\W|^)+' + cleantoken + '(?:\W|$)+', title,
-                                 re.IGNORECASE | re.UNICODE):
+            if not has_token(title, cleantoken):
                 dic = {'!': 'i', '$': 's'}
                 dumbtoken = helpers.replace_all(token, dic)
-                if not not re.search('(?:\W|^)+' + dumbtoken + '(?:\W|$)+', title,
-                                     re.IGNORECASE | re.UNICODE):
-                    logger.info("Removed from results: %s (missing tokens: %s and %s)", title,
-                                token, cleantoken)
+                if not has_token(title, dumbtoken):
+                    logger.info(
+                        "Removed from results: %s (missing tokens: [%s, %s, %s])", 
+                        title, token, cleantoken, dumbtoken)
                     return False
 
     return True
@@ -1309,12 +1327,12 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
     else:
         usersearchterm = ''
 
-    semi_clean_artist_term = re.sub('[\.\-\/]', ' ', semi_cleanartist)
-    semi_clean_album_term = re.sub('[\.\-\/]', ' ', semi_cleanalbum)
+    semi_clean_artist_term = re.sub(r'[\.\-\/]', r' ', semi_cleanartist)
+    semi_clean_album_term = re.sub(r'[\.\-\/]', r' ', semi_cleanalbum)
     # Replace bad characters in the term
-    term = re.sub('[\.\-\/]', ' ', term)
-    artistterm = re.sub('[\.\-\/]', ' ', cleanartist)
-    albumterm = re.sub('[\.\-\/]', ' ', cleanalbum)
+    term = re.sub(r'[\.\-\/]', r' ', term)
+    artistterm = re.sub(r'[\.\-\/]', r' ', cleanartist)
+    albumterm = re.sub(r'[\.\-\/]', r' ', cleanalbum)
 
     # If Preferred Bitrate and High Limit and Allow Lossless then get both lossy and lossless
     if headphones.CONFIG.PREFERRED_QUALITY == 2 and headphones.CONFIG.PREFERRED_BITRATE and headphones.CONFIG.PREFERRED_BITRATE_HIGH_BUFFER and headphones.CONFIG.PREFERRED_BITRATE_ALLOW_LOSSLESS:
@@ -1927,15 +1945,14 @@ def preprocess(resultlist):
         if result[4] == 'bandcamp':
             return True, result
 
-        if result[4] == 'torrent':
-
-        if result.provider in ["The Pirate Bay", "Old Pirate Bay"]:
+        if result[4] == 'torrent' and result.provider in ["The Pirate Bay", "Old Pirate Bay"]:
             headers = {
                 'User-Agent':
                     'Mozilla/5.0 (Windows NT 6.3; Win64; x64) \
                     AppleWebKit/537.36 (KHTML, like Gecko) \
                     Chrome/41.0.2243.2 Safari/537.36'
             }
+
         else:
             headers = {'User-Agent': USER_AGENT}
 
