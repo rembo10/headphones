@@ -40,7 +40,6 @@ from headphones.common import USER_AGENT
 from headphones.types import Result
 from headphones import logger, db, helpers, classes, sab, nzbget, request
 from headphones import utorrent, transmission, notifiers, rutracker, deluge, qbittorrent, bandcamp
-from bencode import bencode, bdecode
 
 # Magnet to torrent services, for Black hole. Stolen from CouchPotato.
 TORRENT_TO_MAGNET_SERVICES = [
@@ -852,7 +851,7 @@ def send_to_downloader(data, result, album):
                 return
 
     elif kind == 'bandcamp':
-        folder_name = bandcamp.download(album, bestqual)
+        folder_name = bandcamp.download(album, result)
         logger.info("Setting folder_name to: {}".format(folder_name))
 
     else:
@@ -1924,20 +1923,8 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
 
 def preprocess(resultlist):
     for result in resultlist:
-        if result[4] == 'bandcamp':
-            return True, result
 
-        if result[4] == 'torrent':
-
-        if result.provider in ["The Pirate Bay", "Old Pirate Bay"]:
-            headers = {
-                'User-Agent':
-                    'Mozilla/5.0 (Windows NT 6.3; Win64; x64) \
-                    AppleWebKit/537.36 (KHTML, like Gecko) \
-                    Chrome/41.0.2243.2 Safari/537.36'
-            }
-        else:
-            headers = {'User-Agent': USER_AGENT}
+        headers = {'User-Agent': USER_AGENT}
 
         if result.kind == 'torrent':
 
@@ -1984,11 +1971,23 @@ def preprocess(resultlist):
                 return True, result
 
             # Download the torrent file
+
+            if result.provider in ["The Pirate Bay", "Old Pirate Bay"]:
+                headers = {
+                    'User-Agent':
+                        'Mozilla/5.0 (Windows NT 6.3; Win64; x64) \
+                        AppleWebKit/537.36 (KHTML, like Gecko) \
+                        Chrome/41.0.2243.2 Safari/537.36'
+                }
+
             return request.request_content(url=result.url, headers=headers), result
 
-        if result.kind == 'magnet':
+        elif result.kind == 'magnet':
             magnet_link = result.url
             return "d10:magnet-uri%d:%se" % (len(magnet_link), magnet_link), result
+
+        elif result.kind == 'bandcamp':
+            return True, result
 
         else:
             if result.provider == 'headphones':

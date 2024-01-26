@@ -20,9 +20,11 @@ import re
 
 from headphones import logger, helpers, metadata, request
 from headphones.common import USER_AGENT
+from headphones.types import Result
 
 from beets.mediafile import MediaFile, UnreadableFileError
 from bs4 import BeautifulSoup
+from bs4 import FeatureNotFound
 
 
 def search(album, albumlength=None, page=1, resultlist=None):
@@ -50,7 +52,10 @@ def search(album, albumlength=None, page=1, resultlist=None):
         params=params,
         headers=headers
         ).decode('utf8')
-    soup = BeautifulSoup(content, "html5lib")
+    try:
+        soup = BeautifulSoup(content, "html5lib")
+    except FeatureNotFound:
+        soup = BeautifulSoup(content, "html.parser")
 
     for item in soup.find_all("li", class_="searchresult"):
         type = item.find('div', class_='itemtype').text.strip().lower()
@@ -66,7 +71,7 @@ def search(album, albumlength=None, page=1, resultlist=None):
                 cleanalbum, cleanalbum_found))
             if (cleanartist.lower() == cleanartist_found.lower() and
                     cleanalbum.lower() == cleanalbum_found.lower()):
-                resultlist.append((
+                resultlist.append(Result(
                     data['title'], data['size'], data['url'],
                     'bandcamp', 'bandcamp', True))
         else:
@@ -82,7 +87,7 @@ def search(album, albumlength=None, page=1, resultlist=None):
 
 
 def download(album, bestqual):
-    html = request.request_content(url=bestqual[2]).decode('utf-8')
+    html = request.request_content(url=bestqual.url).decode('utf-8')
     trackinfo = []
     try:
         trackinfo = json.loads(

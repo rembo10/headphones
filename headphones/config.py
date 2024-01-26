@@ -318,7 +318,7 @@ _CONFIG_DEFINITIONS = {
     'XBMC_UPDATE': (int, 'XBMC', 0),
     'XBMC_USERNAME': (str, 'XBMC', ''),
     'XLDPROFILE': (str, 'General', ''),
-    'BANDCAMP': (int, 'General', 1),
+    'BANDCAMP': (int, 'General', 0),
     'BANDCAMP_DIR': (path, 'General', '')
 }
 
