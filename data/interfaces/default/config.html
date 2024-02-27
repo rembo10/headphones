@@ -477,7 +477,33 @@
                                     <label>Prefer</label>
                                     <input type="radio" name="prefer_torrents" id="prefer_torrents_0" value="0" ${config['prefer_torrents_0']}>NZBs
                                     <input type="radio" name="prefer_torrents" id="prefer_torrents_1" value="1" ${config['prefer_torrents_1']}>Torrents
-                                    <input type="radio" name="prefer_torrents" id="prefer_torrents_2" value="2" ${config['prefer_torrents_2']}>No Preference
+                                    <input type="radio" name="prefer_torrents" id="prefer_torrents_2" value="2" ${config['prefer_torrents_2']}>Soulseek
+                                    <input type="radio" name="prefer_torrents" id="prefer_torrents_3" value="3" ${config['prefer_torrents_3']}>No Preference
+                                </div>
+                            </fieldset>
+                        </td>
+                        <td>
+                            <fieldset>
+                                <legend>Soulseek</legend>
+                                <div class="row">
+                                    <label>Soulseek API URL</label>
+                                    <input type="text" name="soulseek_api_url" value="${config['soulseek_api_url']}" size="50">
+                                </div>
+                                <div class="row">
+                                    <label>Soulseek API KEY</label>
+                                    <input type="text" name="soulseek_api_key" value="${config['soulseek_api_key']}" size="20">
+                                </div>
+                                <div class="row">
+                                    <label title="Path to folder where Headphones can find the downloads.">
+                                        Soulseek Download Dir:
+                                    </label>
+                                    <input type="text" name="soulseek_download_dir" value="${config['soulseek_download_dir']}" size="50">
+                                </div>
+                                <div class="row">
+                                    <label title="Path to folder where Headphones can find the downloads.">
+                                        Soulseek Incomplete Download Dir:
+                                    </label>
+                                    <input type="text" name="soulseek_incomplete_download_dir" value="${config['soulseek_incomplete_download_dir']}" size="50">
                                 </div>
                             </fieldset>
                         </td>
@@ -589,12 +615,16 @@
                                     </div>
                                 </div>
                             </fieldset>
-
                             <fieldset>
                                 <legend>Other</legend>
                                 <fieldset>
                                     <div class="row checkbox left">
                                         <input id="use_bandcamp" type="checkbox" class="bigcheck" name="use_bandcamp" value="1" ${config['use_bandcamp']} /><label for="use_bandcamp"><span class="option">Bandcamp</span></label>
+                                    </div>
+                                </fieldset>
+                                <fieldset>
+                                    <div class="row checkbox left">
+                                        <input id="use_soulseek" type="checkbox" class="bigcheck" name="use_soulseek" value="1" ${config['use_soulseek']} /><label for="use_soulseek"><span class="option">Soulseek</span></label>
                                     </div>
                                 </fieldset>
                             </fieldset>
