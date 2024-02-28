@@ -165,6 +165,7 @@ _CONFIG_DEFINITIONS = {
     'LOSSLESS_BITRATE_FROM': (int, 'General', 0),
     'LOSSLESS_BITRATE_TO': (int, 'General', 0),
     'LOSSLESS_DESTINATION_DIR': (path, 'General', ''),
+    'MAXIMUM_BITRATE': (int, 'General', 0),
     'MB_IGNORE_AGE': (int, 'General', 365),
     'MB_IGNORE_AGE_MISSING': (int, 'General', 0),
     'MIRROR': (str, 'General', 'musicbrainz.org'),

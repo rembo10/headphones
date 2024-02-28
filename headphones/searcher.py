@@ -435,7 +435,12 @@ def sort_search_results(resultlist, album, new, albumlength):
         logger.info(
             'No more results found for:  %s - %s' % (album['ArtistName'], album['AlbumTitle']))
         return None
-
+    print(headphones.CONFIG.MAXIMUM_BITRATE)
+    if headphones.CONFIG.MAXIMUM_BITRATE > 0:
+        resultlist = [
+        result for result in resultlist
+        if ((result.size * 8) / albumlength) <= headphones.CONFIG.MAXIMUM_BITRATE
+        ]
     # Add a priority if it has any of the preferred words
     results_with_priority = []
     preferred_words = helpers.split_string(headphones.CONFIG.PREFERRED_WORDS)
