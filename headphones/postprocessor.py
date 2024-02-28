@@ -405,12 +405,15 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
     # Need to update the downloaded track list with the new location.
     # Could probably just throw in the "headphones-modified" folder,
     # but this is good to make sure we're not counting files that may have failed to move
+
     if new_folder:
         downloaded_track_list = []
         for r, d, f in os.walk(albumpath):
             for files in f:
                 if any(files.lower().endswith('.' + x.lower()) for x in headphones.MEDIA_FORMATS):
                     downloaded_track_list.append(os.path.join(r, files))
+    
+    all_files_lossless = all(file.lower().endswith(tuple('.' + format.lower() for format in headphones.LOSSLESS_MEDIA_FORMATS)) for file in downloaded_track_list)
 
     builder = metadata.AlbumMetadataBuilder()
     # Check if files are valid media files and are writable, before the steps
@@ -504,11 +507,19 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
     if headphones.CONFIG.FILE_PERMISSIONS_ENABLED:
         updateFilePermissions(albumpaths)
 
-    myDB = db.DBConnection()
-    myDB.action('UPDATE albums SET status = "Downloaded" WHERE AlbumID=?', [albumid])
-    myDB.action(
-        'UPDATE snatched SET status = "Processed" WHERE Status NOT LIKE "Seed%" and AlbumID=?',
-        [albumid])
+    # If the downloaded tracks are lossy, but lossless is wanted, set status to wanted lossless
+    if not all_files_lossless and headphones.CONFIG.PREFERRED_QUALITY == 1:
+        myDB = db.DBConnection()
+        myDB.action('UPDATE albums SET status = "Wanted Lossless" WHERE AlbumID=?', [albumid])
+        myDB.action(
+            'UPDATE snatched SET status = "Processed" WHERE Status NOT LIKE "Seed%" and AlbumID=?',
+            [albumid])
+    else:
+        myDB = db.DBConnection()
+        myDB.action('UPDATE albums SET status = "Downloaded" WHERE AlbumID=?', [albumid])
+        myDB.action(
+            'UPDATE snatched SET status = "Processed" WHERE Status NOT LIKE "Seed%" and AlbumID=?',
+            [albumid])
 
     # Check if torrent has finished seeding
     if headphones.CONFIG.TORRENT_DOWNLOADER != 0:

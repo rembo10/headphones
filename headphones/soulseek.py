@@ -11,7 +11,10 @@ Result = namedtuple('Result', ['title', 'size', 'user', 'provider', 'type', 'mat
 def initialize_soulseek_client():
     host = headphones.CONFIG.SOULSEEK_API_URL
     api_key = headphones.CONFIG.SOULSEEK_API_KEY
-    return slskd_api.SlskdClient(host=host, api_key=api_key)
+    try:
+        return slskd_api.SlskdClient(host=host, api_key=api_key)
+    except:
+        logger.info("Something went wrong while connecting to the soulseek client")
 
     # Search logic, calling search and processing fucntions
 def search(artist, album, year, num_tracks, losslessOnly):
@@ -24,14 +27,14 @@ def search(artist, album, year, num_tracks, losslessOnly):
         return processed_results
     
     # Stage 2: If Stage 1 fails, search with artist, album, and num_tracks (excluding year)
-    logger.info("Soulseek search stage 1 did not meet criteria. Retrying without year...")
+    logger.debug("Soulseek search stage 1 did not meet criteria. Retrying without year...")
     results = execute_search(client, artist, album, None, losslessOnly)
     processed_results = process_results(results, losslessOnly, num_tracks)
     if processed_results:
         return processed_results
     
     # Stage 3: Final attempt, search only with artist and album
-    logger.info("Soulseek search stage 2 did not meet criteria. Final attempt with only artist and album.")
+    logger.debug("Soulseek search stage 2 did not meet criteria. Final attempt with only artist and album.")
     results = execute_search(client, artist, album, None, losslessOnly)
     processed_results = process_results(results, losslessOnly, num_tracks, ignore_track_count=True)
     
@@ -42,17 +45,23 @@ def execute_search(client, artist, album, year, losslessOnly):
     if year:
         search_text += f" {year}"
     if losslessOnly:
-        search_text += ".flac"
+        search_text += " .flac"
 
     # Actual search
-    search_response = client.searches.search_text(searchText=search_text, filterResponses=True)
+    try:
+        search_response = client.searches.search_text(searchText=search_text, filterResponses=True)
+    except:
+        logger.info('Something went wrong trying to search soulseek')
     search_id = search_response.get('id')
     
     # Wait for search completion and return response
     while not client.searches.state(id=search_id).get('isComplete'):
         time.sleep(2)
     
-    return client.searches.search_responses(id=search_id)
+    try:
+        return client.searches.search_responses(id=search_id)
+    except:
+        logger.info('Something went wrong getting search responsed from soulseek')
 
 # Processing the search result passed
 def process_results(results, losslessOnly, num_tracks, ignore_track_count=False):
@@ -110,12 +119,18 @@ def process_results(results, losslessOnly, num_tracks, ignore_track_count=False)
 
 def download(user, filelist):
     client = initialize_soulseek_client()
-    client.transfers.enqueue(username=user, files=filelist)
+    try:
+        client.transfers.enqueue(username=user, files=filelist)
+    except:
+        logger.info('Something went wrong enqueueing downloads in soulseek')
 
 
 def download_completed():
     client = initialize_soulseek_client()
-    all_downloads = client.transfers.get_all_downloads(includeRemoved=False)
+    try:
+        all_downloads = client.transfers.get_all_downloads(includeRemoved=False)
+    except:
+        logger.info('Something went wrong grabbing all downloads from soulseek')
     album_completion_tracker = {}  # Tracks completion state of each album's songs
     album_errored_tracker = {}  # Tracks albums with errored downloads
 
@@ -161,15 +176,18 @@ def download_completed():
                     # Extract 'id' and 'username' for each file to cancel the download
                     file_id = file_data.get('id', '')
                     username = file_data.get('username', '')
-                    success = client.transfers.cancel_download(username, file_id)
+                    try:
+                        success = client.transfers.cancel_download(username, file_id)
+                    except:
+                        logger.info('Something went wrong canceling downloads in soulseek')
                     if not success:
                         print(f"Failed to cancel download for file ID: {file_id}")
 
     # Clear completed/canceled/errored stuff from client downloads
     try:
         client.transfers.remove_completed_downloads()
-    except Exception as e:
-        print(f"Failed to remove completed downloads: {e}")
+    except:
+        print(f"Failed to remove completed downloads")
 
     # Identify completed albums
     completed_albums = {album for album, counts in album_completion_tracker.items() if counts['total'] == counts['completed']}
