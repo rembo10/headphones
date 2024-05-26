@@ -1,7 +1,17 @@
 # Changelog
 
+## v0.6.2
+ Released 26 May 2024
+
+Highlights:
+* Added soulseek support
+* Added bandcamp support
+* Changes and dependency updates to work with Python >= 3.12
+
+The full list of commits can be found [here](https://github.com/rembo10/headphones/compare/v0.6.1...v0.6.2).
+
 ## v0.6.1
-Released 26 November 2023
+R eleased 26 November 2023
 
 Highlights:
 * Dependency updates to work with > Python 3.11
