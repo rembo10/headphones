@@ -38,13 +38,13 @@ from unidecode import unidecode
 import headphones
 from headphones.common import USER_AGENT
 from headphones.helpers import (
-    bytes_to_mb, 
-    has_token, 
-    piratesize, 
+    bytes_to_mb,
+    has_token,
+    piratesize,
     replace_all,
-    replace_illegal_chars, 
-    sab_replace_dots, 
-    sab_replace_spaces, 
+    replace_illegal_chars,
+    sab_replace_dots,
+    sab_replace_spaces,
     sab_sanitize_foldername,
     split_string
     )
@@ -52,13 +52,13 @@ from headphones.types import Result
 from headphones import logger, db, classes, sab, nzbget, request
 from headphones import (
     bandcamp,
-    deluge, 
-    notifiers, 
-    qbittorrent, 
-    rutracker, 
+    deluge,
+    notifiers,
+    qbittorrent,
+    rutracker,
     soulseek,
-    transmission, 
-    utorrent, 
+    transmission,
+    utorrent
     )
 
 # Magnet to torrent services, for Black hole. Stolen from CouchPotato.
@@ -329,25 +329,20 @@ def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
 
     else:
 
-        nzb_results = None
-        torrent_results = None
-        bandcamp_results = None
+        nzb_results = []
+        torrent_results = []
+        bandcamp_results = []
 
         if NZB_PROVIDERS and NZB_DOWNLOADERS:
-            nzb_results = searchNZB(album, new, losslessOnly, albumlength, choose_specific_download)
+            nzb_results = searchNZB(album, new, losslessOnly,
+                                    albumlength, choose_specific_download)
 
         if TORRENT_PROVIDERS:
-            torrent_results = searchTorrent(album, new, losslessOnly, albumlength,
-                                            choose_specific_download)
+            torrent_results = searchTorrent(album, new, losslessOnly,
+                                            albumlength, choose_specific_download)
 
         if headphones.CONFIG.BANDCAMP:
             bandcamp_results = searchBandcamp(album, new, albumlength)
-
-        if not nzb_results:
-            nzb_results = []
-
-        if not torrent_results:
-            torrent_results = []
 
         results = nzb_results + torrent_results + bandcamp_results
 
@@ -370,7 +365,6 @@ def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
     (data, result) = preprocess(sorted_search_results)
 
     if data and result:
-        #print(f'going to send stuff to downloader. data: {data}, album: {album}')
         send_to_downloader(data, result, album)
 
 
@@ -876,15 +870,15 @@ def send_to_downloader(data, result, album):
             except Exception as e:
                 logger.error('Couldn\'t write NZB file: %s', e)
                 return
+
     elif kind == 'bandcamp':
         folder_name = bandcamp.download(album, result)
         logger.info("Setting folder_name to: {}".format(folder_name))
 
-
     elif kind == 'soulseek':
         soulseek.download(user=result.user, filelist=result.files)
-        folder_name = result.folder    
-        
+        folder_name = result.folder
+
     else:
         folder_name = '%s - %s [%s]' % (
             unidecode(album['ArtistName']).replace('/', '_'),
@@ -1983,7 +1977,7 @@ def preprocess(resultlist):
 
         if result.kind == 'soulseek':
             return True, result
-        
+
         if result.kind == 'torrent':
 
             # rutracker always needs the torrent data
