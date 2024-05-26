@@ -988,10 +988,6 @@ def send_to_downloader(data, result, album):
                     logger.error("Error sending torrent to Deluge. Are you sure it's running? Maybe the torrent already exists?")
                     return
 
-                # This pauses the torrent right after it is added
-                if headphones.CONFIG.DELUGE_PAUSED:
-                    deluge.setTorrentPause({'hash': torrentid})
-
                 # Set Label
                 if headphones.CONFIG.DELUGE_LABEL:
                     deluge.setTorrentLabel({'hash': torrentid})
@@ -1000,10 +996,6 @@ def send_to_downloader(data, result, album):
                 seed_ratio = get_seed_ratio(result.provider)
                 if seed_ratio is not None:
                     deluge.setSeedRatio({'hash': torrentid, 'ratio': seed_ratio})
-
-                # Set move-to directory
-                if headphones.CONFIG.DELUGE_DONE_DIRECTORY or headphones.CONFIG.DOWNLOAD_TORRENT_DIR:
-                    deluge.setTorrentPath({'hash': torrentid})
 
                 # Get folder name from Deluge, it's usually the torrent name
                 folder_name = deluge.getTorrentFolder({'hash': torrentid})

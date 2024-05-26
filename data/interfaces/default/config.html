@@ -327,7 +327,7 @@
                                 <input type="radio" name="torrent_downloader" id="torrent_downloader_blackhole" value="0" ${config['torrent_downloader_blackhole']}> Black Hole
                                 <input type="radio" name="torrent_downloader" id="torrent_downloader_transmission" value="1" ${config['torrent_downloader_transmission']}> Transmission
                                 <input type="radio" name="torrent_downloader" id="torrent_downloader_utorrent" value="2" ${config['torrent_downloader_utorrent']}> uTorrent (Beta)
-                                <input type="radio" name="torrent_downloader" id="torrent_downloader_deluge" value="3" ${config['torrent_downloader_deluge']}> Deluge (Beta)
+                                <input type="radio" name="torrent_downloader" id="torrent_downloader_deluge" value="3" ${config['torrent_downloader_deluge']}> Deluge
                                 <input type="radio" name="torrent_downloader" id="torrent_downloader_qbittorrent" value="4" ${config['torrent_downloader_qbittorrent']}> QBitTorrent
                             </fieldset>
                             <fieldset id="torrent_blackhole_options">
@@ -447,6 +447,11 @@
                                     <label>Deluge Label</label>
                                     <input type="text" name="deluge_label" value="${config['deluge_label']}" size="30">
                                     <small>Labels shouldn't contain spaces (requires Label plugin)</small>
+                                </div>
+                                <div class="row">
+                                    <label>Download Directory</label>
+                                    <input type="text" name="deluge_download_directory" value="${config['deluge_download_directory']}" size="30">
+                                    <small>Directory where Deluge should download to</small>
                                 </div>
                                 <div class="row">
                                     <label>Move When Completed</label>
