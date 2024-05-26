@@ -65,7 +65,7 @@ class Torrent(object):
         self.snatched = torrent_json_response['torrent']['snatched']
         self.time = torrent_json_response['torrent']['time']
         self.description = torrent_json_response['torrent']['description']
-        self.file_list = [ re.match("(.+){{{(\d+)}}}", item).groups()
+        self.file_list = [ re.match(r"(.+){{{(\d+)}}}", item).groups()
                            for item in torrent_json_response['torrent']['fileList'].split("|||") ] # tuple ( filename, filesize )
         self.file_path = torrent_json_response['torrent']['filePath']
         self.user = self.parent_api.get_user(torrent_json_response['torrent']['userId'])
@@ -122,7 +122,7 @@ class Torrent(object):
         self.free_torrent = group_torrent_json_response['freeTorrent']
         self.time = group_torrent_json_response['time']
         self.description = group_torrent_json_response['description']
-        self.file_list = [ re.match("(.+){{{(\d+)}}}", item).groups()
+        self.file_list = [ re.match(r"(.+){{{(\d+)}}}", item).groups()
                            for item in group_torrent_json_response['fileList'].split("|||") ] # tuple ( filename, filesize )
         self.file_path = group_torrent_json_response['filePath']
         self.user = self.parent_api.get_user(group_torrent_json_response['userId'])

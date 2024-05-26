@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from .unittestcompat import TestCase
-from headphones.helpers import clean_name, is_valid_date, age
+from headphones.helpers import clean_name, is_valid_date, age, has_token
 
 
 class HelpersTest(TestCase):
@@ -56,3 +56,18 @@ class HelpersTest(TestCase):
         ]
         for input, expected, desc in test_cases:
             self.assertEqual(is_valid_date(input), expected, desc)
+
+    def test_has_token(self):
+        """helpers: has_token()"""
+        self.assertEqual(
+            has_token("a cat ran", "cat"), 
+            True, 
+            "return True if token is in string"
+        )
+        self.assertEqual(
+            has_token("acatran", "cat"),
+            False,
+            "return False if token is part of another word"
+        )
+
+

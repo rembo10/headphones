@@ -80,6 +80,7 @@ _CONFIG_DEFINITIONS = {
     'DELUGE_PASSWORD': (str, 'Deluge', ''),
     'DELUGE_LABEL': (str, 'Deluge', ''),
     'DELUGE_DONE_DIRECTORY': (str, 'Deluge', ''),
+    'DELUGE_DOWNLOAD_DIRECTORY': (str, 'Deluge', ''),
     'DELUGE_PAUSED': (int, 'Deluge', 0),
     'DESTINATION_DIR': (str, 'General', ''),
     'DETECT_BITRATE': (int, 'General', 0),
@@ -269,6 +270,11 @@ _CONFIG_DEFINITIONS = {
     'SONGKICK_ENABLED': (int, 'Songkick', 1),
     'SONGKICK_FILTER_ENABLED': (int, 'Songkick', 0),
     'SONGKICK_LOCATION': (str, 'Songkick', ''),
+    'SOULSEEK_API_URL': (str, 'Soulseek', ''),
+    'SOULSEEK_API_KEY': (str, 'Soulseek', ''),
+    'SOULSEEK_DOWNLOAD_DIR': (str, 'Soulseek', ''),
+    'SOULSEEK_INCOMPLETE_DOWNLOAD_DIR': (str, 'Soulseek', ''),
+    'SOULSEEK': (int, 'Soulseek', 0),
     'SUBSONIC_ENABLED': (int, 'Subsonic', 0),
     'SUBSONIC_HOST': (str, 'Subsonic', ''),
     'SUBSONIC_PASSWORD': (str, 'Subsonic', ''),
@@ -317,7 +323,9 @@ _CONFIG_DEFINITIONS = {
     'XBMC_PASSWORD': (str, 'XBMC', ''),
     'XBMC_UPDATE': (int, 'XBMC', 0),
     'XBMC_USERNAME': (str, 'XBMC', ''),
-    'XLDPROFILE': (str, 'General', '')
+    'XLDPROFILE': (str, 'General', ''),
+    'BANDCAMP': (int, 'General', 0),
+    'BANDCAMP_DIR': (path, 'General', '')
 }
 
 

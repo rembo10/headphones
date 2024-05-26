@@ -27,7 +27,7 @@ from beets import config as beetsconfig
 from beets import logging as beetslogging
 from mediafile import MediaFile, FileTypeError, UnreadableFileError
 from beetsplug import lyrics as beetslyrics
-from headphones import notifiers, utorrent, transmission, deluge, qbittorrent
+from headphones import notifiers, utorrent, transmission, deluge, qbittorrent, soulseek
 from headphones import db, albumart, librarysync
 from headphones import logger, helpers, mb, music_encoder
 from headphones import metadata
@@ -36,18 +36,44 @@ postprocessor_lock = threading.Lock()
 
 
 def checkFolder():
-    logger.debug("Checking download folder for completed downloads (only snatched ones).")
+    logger.info("Checking download folder for completed downloads (only snatched ones).")
 
     with postprocessor_lock:
         myDB = db.DBConnection()
         snatched = myDB.select('SELECT * from snatched WHERE Status="Snatched"')
 
+        # If soulseek is used, this part will get the status from the soulseek api and return completed and errored albums
+        completed_albums, errored_albums = set(), set()
+        if any(album['Kind'] == 'soulseek' for album in snatched):
+            completed_albums, errored_albums = soulseek.download_completed()
+
         for album in snatched:
             if album['FolderName']:
                 folder_name = album['FolderName']
                 single = False
-                if album['Kind'] == 'nzb':
-                    download_dir = headphones.CONFIG.DOWNLOAD_DIR
+                if album['Kind'] == 'soulseek':
+                    if folder_name in errored_albums:
+                        # If the album had any tracks with errors in it, the whole download is considered faulty. Status will be reset to wanted.
+                        logger.info(f"Album with folder '{folder_name}' had errors during download. Setting status to 'Wanted'.")
+                        myDB.action('UPDATE albums SET Status="Wanted" WHERE AlbumID=? AND Status="Snatched"', (album['AlbumID'],))
+                        
+                        # Folder will be removed from configured complete and Incomplete directory
+                        complete_path = os.path.join(headphones.CONFIG.SOULSEEK_DOWNLOAD_DIR, folder_name)
+                        incomplete_path = os.path.join(headphones.CONFIG.SOULSEEK_INCOMPLETE_DOWNLOAD_DIR, folder_name)
+                        for path in [complete_path, incomplete_path]:
+                            try:
+                                shutil.rmtree(path)
+                            except Exception as e:
+                                pass
+                        continue
+                    elif folder_name in completed_albums:
+                        download_dir = headphones.CONFIG.SOULSEEK_DOWNLOAD_DIR
+                    else:
+                        continue
+                elif album['Kind'] == 'nzb':
+                    download_dir = headphones.CONFIG.DOWNLOAD_DIR   
+                elif album['Kind'] == 'bandcamp':
+                    download_dir = headphones.CONFIG.BANDCAMP_DIR 
                 else:
                     if headphones.CONFIG.DELUGE_DONE_DIRECTORY and headphones.CONFIG.TORRENT_DOWNLOADER == 3:
                         download_dir = headphones.CONFIG.DELUGE_DONE_DIRECTORY
@@ -289,7 +315,7 @@ def verify(albumid, albumpath, Kind=None, forced=False, keep_original_folder=Fal
     logger.debug('Metadata check failed. Verifying filenames...')
     for downloaded_track in downloaded_track_list:
         track_name = os.path.splitext(downloaded_track)[0]
-        split_track_name = re.sub('[\.\-\_]', ' ', track_name).lower()
+        split_track_name = re.sub(r'[\.\-\_]', r' ', track_name).lower()
         for track in tracks:
 
             if not track['TrackTitle']:
@@ -1170,8 +1196,14 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None, keep_orig
             download_dirs.append(dir)
         if headphones.CONFIG.DOWNLOAD_DIR and not dir:
             download_dirs.append(headphones.CONFIG.DOWNLOAD_DIR)
+        if headphones.CONFIG.SOULSEEK_DOWNLOAD_DIR and not dir:
+            download_dirs.append(headphones.CONFIG.SOULSEEK_DOWNLOAD_DIR)
         if headphones.CONFIG.DOWNLOAD_TORRENT_DIR and not dir:
-            download_dirs.append(headphones.CONFIG.DOWNLOAD_TORRENT_DIR)
+            download_dirs.append(
+                headphones.CONFIG.DOWNLOAD_TORRENT_DIR.encode(headphones.SYS_ENCODING, 'replace'))
+        if headphones.CONFIG.BANDCAMP and not dir:
+            download_dirs.append(
+                headphones.CONFIG.BANDCAMP_DIR.encode(headphones.SYS_ENCODING, 'replace'))
 
         # If DOWNLOAD_DIR and DOWNLOAD_TORRENT_DIR are the same, remove the duplicate to prevent us from trying to process the same folder twice.
         download_dirs = list(set(download_dirs))

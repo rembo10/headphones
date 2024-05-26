@@ -1183,6 +1183,7 @@ class WebInterface(object):
             "deluge_password": headphones.CONFIG.DELUGE_PASSWORD,
             "deluge_label": headphones.CONFIG.DELUGE_LABEL,
             "deluge_done_directory": headphones.CONFIG.DELUGE_DONE_DIRECTORY,
+            "deluge_download_directory": headphones.CONFIG.DELUGE_DOWNLOAD_DIRECTORY,
             "deluge_paused": checked(headphones.CONFIG.DELUGE_PAUSED),
             "utorrent_host": headphones.CONFIG.UTORRENT_HOST,
             "utorrent_username": headphones.CONFIG.UTORRENT_USERNAME,
@@ -1197,6 +1198,8 @@ class WebInterface(object):
             "torrent_downloader_deluge": radio(headphones.CONFIG.TORRENT_DOWNLOADER, 3),
             "torrent_downloader_qbittorrent": radio(headphones.CONFIG.TORRENT_DOWNLOADER, 4),
             "download_dir": headphones.CONFIG.DOWNLOAD_DIR,
+            "soulseek_download_dir": headphones.CONFIG.SOULSEEK_DOWNLOAD_DIR,
+            "soulseek_incomplete_download_dir": headphones.CONFIG.SOULSEEK_INCOMPLETE_DOWNLOAD_DIR,
             "use_blackhole": checked(headphones.CONFIG.BLACKHOLE),
             "blackhole_dir": headphones.CONFIG.BLACKHOLE_DIR,
             "usenet_retention": headphones.CONFIG.USENET_RETENTION,
@@ -1296,6 +1299,7 @@ class WebInterface(object):
             "prefer_torrents_0": radio(headphones.CONFIG.PREFER_TORRENTS, 0),
             "prefer_torrents_1": radio(headphones.CONFIG.PREFER_TORRENTS, 1),
             "prefer_torrents_2": radio(headphones.CONFIG.PREFER_TORRENTS, 2),
+            "prefer_torrents_3": radio(headphones.CONFIG.PREFER_TORRENTS, 3),
             "magnet_links_0": radio(headphones.CONFIG.MAGNET_LINKS, 0),
             "magnet_links_1": radio(headphones.CONFIG.MAGNET_LINKS, 1),
             "magnet_links_2": radio(headphones.CONFIG.MAGNET_LINKS, 2),
@@ -1413,7 +1417,12 @@ class WebInterface(object):
             "join_enabled": checked(headphones.CONFIG.JOIN_ENABLED),
             "join_onsnatch": checked(headphones.CONFIG.JOIN_ONSNATCH),
             "join_apikey": headphones.CONFIG.JOIN_APIKEY,
-            "join_deviceid": headphones.CONFIG.JOIN_DEVICEID
+            "join_deviceid": headphones.CONFIG.JOIN_DEVICEID,
+            "use_bandcamp": checked(headphones.CONFIG.BANDCAMP),
+            "bandcamp_dir": headphones.CONFIG.BANDCAMP_DIR,
+            'soulseek_api_url': headphones.CONFIG.SOULSEEK_API_URL,
+            'soulseek_api_key': headphones.CONFIG.SOULSEEK_API_KEY,
+            'use_soulseek': checked(headphones.CONFIG.SOULSEEK)
         }
 
         for k, v in config.items():
@@ -1482,7 +1491,7 @@ class WebInterface(object):
             "songkick_enabled", "songkick_filter_enabled",
             "mpc_enabled", "email_enabled", "email_ssl", "email_tls", "email_onsnatch",
             "customauth", "idtag", "deluge_paused",
-            "join_enabled", "join_onsnatch"
+            "join_enabled", "join_onsnatch", "use_bandcamp"
         ]
         for checked_config in checked_configs:
             if checked_config not in kwargs:

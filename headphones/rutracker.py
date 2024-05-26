@@ -42,19 +42,22 @@ class Rutracker(object):
             'login_password': headphones.CONFIG.RUTRACKER_PASSWORD,
             'login': b'\xc2\xf5\xee\xe4'  # '%C2%F5%EE%E4'
         }
+        headers = {
+            'User-Agent' : 'Headphones'   
+        }
 
         logger.info("Attempting to log in to rutracker...")
 
         try:
-            r = self.session.post(loginpage, data=post_params, timeout=self.timeout, allow_redirects=False)
+            r = self.session.post(loginpage, data=post_params, timeout=self.timeout, allow_redirects=False, headers=headers)
             # try again
             if not self.has_bb_session_cookie(r):
                 time.sleep(10)
                 if headphones.CONFIG.RUTRACKER_COOKIE:
                     logger.info("Attempting to log in using predefined cookie...")
-                    r = self.session.post(loginpage, data=post_params, timeout=self.timeout, allow_redirects=False, cookies={'bb_session': headphones.CONFIG.RUTRACKER_COOKIE})
+                    r = self.session.post(loginpage, data=post_params, timeout=self.timeout, allow_redirects=False, headers=headers, cookies={'bb_session': headphones.CONFIG.RUTRACKER_COOKIE})
                 else:
-                    r = self.session.post(loginpage, data=post_params, timeout=self.timeout, allow_redirects=False)
+                    r = self.session.post(loginpage, data=post_params, timeout=self.timeout, allow_redirects=False, headers=headers)
             if self.has_bb_session_cookie(r):
                 self.loggedin = True
                 logger.info("Successfully logged in to rutracker")
@@ -113,7 +116,10 @@ class Rutracker(object):
         Parse the search results and return valid torrent list
         """
         try:
-            headers = {'Referer': self.search_referer}
+            headers = {
+                'Referer': self.search_referer,
+                'User-Agent' : 'Headphones'   
+            }
             r = self.session.get(url=searchurl, headers=headers, timeout=self.timeout)
             soup = BeautifulSoup(r.content, 'html.parser')
 
@@ -183,7 +189,10 @@ class Rutracker(object):
         downloadurl = 'https://rutracker.org/forum/dl.php?t=' + torrent_id
         cookie = {'bb_dl': torrent_id}
         try:
-            headers = {'Referer': url}
+            headers = {
+                'Referer': url,
+                'User-Agent' : 'Headphones'   
+            }
             r = self.session.post(url=downloadurl, cookies=cookie, headers=headers,
                                   timeout=self.timeout)
             return r.content
