@@ -22,7 +22,7 @@ from headphones import logger, helpers, metadata, request
 from headphones.common import USER_AGENT
 from headphones.types import Result
 
-from beets.mediafile import MediaFile, UnreadableFileError
+from mediafile import MediaFile, UnreadableFileError
 from bs4 import BeautifulSoup
 from bs4 import FeatureNotFound
 

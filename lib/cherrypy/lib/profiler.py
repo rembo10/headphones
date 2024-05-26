@@ -30,7 +30,6 @@ to get a quick sanity-check on overall CP performance. Use the
 ``--profile`` flag when running the test suite. Then, use the ``serve()``
 function to browse the results in a web browser. If you run this
 module from the command line, it will call ``serve()`` for you.
-
 """
 
 import io
@@ -47,7 +46,9 @@ try:
     import pstats
 
     def new_func_strip_path(func_name):
-        """Make profiler output more readable by adding `__init__` modules' parents
+        """Add ``__init__`` modules' parents.
+
+        This makes the profiler output more readable.
         """
         filename, line, name = func_name
         if filename.endswith('__init__.py'):

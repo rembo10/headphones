@@ -1050,3 +1050,10 @@ def have_pct_have_total(db_artist):
     have_pct = have_tracks / total_tracks if total_tracks else 0
     return (have_pct, total_tracks)
 
+
+def has_token(title, token):
+    return bool(
+            re.search(rf'(?:\W|^)+{token}(?:\W|$)+', 
+            title,
+            re.IGNORECASE | re.UNICODE)
+        )

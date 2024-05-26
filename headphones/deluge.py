@@ -58,12 +58,12 @@ def _scrubber(text):
     if scrub_logs:
         try:
             # URL parameter values
-            text = re.sub('=[0-9a-zA-Z]*', '=REMOVED', text)
+            text = re.sub(r'=[0-9a-zA-Z]*', r'=REMOVED', text)
             # Local host with port
             # text = re.sub('\:\/\/.*\:', '://REMOVED:', text) # just host
-            text = re.sub('\:\/\/.*\:[0-9]*', '://REMOVED:', text)
+            text = re.sub(r'\:\/\/.*\:[0-9]*', r'://REMOVED:', text)
             # Session cookie
-            text = re.sub("_session_id'\: '.*'", "_session_id': 'REMOVED'", text)
+            text = re.sub(r"_session_id'\: '.*'", r"_session_id': 'REMOVED'", text)
             # Local Windows user path
             if text.lower().startswith('c:\\users\\'):
                 k = text.split('\\')
@@ -128,9 +128,9 @@ def addTorrent(link, data=None, name=None):
                 # Extract torrent name from .torrent
                 try:
                     logger.debug('Deluge: Getting torrent name length')
-                    name_length = int(re.findall('name([0-9]*)\:.*?\:', str(torrentfile))[0])
+                    name_length = int(re.findall(r'name([0-9]*)\:.*?\:', str(torrentfile))[0])
                     logger.debug('Deluge: Getting torrent name')
-                    name = re.findall('name[0-9]*\:(.*?)\:', str(torrentfile))[0][:name_length]
+                    name = re.findall(r'name[0-9]*\:(.*?)\:', str(torrentfile))[0][:name_length]
                 except Exception as e:
                     logger.debug('Deluge: Could not get torrent name, getting file name')
                     # get last part of link/path (name only)
@@ -160,9 +160,9 @@ def addTorrent(link, data=None, name=None):
                 # Extract torrent name from .torrent
                 try:
                     logger.debug('Deluge: Getting torrent name length')
-                    name_length = int(re.findall('name([0-9]*)\:.*?\:', str(torrentfile))[0])
+                    name_length = int(re.findall(r'name([0-9]*)\:.*?\:', str(torrentfile))[0])
                     logger.debug('Deluge: Getting torrent name')
-                    name = re.findall('name[0-9]*\:(.*?)\:', str(torrentfile))[0][:name_length]
+                    name = re.findall(r'name[0-9]*\:(.*?)\:', str(torrentfile))[0][:name_length]
                 except Exception as e:
                     logger.debug('Deluge: Could not get torrent name, getting file name')
                     # get last part of link/path (name only)
