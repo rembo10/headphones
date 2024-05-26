@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.6.3
+ Released 26 May 2024
+
+Highlights:
+* Hotfix for searcher not returning results
+
+The full list of commits can be found [here](https://github.com/rembo10/headphones/compare/v0.6.2...v0.6.3).
+
 ## v0.6.2
  Released 26 May 2024
 
