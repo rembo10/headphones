@@ -56,6 +56,7 @@ from headphones import (
     notifiers, 
     qbittorrent, 
     rutracker, 
+    soulseek,
     transmission, 
     utorrent, 
     )
@@ -279,6 +280,8 @@ def strptime_musicbrainz(date_str):
 
 
 def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
+
+
     NZB_PROVIDERS = (headphones.CONFIG.HEADPHONES_INDEXER or
                      headphones.CONFIG.NEWZNAB or
                      headphones.CONFIG.NZBSORG or
@@ -319,7 +322,11 @@ def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
             results = searchNZB(album, new, losslessOnly, albumlength)
 
         if not results and headphones.CONFIG.BANDCAMP:
-            results = searchBandcamp(album, new, albumlength)
+            results = searchBandcamp(album, new, albumlength)    
+
+    elif headphones.CONFIG.PREFER_TORRENTS == 2 and not choose_specific_download:
+        results = searchSoulseek(album, new, losslessOnly, albumlength)
+
     else:
 
         nzb_results = None
@@ -363,6 +370,7 @@ def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
     (data, result) = preprocess(sorted_search_results)
 
     if data and result:
+        #print(f'going to send stuff to downloader. data: {data}, album: {album}')
         send_to_downloader(data, result, album)
 
 
@@ -868,11 +876,15 @@ def send_to_downloader(data, result, album):
             except Exception as e:
                 logger.error('Couldn\'t write NZB file: %s', e)
                 return
-
     elif kind == 'bandcamp':
         folder_name = bandcamp.download(album, result)
         logger.info("Setting folder_name to: {}".format(folder_name))
 
+
+    elif kind == 'soulseek':
+        soulseek.download(user=result.user, filelist=result.files)
+        folder_name = result.folder    
+        
     else:
         folder_name = '%s - %s [%s]' % (
             unidecode(album['ArtistName']).replace('/', '_'),
@@ -1929,14 +1941,49 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
     return results
 
 
+def searchSoulseek(album, new=False, losslessOnly=False, albumlength=None):
+    # Not using some of the input stuff for now or ever
+    replacements = {
+        '...': '',
+        ' & ': ' ',
+        ' = ': ' ',
+        '?': '',
+        '$': '',
+        ' + ': ' ',
+        '"': '',
+        ',': '',
+        '*': '',
+        '.': '',
+        ':': ''
+    }
+
+    num_tracks = get_album_track_count(album['AlbumID'])
+    year = get_year_from_release_date(album['ReleaseDate'])
+    cleanalbum = unidecode(helpers.replace_all(album['AlbumTitle'], replacements)).strip()
+    cleanartist = unidecode(helpers.replace_all(album['ArtistName'], replacements)).strip()
+
+    results = soulseek.search(artist=cleanartist, album=cleanalbum, year=year, losslessOnly=losslessOnly, num_tracks=num_tracks)
+
+    return results
+
+
+def get_album_track_count(album_id):
+    # Not sure if this should be considered a helper function.
+    myDB = db.DBConnection()
+    track_count = myDB.select('SELECT COUNT(*) as count FROM tracks WHERE AlbumID=?', [album_id])[0]['count']
+    return track_count
+
+
 # THIS IS KIND OF A MESS AND PROBABLY NEEDS TO BE CLEANED UP
 
 
 def preprocess(resultlist):
     for result in resultlist:
-
         headers = {'User-Agent': USER_AGENT}
 
+        if result.kind == 'soulseek':
+            return True, result
+        
         if result.kind == 'torrent':
 
             # rutracker always needs the torrent data
