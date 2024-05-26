@@ -184,7 +184,7 @@ def bytes_to_mb(bytes):
 
 
 def mb_to_bytes(mb_str):
-    result = re.search('^(\d+(?:\.\d+)?)\s?(?:mb)?', mb_str, flags=re.I)
+    result = re.search(r"^(\d+(?:\.\d+)?)\s?(?:mb)?", mb_str, flags=re.I)
     if result:
         return int(float(result.group(1)) * 1048576)
 
@@ -253,9 +253,9 @@ def replace_all(text, dic):
 
 def replace_illegal_chars(string, type="file"):
     if type == "file":
-        string = re.sub('[\?"*:|<>/]', '_', string)
+        string = re.sub(r"[\?\"*:|<>/]", "_", string)
     if type == "folder":
-        string = re.sub('[:\?<>"|*]', '_', string)
+        string = re.sub(r"[:\?<>\"|*]", "_", string)
     return string
 
 
@@ -386,7 +386,7 @@ def clean_musicbrainz_name(s, return_as_string=True):
 
 
 def cleanTitle(title):
-    title = re.sub('[\.\-\/\_]', ' ', title).lower()
+    title = re.sub(r"[\.\-\/\_]", " ", title).lower()
 
     # Strip out extra whitespace
     title = ' '.join(title.split())
