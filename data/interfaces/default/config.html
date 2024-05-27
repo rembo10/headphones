@@ -836,6 +836,11 @@
                         <td>
                             <legend>Quality</legend>
                             <fieldset>
+                                <div class="row">
+                                    <label>Absolute maximum bitrate</label>
+                                    <input type="text" name="maximum_bitrate" value="${config['maximum_bitrate']}" size="20">
+                                    <small>0 for unlimited</small>
+                                </div>
                                 <div class="row checkbox left clearfix nopad">
                                     <label title="Snatch the highest quality available, excluding lossless.">
                                         <input type="radio" name="preferred_quality" id="preferred_quality0" value="0" ${config['pref_qual_0']}>
