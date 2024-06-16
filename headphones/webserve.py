@@ -1491,7 +1491,7 @@ class WebInterface(object):
             "songkick_enabled", "songkick_filter_enabled",
             "mpc_enabled", "email_enabled", "email_ssl", "email_tls", "email_onsnatch",
             "customauth", "idtag", "deluge_paused",
-            "join_enabled", "join_onsnatch", "use_bandcamp"
+            "join_enabled", "join_onsnatch", "use_bandcamp", "use_soulseek"
         ]
         for checked_config in checked_configs:
             if checked_config not in kwargs:

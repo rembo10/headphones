@@ -14,40 +14,50 @@ def initialize_soulseek_client():
     return slskd_api.SlskdClient(host=host, api_key=api_key)
 
     # Search logic, calling search and processing fucntions
-def search(artist, album, year, num_tracks, losslessOnly):
+def search(artist, album, year, num_tracks, losslessOnly, allow_lossless, user_search_term):
     client = initialize_soulseek_client()
+
+    # override search string with user provided search term if entered
+    if user_search_term:
+        artist = user_search_term
+        album = ''
+        year = ''
     
     # Stage 1: Search with artist, album, year, and num_tracks
-    results = execute_search(client, artist, album, year, losslessOnly)
-    processed_results = process_results(results, losslessOnly, num_tracks)
-    if processed_results:
+    logger.info(f"Searching Soulseek using term: {artist} {album} {year}")
+    results = execute_search(client, artist, album, year, losslessOnly, allow_lossless)
+    processed_results = process_results(results, losslessOnly, allow_lossless, num_tracks)
+    if processed_results or user_search_term or album.lower() == artist.lower():
         return processed_results
     
     # Stage 2: If Stage 1 fails, search with artist, album, and num_tracks (excluding year)
     logger.info("Soulseek search stage 1 did not meet criteria. Retrying without year...")
-    results = execute_search(client, artist, album, None, losslessOnly)
-    processed_results = process_results(results, losslessOnly, num_tracks)
-    if processed_results:
+    results = execute_search(client, artist, album, None, losslessOnly, allow_lossless)
+    processed_results = process_results(results, losslessOnly, allow_lossless, num_tracks)
+    if processed_results or artist == "Various Artists":
         return processed_results
     
     # Stage 3: Final attempt, search only with artist and album
     logger.info("Soulseek search stage 2 did not meet criteria. Final attempt with only artist and album.")
-    results = execute_search(client, artist, album, None, losslessOnly)
-    processed_results = process_results(results, losslessOnly, num_tracks, ignore_track_count=True)
-    
+    results = execute_search(client, artist, album, None, losslessOnly, allow_lossless)
+    processed_results = process_results(results, losslessOnly, allow_lossless, num_tracks, ignore_track_count=True)
+
     return processed_results
 
-def execute_search(client, artist, album, year, losslessOnly):
+def execute_search(client, artist, album, year, losslessOnly, allow_lossless):
     search_text = f"{artist} {album}"
     if year:
         search_text += f" {year}"
+
     if losslessOnly:
-        search_text += ".flac"
+        search_text += " flac"
+    elif not allow_lossless:
+            search_text += " mp3"
 
     # Actual search
     search_response = client.searches.search_text(searchText=search_text, filterResponses=True)
     search_id = search_response.get('id')
-    
+
     # Wait for search completion and return response
     while not client.searches.state(id=search_id).get('isComplete'):
         time.sleep(2)
@@ -55,8 +65,15 @@ def execute_search(client, artist, album, year, losslessOnly):
     return client.searches.search_responses(id=search_id)
 
 # Processing the search result passed
-def process_results(results, losslessOnly, num_tracks, ignore_track_count=False):
-    valid_extensions = {'.flac'} if losslessOnly else {'.mp3', '.flac'}
+def process_results(results, losslessOnly, allow_lossless, num_tracks, ignore_track_count=False):
+
+    if losslessOnly:
+        valid_extensions = {'.flac'}
+    elif allow_lossless:
+        valid_extensions = {'.mp3', '.flac'}
+    else:
+        valid_extensions = {'.mp3'}
+
     albums = defaultdict(lambda: {'files': [], 'user': None, 'hasFreeUploadSlot': None, 'queueLength': None, 'uploadSpeed': None})
 
     # Extract info from the api response and combine files at album level
@@ -71,7 +88,8 @@ def process_results(results, losslessOnly, num_tracks, ignore_track_count=False)
             filename = file.get('filename')
             file_extension = os.path.splitext(filename)[1].lower()
             if file_extension in valid_extensions:
-                album_directory = os.path.dirname(filename)
+                #album_directory = os.path.dirname(filename)
+                album_directory = filename.rsplit('\\', 1)[0]
                 albums[album_directory]['files'].append(file)
 
                 # Update metadata only once per album_directory
@@ -86,8 +104,9 @@ def process_results(results, losslessOnly, num_tracks, ignore_track_count=False)
     # Filter albums based on num_tracks, add bunch of useful info to the compiled album
     final_results = []
     for directory, album_data in albums.items():
-        if ignore_track_count or len(album_data['files']) == num_tracks:
-            album_title = os.path.basename(directory)
+        if ignore_track_count and len(album_data['files']) > 1 or len(album_data['files']) == num_tracks:
+            #album_title = os.path.basename(directory)
+            album_title = directory.rsplit('\\', 1)[1]
             total_size = sum(file.get('size', 0) for file in album_data['files'])
             final_results.append(Result(
                 title=album_title,
@@ -102,7 +121,8 @@ def process_results(results, losslessOnly, num_tracks, ignore_track_count=False)
                 files=album_data['files'],
                 kind='soulseek',
                 url='http://thisisnot.needed', # URL is needed in other parts of the program.
-                folder=os.path.basename(directory)
+                #folder=os.path.basename(directory)
+                folder = album_title
             ))
 
     return final_results
@@ -163,19 +183,66 @@ def download_completed():
                     username = file_data.get('username', '')
                     success = client.transfers.cancel_download(username, file_id)
                     if not success:
-                        print(f"Failed to cancel download for file ID: {file_id}")
+                        logger.debug(f"Soulseek failed to cancel download for file ID: {file_id}")
 
     # Clear completed/canceled/errored stuff from client downloads
     try:
         client.transfers.remove_completed_downloads()
     except Exception as e:
-        print(f"Failed to remove completed downloads: {e}")
+        logger.debug(f"Soulseek failed to remove completed downloads: {e}")
 
     # Identify completed albums
     completed_albums = {album for album, counts in album_completion_tracker.items() if counts['total'] == counts['completed']}
 
     # Return both completed and errored albums
     return completed_albums, errored_albums
+
+
+def download_completed_album(username, foldername):
+    client = initialize_soulseek_client()
+    downloads = client.transfers.get_downloads(username)
+
+    # Anything older than 24 hours will be canceled
+    cutoff_time = datetime.now() - timedelta(hours=24)
+
+    total_count = 0
+    completed_count = 0
+    errored_count = 0
+    file_ids = []
+
+    # Identify errored and completed album
+    directories = downloads.get('directories', [])
+    for directory in directories:
+        album_part = directory.get('directory', '').split('\\')[-1]
+        if album_part == foldername:
+            files = directory.get('files', [])
+            for file_data in files:
+                state = file_data.get('state', '')
+                requested_at_str = file_data.get('requestedAt', '1900-01-01 00:00:00')
+                requested_at = parse_datetime(requested_at_str)
+
+                total_count += 1
+                file_id = file_data.get('id', '')
+                file_ids.append(file_id)
+
+                if 'Completed, Succeeded' in state:
+                    completed_count += 1
+                elif 'Completed, Errored' in state or requested_at < cutoff_time:
+                    errored_count += 1
+            break
+
+    completed = True if completed_count == total_count else False
+    errored = True if errored_count else False
+
+    # Cancel downloads for errored album
+    if errored:
+        for file_id in file_ids:
+            try:
+                success = client.transfers.cancel_download(username, file_id, remove=True)
+            except Exception as e:
+                logger.debug(f"Soulseek failed to cancel download for folder with file ID: {foldername} {file_id}")
+
+    return completed, errored
 
 
 def parse_datetime(datetime_string):
