@@ -299,11 +299,21 @@ def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
                          headphones.CONFIG.ORPHEUS or
                          headphones.CONFIG.REDACTED)
 
+    BANDCAMP = 1 if (headphones.CONFIG.BANDCAMP and
+                     headphones.CONFIG.BANDCAMP_DIR) else 0
+
+    SOULSEEK = 1 if (headphones.CONFIG.SOULSEEK and
+                     headphones.CONFIG.SOULSEEK_API_URL and
+                     headphones.CONFIG.SOULSEEK_API_KEY and
+                     headphones.CONFIG.SOULSEEK_DOWNLOAD_DIR and
+                     headphones.CONFIG.SOULSEEK_INCOMPLETE_DOWNLOAD_DIR) else 0
+
     results = []
     myDB = db.DBConnection()
     albumlength = myDB.select('SELECT sum(TrackDuration) from tracks WHERE AlbumID=?',
                               [album['AlbumID']])[0][0]
 
+    # NZBs
     if headphones.CONFIG.PREFER_TORRENTS == 0 and not choose_specific_download:
         if NZB_PROVIDERS and NZB_DOWNLOADERS:
             results = searchNZB(album, new, losslessOnly, albumlength)
@@ -311,9 +321,13 @@ def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
         if not results and TORRENT_PROVIDERS:
             results = searchTorrent(album, new, losslessOnly, albumlength)
 
-        if not results and headphones.CONFIG.BANDCAMP:
+        if not results and BANDCAMP:
             results = searchBandcamp(album, new, albumlength)
 
+        if not results and SOULSEEK:
+            results = searchSoulseek(album, new, losslessOnly, albumlength)
+
+    # Torrents
     elif headphones.CONFIG.PREFER_TORRENTS == 1 and not choose_specific_download:
         if TORRENT_PROVIDERS:
             results = searchTorrent(album, new, losslessOnly, albumlength)
@@ -321,17 +335,32 @@ def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
         if not results and NZB_PROVIDERS and NZB_DOWNLOADERS:
             results = searchNZB(album, new, losslessOnly, albumlength)
 
-        if not results and headphones.CONFIG.BANDCAMP:
-            results = searchBandcamp(album, new, albumlength)    
+        if not results and BANDCAMP:
+            results = searchBandcamp(album, new, albumlength)
 
+        if not results and SOULSEEK:
+            results = searchSoulseek(album, new, losslessOnly, albumlength)
+
+    # Soulseek
     elif headphones.CONFIG.PREFER_TORRENTS == 2 and not choose_specific_download:
         results = searchSoulseek(album, new, losslessOnly, albumlength)
 
+        if not results and NZB_PROVIDERS and NZB_DOWNLOADERS:
+            results = searchNZB(album, new, losslessOnly, albumlength)
+
+        if not results and TORRENT_PROVIDERS:
+            results = searchTorrent(album, new, losslessOnly, albumlength)
+
+        if not results and BANDCAMP:
+            results = searchBandcamp(album, new, albumlength)
+
     else:
 
+        # No Preference
         nzb_results = []
         torrent_results = []
         bandcamp_results = []
+        soulseek_results = []
 
         if NZB_PROVIDERS and NZB_DOWNLOADERS:
             nzb_results = searchNZB(album, new, losslessOnly,
@@ -341,10 +370,13 @@ def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
             torrent_results = searchTorrent(album, new, losslessOnly,
                                             albumlength, choose_specific_download)
 
-        if headphones.CONFIG.BANDCAMP:
+        if BANDCAMP:
             bandcamp_results = searchBandcamp(album, new, albumlength)
 
-        results = nzb_results + torrent_results + bandcamp_results
+        if SOULSEEK:
+            soulseek_results = searchSoulseek(album, new, losslessOnly, albumlength)
+
+        results = nzb_results + torrent_results + bandcamp_results + soulseek_results
 
     if choose_specific_download:
         return results
@@ -876,8 +908,14 @@ def send_to_downloader(data, result, album):
         logger.info("Setting folder_name to: {}".format(folder_name))
 
     elif kind == 'soulseek':
-        soulseek.download(user=result.user, filelist=result.files)
-        folder_name = result.folder
+        try:
+            soulseek.download(user=result.user, filelist=result.files)
+            folder_name = '{' + result.user + '}' + result.folder
+            logger.info(f"Soulseek folder name: {result.folder}")
+        except Exception as e:
+            logger.error(f"Soulseek error, check server logs: {e}")
+            return
+
 
     else:
         folder_name = '%s - %s [%s]' % (
@@ -1953,12 +1991,33 @@ def searchSoulseek(album, new=False, losslessOnly=False, albumlength=None):
 
     num_tracks = get_album_track_count(album['AlbumID'])
     year = get_year_from_release_date(album['ReleaseDate'])
-    cleanalbum = unidecode(helpers.replace_all(album['AlbumTitle'], replacements)).strip()
-    cleanartist = unidecode(helpers.replace_all(album['ArtistName'], replacements)).strip()
+    cleanalbum = unidecode(replace_all(album['AlbumTitle'], replacements)).strip()
+    cleanartist = unidecode(replace_all(album['ArtistName'], replacements)).strip()
 
-    results = soulseek.search(artist=cleanartist, album=cleanalbum, year=year, losslessOnly=losslessOnly, num_tracks=num_tracks)
+    # If Preferred Bitrate and High Limit and Allow Lossless then get both lossy and lossless
+    if headphones.CONFIG.PREFERRED_QUALITY == 2 and headphones.CONFIG.PREFERRED_BITRATE and headphones.CONFIG.PREFERRED_BITRATE_HIGH_BUFFER and headphones.CONFIG.PREFERRED_BITRATE_ALLOW_LOSSLESS:
+        allow_lossless = True
+    else:
+        allow_lossless = False
 
-    return results
+    if headphones.CONFIG.PREFERRED_QUALITY == 3 :
+        losslessOnly = True
+    elif headphones.CONFIG.PREFERRED_QUALITY == 1:
+        allow_lossless = True
+
+    if album['SearchTerm']:
+        term = album['SearchTerm']
+    else:
+        term = ''
+
+    try:
+        results = soulseek.search(artist=cleanartist, album=cleanalbum, year=year, losslessOnly=losslessOnly,
+                                  allow_lossless=allow_lossless, num_tracks=num_tracks, user_search_term=term)
+        if not results:
+            logger.info("No valid results found from Soulseek")
+        return results
+    except Exception as e:
+        logger.error(f"Soulseek error, check server logs: {e}")
 
 
 def get_album_track_count(album_id):

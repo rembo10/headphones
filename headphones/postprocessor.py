@@ -41,21 +41,22 @@ def checkFolder():
     with postprocessor_lock:
         myDB = db.DBConnection()
         snatched = myDB.select('SELECT * from snatched WHERE Status="Snatched"')
-
-        # If soulseek is used, this part will get the status from the soulseek api and return completed and errored albums
-        completed_albums, errored_albums = set(), set()
-        if any(album['Kind'] == 'soulseek' for album in snatched):
-            completed_albums, errored_albums = soulseek.download_completed()
-
         for album in snatched:
             if album['FolderName']:
                 folder_name = album['FolderName']
                 single = False
+
+                # Soulseek, check download complete or errored
                 if album['Kind'] == 'soulseek':
-                    if folder_name in errored_albums:
+                    match = re.search(r'\{(.*?)\}(.*?)$', folder_name)    # get soulseek user from folder_name
+                    user_name = match.group(1)
+                    folder_name = match.group(2)
+                    completed, errored = soulseek.download_completed_album(user_name, folder_name)
+                    if errored:
                         # If the album had any tracks with errors in it, the whole download is considered faulty. Status will be reset to wanted.
-                        logger.info(f"Album with folder '{folder_name}' had errors during download. Setting status to 'Wanted'.")
+                        logger.info(f"Soulseek: Album with folder '{folder_name}' had errors during download. Setting status to 'Wanted'.")
                         myDB.action('UPDATE albums SET Status="Wanted" WHERE AlbumID=? AND Status="Snatched"', (album['AlbumID'],))
+                        myDB.action('UPDATE snatched SET status = "Unprocessed" WHERE AlbumID=?', (album['AlbumID'],))
                         
                         # Folder will be removed from configured complete and Incomplete directory
                         complete_path = os.path.join(headphones.CONFIG.SOULSEEK_DOWNLOAD_DIR, folder_name)
@@ -66,7 +67,7 @@ def checkFolder():
                             except Exception as e:
                                 pass
                         continue
-                    elif folder_name in completed_albums:
+                    elif completed:
                         download_dir = headphones.CONFIG.SOULSEEK_DOWNLOAD_DIR
                     else:
                         continue
