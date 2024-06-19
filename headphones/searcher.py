@@ -373,8 +373,10 @@ def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
         if BANDCAMP:
             bandcamp_results = searchBandcamp(album, new, albumlength)
 
-        if SOULSEEK:
-            soulseek_results = searchSoulseek(album, new, losslessOnly, albumlength)
+        # TODO: get this working
+        # if SOULSEEK:
+            # soulseek_results = searchSoulseek(album, new, losslessOnly,
+            #                                  albumlength, choose_specific_download)
 
         results = nzb_results + torrent_results + bandcamp_results + soulseek_results
 
@@ -1451,7 +1453,6 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                             title = item.title.get_text()
                             url = item.find("link").next_sibling.strip()
                             seeders = int(item.find("torznab:attr", attrs={"name": "seeders"}).get('value'))
-
                             # Torrentech hack - size currently not returned, make it up
                             if 'torrentech' in torznab_host[0]:
                                 if albumlength:
@@ -1973,7 +1974,8 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
     return results
 
 
-def searchSoulseek(album, new=False, losslessOnly=False, albumlength=None):
+def searchSoulseek(album, new=False, losslessOnly=False, albumlength=None,
+                   choose_specific_download=False):
     # Not using some of the input stuff for now or ever
     replacements = {
         '...': '',
@@ -2011,13 +2013,24 @@ def searchSoulseek(album, new=False, losslessOnly=False, albumlength=None):
         term = ''
 
     try:
-        results = soulseek.search(artist=cleanartist, album=cleanalbum, year=year, losslessOnly=losslessOnly,
+        resultlist = soulseek.search(artist=cleanartist, album=cleanalbum, year=year, losslessOnly=losslessOnly,
                                   allow_lossless=allow_lossless, num_tracks=num_tracks, user_search_term=term)
-        if not results:
+
+        if not resultlist:
             logger.info("No valid results found from Soulseek")
+
+        # filter results
+        results = [result for result in resultlist if verifyresult(result.title, cleanartist, term, losslessOnly)]
+
+        # Additional filtering for size etc
+        if results and not choose_specific_download:
+            results = more_filtering(results, album, albumlength, new)
+
         return results
+
     except Exception as e:
         logger.error(f"Soulseek error, check server logs: {e}")
+        return None
 
 
 def get_album_track_count(album_id):

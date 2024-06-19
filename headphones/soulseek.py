@@ -120,7 +120,7 @@ def process_results(results, losslessOnly, allow_lossless, num_tracks, ignore_tr
                 queueLength=album_data['queueLength'],
                 files=album_data['files'],
                 kind='soulseek',
-                url='http://thisisnot.needed', # URL is needed in other parts of the program.
+                url='http://' + album_data['user'] + album_title, # URL is needed in other parts of the program.
                 #folder=os.path.basename(directory)
                 folder = album_title
             ))
