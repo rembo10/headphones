@@ -1247,7 +1247,7 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None, keep_orig
     myDB = db.DBConnection()
 
     for folder in folders:
-        folder_basename = os.path.basename(folder)
+        folder_basename = os.path.basename(folder).decode(headphones.SYS_ENCODING, 'replace')
         logger.info('Processing: %s', folder_basename)
 
         # Attempt 1: First try to see if there's a match in the snatched table,
