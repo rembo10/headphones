@@ -1230,9 +1230,9 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None, keep_orig
                     subfolders = helpers.expand_subfolders(path_to_folder)
 
                     if expand_subfolders and subfolders is not None:
-                        folders.extend(subfolders)
+                        folders.extend(subfolders.decode(headphones.SYS_ENCODING, 'replace'))
                     else:
-                        folders.append(path_to_folder)
+                        folders.append(path_to_folder.decode(headphones.SYS_ENCODING, 'replace'))
 
     # Log number of folders
     if folders:
