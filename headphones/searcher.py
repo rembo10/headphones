@@ -187,13 +187,13 @@ def get_seed_ratio(provider):
         seed_ratio = headphones.CONFIG.OLDPIRATEBAY_RATIO
     elif provider == 'Waffles.ch':
         seed_ratio = headphones.CONFIG.WAFFLES_RATIO
-    elif provider.startswith("Jackett_"):
-        provider = provider.split("Jackett_")[1]
-        if provider in headphones.CONFIG.TORZNAB_HOST:
+    elif provider.startswith("Torznab"):
+        host = provider.split('|')[2]
+        if host == headphones.CONFIG.TORZNAB_HOST:
             seed_ratio = headphones.CONFIG.TORZNAB_RATIO
         else:
             for torznab in headphones.CONFIG.get_extra_torznabs():
-                if provider in torznab[0]:
+                if host == torznab[0]:
                     seed_ratio = torznab[2]
                     break
     else:
@@ -206,6 +206,21 @@ def get_seed_ratio(provider):
             logger.warn("Could not get seed ratio for %s" % provider)
 
     return seed_ratio
+
+
+def get_provider_name(provider):
+    """
+    Return the provider name for the provider
+    """
+
+    if provider.startswith("Torznab"):
+        provider_name = "Torznab " + provider.split("|")[1]
+    elif provider.startswith(("http://", "https://")):
+        provider_name = provider.split("//")[1]
+    else:
+        provider_name = provider
+
+    return provider_name
 
 
 def searchforalbum(albumid=None, new=False, losslessOnly=False,
@@ -394,7 +409,7 @@ def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
 
     logger.info(
         "Making sure we can download the best result: "
-        f"{sorted_search_results[0].title} from {sorted_search_results[0].provider}"
+        f"{sorted_search_results[0].title} from {get_provider_name(sorted_search_results[0].provider)}"
     )
     (data, result) = preprocess(sorted_search_results)
 
@@ -423,10 +438,10 @@ def more_filtering(results, album, albumlength, new):
             targetsize = albumlength / 1000 * int(headphones.CONFIG.PREFERRED_BITRATE) * 128
             logger.info('Target size: %s' % bytes_to_mb(targetsize))
             if headphones.CONFIG.PREFERRED_BITRATE_LOW_BUFFER:
-                low_size_limit = targetsize * int(
+                low_size_limit = targetsize - targetsize * int(
                     headphones.CONFIG.PREFERRED_BITRATE_LOW_BUFFER) / 100
             if headphones.CONFIG.PREFERRED_BITRATE_HIGH_BUFFER:
-                high_size_limit = targetsize * int(
+                high_size_limit = targetsize + targetsize * int(
                     headphones.CONFIG.PREFERRED_BITRATE_HIGH_BUFFER) / 100
                 if headphones.CONFIG.PREFERRED_BITRATE_ALLOW_LOSSLESS:
                     allow_lossless = True
@@ -437,15 +452,15 @@ def more_filtering(results, album, albumlength, new):
 
         if low_size_limit and result.size < low_size_limit:
             logger.info(
-                f"{result.title} from {result.provider} is too small for this album. "
-                f"(Size: {result.size}, MinSize: {bytes_to_mb(low_size_limit)})"
+                f"{result.title} from {get_provider_name(result.provider)} is too small for this album. "
+                f"(Size: {bytes_to_mb(result.size)}, MinSize: {bytes_to_mb(low_size_limit)})"
             )
             continue
 
         if high_size_limit and result.size > high_size_limit:
             logger.info(
-                f"{result.title} from {result.provider} is too large for this album. "
-                f"(Size: {result.size}, MaxSize: {bytes_to_mb(high_size_limit)})"
+                f"{result.title} from {get_provider_name(result.provider)} is too large for this album. "
+                f"(Size: {bytes_to_mb(result.size)}, MaxSize: {bytes_to_mb(high_size_limit)})"
             )
             # Keep lossless results if there are no good lossy matches
             if not (allow_lossless and 'flac' in result.title.lower()):
@@ -458,7 +473,7 @@ def more_filtering(results, album, albumlength, new):
             if len(alreadydownloaded):
                 logger.info(
                     f"{result.title} has already been downloaded from "
-                    f"{result.provider}. Skipping."
+                    f"{get_provider_name(result.provider)}. Skipping."
                 )
                 continue
 
@@ -517,12 +532,13 @@ def sort_search_results(resultlist, album, new, albumlength):
                         delta = abs(targetsize - result.size)
                         lossy_results_with_delta.append((result, priority, delta))
 
-                return list(map(lambda x: x[0],
-                    sorted(
-                        lossy_results_with_delta,
-                        key=lambda x: (-x[0].matches, -x[1], x[2])
-                    )
-                ))
+                if len(lossy_results_with_delta):
+                    return list(map(lambda x: x[0],
+                        sorted(
+                            lossy_results_with_delta,
+                            key=lambda x: (-x[0].matches, -x[1], x[2])
+                        )
+                    ))
 
                 if (
                         not len(lossy_results_with_delta)
@@ -534,7 +550,7 @@ def sort_search_results(resultlist, album, new, albumlength):
                         "(and at least one lossless match), going to use "
                         "lossless instead"
                     )
-                    return sort_by_priority_then_size(results_with_priority)
+                    return sort_by_priority_then_size(lossless_results)
 
         except Exception:
             logger.exception('Unhandled exception')
@@ -854,7 +870,7 @@ def searchNZB(album, new=False, losslessOnly=False, albumlength=None,
 
 def send_to_downloader(data, result, album):
     logger.info(
-        f"Found best result from {result.provider}: <a href=\"{result.url}\">"
+        f"Found best result from {get_provider_name(result.provider)}: <a href=\"{result.url}\">"
         f"{result.title}</a> - {bytes_to_mb(result.size)}"
     )
     # Get rid of any dodgy chars here so we can prevent sab from renaming our downloads
@@ -1155,9 +1171,7 @@ def send_to_downloader(data, result, album):
     albumname = album[2]
     rgid = album[6]
     title = artist + ' - ' + albumname
-    provider = result.provider
-    if provider.startswith(("http://", "https://")):
-        provider = provider.split("//")[1]
+    provider = get_provider_name(result.provider)
     name = folder_name if folder_name else None
 
     if headphones.CONFIG.GROWL_ENABLED and headphones.CONFIG.GROWL_ONSNATCH:
@@ -1252,8 +1266,8 @@ def verifyresult(title, artistterm, term, lossless):
         return False
 
     # Filter out FLAC if we're not specifically looking for it
-    if headphones.CONFIG.PREFERRED_QUALITY == (
-            0 or '0') and 'flac' in title.lower() and not lossless:
+    if (headphones.CONFIG.PREFERRED_QUALITY == 0 or headphones.CONFIG.PREFERRED_QUALITY == '0') \
+            and 'flac' in title.lower() and not lossless:
         logger.info(
             "Removed %s from results because it's a lossless album and we're not looking for a lossless album right now.",
             title)
@@ -1285,7 +1299,7 @@ def verifyresult(title, artistterm, term, lossless):
 
     if headphones.CONFIG.IGNORE_CLEAN_RELEASES:
         for each_word in ['clean', 'edited', 'censored']:
-            logger.debug("Checking if '%s' is in search result: '%s'", each_word, title)
+            # logger.debug("Checking if '%s' is in search result: '%s'", each_word, title)
             if each_word.lower() in title.lower() and each_word.lower() not in term.lower():
                 logger.info("Removed '%s' from results because it contains clean album word: '%s'",
                             title, each_word)
@@ -1403,6 +1417,8 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
             if torznab_host[3] == '1' or torznab_host[3] == 1:
                 torznab_hosts.append(torznab_host)
 
+        parent_category = "3000"
+
         if headphones.CONFIG.PREFERRED_QUALITY == 3 or losslessOnly:
             categories = "3040"
             maxsize = 10000000000
@@ -1417,23 +1433,28 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
             categories = "3030"
             logger.info("Album type is audiobook/spokenword. Using audiobook category")
 
+        categories = categories + "," + parent_category
+
         for torznab_host in torznab_hosts:
 
             provider = torznab_host[0]
+            provider_name = torznab_host[0]
 
             # Format Jackett provider
             if "api/v2.0/indexers" in torznab_host[0]:
-                provider = "Jackett_" + provider.split("/indexers/", 1)[1].split('/', 1)[0]
+                provider_name = provider.split("/indexers/", 1)[1].split('/', 1)[0]
+                provider = "Torznab" + '|' +  provider_name + '|' + torznab_host[0]
 
             # Request results
-            logger.info('Parsing results from %s using search term: %s' % (provider, term))
+            logger.info('Parsing results from Torznab %s using search term: %s' % (provider_name, term))
 
             headers = {'User-Agent': USER_AGENT}
             params = {
                 "t": "search",
                 "apikey": torznab_host[1],
-                "cat": categories,
-                "maxage": headphones.CONFIG.USENET_RETENTION,
+                #"cat": categories,
+                "cat": parent_category, # search using '3000' and filter below
+                #"maxage": headphones.CONFIG.USENET_RETENTION,
                 "q": term
             }
 
@@ -1446,39 +1467,38 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
             if data:
                 items = data.find_all('item')
                 if not items:
-                    logger.info("No results found from %s for %s", provider, term)
+                    logger.info("No results found from %s for %s", provider_name, term)
                 else:
                     for item in items:
                         try:
                             title = item.title.get_text()
                             url = item.find("link").next_sibling.strip()
                             seeders = int(item.find("torznab:attr", attrs={"name": "seeders"}).get('value'))
-                            # Torrentech hack - size currently not returned, make it up
-                            if 'torrentech' in torznab_host[0]:
-                                if albumlength:
-                                    if 'Lossless' in title:
-                                        size = albumlength / 1000 * 800 * 128
-                                    elif 'MP3' in title:
-                                        size = albumlength / 1000 * 320 * 128
-                                    else:
-                                        size = albumlength / 1000 * 256 * 128
-                                else:
-                                    logger.info('Skipping %s, could not determine size' % title)
-                                    continue
-                            elif item.size:
+                            if item.size:
                                 size = int(item.size.string)
                             else:
                                 size = int(item.find("torznab:attr", attrs={"name": "size"}).get('value'))
 
+                            category = item.find("torznab:attr", attrs={"name": "category"}).get('value')
+                            if category not in categories:
+                                logger.info(f"Skipping {title}, size {bytes_to_mb(size)}, incorrect category {category}")
+                                continue
+
                             if all(word.lower() in title.lower() for word in term.split()):
                                 if size < maxsize and minimumseeders < seeders:
                                     logger.info('Found %s. Size: %s' % (title, bytes_to_mb(size)))
+                                    if item.prowlarrindexer:
+                                        provider = "Torznab" + '|' + item.prowlarrindexer.get_text() + '|' + \
+                                                   torznab_host[0]
+                                    elif item.jackettindexer:
+                                            provider = "Torznab" + '|' + item.jackettindexer.get_text() + '|' + \
+                                                   torznab_host[0]
                                     resultlist.append(Result(title, size, url, provider, 'torrent', True))
                                 else:
                                     logger.info(
                                         '%s is larger than the maxsize or has too little seeders for this category, '
-                                        'skipping. (Size: %i bytes, Seeders: %d)',
-                                        title, size, seeders)
+                                        'skipping. (Size: %s, Seeders: %d)',
+                                        title, bytes_to_mb(size), seeders)
                             else:
                                 logger.info('Skipping %s, not all search term words found' % title)
 
@@ -2056,15 +2076,15 @@ def preprocess(resultlist):
             if result.provider == 'rutracker.org':
                 return ruobj.get_torrent_data(result.url), result
 
-            # Jackett sometimes redirects
-            if result.provider.startswith('Jackett_') or 'torznab' in result.provider.lower():
+            # Torznab sometimes redirects
+            if result.provider.startswith("Torznab") or 'torznab' in result.provider.lower():
                 r = request.request_response(url=result.url, headers=headers, allow_redirects=False)
                 if r:
                     link = r.headers.get('Location')
                     if link and link != result.url:
                         if link.startswith('magnet:'):
                             result = Result(
-                                result.url,
+                                result.title,
                                 result.size,
                                 link,
                                 result.provider,
@@ -2074,7 +2094,7 @@ def preprocess(resultlist):
                             return "d10:magnet-uri%d:%se" % (len(link), link), result
                         else:
                             result = Result(
-                                result.url,
+                                result.title,
                                 result.size,
                                 link,
                                 result.provider,
