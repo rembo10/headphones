@@ -1195,16 +1195,15 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None, keep_orig
 
         if dir:
             download_dirs.append(dir)
-        if headphones.CONFIG.DOWNLOAD_DIR and not dir:
-            download_dirs.append(headphones.CONFIG.DOWNLOAD_DIR)
-        if headphones.CONFIG.SOULSEEK_DOWNLOAD_DIR and not dir:
-            download_dirs.append(headphones.CONFIG.SOULSEEK_DOWNLOAD_DIR)
-        if headphones.CONFIG.DOWNLOAD_TORRENT_DIR and not dir:
-            download_dirs.append(
-                headphones.CONFIG.DOWNLOAD_TORRENT_DIR.encode(headphones.SYS_ENCODING, 'replace'))
-        if headphones.CONFIG.BANDCAMP and not dir:
-            download_dirs.append(
-                headphones.CONFIG.BANDCAMP_DIR.encode(headphones.SYS_ENCODING, 'replace'))
+        else:
+            if headphones.CONFIG.DOWNLOAD_DIR:
+                download_dirs.append(headphones.CONFIG.DOWNLOAD_DIR)
+            if headphones.CONFIG.SOULSEEK_DOWNLOAD_DIR:
+                download_dirs.append(headphones.CONFIG.SOULSEEK_DOWNLOAD_DIR)
+            if headphones.CONFIG.DOWNLOAD_TORRENT_DIR:
+                download_dirs.append(headphones.CONFIG.DOWNLOAD_TORRENT_DIR)
+            if headphones.CONFIG.BANDCAMP:
+                download_dirs.append(headphones.CONFIG.BANDCAMP_DIR)
 
         # If DOWNLOAD_DIR and DOWNLOAD_TORRENT_DIR are the same, remove the duplicate to prevent us from trying to process the same folder twice.
         download_dirs = list(set(download_dirs))
@@ -1214,6 +1213,7 @@ def forcePostProcess(dir=None, expand_subfolders=True, album_dir=None, keep_orig
         folders = []
 
         for download_dir in download_dirs:
+            download_dir = download_dir.encode(headphones.SYS_ENCODING, 'replace')
             if not os.path.isdir(download_dir):
                 logger.warn('Directory %s does not exist. Skipping', download_dir)
                 continue
