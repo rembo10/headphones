@@ -860,6 +860,8 @@ def smartMove(src, dest, delete=True):
                 try:
                     os.rename(src, os.path.join(source_dir, newfile))
                     filename = newfile
+                    source_path = os.path.join(source_dir, filename)
+                    dest_path = os.path.join(dest, filename)
                 except Exception as e:
                     logger.warn(f"Error renaming {src}: {e}")
                 break
