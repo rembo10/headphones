@@ -183,8 +183,6 @@ def get_seed_ratio(provider):
         seed_ratio = headphones.CONFIG.REDACTED_RATIO
     elif provider == 'The Pirate Bay':
         seed_ratio = headphones.CONFIG.PIRATEBAY_RATIO
-    elif provider == 'Old Pirate Bay':
-        seed_ratio = headphones.CONFIG.OLDPIRATEBAY_RATIO
     elif provider == 'Waffles.ch':
         seed_ratio = headphones.CONFIG.WAFFLES_RATIO
     elif provider.startswith("Torznab"):
@@ -221,6 +219,22 @@ def get_provider_name(provider):
         provider_name = provider
 
     return provider_name
+
+
+def pirate_bay_get_magnet(info_hash, torrent_name):
+    trackers = [
+        "udp://tracker.coppersurfer.tk:6969/announce",
+        "udp://9.rarbg.me:2850/announce",
+        "udp://9.rarbg.to:2920/announce",
+        "udp://tracker.opentrackr.org:1337",
+        "udp://tracker.internetwarriors.net:1337/announce",
+        "udp://tracker.leechers-paradise.org:6969/announce",
+        "udp://tracker.pirateparty.gr:6969/announce",
+        "udp://tracker.cyberia.is:6969/announce",
+    ]
+    trackers = "".join([f"&tr={urllib.parse.quote(t, safe='')}" for t in trackers])
+    name = urllib.parse.quote(torrent_name, safe="")
+    return f"magnet:?xt=urn:btih:{info_hash}&dn={name}{trackers}"
 
 
 def searchforalbum(albumid=None, new=False, losslessOnly=False,
@@ -308,7 +322,6 @@ def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
 
     TORRENT_PROVIDERS = (headphones.CONFIG.TORZNAB or
                          headphones.CONFIG.PIRATEBAY or
-                         headphones.CONFIG.OLDPIRATEBAY or
                          headphones.CONFIG.WAFFLES or
                          headphones.CONFIG.RUTRACKER or
                          headphones.CONFIG.ORPHEUS or
@@ -1849,8 +1862,51 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                     )
                 )
 
-    # Pirate Bay
-    if headphones.CONFIG.PIRATEBAY:
+    # PIRATE BAY
+
+    # 09/08/2024 - thepiratebay.org/Proxy no longer working, switch to apibay.org as default
+
+    # Pirate Bay api
+    if (headphones.CONFIG.PIRATEBAY and not headphones.CONFIG.PIRATEBAY_PROXY_URL or
+        headphones.CONFIG.PIRATEBAY and "apibay.org" in headphones.CONFIG.PIRATEBAY_PROXY_URL):
+        provider = "The Pirate Bay"
+        logger.info(f"Searching The Pirate Bay using term: {term}")
+
+        # Pick category for torrents
+        if headphones.CONFIG.PREFERRED_QUALITY == 3 or losslessOnly:
+            category = '104'  # FLAC
+            maxsize = 10000000000
+        elif headphones.CONFIG.PREFERRED_QUALITY == 1 or allow_lossless:
+            category = '100'  # General audio category
+            maxsize = 10000000000
+        else:
+            category = '101'  # MP3 only
+            maxsize = 300000000
+
+        data = request.request_json(f"http://apibay.org/q.php?q={term}&cat={category}")
+
+        for t in data:
+            title = t["name"]
+            if title == "No results returned":
+                logger.info(f"No valid results found from The Pirate Bay using term: {term}")
+            else:
+                size = int(t["size"])
+                seeders = int(t["seeders"])
+                url = pirate_bay_get_magnet(t["info_hash"], t["name"])
+
+                if size < maxsize and minimumseeders < seeders and url is not None:
+                    match = True
+                    logger.info(f"Found {title}. Size: {bytes_to_mb(size)}")
+                else:
+                    match = False
+                    logger.info(f"{title} is larger than the maxsize or has too little seeders for this category, skipping."
+                                f" (Size: {bytes_to_mb(size)}, Seeders: {seeders})")
+
+                resultlist.append(Result(title, size, url, provider, "torrent", match))
+
+    # Pirate Bay (09/08/2024 not working, to fix or remove)
+    if (headphones.CONFIG.PIRATEBAY and headphones.CONFIG.PIRATEBAY_PROXY_URL and
+            "apibay.org" not in headphones.CONFIG.PIRATEBAY_PROXY_URL):
         provider = "The Pirate Bay"
         tpb_term = term.replace("!", "").replace("'", " ").replace(" ", "%20")
 
@@ -1926,61 +1982,6 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                         resultlist.append(Result(title, size, url, provider, "torrent", match))
                     except Exception as e:
                         logger.error("An unknown error occurred in the Pirate Bay parser: %s" % e)
-
-    # Old Pirate Bay Compatible
-    if headphones.CONFIG.OLDPIRATEBAY:
-        provider = "Old Pirate Bay"
-        tpb_term = term.replace("!", "")
-
-        # Pick category for torrents
-        if headphones.CONFIG.PREFERRED_QUALITY == 3 or losslessOnly:
-            maxsize = 10000000000
-        elif headphones.CONFIG.PREFERRED_QUALITY == 1 or allow_lossless:
-            maxsize = 10000000000
-        else:
-            maxsize = 300000000
-
-        # Requesting content
-        logger.info("Parsing results from Old Pirate Bay")
-
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2243.2 Safari/537.36'}
-        provider_url = fix_url(headphones.CONFIG.OLDPIRATEBAY_URL) + \
-                       "/search.php?" + urllib.parse.urlencode({"q": tpb_term, "iht": 6})
-
-        data = request.request_soup(url=provider_url, headers=headers)
-
-        # Process content
-        if data:
-            rows = data.select('table tbody tr')
-
-            if not rows:
-                logger.info("No results found")
-            else:
-                for item in rows:
-                    try:
-                        links = item.select("td.title-row a")
-
-                        title = links[1].text
-                        seeds = int(item.select("td.seeders-row")[0].text)
-                        url = links[0][
-                            "href"]  # Magnet link. The actual download link is not based on the URL
-
-                        formatted_size = item.select("td.size-row")[0].text
-                        size = piratesize(formatted_size)
-
-                        if size < maxsize and minimumseeders < seeds and url is not None:
-                            match = True
-                            logger.info('Found %s. Size: %s' % (title, formatted_size))
-                        else:
-                            match = False
-                            logger.info('%s is larger than the maxsize or has too little seeders for this category, '
-                                        'skipping. (Size: %i bytes, Seeders: %i)' % (title, size, int(seeds)))
-
-                        resultlist.append(Result(title, size, url, provider, "torrent", match))
-                    except Exception as e:
-                        logger.error(
-                            "An unknown error occurred in the Old Pirate Bay parser: %s" % e)
 
     # attempt to verify that this isn't a substring result
     # when looking for "Foo - Foo" we don't want "Foobar"
@@ -2116,7 +2117,7 @@ def preprocess(resultlist):
 
             # Download the torrent file
 
-            if result.provider in ["The Pirate Bay", "Old Pirate Bay"]:
+            if result.provider in ["The Pirate Bay"]:
                 headers = {
                     'User-Agent':
                         'Mozilla/5.0 (Windows NT 6.3; Win64; x64) \

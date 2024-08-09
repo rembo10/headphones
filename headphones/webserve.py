@@ -1231,9 +1231,6 @@ class WebInterface(object):
             "use_piratebay": checked(headphones.CONFIG.PIRATEBAY),
             "piratebay_proxy_url": headphones.CONFIG.PIRATEBAY_PROXY_URL,
             "piratebay_ratio": headphones.CONFIG.PIRATEBAY_RATIO,
-            "use_oldpiratebay": checked(headphones.CONFIG.OLDPIRATEBAY),
-            "oldpiratebay_url": headphones.CONFIG.OLDPIRATEBAY_URL,
-            "oldpiratebay_ratio": headphones.CONFIG.OLDPIRATEBAY_RATIO,
             "use_waffles": checked(headphones.CONFIG.WAFFLES),
             "waffles_uid": headphones.CONFIG.WAFFLES_UID,
             "waffles_passkey": headphones.CONFIG.WAFFLES_PASSKEY,
@@ -1467,7 +1464,7 @@ class WebInterface(object):
         checked_configs = [
             "launch_browser", "enable_https", "api_enabled", "use_blackhole", "headphones_indexer",
             "use_newznab", "newznab_enabled", "use_torznab", "torznab_enabled",
-            "use_nzbsorg", "use_omgwtfnzbs", "use_piratebay", "use_oldpiratebay",
+            "use_nzbsorg", "use_omgwtfnzbs", "use_piratebay",
             "use_waffles", "use_rutracker",
             "use_orpheus", "use_redacted", "redacted_use_fltoken", "preferred_bitrate_allow_lossless",
             "detect_bitrate", "ignore_clean_releases", "freeze_db", "cue_split", "move_files",

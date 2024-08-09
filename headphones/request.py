@@ -245,7 +245,9 @@ def server_message(response):
 
     if message:
         # Truncate message if it is too long.
-        if len(message) > 150:
-            message = message[:150] + "..."
+        if len(message) > 200:
+            if not type(message) == str:
+                message = message.decode(headphones.SYS_ENCODING, 'replace')
+            message = message[:200] + "..."
 
         logger.debug("Server responded with message: %s", message)
