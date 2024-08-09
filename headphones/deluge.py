@@ -84,7 +84,6 @@ def addTorrent(link, data=None, name=None):
         result = {}
         retid = False
         url_orpheus = ['https://orpheus.network/', 'http://orpheus.network/']
-        url_waffles = ['https://waffles.ch/', 'http://waffles.ch/']
 
         if link.lower().startswith('magnet:'):
             logger.debug('Deluge: Got a magnet link: %s' % _scrubber(link))
@@ -94,9 +93,6 @@ def addTorrent(link, data=None, name=None):
 
         elif link.lower().startswith('http://') or link.lower().startswith('https://'):
             logger.debug('Deluge: Got a URL: %s' % _scrubber(link))
-            if link.lower().startswith(tuple(url_waffles)):
-                if 'rss=' not in link:
-                    link = link + '&rss=1'
             if link.lower().startswith(tuple(url_orpheus)):
                 logger.debug('Deluge: Using different User-Agent for this site')
                 user_agent = 'Headphones'

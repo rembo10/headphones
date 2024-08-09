@@ -183,8 +183,6 @@ def get_seed_ratio(provider):
         seed_ratio = headphones.CONFIG.REDACTED_RATIO
     elif provider == 'The Pirate Bay':
         seed_ratio = headphones.CONFIG.PIRATEBAY_RATIO
-    elif provider == 'Waffles.ch':
-        seed_ratio = headphones.CONFIG.WAFFLES_RATIO
     elif provider.startswith("Torznab"):
         host = provider.split('|')[2]
         if host == headphones.CONFIG.TORZNAB_HOST:
@@ -322,7 +320,6 @@ def do_sorted_search(album, new, losslessOnly, choose_specific_download=False):
 
     TORRENT_PROVIDERS = (headphones.CONFIG.TORZNAB or
                          headphones.CONFIG.PIRATEBAY or
-                         headphones.CONFIG.WAFFLES or
                          headphones.CONFIG.RUTRACKER or
                          headphones.CONFIG.ORPHEUS or
                          headphones.CONFIG.REDACTED)
@@ -1518,74 +1515,6 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                         except Exception as e:
                             logger.exception(
                                 "An unknown error occurred trying to parse the feed: %s" % e)
-
-    if headphones.CONFIG.WAFFLES:
-        provider = "Waffles.ch"
-        providerurl = fix_url("https://waffles.ch/browse.php")
-
-        bitrate = None
-        if headphones.CONFIG.PREFERRED_QUALITY == 3 or losslessOnly:
-            format = "FLAC"
-            bitrate = "(Lossless)"
-            maxsize = 10000000000
-        elif headphones.CONFIG.PREFERRED_QUALITY == 1 or allow_lossless:
-            format = "FLAC OR MP3"
-            maxsize = 10000000000
-        else:
-            format = "MP3"
-            maxsize = 300000000
-
-        if not usersearchterm:
-            query_items = ['artist:"%s"' % artistterm,
-                           'album:"%s"' % albumterm,
-                           'year:(%s)' % year]
-        else:
-            query_items = [usersearchterm]
-
-        query_items.extend(['format:(%s)' % format,
-                            'size:[0 TO %d]' % maxsize])
-        # (25/03/2017 Waffles back up after 5 months, all torrents currently have no seeders, remove for now)
-        # '-seeders:0'])  cut out dead torrents
-
-        if bitrate:
-            query_items.append('bitrate:"%s"' % bitrate)
-
-        # Requesting content
-        logger.info('Parsing results from Waffles.ch')
-
-        params = {
-            "uid": headphones.CONFIG.WAFFLES_UID,
-            "passkey": headphones.CONFIG.WAFFLES_PASSKEY,
-            "rss": "1",
-            "c0": "1",
-            "s": "seeders",  # sort by
-            "d": "desc",  # direction
-            "q": " ".join(query_items)
-        }
-
-        data = request.request_feed(
-            url=providerurl,
-            params=params,
-            timeout=20
-        )
-
-        # Process feed
-        if data:
-            if not len(data.entries):
-                logger.info("No results found from %s for %s", provider, term)
-            else:
-                for item in data.entries:
-                    try:
-                        title = item.title
-                        desc_match = re.search(r"Size: (\d+)<", item.description)
-                        size = int(desc_match.group(1))
-                        url = item.link
-                        resultlist.append(Result(title, size, url, provider, 'torrent', True))
-                        logger.info('Found %s. Size: %s', title, bytes_to_mb(size))
-                    except Exception as e:
-                        logger.error(
-                            "An error occurred while trying to parse the response from Waffles.ch: %s",
-                            e)
 
     # rutracker.org
     if headphones.CONFIG.RUTRACKER:

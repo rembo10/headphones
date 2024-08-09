@@ -657,26 +657,6 @@
 
                                 <fieldset>
                                     <div class="row checkbox left">
-                                        <input id="use_waffles" type="checkbox" class="bigcheck" name="use_waffles" value="1" ${config['use_waffles']} /><label for="use_waffles"><span class="option">Waffles.ch</span></label>
-                                    </div>
-                                    <div class="config">
-                                        <div class="row">
-                                            <label>UID Number</label>
-                                            <input type="text" name="waffles_uid" value="${config['waffles_uid']}" size="36">
-                                        </div>
-                                        <div class="row">
-                                            <label>Passkey</label>
-                                            <input type="password" name="waffles_passkey" value="${config['waffles_passkey']}" size="36">
-                                        </div>
-                                        <div class="row">
-                                            <label>Seed Ratio</label>
-                                            <input type="text" class="override-float" name="waffles_ratio" value="${config['waffles_ratio']}" size="10" title="Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove torrent when post processed and finished seeding">
-                                        </div>
-                                    </div>
-                                </fieldset>
-
-                                <fieldset>
-                                    <div class="row checkbox left">
                                         <input id="use_rutracker" type="checkbox" class="bigcheck" name="use_rutracker" value="1" ${config['use_rutracker']} /><label for="use_rutracker"><span class="option">rutracker.org</span></label>
                                     </div>
                                     <div class="config">
@@ -2602,8 +2582,6 @@
                 initConfigCheckbox("#use_omgwtfnzbs");
                 initConfigCheckbox("#use_torznab");
                 initConfigCheckbox("#use_piratebay");
-                initConfigCheckbox("#use_oldpiratebay");
-                initConfigCheckbox("#use_waffles");
                 initConfigCheckbox("#use_rutracker");
                 initConfigCheckbox("#use_orpheus");
                 initConfigCheckbox("#use_redacted");
