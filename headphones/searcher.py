@@ -1793,7 +1793,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
 
     # PIRATE BAY
 
-    # 09/08/2024 - thepiratebay.org/Proxy no longer working, switch to apibay.org as default
+    # 09/08/2024 - thepiratebay.org no longer working, switch to apibay.org as default
 
     # Pirate Bay api
     if (headphones.CONFIG.PIRATEBAY and not headphones.CONFIG.PIRATEBAY_PROXY_URL or
@@ -1833,7 +1833,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
 
                 resultlist.append(Result(title, size, url, provider, "torrent", match))
 
-    # Pirate Bay (09/08/2024 not working, to fix or remove)
+    # Pirate Bay (09/08/2024 some proxies working (e.g. prbay.top), some not)
     if (headphones.CONFIG.PIRATEBAY and headphones.CONFIG.PIRATEBAY_PROXY_URL and
             "apibay.org" not in headphones.CONFIG.PIRATEBAY_PROXY_URL):
         provider = "The Pirate Bay"
