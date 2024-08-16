@@ -1795,59 +1795,12 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
 
     # 09/08/2024 - thepiratebay.org no longer working, switch to apibay.org as default
 
-    # Pirate Bay api
-    if (headphones.CONFIG.PIRATEBAY and not headphones.CONFIG.PIRATEBAY_PROXY_URL or
-        headphones.CONFIG.PIRATEBAY and "apibay.org" in headphones.CONFIG.PIRATEBAY_PROXY_URL):
-        provider = "The Pirate Bay"
+    # Pirate Bay
+    if (headphones.CONFIG.PIRATEBAY):
         logger.info(f"Searching The Pirate Bay using term: {term}")
-
-        # Pick category for torrents
-        if headphones.CONFIG.PREFERRED_QUALITY == 3 or losslessOnly:
-            category = '104'  # FLAC
-            maxsize = 10000000000
-        elif headphones.CONFIG.PREFERRED_QUALITY == 1 or allow_lossless:
-            category = '100'  # General audio category
-            maxsize = 10000000000
-        else:
-            category = '101'  # MP3 only
-            maxsize = 300000000
-
-        data = request.request_json(f"http://apibay.org/q.php?q={term}&cat={category}")
-
-        for t in data:
-            title = t["name"]
-            if title == "No results returned":
-                logger.info(f"No valid results found from The Pirate Bay using term: {term}")
-            else:
-                size = int(t["size"])
-                seeders = int(t["seeders"])
-                url = pirate_bay_get_magnet(t["info_hash"], t["name"])
-
-                if size < maxsize and minimumseeders < seeders and url is not None:
-                    match = True
-                    logger.info(f"Found {title}. Size: {bytes_to_mb(size)}")
-                else:
-                    match = False
-                    logger.info(f"{title} is larger than the maxsize or has too little seeders for this category, skipping."
-                                f" (Size: {bytes_to_mb(size)}, Seeders: {seeders})")
-
-                resultlist.append(Result(title, size, url, provider, "torrent", match))
-
-    # Pirate Bay (09/08/2024 some proxies working (e.g. prbay.top), some not)
-    if (headphones.CONFIG.PIRATEBAY and headphones.CONFIG.PIRATEBAY_PROXY_URL and
-            "apibay.org" not in headphones.CONFIG.PIRATEBAY_PROXY_URL):
         provider = "The Pirate Bay"
         tpb_term = term.replace("!", "").replace("'", " ").replace(" ", "%20")
 
-        # Use proxy if specified
-        if headphones.CONFIG.PIRATEBAY_PROXY_URL:
-            providerurl = fix_url(set_proxy(headphones.CONFIG.PIRATEBAY_PROXY_URL))
-        else:
-            providerurl = fix_url("https://thepiratebay.org")
-
-        # Build URL
-        providerurl = providerurl + "/search/" + tpb_term + "/0/7/"  # 7 is sort by seeders
-
         # Pick category for torrents
         if headphones.CONFIG.PREFERRED_QUALITY == 3 or losslessOnly:
             category = '104'  # FLAC
@@ -1859,58 +1812,71 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
             category = '101'  # MP3 only
             maxsize = 300000000
 
-        # Request content
-        logger.info("Searching The Pirate Bay using term: %s", tpb_term)
-
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2243.2 Safari/537.36'}
-        data = request.request_soup(url=providerurl + category, headers=headers)
 
-        # Process content
-        if data:
-            rows = data.select('table tbody tr')
-            if not rows:
-                rows = data.select('table tr')
+        # Use proxy if specified
+        if headphones.CONFIG.PIRATEBAY_PROXY_URL and "apibay.org" not in headphones.CONFIG.PIRATEBAY_PROXY_URL:
+            apibay = False
+            providerurl = fix_url(set_proxy(headphones.CONFIG.PIRATEBAY_PROXY_URL))
+            providerurl = providerurl + "/search/" + tpb_term + "/0/7/"  # 7 is sort by seeders
+            data = request.request_soup(url=providerurl + category, headers=headers)
+            rows = []
+            if data:
+                rows = data.select('table tbody tr')[1:]
+                if not rows:
+                    rows = data.select('table tr')[1:]
+        else:
+            # Use apibay
+            apibay = True
+            rows = request.request_json(f"http://apibay.org/q.php?q={term}&cat={category}", headers=headers)
 
-            if not rows:
-                logger.info("No results found from The Pirate Bay using term: %s" % tpb_term)
+        for item in rows:
+            # apibay
+            if apibay:
+                title = item["name"]
+                if title == "No results returned":
+                    rows = None
+                    break
+                size = int(item["size"])
+                seeders = int(item["seeders"])
+                url = pirate_bay_get_magnet(item["info_hash"], item["name"])
             else:
-                for item in rows:
+                # proxy
+                try:
+                    # proxy format 1
+                    columns = item.find_all('td')
+                    description = columns[1].text.strip().split('\n\n')
+                    title = description[0]
+                    url = columns[3].select('a[href^="magnet"]')[0]['href']
+                    formatted_size = columns[4].text.replace('\xa0', ' ')
+                    size = piratesize(formatted_size)
+                    seeders = int(columns[5].text)
+                except:
+                    # proxy format 2
                     try:
-                        url = None
                         title = ''.join(item.find("a", {"class": "detLink"}))
-                        seeds = int(''.join(item.find("td", {"align": "right"})))
-
-                        if headphones.CONFIG.TORRENT_DOWNLOADER == 0:
-                            try:
-                                url = item.find("a", {"title": "Download this torrent"})['href']
-                            except TypeError:
-                                if headphones.CONFIG.MAGNET_LINKS != 0:
-                                    url = item.findAll("a")[3]['href']
-                                else:
-                                    logger.info('"%s" only has a magnet link, skipping' % title)
-                                    continue
-                        else:
-                            url = item.findAll("a")[3]["href"]
-
-                        if url.lower().startswith("//"):
-                            url = "http:" + url
-
-                        formatted_size = re.search('Size (.*),', str(item)).group(1).replace(
-                            '\xa0', ' ')
+                        seeders = int(''.join(item.find("td", {"align": "right"})))
+                        url = item.findAll("a")[3]["href"]
+                        formatted_size = re.search('Size (.*),', str(item)).group(1).replace('\xa0', ' ')
                         size = piratesize(formatted_size)
-
-                        if size < maxsize and minimumseeders < seeds and url is not None:
-                            match = True
-                            logger.info('Found %s. Size: %s' % (title, formatted_size))
-                        else:
-                            match = False
-                            logger.info('%s is larger than the maxsize or has too little seeders for this category, '
-                                        'skipping. (Size: %i bytes, Seeders: %i)' % (title, size, int(seeds)))
-
-                        resultlist.append(Result(title, size, url, provider, "torrent", match))
                     except Exception as e:
-                        logger.error("An unknown error occurred in the Pirate Bay parser: %s" % e)
+                        logger.error("Cannot parse results with this proxy, leave setting blank for default apibay.org "
+                                    f"or try a different proxy. Error: {e}")
+                        break
+
+            if size < maxsize and minimumseeders < seeders and url is not None:
+                match = True
+                logger.info(f"Found {title}. Size: {bytes_to_mb(size)}")
+            else:
+                match = False
+                logger.info(f"{title} is larger than the maxsize or has too little seeders for this category, skipping."
+                            f" (Size: {bytes_to_mb(size)}, Seeders: {seeders})")
+
+            resultlist.append(Result(title, size, url, provider, "torrent", match))
+
+        if not rows:
+            logger.info(f"No valid results found from The Pirate Bay using term: {term}")
 
     # attempt to verify that this isn't a substring result
     # when looking for "Foo - Foo" we don't want "Foobar"
