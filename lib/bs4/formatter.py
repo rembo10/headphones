@@ -49,9 +49,9 @@ class Formatter(EntitySubstitution):
     def __init__(
             self, language=None, entity_substitution=None,
             void_element_close_prefix='/', cdata_containing_tags=None,
-            empty_attributes_are_booleans=False,
+            empty_attributes_are_booleans=False, indent=1,
     ):
-        """Constructor.
+        r"""Constructor.
 
         :param language: This should be Formatter.XML if you are formatting
            XML markup and Formatter.HTML if you are formatting HTML markup.
@@ -69,6 +69,15 @@ class Formatter(EntitySubstitution):
         :param blank_attributes_are_booleans: Render attributes whose value
             is the empty string as HTML-style boolean attributes.
             (Attributes whose value is None are always rendered this way.)
+
+        :param indent: If indent is a non-negative integer or string,
+            then the contents of elements will be indented
+            appropriately when pretty-printing. An indent level of 0,
+            negative, or "" will only insert newlines. Using a
+            positive integer indent indents that many spaces per
+            level. If indent is a string (such as "\t"), that string
+            is used to indent each level. The default behavior is to
+            indent one space per level.
         """
         self.language = language
         self.entity_substitution = entity_substitution
@@ -77,7 +86,18 @@ class Formatter(EntitySubstitution):
             language, cdata_containing_tags, 'cdata_containing_tags'
         )
         self.empty_attributes_are_booleans=empty_attributes_are_booleans
-        
+        if indent is None:
+            indent = 0
+        if isinstance(indent, int):
+            if indent < 0:
+                indent = 0
+            indent = ' ' * indent
+        elif isinstance(indent, str):
+            indent = indent
+        else:
+            indent = ' '
+        self.indent = indent
+
     def substitute(self, ns):
         """Process a string that needs to undergo entity substitution.
         This may be a string encountered in an attribute value or as
@@ -129,14 +149,14 @@ class HTMLFormatter(Formatter):
     """A generic Formatter for HTML."""
     REGISTRY = {}
     def __init__(self, *args, **kwargs):
-        return super(HTMLFormatter, self).__init__(self.HTML, *args, **kwargs)
+        super(HTMLFormatter, self).__init__(self.HTML, *args, **kwargs)
 
     
 class XMLFormatter(Formatter):
     """A generic Formatter for XML."""
     REGISTRY = {}
     def __init__(self, *args, **kwargs):
-        return super(XMLFormatter, self).__init__(self.XML, *args, **kwargs)
+        super(XMLFormatter, self).__init__(self.XML, *args, **kwargs)
 
 
 # Set up aliases for the default formatters.

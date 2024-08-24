@@ -4,7 +4,7 @@
 __license__ = "MIT"
 
 import cProfile
-from io import StringIO
+from io import BytesIO
 from html.parser import HTMLParser
 import bs4
 from bs4 import BeautifulSoup, __version__
@@ -59,21 +59,6 @@ def diagnose(data):
 
     if hasattr(data, 'read'):
         data = data.read()
-    elif data.startswith("http:") or data.startswith("https:"):
-        print(('"%s" looks like a URL. Beautiful Soup is not an HTTP client.' % data))
-        print("You need to use some other library to get the document behind the URL, and feed that document to Beautiful Soup.")
-        return
-    else:
-        try:
-            if os.path.exists(data):
-                print(('"%s" looks like a filename. Reading data from the file.' % data))
-                with open(data) as fp:
-                    data = fp.read()
-        except ValueError:
-            # This can happen on some platforms when the 'filename' is
-            # too long. Assume it's data and not a filename.
-            pass
-        print("")
 
     for parser in basic_parsers:
         print(("Trying to parse your markup with %s" % parser))
@@ -103,7 +88,13 @@ def lxml_trace(data, html=True, **kwargs):
        if False, lxml's XML parser will be used.
     """
     from lxml import etree
-    for event, element in etree.iterparse(StringIO(data), html=html, **kwargs):
+    recover = kwargs.pop('recover', True)
+    if isinstance(data, str):
+        data = data.encode("utf8")
+    reader = BytesIO(data)
+    for event, element in etree.iterparse(
+        reader, html=html, recover=recover, **kwargs
+    ):
         print(("%s, %4s, %s" % (event, element.tag, element.text)))
 
 class AnnouncingParser(HTMLParser):
