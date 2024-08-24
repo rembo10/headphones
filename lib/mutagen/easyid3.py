@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (C) 2006  Joe Wreschnig
 #
 # This program is free software; you can redistribute it and/or modify
@@ -11,6 +10,8 @@
 EasyID3 is a wrapper around mutagen.id3.ID3 to make ID3 tags appear
 more like Vorbis or APEv2 tags.
 """
+
+from typing import Callable, Dict
 
 import mutagen.id3
 
@@ -64,10 +65,10 @@ class EasyID3(DictMixin, Metadata):
 
     """
 
-    Set = {}
-    Get = {}
-    Delete = {}
-    List = {}
+    Set: Dict[str, Callable] = {}
+    Get: Dict[str, Callable] = {}
+    Delete: Dict[str, Callable] = {}
+    List: Dict[str, Callable] = {}
 
     # For compatibility.
     valid_keys = Get
@@ -129,7 +130,7 @@ class EasyID3(DictMixin, Metadata):
                 frame.text = value
 
         def deleter(id3, key):
-            del(id3[frameid])
+            del id3[frameid]
 
         cls.RegisterKey(key, getter, setter, deleter)
 
@@ -159,7 +160,7 @@ class EasyID3(DictMixin, Metadata):
             id3.add(mutagen.id3.TXXX(encoding=enc, text=value, desc=desc))
 
         def deleter(id3, key):
-            del(id3[frameid])
+            del id3[frameid]
 
         cls.RegisterKey(key, getter, setter, deleter)
 
@@ -269,7 +270,7 @@ def genre_set(id3, key, value):
 
 
 def genre_delete(id3, key):
-    del(id3["TCON"])
+    del id3["TCON"]
 
 
 def date_get(id3, key):
@@ -281,7 +282,7 @@ def date_set(id3, key, value):
 
 
 def date_delete(id3, key):
-    del(id3["TDRC"])
+    del id3["TDRC"]
 
 
 def original_date_get(id3, key):
@@ -293,7 +294,7 @@ def original_date_set(id3, key, value):
 
 
 def original_date_delete(id3, key):
-    del(id3["TDOR"])
+    del id3["TDOR"]
 
 
 def performer_get(id3, key):
@@ -338,7 +339,7 @@ def performer_delete(id3, key):
     elif people:
         mcl.people = people
     else:
-        del(id3["TMCL"])
+        del id3["TMCL"]
 
 
 def performer_list(id3, key):
@@ -368,7 +369,7 @@ def musicbrainz_trackid_set(id3, key, value):
 
 
 def musicbrainz_trackid_delete(id3, key):
-    del(id3["UFID:http://musicbrainz.org"])
+    del id3["UFID:http://musicbrainz.org"]
 
 
 def website_get(id3, key):
@@ -420,7 +421,7 @@ def gain_delete(id3, key):
         if frame.peak:
             frame.gain = 0.0
         else:
-            del(id3["RVA2:" + key[11:-5]])
+            del id3["RVA2:" + key[11:-5]]
 
 
 def peak_get(id3, key):
@@ -456,7 +457,7 @@ def peak_delete(id3, key):
         if frame.gain:
             frame.peak = 0.0
         else:
-            del(id3["RVA2:" + key[11:-5]])
+            del id3["RVA2:" + key[11:-5]]
 
 
 def peakgain_list(id3, key):
@@ -477,6 +478,7 @@ for frameid, key in {
     "TLEN": "length",
     "TMED": "media",
     "TMOO": "mood",
+    "TIT1": "grouping",
     "TIT2": "title",
     "TIT3": "version",
     "TPE1": "artist",
@@ -553,4 +555,4 @@ class EasyID3FileType(ID3FileType):
         tags (`EasyID3`)
     """
 
-    ID3 = EasyID3
+    ID3 = EasyID3  # type: ignore

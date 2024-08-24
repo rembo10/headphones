@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2015 Christoph Reiter
 #
 # This program is free software; you can redistribute it and/or modify
@@ -11,7 +10,6 @@ import signal
 import contextlib
 import optparse
 
-from mutagen._senf import print_
 from mutagen._util import iterbytes
 
 
@@ -88,8 +86,4 @@ class SignalHandler(object):
             raise SystemExit("Aborted...")
 
 
-class OptionParser(optparse.OptionParser):
-    """OptionParser subclass which supports printing Unicode under Windows"""
-
-    def print_help(self, file=None):
-        print_(self.format_help(), file=file)
+OptionParser = optparse.OptionParser

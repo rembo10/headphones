@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 # Copyright (C) 2014  Evan Purkhiser
 #               2014  Ben Ockmore
 #               2017  Borewit
-#               2019-2020  Philipp Wolfer
+#               2019-2021  Philipp Wolfer
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -38,7 +37,7 @@ class EmptyChunk(InvalidChunk):
     pass
 
 
-def is_valid_chunk_id(id):
+def is_valid_chunk_id(id: str) -> bool:
     """ is_valid_chunk_id(FOURCC)
 
     Arguments:
@@ -57,7 +56,7 @@ def is_valid_chunk_id(id):
 
 
 #  Assert FOURCC formatted valid
-def assert_valid_chunk_id(id):
+def assert_valid_chunk_id(id: str) -> None:
     if not is_valid_chunk_id(id):
         raise ValueError("IFF chunk ID must be four ASCII characters.")
 
@@ -127,13 +126,13 @@ class IffChunk(object):
             % (type(self).__name__, self.id, self.offset, self.size,
                self.data_offset, self.data_size))
 
-    def read(self):
+    def read(self) -> bytes:
         """Read the chunks data"""
 
         self._fileobj.seek(self.data_offset)
         return self._fileobj.read(self.data_size)
 
-    def write(self, data):
+    def write(self, data: bytes) -> None:
         """Write the chunk data"""
 
         if len(data) > self.data_size:
@@ -147,7 +146,7 @@ class IffChunk(object):
             self._fileobj.seek(self.data_offset + self.data_size)
             self._fileobj.write(b'\x00' * padding)
 
-    def delete(self):
+    def delete(self) -> None:
         """Removes the chunk from the file"""
 
         delete_bytes(self._fileobj, self.size, self.offset)
@@ -173,22 +172,35 @@ class IffChunk(object):
         self.size = self.HEADER_SIZE + self.data_size + self.padding()
         assert self.size % 2 == 0
 
-    def resize(self, new_data_size):
+    def resize(self, new_data_size: int) -> None:
         """Resize the file and update the chunk sizes"""
 
+        old_size = self._get_actual_data_size()
         padding = new_data_size % 2
-        resize_bytes(self._fileobj, self.data_size + self.padding(),
+        resize_bytes(self._fileobj, old_size,
                      new_data_size + padding, self.data_offset)
         size_diff = new_data_size - self.data_size
         self._update_size(size_diff)
         self._fileobj.flush()
 
-    def padding(self):
+    def padding(self) -> int:
         """Returns the number of padding bytes (0 or 1).
         IFF chunks are required to be a even number in total length. If
         data_size is odd a padding byte will be added at the end.
         """
         return self.data_size % 2
+
+    def _get_actual_data_size(self) -> int:
+        """Returns the data size that is actually possible.
+        Some files have chunks that are truncated and their reported size
+        would be outside of the file's actual size."""
+        fileobj = self._fileobj
+        fileobj.seek(0, 2)
+        file_size = fileobj.tell()
+
+        expected_size = self.data_size + self.padding()
+        max_size_possible = file_size - self.data_offset
+        return min(expected_size, max_size_possible)
 
 
 class IffContainerChunkMixin():
@@ -250,7 +262,7 @@ class IffContainerChunkMixin():
         if not is_valid_chunk_id(id_):
             raise KeyError("Invalid IFF key.")
 
-        next_offset = self.offset + self.size
+        next_offset = self.data_offset + self._get_actual_data_size()
         size = self.HEADER_SIZE
         data_size = 0
         if data:

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (C) 2006  Lukas Lalinsky
 # Copyright (C) 2012  Christoph Reiter
 #

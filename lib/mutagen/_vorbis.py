@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (C) 2005-2006  Joe Wreschnig
 #                    2013  Christoph Reiter
 #
@@ -23,7 +22,7 @@ import mutagen
 from mutagen._util import DictMixin, cdata, MutagenError, reraise
 
 
-def is_valid_key(key):
+def is_valid_key(key: str) -> bool:
     """Return true if a string is a valid Vorbis comment key.
 
     Valid Vorbis comment keys are printable ASCII between 0x20 (space)
@@ -159,7 +158,7 @@ class VComment(mutagen.Tags, list):
 
         return True
 
-    def clear(self):
+    def clear(self) -> None:
         """Clear all keys from the comment."""
 
         for i in list(self):
@@ -197,7 +196,7 @@ class VComment(mutagen.Tags, list):
             f.write(b"\x01")
         return f.getvalue()
 
-    def pprint(self):
+    def pprint(self) -> str:
 
         def _decode(value):
             if not isinstance(value, str):
@@ -208,7 +207,7 @@ class VComment(mutagen.Tags, list):
         return u"\n".join(tags)
 
 
-class VCommentDict(VComment, DictMixin):
+class VCommentDict(VComment, DictMixin):  # type: ignore
     """A VComment that looks like a dictionary.
 
     This object differs from a dictionary in two ways. First,
@@ -290,7 +289,7 @@ class VCommentDict(VComment, DictMixin):
         if not isinstance(values, list):
             values = [values]
         try:
-            del(self[key])
+            del self[key]
         except KeyError:
             pass
 

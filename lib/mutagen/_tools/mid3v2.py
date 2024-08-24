@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2005 Joe Wreschnig
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,6 +7,7 @@
 
 """Pretend to be /usr/bin/id3v2 from id3lib, sort of."""
 
+import os
 import sys
 import codecs
 import mimetypes
@@ -18,8 +18,6 @@ from optparse import SUPPRESS_HELP
 import mutagen
 import mutagen.id3
 from mutagen.id3 import Encoding, PictureType
-from mutagen._senf import fsnative, print_, argv, fsn2text, fsn2bytes, \
-    bytes2fsn
 
 from ._util import split_escape, SignalHandler, OptionParser
 
@@ -57,7 +55,7 @@ Any editing operation will cause the ID3 tag to be upgraded to ID3v2.4.
 def list_frames(option, opt, value, parser):
     items = mutagen.id3.Frames.items()
     for name, frame in sorted(items):
-        print_(u"    --%s    %s" % (name, frame.__doc__.split("\n")[0]))
+        print(u"    --%s    %s" % (name, frame.__doc__.split("\n")[0]))
     raise SystemExit
 
 
@@ -65,13 +63,13 @@ def list_frames_2_2(option, opt, value, parser):
     items = mutagen.id3.Frames_2_2.items()
     items.sort()
     for name, frame in items:
-        print_(u"    --%s    %s" % (name, frame.__doc__.split("\n")[0]))
+        print(u"    --%s    %s" % (name, frame.__doc__.split("\n")[0]))
     raise SystemExit
 
 
 def list_genres(option, opt, value, parser):
     for i, genre in enumerate(mutagen.id3.TCON.GENRES):
-        print_(u"%3d: %s" % (i, genre))
+        print(u"%3d: %s" % (i, genre))
     raise SystemExit
 
 
@@ -79,7 +77,7 @@ def delete_tags(filenames, v1, v2):
     for filename in filenames:
         with _sig.block():
             if verbose:
-                print_(u"deleting ID3 tag info in", filename, file=sys.stderr)
+                print(u"deleting ID3 tag info in", filename, file=sys.stderr)
             mutagen.id3.delete(filename, v1, v2)
 
 
@@ -88,22 +86,22 @@ def delete_frames(deletes, filenames):
     try:
         deletes = frame_from_fsnative(deletes)
     except ValueError as err:
-        print_(str(err), file=sys.stderr)
+        print(str(err), file=sys.stderr)
 
     frames = deletes.split(",")
 
     for filename in filenames:
         with _sig.block():
             if verbose:
-                print_(u"deleting %s from" % deletes, filename,
-                       file=sys.stderr)
+                print("deleting %s from" % deletes, filename,
+                      file=sys.stderr)
             try:
                 id3 = mutagen.id3.ID3(filename)
             except mutagen.id3.ID3NoHeaderError:
                 if verbose:
-                    print_(u"No ID3 header found; skipping.", file=sys.stderr)
+                    print(u"No ID3 header found; skipping.", file=sys.stderr)
             except Exception as err:
-                print_(str(err), file=sys.stderr)
+                print(str(err), file=sys.stderr)
                 raise SystemExit(1)
             else:
                 for frame in frames:
@@ -116,10 +114,8 @@ def frame_from_fsnative(arg):
     or raises ValueError.
     """
 
-    assert isinstance(arg, fsnative)
-
-    text = fsn2text(arg, strict=True)
-    return text.encode("ascii").decode("ascii")
+    assert isinstance(arg, str)
+    return arg.encode("ascii").decode("ascii")
 
 
 def value_from_fsnative(arg, escape):
@@ -127,23 +123,23 @@ def value_from_fsnative(arg, escape):
     surrogate escapes or raises ValueError.
     """
 
-    assert isinstance(arg, fsnative)
+    assert isinstance(arg, str)
 
     if escape:
-        bytes_ = fsn2bytes(arg)
+        bytes_ = os.fsencode(arg)
         # With py3.7 this has started to warn for invalid escapes, but we
         # don't control the input so ignore it.
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             bytes_ = codecs.escape_decode(bytes_)[0]
-        arg = bytes2fsn(bytes_)
+        arg = os.fsdecode(bytes_)
 
-    text = fsn2text(arg, strict=True)
+    text = arg.encode("utf-8").decode("utf-8")
     return text
 
 
 def error(*args):
-    print_(*args, file=sys.stderr)
+    print(*args, file=sys.stderr)
     raise SystemExit(1)
 
 
@@ -165,7 +161,7 @@ def write_files(edits, filenames, escape):
         try:
             frame = frame_from_fsnative(frame)
         except ValueError as err:
-            print_(str(err), file=sys.stderr)
+            print(str(err), file=sys.stderr)
 
         assert isinstance(frame, str)
 
@@ -203,16 +199,16 @@ def write_files(edits, filenames, escape):
     for filename in filenames:
         with _sig.block():
             if verbose:
-                print_(u"Writing", filename, file=sys.stderr)
+                print(u"Writing", filename, file=sys.stderr)
             try:
                 id3 = mutagen.id3.ID3(filename)
             except mutagen.id3.ID3NoHeaderError:
                 if verbose:
-                    print_(u"No ID3 header found; creating a new tag",
+                    print(u"No ID3 header found; creating a new tag",
                           file=sys.stderr)
                 id3 = mutagen.id3.ID3()
             except Exception as err:
-                print_(str(err), file=sys.stderr)
+                print(str(err), file=sys.stderr)
                 continue
             for (frame, vlist) in edits.items():
                 if frame == "POPM":
@@ -336,31 +332,31 @@ def write_files(edits, filenames, escape):
 
 def list_tags(filenames):
     for filename in filenames:
-        print_("IDv2 tag info for", filename)
+        print("IDv2 tag info for", filename)
         try:
             id3 = mutagen.id3.ID3(filename, translate=False)
         except mutagen.id3.ID3NoHeaderError:
-            print_(u"No ID3 header found; skipping.")
+            print(u"No ID3 header found; skipping.")
         except Exception as err:
-            print_(str(err), file=sys.stderr)
+            print(str(err), file=sys.stderr)
             raise SystemExit(1)
         else:
-            print_(id3.pprint())
+            print(id3.pprint())
 
 
 def list_tags_raw(filenames):
     for filename in filenames:
-        print_("Raw IDv2 tag info for", filename)
+        print("Raw IDv2 tag info for", filename)
         try:
             id3 = mutagen.id3.ID3(filename, translate=False)
         except mutagen.id3.ID3NoHeaderError:
-            print_(u"No ID3 header found; skipping.")
+            print(u"No ID3 header found; skipping.")
         except Exception as err:
-            print_(str(err), file=sys.stderr)
+            print(str(err), file=sys.stderr)
             raise SystemExit(1)
         else:
             for frame in id3.values():
-                print_(str(repr(frame)))
+                print(str(repr(frame)))
 
 
 def main(argv):
@@ -409,43 +405,43 @@ def main(argv):
     parser.add_option(
         "-a", "--artist", metavar='"ARTIST"', action="callback",
         help="Set the artist information", type="string",
-        callback=lambda *args: args[3].edits.append((fsnative(u"--TPE1"),
+        callback=lambda *args: args[3].edits.append(("--TPE1",
                                                      args[2])))
     parser.add_option(
         "-A", "--album", metavar='"ALBUM"', action="callback",
         help="Set the album title information", type="string",
-        callback=lambda *args: args[3].edits.append((fsnative(u"--TALB"),
+        callback=lambda *args: args[3].edits.append(("--TALB",
                                                      args[2])))
     parser.add_option(
         "-t", "--song", metavar='"SONG"', action="callback",
         help="Set the song title information", type="string",
-        callback=lambda *args: args[3].edits.append((fsnative(u"--TIT2"),
+        callback=lambda *args: args[3].edits.append(("--TIT2",
                                                      args[2])))
     parser.add_option(
         "-c", "--comment", metavar='"DESCRIPTION":"COMMENT":"LANGUAGE"',
         action="callback", help="Set the comment information", type="string",
-        callback=lambda *args: args[3].edits.append((fsnative(u"--COMM"),
+        callback=lambda *args: args[3].edits.append(("--COMM",
                                                      args[2])))
     parser.add_option(
         "-p", "--picture",
         metavar='"FILENAME":"DESCRIPTION":"IMAGE-TYPE":"MIME-TYPE"',
         action="callback", help="Set the picture", type="string",
-        callback=lambda *args: args[3].edits.append((fsnative(u"--APIC"),
+        callback=lambda *args: args[3].edits.append(("--APIC",
                                                      args[2])))
     parser.add_option(
         "-g", "--genre", metavar='"GENRE"', action="callback",
         help="Set the genre or genre number", type="string",
-        callback=lambda *args: args[3].edits.append((fsnative(u"--TCON"),
+        callback=lambda *args: args[3].edits.append(("--TCON",
                                                      args[2])))
     parser.add_option(
         "-y", "--year", "--date", metavar='YYYY[-MM-DD]', action="callback",
         help="Set the year/date", type="string",
-        callback=lambda *args: args[3].edits.append((fsnative(u"--TDRC"),
+        callback=lambda *args: args[3].edits.append(("--TDRC",
                                                      args[2])))
     parser.add_option(
         "-T", "--track", metavar='"num/num"', action="callback",
         help="Set the track number/(optional) total tracks", type="string",
-        callback=lambda *args: args[3].edits.append((fsnative(u"--TRCK"),
+        callback=lambda *args: args[3].edits.append(("--TRCK",
                                                      args[2])))
 
     for key, frame in mutagen.id3.Frames.items():
@@ -485,4 +481,4 @@ def main(argv):
 
 def entry_point():
     _sig.init()
-    return main(argv)
+    return main(sys.argv)

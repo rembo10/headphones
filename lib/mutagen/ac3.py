@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (C) 2019 Philipp Wolfer
 #
 # This program is free software; you can redistribute it and/or modify
@@ -220,7 +219,7 @@ class AC3Info(StreamInfo):
         if timecod2e:
             r.skip(14)  # Time Code Second Half
         if r.bits(1):  # Additional Bit Stream Information Exists
-            addbsil = r.bit(6)  # Additional Bit Stream Information Length
+            addbsil = r.bits(6)  # Additional Bit Stream Information Length
             r.skip((addbsil + 1) * 8)
 
     @staticmethod
@@ -271,7 +270,7 @@ class AC3Info(StreamInfo):
                 if r.bits(1):  # blkid
                     r.skip(6)  # frmsizecod
         if r.bits(1):  # Additional Bit Stream Information Exists
-            addbsil = r.bit(6)  # Additional Bit Stream Information Length
+            addbsil = r.bits(6)  # Additional Bit Stream Information Length
             r.skip((addbsil + 1) * 8)
 
     @staticmethod

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (C) 2006  Joe Wreschnig
 #
 # This program is free software; you can redistribute it and/or modify
@@ -10,7 +9,7 @@
 
 True Audio is a lossless format designed for real-time encoding and
 decoding. This module is based on the documentation at
-http://www.true-audio.com/TTA_Lossless_Audio_Codec\\_-_Format_Description
+http://tausoft.org/wiki/True_Audio_Codec_Format
 
 True Audio files use ID3 tags.
 """
@@ -48,9 +47,11 @@ class TrueAudioInfo(StreamInfo):
         header = fileobj.read(18)
         if len(header) != 18 or not header.startswith(b"TTA"):
             raise TrueAudioHeaderError("TTA header not found")
-        self.sample_rate = cdata.int_le(header[10:14])
+        self.sample_rate = cdata.uint_le(header[10:14])
         samples = cdata.uint_le(header[14:18])
-        self.length = float(samples) / self.sample_rate
+        self.length = 0.0
+        if self.sample_rate != 0:
+            self.length = float(samples) / self.sample_rate
 
     def pprint(self):
         return u"True Audio, %.2f seconds, %d Hz." % (
@@ -98,4 +99,4 @@ class EasyTrueAudio(TrueAudio):
     """
 
     from mutagen.easyid3 import EasyID3 as ID3
-    ID3 = ID3
+    ID3 = ID3  # type: ignore

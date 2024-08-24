@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (C) 2006  Joe Wreschnig
 #
 # This program is free software; you can redistribute it and/or modify
@@ -20,10 +19,13 @@ import struct
 import sys
 import zlib
 from io import BytesIO
+from typing import Type
 
 from mutagen import FileType
 from mutagen._util import cdata, resize_bytes, MutagenError, loadfile, \
     seek_end, bchr, reraise
+from mutagen._file import StreamInfo
+from mutagen._tags import Tags
 
 
 class error(MutagenError):
@@ -165,7 +167,7 @@ class OggPage(object):
         return data
 
     @property
-    def size(self):
+    def size(self) -> int:
         """Total frame size."""
 
         size = 27  # Initial header size
@@ -211,7 +213,7 @@ class OggPage(object):
         to logical stream 'serial'. Other pages will be ignored.
 
         fileobj must point to the start of a valid Ogg page; any
-        occuring after it and part of the specified logical stream
+        occurring after it and part of the specified logical stream
         will be numbered. No adjustment will be made to the data in
         the pages nor the granule position; only the page number, and
         so also the CRC.
@@ -427,7 +429,7 @@ class OggPage(object):
             new_data_end = offset + data_size
             offset_adjust += (data_size - old_page.size)
 
-        # Finally, if there's any discrepency in length, we need to
+        # Finally, if there's any discrepancy in length, we need to
         # renumber the pages for the logical stream.
         if len(old_pages) != len(new_pages):
             fileobj.seek(new_data_end, 0)
@@ -508,9 +510,9 @@ class OggFileType(FileType):
         filething (filething)
     """
 
-    _Info = None
-    _Tags = None
-    _Error = None
+    _Info: Type[StreamInfo]
+    _Tags: Type[Tags]
+    _Error: Type[error]
     _mimes = ["application/ogg", "application/x-ogg"]
 
     @loadfile()

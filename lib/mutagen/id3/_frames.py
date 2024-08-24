@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (C) 2005  Michael Urman
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,6 +7,7 @@
 
 import zlib
 from struct import unpack
+from typing import Sequence
 
 from ._util import ID3JunkFrameError, ID3EncryptionUnsupportedError, unsynch, \
     ID3SaveConfig, error
@@ -17,7 +17,7 @@ from ._specs import BinaryDataSpec, StringSpec, Latin1TextSpec, \
     VolumeAdjustmentSpec, ChannelSpec, MultiSpec, SynchronizedTextSpec, \
     KeyEventSpec, TimeStampSpec, EncodedNumericPartTextSpec, \
     EncodedNumericTextSpec, SpecError, PictureTypeSpec, ID3FramesSpec, \
-    Latin1TextListSpec, CTOCFlagsSpec, FrameIDSpec, RVASpec
+    Latin1TextListSpec, CTOCFlagsSpec, FrameIDSpec, RVASpec, Spec
 
 
 def _bytes2key(b):
@@ -49,8 +49,8 @@ class Frame(object):
     FLAG24_UNSYNCH = 0x0002
     FLAG24_DATALEN = 0x0001
 
-    _framespec = []
-    _optionalspec = []
+    _framespec: Sequence[Spec] = []
+    _optionalspec: Sequence[Spec] = []
 
     def __init__(self, *args, **kwargs):
         if len(args) == 1 and len(kwargs) == 0 and \
@@ -291,7 +291,7 @@ class Frame(object):
         frame._readData(header, data)
         return frame
 
-    def __hash__(self):
+    def __hash__(self: object):
         raise TypeError("Frame objects are unhashable")
 
 
@@ -514,7 +514,7 @@ class UrlFrame(Frame):
     ASCII.
     """
 
-    _framespec = [
+    _framespec: Sequence[Spec] = [
         Latin1TextSpec('url'),
     ]
 
@@ -568,7 +568,7 @@ class TCON(TextFrame):
         genre_re = re.compile(r"((?:\((?P<id>[0-9]+|RX|CR)\))*)(?P<str>.+)?")
         for value in self.text:
             # 255 possible entries in id3v1
-            if value.isdigit() and int(value) < 256:
+            if value.isdecimal() and int(value) < 256:
                 try:
                     genres.append(self.GENRES[int(value)])
                 except IndexError:
@@ -832,7 +832,7 @@ class TSOC(TextFrame):
 
 
 class TSOP(TextFrame):
-    "Perfomer Sort Order key"
+    "Performer Sort Order key"
 
 
 class TSOT(TextFrame):
@@ -1110,7 +1110,7 @@ class SYLT(Frame):
 class COMM(TextFrame):
     """User comment.
 
-    User comment frames have a descrption, like TXXX, and also a three
+    User comment frames have a description, like TXXX, and also a three
     letter ISO language code in the 'lang' attribute.
     """
 
@@ -1895,7 +1895,7 @@ class TS2(TSO2):
 
 
 class TSP(TSOP):
-    "Perfomer Sort Order key"
+    "Performer Sort Order key"
 
 
 class TSC(TSOC):
@@ -1931,7 +1931,7 @@ class TOT(TOAL):
 
 
 class TOA(TOPE):
-    "Original Artist/Perfomer"
+    "Original Artist/Performer"
 
 
 class TOL(TOLY):
@@ -1995,7 +1995,7 @@ class STC(SYTC):
 
 
 class ULT(USLT):
-    "Unsychronised lyrics/text transcription"
+    "Unsynchronised lyrics/text transcription"
 
 
 class SLT(SYLT):

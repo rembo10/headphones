@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (C) 2014 Christoph Reiter
 #
 # This program is free software; you can redistribute it and/or modify
@@ -204,7 +203,7 @@ class DescriptorError(Exception):
 
 class BaseDescriptor(object):
 
-    TAG = None
+    TAG: int
 
     @classmethod
     def _parse_desc_length_file(cls, fileobj):

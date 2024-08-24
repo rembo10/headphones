@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2006 Emfox Zhou <EmfoxZhou@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
@@ -7,7 +6,7 @@
 # (at your option) any later version.
 
 """
-ID3iconv is a Java based ID3 encoding convertor, here's the Python version.
+ID3iconv is a Java based ID3 encoding converter, here's the Python version.
 """
 
 import sys
@@ -15,7 +14,6 @@ import locale
 
 import mutagen
 import mutagen.id3
-from mutagen._senf import argv, print_, fsnative
 
 from ._util import SignalHandler, OptionParser
 
@@ -74,7 +72,7 @@ def update(options, filenames):
     for filename in filenames:
         with _sig.block():
             if verbose != "quiet":
-                print_(u"Updating", filename)
+                print(u"Updating", filename)
 
             if has_id3v1(filename) and not noupdate and force_v1:
                 mutagen.id3.delete(filename, False, True)
@@ -83,10 +81,10 @@ def update(options, filenames):
                 id3 = mutagen.id3.ID3(filename)
             except mutagen.id3.ID3NoHeaderError:
                 if verbose != "quiet":
-                    print_(u"No ID3 header found; skipping...")
+                    print(u"No ID3 header found; skipping...")
                 continue
             except Exception as err:
-                print_(str(err), file=sys.stderr)
+                print(str(err), file=sys.stderr)
                 continue
 
             for tag in filter(lambda t: t.startswith(("T", "COMM")), id3):
@@ -110,7 +108,7 @@ def update(options, filenames):
                         frame.encoding = 1
 
             if verbose == "debug":
-                print_(id3.pprint())
+                print(id3.pprint())
 
             if not noupdate:
                 if remove_v1:
@@ -153,9 +151,9 @@ def main(argv):
 
     for i, arg in enumerate(argv):
         if arg == "-v1":
-            argv[i] = fsnative(u"--force-v1")
+            argv[i] = "--force-v1"
         elif arg == "-removev1":
-            argv[i] = fsnative(u"--remove-v1")
+            argv[i] = "--remove-v1"
 
     (options, args) = parser.parse_args(argv[1:])
 
@@ -167,4 +165,4 @@ def main(argv):
 
 def entry_point():
     _sig.init()
-    return main(argv)
+    return main(sys.argv)

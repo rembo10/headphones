@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (C) 2005  Michael Urman
 #               2006  Lukas Lalinsky
 #               2013  Christoph Reiter
@@ -167,7 +166,10 @@ class ID3(ID3Tags, mutagen.Metadata):
             if known_frames is not None:
                 self._header._known_frames = known_frames
 
-            data = read_full(fileobj, self.size - 10)
+            size = self.size - 10
+            if self.f_extended:
+                size -= 4 + len(self._header._extdata)
+            data = read_full(fileobj, size)
             remaining_data = self._read(self._header, data)
             self._padding = len(remaining_data)
 
@@ -232,7 +234,7 @@ class ID3(ID3Tags, mutagen.Metadata):
                 if 0, ID3v1 tags will be removed.
                 if 1, ID3v1 tags will be updated but not added.
                 if 2, ID3v1 tags will be created and/or updated
-            v2 (int):
+            v2_version (int):
                 version of ID3v2 tags (3 or 4).
             v23_sep (text):
                 the separator used to join multiple text values

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2015 Christoph Reiter
 #
 # This program is free software; you can redistribute it and/or modify
@@ -14,6 +13,7 @@ http://wiki.hydrogenaud.io/index.php?title=MP3
 from __future__ import division
 from functools import partial
 from io import BytesIO
+from typing import List
 
 from mutagen._util import cdata, BitReader, iterbytes
 
@@ -356,7 +356,7 @@ class XingHeader(object):
     bytes = -1
     """Number of bytes, -1 if unknown"""
 
-    toc = []
+    toc: List[int] = []
     """List of 100 file offsets in percent encoded as 0-255. E.g. entry
     50 contains the file offset in percent at 50% play time.
     Empty if unknown.
@@ -474,7 +474,7 @@ class VBRIHeader(object):
     toc_frames = 0
     """Number of frames per table entry"""
 
-    toc = []
+    toc: List[int] = []
     """TOC"""
 
     def __init__(self, fileobj):

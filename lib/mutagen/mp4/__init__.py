@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (C) 2006  Joe Wreschnig
 #
 # This program is free software; you can redistribute it and/or modify
@@ -248,7 +247,7 @@ def _item_sort_key(key, value):
     last = len(order)
     # If there's no key-based way to distinguish, order by length.
     # If there's still no way, go by string comparison on the
-    # values, so we at least have something determinstic.
+    # values, so we at least have something deterministic.
     return (order.get(key[:4], last), len(repr(value)), repr(value))
 
 
@@ -365,8 +364,7 @@ class MP4Tags(DictProxy, Tags):
                     self.__parse_text(atom, data, implicit=False)
             except MP4MetadataError:
                 # parsing failed, save them so we can write them back
-                key = _name2key(atom.name)
-                self._failed_atoms.setdefault(key, []).append(data)
+                self._failed_atoms.setdefault(_name2key(atom.name), []).append(data)
 
     def __setitem__(self, key, value):
         if not isinstance(key, str):
@@ -521,10 +519,13 @@ class MP4Tags(DictProxy, Tags):
         fileobj.seek(atom.offset + 12)
         data = fileobj.read(atom.length - 12)
         fmt = fmt % cdata.uint_be(data[:4])
-        offsets = struct.unpack(fmt, data[4:])
-        offsets = [o + (0, delta)[offset < o] for o in offsets]
-        fileobj.seek(atom.offset + 16)
-        fileobj.write(struct.pack(fmt, *offsets))
+        try:
+            offsets = struct.unpack(fmt, data[4:])
+            offsets = [o + (0, delta)[offset < o] for o in offsets]
+            fileobj.seek(atom.offset + 16)
+            fileobj.write(struct.pack(fmt, *offsets))
+        except struct.error:
+            raise MP4MetadataError("wrong offset inside %r" % atom.name)
 
     def __update_tfhd(self, fileobj, atom, delta, offset):
         if atom.offset > offset:

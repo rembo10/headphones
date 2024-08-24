@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2014 Marcus Sundman
 #
 # This program is free software; you can redistribute it and/or modify
@@ -15,18 +14,12 @@ import os.path
 
 import mutagen
 import mutagen.id3
-from mutagen._senf import print_, argv
 
 from ._util import SignalHandler, OptionParser
 
 
 VERSION = (0, 1)
 _sig = SignalHandler()
-
-
-def printerr(*args, **kwargs):
-    kwargs.setdefault("file", sys.stderr)
-    print_(*args, **kwargs)
 
 
 class ID3OptionParser(OptionParser):
@@ -51,15 +44,15 @@ def copy(src, dst, merge, write_v1=True, excluded_tags=None, verbose=False):
     try:
         id3 = mutagen.id3.ID3(src, translate=False)
     except mutagen.id3.ID3NoHeaderError:
-        print_(u"No ID3 header found in ", src, file=sys.stderr)
+        print(u"No ID3 header found in ", src, file=sys.stderr)
         return 1
     except Exception as err:
-        print_(str(err), file=sys.stderr)
+        print(str(err), file=sys.stderr)
         return 1
 
     if verbose:
-        print_(u"File", src, u"contains:", file=sys.stderr)
-        print_(id3.pprint(), file=sys.stderr)
+        print(u"File", src, u"contains:", file=sys.stderr)
+        print(id3.pprint(), file=sys.stderr)
 
     for tag in excluded_tags:
         id3.delall(tag)
@@ -71,7 +64,7 @@ def copy(src, dst, merge, write_v1=True, excluded_tags=None, verbose=False):
             # no need to merge
             pass
         except Exception as err:
-            print_(str(err), file=sys.stderr)
+            print(str(err), file=sys.stderr)
             return 1
         else:
             for frame in id3.values():
@@ -90,12 +83,12 @@ def copy(src, dst, merge, write_v1=True, excluded_tags=None, verbose=False):
     try:
         id3.save(dst, v1=(2 if write_v1 else 0), v2_version=v2_version)
     except Exception as err:
-        print_(u"Error saving", dst, u":\n%s" % str(err),
-               file=sys.stderr)
+        print(u"Error saving", dst, u":\n%s" % str(err),
+              file=sys.stderr)
         return 1
     else:
         if verbose:
-            print_(u"Successfully saved", dst, file=sys.stderr)
+            print(u"Successfully saved", dst, file=sys.stderr)
         return 0
 
 
@@ -119,12 +112,12 @@ def main(argv):
     (src, dst) = args
 
     if not os.path.isfile(src):
-        print_(u"File not found:", src, file=sys.stderr)
+        print(u"File not found:", src, file=sys.stderr)
         parser.print_help(file=sys.stderr)
         return 1
 
     if not os.path.isfile(dst):
-        printerr(u"File not found:", dst, file=sys.stderr)
+        print(u"File not found:", dst, file=sys.stderr)
         parser.print_help(file=sys.stderr)
         return 1
 
@@ -138,4 +131,4 @@ def main(argv):
 
 def entry_point():
     _sig.init()
-    return main(argv)
+    return main(sys.argv)

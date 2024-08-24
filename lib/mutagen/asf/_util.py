@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (C) 2005-2006  Joe Wreschnig
 # Copyright (C) 2006-2007  Lukas Lalinsky
 #
@@ -8,6 +7,7 @@
 # (at your option) any later version.
 
 import struct
+from typing import List
 
 from mutagen._util import MutagenError
 
@@ -24,7 +24,7 @@ class ASFHeaderError(error):
     pass
 
 
-def guid2bytes(s):
+def guid2bytes(s: str) -> bytes:
     """Converts a GUID to the serialized bytes representation"""
 
     assert isinstance(s, str)
@@ -38,13 +38,13 @@ def guid2bytes(s):
     ])
 
 
-def bytes2guid(s):
+def bytes2guid(s: bytes) -> str:
     """Converts a serialized GUID to a text GUID"""
 
     assert isinstance(s, bytes)
 
     u = struct.unpack
-    v = []
+    v: List[int] = []
     v.extend(u("<IHH", s[:8]))
     v.extend(u(">HQ", s[8:10] + b"\x00\x00" + s[10:]))
     return "%08X-%04X-%04X-%04X-%012X" % tuple(v)
@@ -285,7 +285,7 @@ CODECS = {
     0xA10C: u"Media Foundation Spectrum Analyzer Output",
     0xA10D: u"GSM 6.10 (Full-Rate) Speech",
     0xA10E: u"GSM 6.20 (Half-Rate) Speech",
-    0xA10F: u"GSM 6.60 (Enchanced Full-Rate) Speech",
+    0xA10F: u"GSM 6.60 (Enhanced Full-Rate) Speech",
     0xA110: u"GSM 6.90 (Adaptive Multi-Rate) Speech",
     0xA111: u"GSM Adaptive Multi-Rate WideBand Speech",
     0xA112: u"Polycom G.722",

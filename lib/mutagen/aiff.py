@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (C) 2014  Evan Purkhiser
 #               2014  Ben Ockmore
 #               2019-2020  Philipp Wolfer

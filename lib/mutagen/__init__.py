@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (C) 2005  Michael Urman
 #
 # This program is free software; you can redistribute it and/or modify
@@ -23,7 +22,7 @@ from mutagen._util import MutagenError
 from mutagen._file import FileType, StreamInfo, File
 from mutagen._tags import Tags, Metadata, PaddingInfo
 
-version = (1, 45, 1)
+version = (1, 47, 1)
 """Version tuple."""
 
 version_string = ".".join(map(str, version))

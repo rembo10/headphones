@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (C) 2005-2006  Joe Wreschnig
 # Copyright (C) 2006-2007  Lukas Lalinsky
 #
@@ -8,6 +7,7 @@
 # (at your option) any later version.
 
 import struct
+from typing import Dict, Type
 
 from mutagen._util import cdata, get_size
 from mutagen._tags import PaddingInfo
@@ -19,8 +19,8 @@ from ._attrs import ASFBaseAttribute, ASFUnicodeAttribute
 class BaseObject(object):
     """Base ASF object."""
 
-    GUID = None
-    _TYPES = {}
+    GUID: bytes
+    _TYPES: "Dict[bytes, Type[BaseObject]]" = {}
 
     def __init__(self):
         self.objects = []

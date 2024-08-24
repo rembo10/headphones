@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (C) 2005-2006  Joe Wreschnig
 # Copyright (C) 2006-2007  Lukas Lalinsky
 #
@@ -74,7 +73,7 @@ class ASFInfo(StreamInfo):
         return s
 
 
-class ASFTags(list, DictMixin, Tags):
+class ASFTags(list, DictMixin, Tags):  # type: ignore
     """ASFTags()
 
     Dictionary containing ASF attributes.
@@ -148,7 +147,7 @@ class ASFTags(list, DictMixin, Tags):
             to_append.append((key, value))
 
         try:
-            del(self[key])
+            del self[key]
         except KeyError:
             pass
 

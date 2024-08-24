@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (C) 2005  Joe Wreschnig
 #
 # This program is free software; you can redistribute it and/or modify
@@ -41,6 +40,7 @@ from mutagen._util import DictMixin, cdata, delete_bytes, total_ordering, \
 
 
 def is_valid_apev2_key(key):
+    # https://wiki.hydrogenaud.io/index.php?title=APE_key
     if not isinstance(key, str):
         raise TypeError("APEv2 key must be str")
 
@@ -252,8 +252,8 @@ class _CIDictProxy(DictMixin):
 
     def __delitem__(self, key):
         lower = key.lower()
-        del(self.__casemap[lower])
-        del(self.__dict[lower])
+        del self.__casemap[lower]
+        del self.__dict[lower]
 
     def keys(self):
         return [self.__casemap.get(key, key) for key in self.__dict.keys()]
@@ -327,6 +327,10 @@ class APEv2(_CIDictProxy, Metadata):
                 key = key.decode("ascii")
             except UnicodeError as err:
                 reraise(APEBadItemError, err, sys.exc_info()[2])
+
+            if not is_valid_apev2_key(key):
+                raise APEBadItemError("%r is not a valid APEv2 key" % key)
+
             value = fileobj.read(size)
             if len(value) != size:
                 raise APEBadItemError
@@ -517,7 +521,7 @@ def APEValue(value, kind):
 
 class _APEValue(object):
 
-    kind = None
+    kind: int
     value = None
 
     def __init__(self, value, kind=None):

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (C) 2017  Borewit
 # Copyright (C) 2019-2020  Philipp Wolfer
 #
