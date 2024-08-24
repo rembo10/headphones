@@ -1,9 +1,8 @@
 """Utility."""
-from __future__ import annotations
 from functools import wraps, lru_cache
 import warnings
 import re
-from typing import Callable, Any
+from typing import Callable, Any, Optional, Tuple, List
 
 DEBUG = 0x00001
 
@@ -27,7 +26,7 @@ def lower(string: str) -> str:
 class SelectorSyntaxError(Exception):
     """Syntax error in a CSS selector."""
 
-    def __init__(self, msg: str, pattern: str | None = None, index: int | None = None) -> None:
+    def __init__(self, msg: str, pattern: Optional[str] = None, index: Optional[int] = None) -> None:
         """Initialize."""
 
         self.line = None
@@ -37,7 +36,7 @@ class SelectorSyntaxError(Exception):
         if pattern is not None and index is not None:
             # Format pattern to show line and column position
             self.context, self.line, self.col = get_pattern_context(pattern, index)
-            msg = f'{msg}\n  line {self.line}:\n{self.context}'
+            msg = '{}\n  line {}:\n{}'.format(msg, self.line, self.context)
 
         super().__init__(msg)
 
@@ -76,15 +75,15 @@ def warn_deprecated(message: str, stacklevel: int = 2) -> None:  # pragma: no co
     )
 
 
-def get_pattern_context(pattern: str, index: int) -> tuple[str, int, int]:
+def get_pattern_context(pattern: str, index: int) -> Tuple[str, int, int]:
     """Get the pattern context."""
 
     last = 0
     current_line = 1
     col = 1
-    text = []  # type: list[str]
+    text = []  # type: List[str]
     line = 1
-    offset = None  # type: int | None
+    offset = None  # type: Optional[int]
 
     # Split pattern by newline and handle the text before the newline
     for m in RE_PATTERN_LINE_SPLIT.finditer(pattern):
@@ -105,7 +104,7 @@ def get_pattern_context(pattern: str, index: int) -> tuple[str, int, int]:
             # we will render the output with just `\n`. We will still log the column
             # correctly though.
             text.append('\n')
-        text.append(f'{indent}{linetext}')
+        text.append('{}{}'.format(indent, linetext))
         if offset is not None:
             text.append('\n')
             text.append(' ' * (col + offset) + '^')

@@ -1,5 +1,4 @@
 """Meta related things."""
-from __future__ import annotations
 from collections import namedtuple
 import re
 
@@ -84,7 +83,7 @@ class Version(namedtuple("Version", ["major", "minor", "micro", "release", "pre"
         cls,
         major: int, minor: int, micro: int, release: str = "final",
         pre: int = 0, post: int = 0, dev: int = 0
-    ) -> Version:
+    ) -> "Version":
         """Validate version info."""
 
         # Ensure all parts are positive integers.
@@ -93,7 +92,7 @@ class Version(namedtuple("Version", ["major", "minor", "micro", "release", "pre"
                 raise ValueError("All version parts except 'release' should be integers.")
 
         if release not in REL_MAP:
-            raise ValueError(f"'{release}' is not a valid release type.")
+            raise ValueError("'{}' is not a valid release type.".format(release))
 
         # Ensure valid pre-release (we do not allow implicit pre-releases).
         if ".dev-candidate" < release < "final":
@@ -118,7 +117,7 @@ class Version(namedtuple("Version", ["major", "minor", "micro", "release", "pre"
             elif dev:
                 raise ValueError("Version is not a development release.")
 
-        return super().__new__(cls, major, minor, micro, release, pre, post, dev)
+        return super(Version, cls).__new__(cls, major, minor, micro, release, pre, post, dev)
 
     def _is_pre(self) -> bool:
         """Is prerelease."""
@@ -145,15 +144,15 @@ class Version(namedtuple("Version", ["major", "minor", "micro", "release", "pre"
 
         # Assemble major, minor, micro version and append `pre`, `post`, or `dev` if needed..
         if self.micro == 0:
-            ver = f"{self.major}.{self.minor}"
+            ver = "{}.{}".format(self.major, self.minor)
         else:
-            ver = f"{self.major}.{self.minor}.{self.micro}"
+            ver = "{}.{}.{}".format(self.major, self.minor, self.micro)
         if self._is_pre():
-            ver += f'{REL_MAP[self.release]}{self.pre}'
+            ver += '{}{}'.format(REL_MAP[self.release], self.pre)
         if self._is_post():
-            ver += f".post{self.post}"
+            ver += ".post{}".format(self.post)
         if self._is_dev():
-            ver += f".dev{self.dev}"
+            ver += ".dev{}".format(self.dev)
 
         return ver
 
@@ -164,7 +163,7 @@ def parse_version(ver: str) -> Version:
     m = RE_VER.match(ver)
 
     if m is None:
-        raise ValueError(f"'{ver}' is not a valid version")
+        raise ValueError("'{}' is not a valid version".format(ver))
 
     # Handle major, minor, micro
     major = int(m.group('major'))
@@ -193,5 +192,5 @@ def parse_version(ver: str) -> Version:
     return Version(major, minor, micro, release, pre, post, dev)
 
 
-__version_info__ = Version(2, 6, 0, "final")
+__version_info__ = Version(2, 3, 1, "final")
 __version__ = __version_info__._get_canonical()
