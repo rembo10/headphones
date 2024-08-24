@@ -1,5 +1,5 @@
 # This file is part of beets.
-# Copyright 2016-2019, Adrian Sampson.
+# Copyright 2024, Lars Kruse
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -12,17 +12,8 @@
 # The above copyright notice and this permission notice shall be
 # included in all copies or substantial portions of the Software.
 
-
-import confuse
-
-import warnings
-warnings.warn("beets.util.confit is deprecated; use confuse instead")
-
-# Import everything from the confuse module into this module.
-for key, value in confuse.__dict__.items():
-    if key not in ['__name__']:
-        globals()[key] = value
-
-
-# Cleanup namespace.
-del key, value, warnings, confuse
+"""This module contains components of beets' test environment, which
+may be of use for testing procedures of external libraries or programs.
+For example the 'TestHelper' class may be useful for creating an
+in-memory beets library filled with a few example items.
+"""

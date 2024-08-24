@@ -23,46 +23,44 @@ from beets import util
 from beets.plugins import BeetsPlugin
 from beets.ui import Subcommand, print_
 
-__author__ = 'https://github.com/MrNuggelz'
+__author__ = "https://github.com/MrNuggelz"
 
 
 class Unimported(BeetsPlugin):
-
     def __init__(self):
         super().__init__()
-        self.config.add(
-            {
-                'ignore_extensions': []
-            }
-        )
+        self.config.add({"ignore_extensions": [], "ignore_subdirectories": []})
 
     def commands(self):
         def print_unimported(lib, opts, args):
             ignore_exts = [
-                ('.' + x).encode()
+                ("." + x).encode()
                 for x in self.config["ignore_extensions"].as_str_seq()
             ]
             ignore_dirs = [
                 os.path.join(lib.directory, x.encode())
                 for x in self.config["ignore_subdirectories"].as_str_seq()
             ]
-            in_folder = {
-                os.path.join(r, file)
-                for r, d, f in os.walk(lib.directory)
-                for file in f
-                if not any(
-                    [file.endswith(ext) for ext in ignore_exts]
-                    + [r in ignore_dirs]
-                )
-            }
+            in_folder = set()
+            for root, _, files in os.walk(lib.directory):
+                # do not traverse if root is a child of an ignored directory
+                if any(root.startswith(ignored) for ignored in ignore_dirs):
+                    continue
+                for file in files:
+                    # ignore files with ignored extensions
+                    if any(file.endswith(ext) for ext in ignore_exts):
+                        continue
+                    in_folder.add(os.path.join(root, file))
+
             in_library = {x.path for x in lib.items()}
             art_files = {x.artpath for x in lib.albums()}
             for f in in_folder - in_library - art_files:
                 print_(util.displayable_path(f))
 
         unimported = Subcommand(
-            'unimported',
-            help='list all files in the library folder which are not listed'
-                 ' in the beets library database')
+            "unimported",
+            help="list all files in the library folder which are not listed"
+            " in the beets library database",
+        )
         unimported.func = print_unimported
         return [unimported]

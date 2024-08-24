@@ -19,32 +19,53 @@ releases and tracks.
 
 import datetime
 import re
-from munkres import Munkres
 from collections import namedtuple
+from typing import (
+    Any,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Sequence,
+    Tuple,
+    TypeVar,
+    Union,
+    cast,
+)
 
-from beets import logging
-from beets import plugins
-from beets import config
+from munkres import Munkres
+
+from beets import config, logging, plugins
+from beets.autotag import (
+    AlbumInfo,
+    AlbumMatch,
+    Distance,
+    TrackInfo,
+    TrackMatch,
+    hooks,
+)
+from beets.library import Item
 from beets.util import plurality
-from beets.autotag import hooks
 from beets.util.enumeration import OrderedEnum
 
 # Artist signals that indicate "various artists". These are used at the
 # album level to determine whether a given release is likely a VA
 # release and also on the track level to to remove the penalty for
 # differing artists.
-VA_ARTISTS = ('', 'various artists', 'various', 'va', 'unknown')
+VA_ARTISTS = ("", "various artists", "various", "va", "unknown")
 
 # Global logger.
-log = logging.getLogger('beets')
+log = logging.getLogger("beets")
 
 
 # Recommendation enumeration.
+
 
 class Recommendation(OrderedEnum):
     """Indicates a qualitative suggestion to the user about what should
     be done with a given match.
     """
+
     none = 0
     low = 1
     medium = 2
@@ -55,12 +76,15 @@ class Recommendation(OrderedEnum):
 # consists of a list of possible candidates (i.e., AlbumInfo or TrackInfo
 # objects) and a recommendation value.
 
-Proposal = namedtuple('Proposal', ('candidates', 'recommendation'))
+Proposal = namedtuple("Proposal", ("candidates", "recommendation"))
 
 
 # Primary matching functionality.
 
-def current_metadata(items):
+
+def current_metadata(
+    items: Iterable[Item],
+) -> Tuple[Dict[str, Any], Dict[str, Any]]:
     """Extract the likely current metadata for an album given a list of its
     items. Return two dictionaries:
      - The most common value for each field.
@@ -70,22 +94,36 @@ def current_metadata(items):
 
     likelies = {}
     consensus = {}
-    fields = ['artist', 'album', 'albumartist', 'year', 'disctotal',
-              'mb_albumid', 'label', 'catalognum', 'country', 'media',
-              'albumdisambig']
+    fields = [
+        "artist",
+        "album",
+        "albumartist",
+        "year",
+        "disctotal",
+        "mb_albumid",
+        "label",
+        "barcode",
+        "catalognum",
+        "country",
+        "media",
+        "albumdisambig",
+    ]
     for field in fields:
         values = [item[field] for item in items if item]
         likelies[field], freq = plurality(values)
-        consensus[field] = (freq == len(values))
+        consensus[field] = freq == len(values)
 
     # If there's an album artist consensus, use this for the artist.
-    if consensus['albumartist'] and likelies['albumartist']:
-        likelies['artist'] = likelies['albumartist']
+    if consensus["albumartist"] and likelies["albumartist"]:
+        likelies["artist"] = likelies["albumartist"]
 
     return likelies, consensus
 
 
-def assign_items(items, tracks):
+def assign_items(
+    items: Sequence[Item],
+    tracks: Sequence[TrackInfo],
+) -> Tuple[Dict[Item, TrackInfo], List[Item], List[TrackInfo]]:
     """Given a list of Items and a list of TrackInfo objects, find the
     best mapping between them. Returns a mapping from Items to TrackInfo
     objects, a set of extra Items, and a set of extra TrackInfo
@@ -93,17 +131,17 @@ def assign_items(items, tracks):
     of objects of the two types.
     """
     # Construct the cost matrix.
-    costs = []
+    costs: List[List[Distance]] = []
     for item in items:
         row = []
-        for i, track in enumerate(tracks):
+        for track in tracks:
             row.append(track_distance(item, track))
         costs.append(row)
 
     # Find a minimum-cost bipartite matching.
-    log.debug('Computing track assignment...')
+    log.debug("Computing track assignment...")
     matching = Munkres().compute(costs)
-    log.debug('...done.')
+    log.debug("...done.")
 
     # Produce the output matching.
     mapping = {items[i]: tracks[j] for (i, j) in matching}
@@ -114,14 +152,18 @@ def assign_items(items, tracks):
     return mapping, extra_items, extra_tracks
 
 
-def track_index_changed(item, track_info):
+def track_index_changed(item: Item, track_info: TrackInfo) -> bool:
     """Returns True if the item and track info index is different. Tolerates
     per disc and per release numbering.
     """
     return item.track not in (track_info.medium_index, track_info.index)
 
 
-def track_distance(item, track_info, incl_artist=False):
+def track_distance(
+    item: Item,
+    track_info: TrackInfo,
+    incl_artist: bool = False,
+) -> Distance:
     """Determines the significance of a track metadata change. Returns a
     Distance object. `incl_artist` indicates that a distance component should
     be included for the track artist (i.e., for various-artist releases).
@@ -130,26 +172,37 @@ def track_distance(item, track_info, incl_artist=False):
 
     # Length.
     if track_info.length:
-        diff = abs(item.length - track_info.length) - \
-            config['match']['track_length_grace'].as_number()
-        dist.add_ratio('track_length', diff,
-                       config['match']['track_length_max'].as_number())
+        item_length = cast(float, item.length)
+        track_length_grace = cast(
+            Union[float, int],
+            config["match"]["track_length_grace"].as_number(),
+        )
+        track_length_max = cast(
+            Union[float, int],
+            config["match"]["track_length_max"].as_number(),
+        )
+
+        diff = abs(item_length - track_info.length) - track_length_grace
+        dist.add_ratio("track_length", diff, track_length_max)
 
     # Title.
-    dist.add_string('track_title', item.title, track_info.title)
+    dist.add_string("track_title", item.title, track_info.title)
 
     # Artist. Only check if there is actually an artist in the track data.
-    if incl_artist and track_info.artist and \
-            item.artist.lower() not in VA_ARTISTS:
-        dist.add_string('track_artist', item.artist, track_info.artist)
+    if (
+        incl_artist
+        and track_info.artist
+        and item.artist.lower() not in VA_ARTISTS
+    ):
+        dist.add_string("track_artist", item.artist, track_info.artist)
 
     # Track index.
     if track_info.index and item.track:
-        dist.add_expr('track_index', track_index_changed(item, track_info))
+        dist.add_expr("track_index", track_index_changed(item, track_info))
 
     # Track ID.
     if item.mb_trackid:
-        dist.add_expr('track_id', item.mb_trackid != track_info.track_id)
+        dist.add_expr("track_id", item.mb_trackid != track_info.track_id)
 
     # Plugins.
     dist.update(plugins.track_distance(item, track_info))
@@ -157,7 +210,11 @@ def track_distance(item, track_info, incl_artist=False):
     return dist
 
 
-def distance(items, album_info, mapping):
+def distance(
+    items: Sequence[Item],
+    album_info: AlbumInfo,
+    mapping: Dict[Item, TrackInfo],
+) -> Distance:
     """Determines how "significant" an album metadata change would be.
     Returns a Distance object. `album_info` is an AlbumInfo object
     reflecting the album to be compared. `items` is a sequence of all
@@ -172,90 +229,96 @@ def distance(items, album_info, mapping):
 
     # Artist, if not various.
     if not album_info.va:
-        dist.add_string('artist', likelies['artist'], album_info.artist)
+        dist.add_string("artist", likelies["artist"], album_info.artist)
 
     # Album.
-    dist.add_string('album', likelies['album'], album_info.album)
+    dist.add_string("album", likelies["album"], album_info.album)
 
     # Current or preferred media.
     if album_info.media:
         # Preferred media options.
-        patterns = config['match']['preferred']['media'].as_str_seq()
-        options = [re.compile(r'(\d+x)?(%s)' % pat, re.I) for pat in patterns]
+        patterns = config["match"]["preferred"]["media"].as_str_seq()
+        patterns = cast(Sequence[str], patterns)
+        options = [re.compile(r"(\d+x)?(%s)" % pat, re.I) for pat in patterns]
         if options:
-            dist.add_priority('media', album_info.media, options)
+            dist.add_priority("media", album_info.media, options)
         # Current media.
-        elif likelies['media']:
-            dist.add_equality('media', album_info.media, likelies['media'])
+        elif likelies["media"]:
+            dist.add_equality("media", album_info.media, likelies["media"])
 
     # Mediums.
-    if likelies['disctotal'] and album_info.mediums:
-        dist.add_number('mediums', likelies['disctotal'], album_info.mediums)
+    if likelies["disctotal"] and album_info.mediums:
+        dist.add_number("mediums", likelies["disctotal"], album_info.mediums)
 
     # Prefer earliest release.
-    if album_info.year and config['match']['preferred']['original_year']:
+    if album_info.year and config["match"]["preferred"]["original_year"]:
         # Assume 1889 (earliest first gramophone discs) if we don't know the
         # original year.
         original = album_info.original_year or 1889
         diff = abs(album_info.year - original)
         diff_max = abs(datetime.date.today().year - original)
-        dist.add_ratio('year', diff, diff_max)
+        dist.add_ratio("year", diff, diff_max)
     # Year.
-    elif likelies['year'] and album_info.year:
-        if likelies['year'] in (album_info.year, album_info.original_year):
+    elif likelies["year"] and album_info.year:
+        if likelies["year"] in (album_info.year, album_info.original_year):
             # No penalty for matching release or original year.
-            dist.add('year', 0.0)
+            dist.add("year", 0.0)
         elif album_info.original_year:
             # Prefer matchest closest to the release year.
-            diff = abs(likelies['year'] - album_info.year)
-            diff_max = abs(datetime.date.today().year -
-                           album_info.original_year)
-            dist.add_ratio('year', diff, diff_max)
+            diff = abs(likelies["year"] - album_info.year)
+            diff_max = abs(
+                datetime.date.today().year - album_info.original_year
+            )
+            dist.add_ratio("year", diff, diff_max)
         else:
             # Full penalty when there is no original year.
-            dist.add('year', 1.0)
+            dist.add("year", 1.0)
 
     # Preferred countries.
-    patterns = config['match']['preferred']['countries'].as_str_seq()
+    patterns = config["match"]["preferred"]["countries"].as_str_seq()
+    patterns = cast(Sequence[str], patterns)
     options = [re.compile(pat, re.I) for pat in patterns]
     if album_info.country and options:
-        dist.add_priority('country', album_info.country, options)
+        dist.add_priority("country", album_info.country, options)
     # Country.
-    elif likelies['country'] and album_info.country:
-        dist.add_string('country', likelies['country'], album_info.country)
+    elif likelies["country"] and album_info.country:
+        dist.add_string("country", likelies["country"], album_info.country)
 
     # Label.
-    if likelies['label'] and album_info.label:
-        dist.add_string('label', likelies['label'], album_info.label)
+    if likelies["label"] and album_info.label:
+        dist.add_string("label", likelies["label"], album_info.label)
 
     # Catalog number.
-    if likelies['catalognum'] and album_info.catalognum:
-        dist.add_string('catalognum', likelies['catalognum'],
-                        album_info.catalognum)
+    if likelies["catalognum"] and album_info.catalognum:
+        dist.add_string(
+            "catalognum", likelies["catalognum"], album_info.catalognum
+        )
 
     # Disambiguation.
-    if likelies['albumdisambig'] and album_info.albumdisambig:
-        dist.add_string('albumdisambig', likelies['albumdisambig'],
-                        album_info.albumdisambig)
+    if likelies["albumdisambig"] and album_info.albumdisambig:
+        dist.add_string(
+            "albumdisambig", likelies["albumdisambig"], album_info.albumdisambig
+        )
 
     # Album ID.
-    if likelies['mb_albumid']:
-        dist.add_equality('album_id', likelies['mb_albumid'],
-                          album_info.album_id)
+    if likelies["mb_albumid"]:
+        dist.add_equality(
+            "album_id", likelies["mb_albumid"], album_info.album_id
+        )
 
     # Tracks.
     dist.tracks = {}
     for item, track in mapping.items():
         dist.tracks[track] = track_distance(item, track, album_info.va)
-        dist.add('tracks', dist.tracks[track].distance)
+        dist.add("tracks", dist.tracks[track].distance)
 
     # Missing tracks.
-    for i in range(len(album_info.tracks) - len(mapping)):
-        dist.add('missing_tracks', 1.0)
+    for _ in range(len(album_info.tracks) - len(mapping)):
+        dist.add("missing_tracks", 1.0)
 
     # Unmatched tracks.
-    for i in range(len(items) - len(mapping)):
-        dist.add('unmatched_tracks', 1.0)
+    for _ in range(len(items) - len(mapping)):
+        dist.add("unmatched_tracks", 1.0)
 
     # Plugins.
     dist.update(plugins.album_distance(items, album_info, mapping))
@@ -263,7 +326,7 @@ def distance(items, album_info, mapping):
     return dist
 
 
-def match_by_id(items):
+def match_by_id(items: Iterable[Item]):
     """If the items are tagged with a MusicBrainz album ID, returns an
     AlbumInfo object for the corresponding album. Otherwise, returns
     None.
@@ -274,20 +337,22 @@ def match_by_id(items):
     try:
         first = next(albumids)
     except StopIteration:
-        log.debug('No album ID found.')
+        log.debug("No album ID found.")
         return None
 
     # Is there a consensus on the MB album ID?
     for other in albumids:
         if other != first:
-            log.debug('No album ID consensus.')
+            log.debug("No album ID consensus.")
             return None
     # If all album IDs are equal, look up the album.
-    log.debug('Searching for discovered album ID: {0}', first)
+    log.debug("Searching for discovered album ID: {0}", first)
     return hooks.album_for_mbid(first)
 
 
-def _recommendation(results):
+def _recommendation(
+    results: Sequence[Union[AlbumMatch, TrackMatch]],
+) -> Recommendation:
     """Given a sorted list of AlbumMatch or TrackMatch objects, return a
     recommendation based on the results' distances.
 
@@ -301,17 +366,19 @@ def _recommendation(results):
 
     # Basic distance thresholding.
     min_dist = results[0].distance
-    if min_dist < config['match']['strong_rec_thresh'].as_number():
+    if min_dist < config["match"]["strong_rec_thresh"].as_number():
         # Strong recommendation level.
         rec = Recommendation.strong
-    elif min_dist <= config['match']['medium_rec_thresh'].as_number():
+    elif min_dist <= config["match"]["medium_rec_thresh"].as_number():
         # Medium recommendation level.
         rec = Recommendation.medium
     elif len(results) == 1:
         # Only a single candidate.
         rec = Recommendation.low
-    elif results[1].distance - min_dist >= \
-            config['match']['rec_gap_thresh'].as_number():
+    elif (
+        results[1].distance - min_dist
+        >= config["match"]["rec_gap_thresh"].as_number()
+    ):
         # Gap between first two candidates is large.
         rec = Recommendation.low
     else:
@@ -324,48 +391,60 @@ def _recommendation(results):
     if isinstance(results[0], hooks.AlbumMatch):
         for track_dist in min_dist.tracks.values():
             keys.update(list(track_dist.keys()))
-    max_rec_view = config['match']['max_rec']
+    max_rec_view = config["match"]["max_rec"]
     for key in keys:
         if key in list(max_rec_view.keys()):
-            max_rec = max_rec_view[key].as_choice({
-                'strong': Recommendation.strong,
-                'medium': Recommendation.medium,
-                'low': Recommendation.low,
-                'none': Recommendation.none,
-            })
+            max_rec = max_rec_view[key].as_choice(
+                {
+                    "strong": Recommendation.strong,
+                    "medium": Recommendation.medium,
+                    "low": Recommendation.low,
+                    "none": Recommendation.none,
+                }
+            )
             rec = min(rec, max_rec)
 
     return rec
 
 
-def _sort_candidates(candidates):
+AnyMatch = TypeVar("AnyMatch", TrackMatch, AlbumMatch)
+
+
+def _sort_candidates(candidates: Iterable[AnyMatch]) -> Sequence[AnyMatch]:
     """Sort candidates by distance."""
     return sorted(candidates, key=lambda match: match.distance)
 
 
-def _add_candidate(items, results, info):
+def _add_candidate(
+    items: Sequence[Item],
+    results: Dict[Any, AlbumMatch],
+    info: AlbumInfo,
+):
     """Given a candidate AlbumInfo object, attempt to add the candidate
     to the output dictionary of AlbumMatch objects. This involves
     checking the track count, ordering the items, checking for
     duplicates, and calculating the distance.
     """
-    log.debug('Candidate: {0} - {1} ({2})',
-              info.artist, info.album, info.album_id)
+    log.debug(
+        "Candidate: {0} - {1} ({2})", info.artist, info.album, info.album_id
+    )
 
     # Discard albums with zero tracks.
     if not info.tracks:
-        log.debug('No tracks.')
+        log.debug("No tracks.")
         return
 
-    # Don't duplicate.
-    if info.album_id in results:
-        log.debug('Duplicate.')
+    # Prevent duplicates.
+    if info.album_id and info.album_id in results:
+        log.debug("Duplicate.")
         return
 
     # Discard matches without required tags.
-    for req_tag in config['match']['required'].as_str_seq():
+    for req_tag in cast(
+        Sequence[str], config["match"]["required"].as_str_seq()
+    ):
         if getattr(info, req_tag) is None:
-            log.debug('Ignored. Missing required tag: {0}', req_tag)
+            log.debug("Ignored. Missing required tag: {0}", req_tag)
             return
 
     # Find mapping between the items and the track info.
@@ -376,18 +455,24 @@ def _add_candidate(items, results, info):
 
     # Skip matches with ignored penalties.
     penalties = [key for key, _ in dist]
-    for penalty in config['match']['ignored'].as_str_seq():
+    ignored = cast(Sequence[str], config["match"]["ignored"].as_str_seq())
+    for penalty in ignored:
         if penalty in penalties:
-            log.debug('Ignored. Penalty: {0}', penalty)
+            log.debug("Ignored. Penalty: {0}", penalty)
             return
 
-    log.debug('Success. Distance: {0}', dist)
-    results[info.album_id] = hooks.AlbumMatch(dist, info, mapping,
-                                              extra_items, extra_tracks)
+    log.debug("Success. Distance: {0}", dist)
+    results[info.album_id] = hooks.AlbumMatch(
+        dist, info, mapping, extra_items, extra_tracks
+    )
 
 
-def tag_album(items, search_artist=None, search_album=None,
-              search_ids=[]):
+def tag_album(
+    items,
+    search_artist: Optional[str] = None,
+    search_album: Optional[str] = None,
+    search_ids: List[str] = [],
+) -> Tuple[str, str, Proposal]:
     """Return a tuple of the current artist name, the current album
     name, and a `Proposal` containing `AlbumMatch` candidates.
 
@@ -407,20 +492,19 @@ def tag_album(items, search_artist=None, search_album=None,
     """
     # Get current metadata.
     likelies, consensus = current_metadata(items)
-    cur_artist = likelies['artist']
-    cur_album = likelies['album']
-    log.debug('Tagging {0} - {1}', cur_artist, cur_album)
+    cur_artist = cast(str, likelies["artist"])
+    cur_album = cast(str, likelies["album"])
+    log.debug("Tagging {0} - {1}", cur_artist, cur_album)
 
-    # The output result (distance, AlbumInfo) tuples (keyed by MB album
-    # ID).
-    candidates = {}
+    # The output result, keys are the MB album ID.
+    candidates: Dict[Any, AlbumMatch] = {}
 
     # Search by explicit ID.
     if search_ids:
         for search_id in search_ids:
-            log.debug('Searching for album ID: {0}', search_id)
-            for id_candidate in hooks.albums_for_id(search_id):
-                _add_candidate(items, candidates, id_candidate)
+            log.debug("Searching for album ID: {0}", search_id)
+            for album_info_for_id in hooks.albums_for_id(search_id):
+                _add_candidate(items, candidates, album_info_for_id)
 
     # Use existing metadata or text search.
     else:
@@ -429,51 +513,58 @@ def tag_album(items, search_artist=None, search_album=None,
         if id_info:
             _add_candidate(items, candidates, id_info)
             rec = _recommendation(list(candidates.values()))
-            log.debug('Album ID match recommendation is {0}', rec)
-            if candidates and not config['import']['timid']:
+            log.debug("Album ID match recommendation is {0}", rec)
+            if candidates and not config["import"]["timid"]:
                 # If we have a very good MBID match, return immediately.
                 # Otherwise, this match will compete against metadata-based
                 # matches.
                 if rec == Recommendation.strong:
-                    log.debug('ID match.')
-                    return cur_artist, cur_album, \
-                        Proposal(list(candidates.values()), rec)
+                    log.debug("ID match.")
+                    return (
+                        cur_artist,
+                        cur_album,
+                        Proposal(list(candidates.values()), rec),
+                    )
 
         # Search terms.
         if not (search_artist and search_album):
             # No explicit search terms -- use current metadata.
             search_artist, search_album = cur_artist, cur_album
-        log.debug('Search terms: {0} - {1}', search_artist, search_album)
+        log.debug("Search terms: {0} - {1}", search_artist, search_album)
 
         extra_tags = None
-        if config['musicbrainz']['extra_tags']:
-            tag_list = config['musicbrainz']['extra_tags'].get()
+        if config["musicbrainz"]["extra_tags"]:
+            tag_list = config["musicbrainz"]["extra_tags"].get()
             extra_tags = {k: v for (k, v) in likelies.items() if k in tag_list}
-            log.debug('Additional search terms: {0}', extra_tags)
+            log.debug("Additional search terms: {0}", extra_tags)
 
         # Is this album likely to be a "various artist" release?
-        va_likely = ((not consensus['artist']) or
-                     (search_artist.lower() in VA_ARTISTS) or
-                     any(item.comp for item in items))
-        log.debug('Album might be VA: {0}', va_likely)
+        va_likely = (
+            (not consensus["artist"])
+            or (search_artist.lower() in VA_ARTISTS)
+            or any(item.comp for item in items)
+        )
+        log.debug("Album might be VA: {0}", va_likely)
 
         # Get the results from the data sources.
-        for matched_candidate in hooks.album_candidates(items,
-                                                        search_artist,
-                                                        search_album,
-                                                        va_likely,
-                                                        extra_tags):
+        for matched_candidate in hooks.album_candidates(
+            items, search_artist, search_album, va_likely, extra_tags
+        ):
             _add_candidate(items, candidates, matched_candidate)
 
-    log.debug('Evaluating {0} candidates.', len(candidates))
+    log.debug("Evaluating {0} candidates.", len(candidates))
     # Sort and get the recommendation.
-    candidates = _sort_candidates(candidates.values())
-    rec = _recommendation(candidates)
-    return cur_artist, cur_album, Proposal(candidates, rec)
+    candidates_sorted = _sort_candidates(candidates.values())
+    rec = _recommendation(candidates_sorted)
+    return cur_artist, cur_album, Proposal(candidates_sorted, rec)
 
 
-def tag_item(item, search_artist=None, search_title=None,
-             search_ids=[]):
+def tag_item(
+    item,
+    search_artist: Optional[str] = None,
+    search_title: Optional[str] = None,
+    search_ids: Optional[List[str]] = None,
+) -> Proposal:
     """Find metadata for a single track. Return a `Proposal` consisting
     of `TrackMatch` objects.
 
@@ -485,26 +576,31 @@ def tag_item(item, search_artist=None, search_title=None,
     # Holds candidates found so far: keys are MBIDs; values are
     # (distance, TrackInfo) pairs.
     candidates = {}
+    rec: Optional[Recommendation] = None
 
     # First, try matching by MusicBrainz ID.
     trackids = search_ids or [t for t in [item.mb_trackid] if t]
     if trackids:
         for trackid in trackids:
-            log.debug('Searching for track ID: {0}', trackid)
+            log.debug("Searching for track ID: {0}", trackid)
             for track_info in hooks.tracks_for_id(trackid):
                 dist = track_distance(item, track_info, incl_artist=True)
-                candidates[track_info.track_id] = \
-                    hooks.TrackMatch(dist, track_info)
+                candidates[track_info.track_id] = hooks.TrackMatch(
+                    dist, track_info
+                )
                 # If this is a good match, then don't keep searching.
                 rec = _recommendation(_sort_candidates(candidates.values()))
-                if rec == Recommendation.strong and \
-                        not config['import']['timid']:
-                    log.debug('Track ID match.')
+                if (
+                    rec == Recommendation.strong
+                    and not config["import"]["timid"]
+                ):
+                    log.debug("Track ID match.")
                     return Proposal(_sort_candidates(candidates.values()), rec)
 
     # If we're searching by ID, don't proceed.
     if search_ids:
         if candidates:
+            assert rec is not None
             return Proposal(_sort_candidates(candidates.values()), rec)
         else:
             return Proposal([], Recommendation.none)
@@ -512,7 +608,7 @@ def tag_item(item, search_artist=None, search_title=None,
     # Search terms.
     if not (search_artist and search_title):
         search_artist, search_title = item.artist, item.title
-    log.debug('Item search terms: {0} - {1}', search_artist, search_title)
+    log.debug("Item search terms: {0} - {1}", search_artist, search_title)
 
     # Get and evaluate candidate metadata.
     for track_info in hooks.item_candidates(item, search_artist, search_title):
@@ -520,7 +616,7 @@ def tag_item(item, search_artist=None, search_title=None,
         candidates[track_info.track_id] = hooks.TrackMatch(dist, track_info)
 
     # Sort by distance and return with recommendation.
-    log.debug('Found {0} candidates.', len(candidates))
-    candidates = _sort_candidates(candidates.values())
-    rec = _recommendation(candidates)
-    return Proposal(candidates, rec)
+    log.debug("Found {0} candidates.", len(candidates))
+    candidates_sorted = _sort_candidates(candidates.values())
+    rec = _recommendation(candidates_sorted)
+    return Proposal(candidates_sorted, rec)
