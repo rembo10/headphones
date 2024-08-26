@@ -1590,9 +1590,9 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
         if not orpheusobj or not orpheusobj.logged_in():
             try:
                 logger.info("Attempting to log in to Orpheus.network...")
-                orpheusobj = gazelleapi.GazelleAPI(headphones.CONFIG.ORPHEUS_USERNAME,
-                                                headphones.CONFIG.ORPHEUS_PASSWORD,
-                                                headphones.CONFIG.ORPHEUS_URL)
+                orpheusobj = gazelleapi.GazelleAPI(username=headphones.CONFIG.ORPHEUS_USERNAME,
+                                                password=headphones.CONFIG.ORPHEUS_PASSWORD,
+                                                url=headphones.CONFIG.ORPHEUS_URL)
                 orpheusobj._login()
             except Exception as e:
                 orpheusobj = None
@@ -1726,9 +1726,8 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
         if not redobj or not redobj.logged_in():
             try:
                 logger.info("Attempting to log in to Redacted...")
-                redobj = gazelleapi.GazelleAPI(headphones.CONFIG.REDACTED_USERNAME,
-                                                headphones.CONFIG.REDACTED_PASSWORD,
-                                                providerurl)
+                redobj = gazelleapi.GazelleAPI(apikey=headphones.CONFIG.REDACTED_APIKEY,
+                                                url=providerurl)
                 redobj._login()
             except Exception as e:
                 redobj = None
