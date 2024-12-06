@@ -23,6 +23,9 @@ from headphones import logger
 import feedparser
 import headphones
 import headphones.lock
+from bs4.builder import XMLParsedAsHTMLWarning
+import warnings
+warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
 
 
 # Disable SSL certificate warnings. We have our own handling
