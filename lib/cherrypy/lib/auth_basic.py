@@ -33,7 +33,9 @@ __date__ = 'April 2009'
 
 
 def checkpassword_dict(user_password_dict):
-    """Returns a checkpassword function which checks credentials
+    """Check credentials against a dictionary.
+
+    Returns a checkpassword function which checks credentials
     against a dictionary of the form: {username : password}.
 
     If you want a simple dictionary-based authentication scheme, use
@@ -48,7 +50,9 @@ def checkpassword_dict(user_password_dict):
 
 
 def basic_auth(realm, checkpassword, debug=False, accept_charset='utf-8'):
-    """A CherryPy tool which hooks at before_handler to perform
+    """Perform basic auth.
+
+    A CherryPy tool which hooks at before_handler to perform
     HTTP Basic Access Authentication, as specified in :rfc:`2617`
     and :rfc:`7617`.
 
@@ -69,7 +73,6 @@ def basic_auth(realm, checkpassword, debug=False, accept_charset='utf-8'):
         returns True, else it returns False.
 
     """
-
     fallback_charset = 'ISO-8859-1'
 
     if '"' in realm:

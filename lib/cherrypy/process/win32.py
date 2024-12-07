@@ -17,10 +17,12 @@ class ConsoleCtrlHandler(plugins.SimplePlugin):
     """A WSPBus plugin for handling Win32 console events (like Ctrl-C)."""
 
     def __init__(self, bus):
+        """Initialize the console control handler."""
         self.is_set = False
         plugins.SimplePlugin.__init__(self, bus)
 
     def start(self):
+        """Register handling of the console control events."""
         if self.is_set:
             self.bus.log('Handler for console events already set.', level=20)
             return
@@ -34,6 +36,7 @@ class ConsoleCtrlHandler(plugins.SimplePlugin):
             self.is_set = True
 
     def stop(self):
+        """Unregister the console control handlers."""
         if not self.is_set:
             self.bus.log('Handler for console events already off.', level=20)
             return
@@ -78,6 +81,7 @@ class Win32Bus(wspbus.Bus):
     """
 
     def __init__(self):
+        """Initialize a Win32 bus implementation."""
         self.events = {}
         wspbus.Bus.__init__(self)
 
@@ -94,10 +98,12 @@ class Win32Bus(wspbus.Bus):
 
     @property
     def state(self):
+        """The bus state."""
         return self._state
 
     @state.setter
     def state(self, value):
+        """Set the bus state."""
         self._state = value
         event = self._get_state_event(value)
         win32event.PulseEvent(event)
@@ -144,6 +150,7 @@ control_codes = _ControlCodes({'graceful': 138})
 
 
 def signal_child(service, command):
+    """Send a control command to a service."""
     if command == 'stop':
         win32serviceutil.StopService(service)
     elif command == 'restart':
@@ -165,16 +172,19 @@ class PyWebService(win32serviceutil.ServiceFramework):
     _svc_description_ = 'Python Web Service'
 
     def SvcDoRun(self):
+        """Start the service."""
         from cherrypy import process
         process.bus.start()
         process.bus.block()
 
     def SvcStop(self):
+        """Stop the service."""
         from cherrypy import process
         self.ReportServiceStatus(win32service.SERVICE_STOP_PENDING)
         process.bus.exit()
 
     def SvcOther(self, control):
+        """Send a command to the service."""
         from cherrypy import process
         process.bus.publish(control_codes.key_for(control))
 

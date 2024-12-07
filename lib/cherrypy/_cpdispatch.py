@@ -25,6 +25,7 @@ class PageHandler(object):
     """Callable which sets response.body."""
 
     def __init__(self, callable, *args, **kwargs):
+        """Initialize the page handler."""
         self.callable = callable
         self.args = args
         self.kwargs = kwargs
@@ -36,6 +37,7 @@ class PageHandler(object):
 
     @args.setter
     def args(self, args):
+        """Set the request arguments in order."""
         cherrypy.serving.request.args = args
         return cherrypy.serving.request.args
 
@@ -46,10 +48,12 @@ class PageHandler(object):
 
     @kwargs.setter
     def kwargs(self, kwargs):
+        """Set the named request keyword arguments as :class:`dict`."""
         cherrypy.serving.request.kwargs = kwargs
         return cherrypy.serving.request.kwargs
 
     def __call__(self):
+        """Invoke an HTTP handler callable for :class:`PageHandler`."""
         try:
             return self.callable(*self.args, **self.kwargs)
         except TypeError:
@@ -203,15 +207,18 @@ try:
     import inspect
 except ImportError:
     def test_callable_spec(callable, args, kwargs):  # noqa: F811
+        """Do nothing as a no-op."""
         return None
 else:
     def getargspec(callable):
+        """Get argument specification using :mod:`inspect`."""
         return inspect.getfullargspec(callable)[:4]
 
 
 class LateParamPageHandler(PageHandler):
+    """Page handler callable with delayed request parameters binding.
 
-    """When passing cherrypy.request.params to the page handler, we do not
+    When passing ``cherrypy.request.params`` to the page handler, we do not
     want to capture that dict too early; we want to give tools like the
     decoding tool a chance to modify the params dict in-between the lookup
     of the handler and the actual calling of the handler. This subclass
@@ -221,7 +228,11 @@ class LateParamPageHandler(PageHandler):
 
     @property
     def kwargs(self):
-        """Page handler kwargs (with cherrypy.request.params copied in)."""
+        """Page handler keyword arguments.
+
+        The returned value contains data merged in
+        from ``cherrypy.request.params``.
+        """
         kwargs = cherrypy.serving.request.params.copy()
         if self._kwargs:
             kwargs.update(self._kwargs)
@@ -229,6 +240,7 @@ class LateParamPageHandler(PageHandler):
 
     @kwargs.setter
     def kwargs(self, kwargs):
+        """Set the named request keyword arguments as :class:`dict`."""
         cherrypy.serving.request.kwargs = kwargs
         self._kwargs = kwargs
 
@@ -238,6 +250,7 @@ if sys.version_info < (3, 0):
         string.punctuation, '_' * len(string.punctuation))
 
     def validate_translator(t):
+        """Ensure the translator is of the correct length and size."""
         if not isinstance(t, str) or len(t) != 256:
             raise ValueError(
                 'The translate argument must be a str of len 256.')
@@ -246,6 +259,7 @@ else:
         string.punctuation, '_' * len(string.punctuation))
 
     def validate_translator(t):
+        """Ensure the translator is of the correct length and size."""
         if not isinstance(t, dict):
             raise ValueError('The translate argument must be a dict.')
 
@@ -273,6 +287,7 @@ class Dispatcher(object):
 
     def __init__(self, dispatch_method_name=None,
                  translate=punctuation_to_underscores):
+        """Initialize the HTTP request dispatcher."""
         validate_translator(translate)
         self.translate = translate
         if dispatch_method_name:
@@ -389,7 +404,9 @@ class Dispatcher(object):
             object_trail.append([name, node, nodeconf, segleft])
 
         def set_conf():
-            """Collapse all object_trail config into cherrypy.request.config.
+            """Collapse all ``object_trail`` conf into config.
+
+            The config being ``cherrypy.request.config``.
             """
             base = cherrypy.config.copy()
             # Note that we merge the config from each node
@@ -505,10 +522,12 @@ class RoutesDispatcher(object):
         self.mapper.controller_scan = self.controllers.keys
 
     def connect(self, name, route, controller, **kwargs):
+        """Mount an HTTP handler into the router."""
         self.controllers[name] = controller
         self.mapper.connect(name, route, controller=name, **kwargs)
 
     def redirect(self, url):
+        """Perform an HTTP redirect to the given URL."""
         raise cherrypy.HTTPRedirect(url)
 
     def __call__(self, path_info):
@@ -602,6 +621,7 @@ class RoutesDispatcher(object):
 
 
 def XMLRPCDispatcher(next_dispatcher=Dispatcher()):
+    """Chain an HTTP dispatcher variant implementing XML-RPC."""
     from cherrypy.lib import xmlrpcutil
 
     def xmlrpc_dispatch(path_info):

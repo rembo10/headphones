@@ -1,4 +1,6 @@
 """
+CherryPy cache tooling.
+
 CherryPy implements a simple caching system as a pluggable Tool. This tool
 tries to be an (in-process) HTTP/1.1-compliant cache. It's not quite there
 yet, but it's probably good enough for most sites.
@@ -161,6 +163,7 @@ class MemoryCache(Cache):
     debug = False
 
     def __init__(self):
+        """Initialize in-memory cache store."""
         self.clear()
 
         # Run self.expire_cache in a separate daemon thread.
@@ -442,7 +445,6 @@ def expires(secs=0, force=False, debug=False):
 
         If any are already present, none of the above response headers are set.
     """
-
     response = cherrypy.serving.response
     headers = response.headers
 

@@ -2,7 +2,8 @@
 
 To use this module, or the coverage tools in the test suite,
 you need to download 'coverage.py', either Gareth Rees' `original
-implementation <http://www.garethrees.org/2001/12/04/python-coverage/>`_
+implementation
+<https://web.archive.org/web/20231108042640/https://garethrees.org/2001/12/04/python-coverage/>`_
 or Ned Batchelder's `enhanced version:
 <http://www.nedbatchelder.com/code/modules/coverage.html>`_
 
@@ -22,7 +23,7 @@ it will call ``serve()`` for you.
 
 import re
 import sys
-import cgi
+import html
 import os
 import os.path
 import urllib.parse
@@ -38,6 +39,7 @@ try:
     the_coverage = coverage(data_file=localFile)
 
     def start():
+        """Start collecting coverage."""
         the_coverage.start()
 except ImportError:
     # Setting the_coverage to None will raise errors
@@ -50,6 +52,7 @@ except ImportError:
         'coverage.py could not be imported.')
 
     def start():
+        """Start collecting coverage."""
         pass
 start.priority = 20
 
@@ -284,8 +287,10 @@ def get_tree(base, exclude, coverage=the_coverage):
 
 
 class CoverStats(object):
+    """HTTP handler for the coverage stats."""
 
     def __init__(self, coverage, root=None):
+        """Initialize the coverage stats application."""
         self.coverage = coverage
         if root is None:
             # Guess initial depth. Files outside this path will not be
@@ -295,12 +300,13 @@ class CoverStats(object):
 
     @cherrypy.expose
     def index(self):
+        """Render the coverage stats index page."""
         return TEMPLATE_FRAMESET % self.root.lower()
 
     @cherrypy.expose
     def menu(self, base='/', pct='50', showpct='',
              exclude=r'python\d\.\d|test|tut\d|tutorial'):
-
+        """Render HTML menu web page."""
         # The coverage module uses all-lower-case names.
         base = base.lower().rstrip(os.sep)
 
@@ -334,6 +340,7 @@ class CoverStats(object):
         yield '</body></html>'
 
     def annotated_file(self, filename, statements, excluded, missing):
+        """Annotate given file with coverage information."""
         with open(filename, 'r') as source:
             lines = source.readlines()
         buffer = []
@@ -352,12 +359,13 @@ class CoverStats(object):
                 buffer.append((lineno, line))
             if empty_the_buffer:
                 for lno, pastline in buffer:
-                    yield template % (lno, cgi.escape(pastline))
+                    yield template % (lno, html.escape(pastline))
                 buffer = []
-                yield template % (lineno, cgi.escape(line))
+                yield template % (lineno, html.escape(line))
 
     @cherrypy.expose
     def report(self, name):
+        """Render coverage stats as HTML."""
         filename, statements, excluded, missing, _ = self.coverage.analysis2(
             name)
         pc = _percent(statements, missing)
@@ -374,6 +382,7 @@ class CoverStats(object):
 
 
 def serve(path=localFile, port=8080, root=None):
+    """Serve the coverage app over HTTP."""
     if coverage is None:
         raise ImportError('The coverage module could not be imported.')
     from coverage import coverage

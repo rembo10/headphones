@@ -177,6 +177,7 @@ class Session(object):
     # --------------------- Session management methods --------------------- #
 
     def __init__(self, id=None, **kwargs):
+        """Initialize the session tool."""
         self.id_observers = []
         self._data = {}
 
@@ -321,16 +322,19 @@ class Session(object):
     # -------------------- Application accessor methods -------------------- #
 
     def __getitem__(self, key):
+        """Retrieve a session-stored object."""
         if not self.loaded:
             self.load()
         return self._data[key]
 
     def __setitem__(self, key, value):
+        """Store an object in the session."""
         if not self.loaded:
             self.load()
         self._data[key] = value
 
     def __delitem__(self, key):
+        """Delete object stored in the session."""
         if not self.loaded:
             self.load()
         del self._data[key]
@@ -349,13 +353,15 @@ class Session(object):
             return self._data.pop(key, default)
 
     def __contains__(self, key):
+        """Check if the session has an object by key."""
         if not self.loaded:
             self.load()
         return key in self._data
 
     def get(self, key, default=None):
-        """D.get(k[,d]) -> D[k] if k in D, else d.
+        """Retrieve a session-stored object.
 
+        D.get(k[,d]) -> D[k] if k in D, else d.
         d defaults to None.
         """
         if not self.loaded:
@@ -363,8 +369,9 @@ class Session(object):
         return self._data.get(key, default)
 
     def update(self, d):
-        """D.update(E) -> None.
+        """Update multiple session-stored objects in one go.
 
+        D.update(E) -> None.
         Update D from E: for k in E: D[k] = E[k].
         """
         if not self.loaded:
@@ -372,14 +379,18 @@ class Session(object):
         self._data.update(d)
 
     def setdefault(self, key, default=None):
-        """D.setdefault(k[,d]) -> D.get(k,d), also set D[k]=d if k not in D."""
+        """Set a default session key value.
+
+        D.setdefault(k[,d]) -> D.get(k,d), also set D[k]=d if k not in D.
+        """
         if not self.loaded:
             self.load()
         return self._data.setdefault(key, default)
 
     def clear(self):
-        """D.clear() -> None.
+        """Clean up the session-stored data.
 
+        D.clear() -> None.
         Remove all items from D.
         """
         if not self.loaded:
@@ -387,25 +398,35 @@ class Session(object):
         self._data.clear()
 
     def keys(self):
-        """D.keys() -> list of D's keys."""
+        """Return an iterable of session keys.
+
+        D.keys() -> list of D's keys.
+        """
         if not self.loaded:
             self.load()
         return self._data.keys()
 
     def items(self):
-        """D.items() -> list of D's (key, value) pairs, as 2-tuples."""
+        """Return an iterable of items as tuples.
+
+        D.items() -> list of D's (key, value) pairs, as 2-tuples.
+        """
         if not self.loaded:
             self.load()
         return self._data.items()
 
     def values(self):
-        """D.values() -> list of D's values."""
+        """Return an iterable of session objects.
+
+        D.values() -> list of D's values.
+        """
         if not self.loaded:
             self.load()
         return self._data.values()
 
 
 class RamSession(Session):
+    """A memory-baked session store implementation."""
 
     # Class-level objects. Don't rebind these!
     cache = {}
@@ -413,7 +434,6 @@ class RamSession(Session):
 
     def clean_up(self):
         """Clean up expired sessions."""
-
         now = self.now()
         for _id, (data, expiration_time) in self.cache.copy().items():
             if expiration_time <= now:
@@ -466,8 +486,7 @@ class RamSession(Session):
 
 
 class FileSession(Session):
-
-    """Implementation of the File backend for sessions
+    """Implementation of the file backend for sessions.
 
     storage_path
         The folder where session data will be saved. Each session
@@ -485,6 +504,7 @@ class FileSession(Session):
     pickle_protocol = pickle.HIGHEST_PROTOCOL
 
     def __init__(self, id=None, **kwargs):
+        """Prepare the file session store."""
         # The 'storage_path' arg is required for file-based sessions.
         kwargs['storage_path'] = os.path.abspath(kwargs['storage_path'])
         kwargs.setdefault('lock_timeout', None)
@@ -614,6 +634,7 @@ class FileSession(Session):
 
 
 class MemcachedSession(Session):
+    """A Memcached-baked session store."""
 
     # The most popular memcached client for Python isn't thread-safe.
     # Wrap all .get and .set operations in a single lock.
@@ -687,7 +708,6 @@ class MemcachedSession(Session):
 
 def save():
     """Save any changed session data."""
-
     if not hasattr(cherrypy.serving, 'session'):
         return
     request = cherrypy.serving.request
@@ -783,7 +803,6 @@ def init(storage_type=None, path=None, path_header=None, name='session_id',
     and may be specific to the storage type. See the subclass of Session
     you're using for more information.
     """
-
     # Py27 compat
     storage_class = kwargs.pop('storage_class', RamSession)
 
@@ -898,7 +917,8 @@ def set_response_cookie(path=None, path_header=None, name='session_id',
 
 
 def _add_MSIE_max_age_workaround(cookie, timeout):
-    """
+    """Inject a Microsoft Internet Explorer ``max-age`` workaround.
+
     We'd like to use the "max-age" param as indicated in
     http://www.faqs.org/rfcs/rfc2109.html but IE doesn't
     save it to disk and the session is lost if people close

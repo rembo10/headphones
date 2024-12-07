@@ -1,4 +1,6 @@
 """
+CherryPy logging module.
+
 Simple config
 =============
 
@@ -126,12 +128,15 @@ class NullHandler(logging.Handler):
     """A no-op logging handler to silence the logging.lastResort handler."""
 
     def handle(self, record):
+        """Handle a log record doing no-op."""
         pass
 
     def emit(self, record):
+        """Emit  a log record doing no-op."""
         pass
 
     def createLock(self):
+        """Lock log write with no-op."""
         self.lock = None
 
 
@@ -167,6 +172,7 @@ class LogManager(object):
     """
 
     def __init__(self, appid=None, logger_root='cherrypy'):
+        """Initialize a CherryPy log manager."""
         self.logger_root = logger_root
         self.appid = appid
         if appid is None:
@@ -217,11 +223,11 @@ class LogManager(object):
         )
 
     def __call__(self, *args, **kwargs):
-        """An alias for ``error``."""
+        """Record an error log entry."""
         return self.error(*args, **kwargs)
 
     def access(self):
-        """Write to the access log (in Apache/NCSA Combined Log format).
+        r"""Write to the access log (in Apache/NCSA Combined Log format).
 
         See the
         `apache documentation
@@ -414,7 +420,10 @@ class LogManager(object):
 
 
 class WSGIErrorHandler(logging.Handler):
-    "A handler class which writes logging records to environ['wsgi.errors']."
+    """A handler class writing logs to WSGI env.
+
+    Specifically, the target is ``environ['wsgi.errors']``.
+    """
 
     def flush(self):
         """Flushes the stream."""
@@ -450,6 +459,8 @@ class WSGIErrorHandler(logging.Handler):
 
 
 class LazyRfc3339UtcTime(object):
+    """A postponed timestamp string retrieval class."""
+
     def __str__(self):
         """Return datetime in RFC3339 UTC Format."""
         iso_formatted_now = datetime.datetime.now(

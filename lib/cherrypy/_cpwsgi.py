@@ -18,8 +18,7 @@ from cherrypy.lib import is_closable_iterator
 
 
 def downgrade_wsgi_ux_to_1x(environ):
-    """Return a new environ dict for WSGI 1.x from the given WSGI u.x environ.
-    """
+    """Return new environ dict for WSGI 1.x from provided WSGI u.x environ."""
     env1x = {}
 
     url_encoding = environ[ntou('wsgi.url_encoding')]
@@ -54,10 +53,11 @@ class VirtualHost(object):
 
         cherrypy.tree.graft(vhost)
     """
-    default = None
-    """Required.
 
-    The default WSGI application.
+    default = None
+    """The default WSGI application.
+
+    Required.
     """
 
     use_x_forwarded_host = True
@@ -67,7 +67,6 @@ class VirtualHost(object):
 
     domains = {}
     """A dict of {host header value: application} pairs.
-
     The incoming "Host" request header is looked up in this dict, and,
     if a match is found, the corresponding WSGI application will be
     called instead of the default. Note that you often need separate
@@ -76,11 +75,30 @@ class VirtualHost(object):
     """
 
     def __init__(self, default, domains=None, use_x_forwarded_host=True):
+        """
+        Initialize a virtual host app.
+
+        :param default: The default WSGI application
+        :type default: WSGI application
+        :param use_x_forwarded_host: If True (the default), any
+            "X-Forwarded-Host" request header will be used instead of the
+            "Host" header. This is commonly added by HTTP servers (such as
+            Apache) when proxying.
+        :type use_x_forwarded_host: Bool, optional
+        :param domains: A dict of {host header value: application} pairs.
+            The incoming "Host" request header is looked up in this dict, and,
+            if a match is found, the corresponding WSGI application will be
+            called instead of the default. Note that you often need separate
+            entries for "example.com" and "www.example.com". In addition,
+            "Host" headers may contain the port number.
+        :type domains: Dict, optional
+        """
         self.default = default
         self.domains = domains or {}
         self.use_x_forwarded_host = use_x_forwarded_host
 
     def __call__(self, environ, start_response):
+        """Route WSGI requests based on host names."""
         domain = environ.get('HTTP_HOST', '')
         if self.use_x_forwarded_host:
             domain = environ.get('HTTP_X_FORWARDED_HOST', domain)
@@ -95,10 +113,12 @@ class InternalRedirector(object):
     """WSGI middleware that handles raised cherrypy.InternalRedirect."""
 
     def __init__(self, nextapp, recursive=False):
+        """Initialize an internal redirector."""
         self.nextapp = nextapp
         self.recursive = recursive
 
     def __call__(self, environ, start_response):
+        """Process internal WSGI request redirects."""
         redirections = []
         while True:
             environ = environ.copy()
@@ -142,10 +162,12 @@ class ExceptionTrapper(object):
     """WSGI middleware that traps exceptions."""
 
     def __init__(self, nextapp, throws=(KeyboardInterrupt, SystemExit)):
+        """Initialize exception trapper."""
         self.nextapp = nextapp
         self.throws = throws
 
     def __call__(self, environ, start_response):
+        """Handle exceptions while processing a WSGI request."""
         return _TrappedResponse(
             self.nextapp,
             environ,
@@ -230,6 +252,7 @@ class AppResponse(object):
     """WSGI response iterable for CherryPy applications."""
 
     def __init__(self, environ, start_response, cpapp):
+        """Initialize the WSGI app response."""
         self.cpapp = cpapp
         try:
             self.environ = environ
@@ -271,9 +294,11 @@ class AppResponse(object):
             raise
 
     def __iter__(self):
+        """Make an app response iterator."""
         return self
 
     def __next__(self):
+        """Iterate over the app response."""
         return next(self.iter_response)
 
     def close(self):
@@ -346,6 +371,7 @@ class AppResponse(object):
     }
 
     def recode_path_qs(self, path, qs):
+        """Recode app response path query string."""
         # This isn't perfect; if the given PATH_INFO is in the
         # wrong encoding, it may fail to match the appropriate config
         # section URI. But meh.
@@ -416,6 +442,7 @@ class CPWSGIApp(object):
     """
 
     def __init__(self, cpapp, pipeline=None):
+        """Initialize a framework WSGI app wrapper."""
         self.cpapp = cpapp
         self.pipeline = self.pipeline[:]
         if pipeline:
@@ -431,6 +458,7 @@ class CPWSGIApp(object):
         return self.response_class(environ, start_response, self.cpapp)
 
     def __call__(self, environ, start_response):
+        """Process a WSGI request."""
         head = self.head
         if head is None:
             # Create and nest the WSGI apps in our pipeline (in reverse order).

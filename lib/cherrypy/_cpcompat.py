@@ -22,8 +22,9 @@ import http.client
 
 
 def ntob(n, encoding='ISO-8859-1'):
-    """Return the given native string as a byte string in the given
-    encoding.
+    """Convert a native :class:`str` to a :class:`bytes` instance.
+
+    The encoding can be changed to non-ASCII optionally.
     """
     assert_native(n)
     # In Python 3, the native string type is unicode
@@ -31,8 +32,9 @@ def ntob(n, encoding='ISO-8859-1'):
 
 
 def ntou(n, encoding='ISO-8859-1'):
-    """Return the given native string as a unicode string with the given
-    encoding.
+    """Convert a native :class:`str` to a :class:`str` instance.
+
+    This doesn't actually do anything.
     """
     assert_native(n)
     # In Python 3, the native string type is unicode
@@ -48,6 +50,7 @@ def tonative(n, encoding='ISO-8859-1'):
 
 
 def assert_native(n):
+    """Ensure that input is a native :class:`str`."""
     if not isinstance(n, str):
         raise TypeError('n must be a native str (got %s)' % type(n).__name__)
 

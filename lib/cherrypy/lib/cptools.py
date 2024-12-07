@@ -172,7 +172,6 @@ def proxy(base=None, local='X-Forwarded-Host', remote='X-Forwarded-For',
     default, 'remote' is set to 'X-Forwarded-For'. If you do not want to
     rewrite remote.ip, set the 'remote' arg to an empty string.
     """
-
     request = cherrypy.serving.request
 
     if scheme:
@@ -288,23 +287,45 @@ class SessionAuth(object):
     debug = False
 
     def check_username_and_password(self, username, password):
-        pass
+        """Assert the login credentials.
+
+        :param username: A user name sent from the login form.
+        :type username: str
+        :param password: A pass word sent from the login form.
+        :type password: str
+
+        :returns: A non-empty error string if the authentication fails.
+        :rtype: str
+        """
 
     def anonymous(self):
         """Provide a temporary user name for anonymous users."""
         pass
 
     def on_login(self, username):
-        pass
+        """Process a successful login event.
+
+        :param username: The logged in user name.
+        :type username: str
+        """
 
     def on_logout(self, username):
-        pass
+        """Process a successful logout event.
+
+        :param username: The logged out user name.
+        :type username: str
+        """
 
     def on_check(self, username):
-        pass
+        """Process a successful check event.
+
+        :param username: The checked user name.
+        :type username: str
+        """
 
     def login_screen(self, from_page='..', username='', error_msg='',
                      **kwargs):
+        """Render the login HTML page."""
         return (str("""<html><body>
 Message: %(error_msg)s
 <form method="post" action="do_login">
@@ -385,6 +406,7 @@ Message: %(error_msg)s
         cherrypy.log(template % context, 'TOOLS.SESSAUTH')
 
     def run(self):
+        """Perform session authentication."""
         request = cherrypy.serving.request
         response = cherrypy.serving.response
 
@@ -592,19 +614,21 @@ def accept(media=None, debug=False):
 
 
 class MonitoredHeaderMap(_httputil.HeaderMap):
+    """An access-tracked HTTP header mapping."""
 
     def transform_key(self, key):
+        """Normalize and track an HTTP header name."""
         self.accessed_headers.add(key)
         return super(MonitoredHeaderMap, self).transform_key(key)
 
     def __init__(self):
+        """Initialize a monitored HTTP header mapping."""
         self.accessed_headers = set()
         super(MonitoredHeaderMap, self).__init__()
 
 
 def autovary(ignore=None, debug=False):
-    """Auto-populate the Vary response header based on request.header access.
-    """
+    """Populate ``Vary`` response header based on ``request.header`` access."""
     request = cherrypy.serving.request
 
     req_h = request.headers

@@ -1,3 +1,4 @@
+"""JSON tools."""
 import cherrypy
 from cherrypy import _json as json
 from cherrypy._cpcompat import text_or_bytes, ntou
@@ -15,7 +16,8 @@ def json_processor(entity):
 
 def json_in(content_type=[ntou('application/json'), ntou('text/javascript')],
             force=True, debug=False, processor=json_processor):
-    """Add a processor to parse JSON request entities:
+    """Add a processor to parse JSON request entities.
+
     The default processor places the parsed data into request.json.
 
     Incoming request entities which match the given content_type(s) will
@@ -56,6 +58,7 @@ def json_in(content_type=[ntou('application/json'), ntou('text/javascript')],
 
 
 def json_handler(*args, **kwargs):
+    """Convert decorated HTTP handler-returned object to JSON string."""
     value = cherrypy.serving.request._json_inner_handler(*args, **kwargs)
     return json.encode(value)
 

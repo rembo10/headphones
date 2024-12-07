@@ -249,6 +249,7 @@ appstats.update({
 
 
 def proc_time(s):
+    """Compute current HTTP request processing time."""
     return time.time() - s['Start Time']
 
 
@@ -256,20 +257,24 @@ class ByteCountWrapper(object):
     """Wraps a file-like object, counting the number of bytes read."""
 
     def __init__(self, rfile):
+        """Initialize a read byte counter."""
         self.rfile = rfile
         self.bytes_read = 0
 
     def read(self, size=-1):
+        """Read from file, counting bytes."""
         data = self.rfile.read(size)
         self.bytes_read += len(data)
         return data
 
     def readline(self, size=-1):
+        """Read a line from file, counting bytes."""
         data = self.rfile.readline(size)
         self.bytes_read += len(data)
         return data
 
     def readlines(self, sizehint=0):
+        """Read a list of lines from file, counting bytes."""
         # Shamelessly stolen from StringIO
         total = 0
         lines = []
@@ -283,22 +288,27 @@ class ByteCountWrapper(object):
         return lines
 
     def close(self):
+        """Close the underlying file object."""
         self.rfile.close()
 
     def __iter__(self):
+        """Make a file reader iterator."""
         return self
 
     def next(self):
+        """Return next portion of bytes from the iterated file."""
         data = self.rfile.next()
         self.bytes_read += len(data)
         return data
 
 
 def average_uriset_time(s):
+    """Compute average request processing time within a URI set."""
     return s['Count'] and (s['Sum'] / s['Count']) or 0
 
 
 def _get_threading_ident():
+    """Discover the current thread identifier."""
     if sys.version_info >= (3, 3):
         return threading.get_ident()
     return threading._get_ident()
@@ -308,10 +318,11 @@ class StatsTool(cherrypy.Tool):
     """Record various information about the current request."""
 
     def __init__(self):
+        """Initialize the statistics gathering tool."""
         cherrypy.Tool.__init__(self, 'on_end_request', self.record_stop)
 
     def _setup(self):
-        """Hook this tool into cherrypy.request.
+        """Plug this tool into ``cherrypy.request``.
 
         The standard CherryPy request object will automatically call
         this method when the tool is "turned on" in config.
@@ -404,14 +415,17 @@ missing = object()
 
 
 def locale_date(v):
+    """Format given date per current locale."""
     return time.strftime('%c', time.gmtime(v))
 
 
 def iso_format(v):
+    """Format given date as ISO string."""
     return time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(v))
 
 
 def pause_resume(ns):
+    """Produce pause or resume HTML form maker."""
     def _pause_resume(enabled):
         pause_disabled = ''
         resume_disabled = ''
@@ -433,6 +447,7 @@ def pause_resume(ns):
 
 
 class StatsPage(object):
+    """An app rendering the gathered statistics."""
 
     formatting = {
         'CherryPy Applications': {
@@ -474,6 +489,7 @@ class StatsPage(object):
 
     @cherrypy.expose
     def index(self):
+        """Render the app stats index page."""
         # Transform the raw data into pretty output for HTML
         yield """
 <html>
@@ -672,12 +688,14 @@ table.stats2 th {
     if json is not None:
         @cherrypy.expose
         def data(self):
+            """Render statistics as JSON."""
             s = extrapolate_statistics(logging.statistics)
             cherrypy.response.headers['Content-Type'] = 'application/json'
             return json.dumps(s, sort_keys=True, indent=4).encode('utf-8')
 
     @cherrypy.expose
     def pause(self, namespace):
+        """Pause gathering the statistics."""
         logging.statistics.get(namespace, {})['Enabled'] = False
         raise cherrypy.HTTPRedirect('./')
     pause.cp_config = {'tools.allow.on': True,
@@ -685,6 +703,7 @@ table.stats2 th {
 
     @cherrypy.expose
     def resume(self, namespace):
+        """Resume gathering the statistics."""
         logging.statistics.get(namespace, {})['Enabled'] = True
         raise cherrypy.HTTPRedirect('./')
     resume.cp_config = {'tools.allow.on': True,
