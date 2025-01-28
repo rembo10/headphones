@@ -616,6 +616,11 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
         telegram = notifiers.TELEGRAM()
         telegram.notify(statusmessage, pushmessage)
 
+    if headphones.CONFIG.SLACK_ENABLED:
+        logger.info(u"Slack request")
+        slack = notifiers.SLACK()
+        slack.notify(pushmessage, statusmessage)
+
     if headphones.CONFIG.TWITTER_ENABLED:
         logger.info("Twitter notifications temporarily disabled")
         #logger.info("Sending Twitter notification")
