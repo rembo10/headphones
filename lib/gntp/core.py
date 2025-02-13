@@ -19,14 +19,14 @@ __all__ = [
 
 #GNTP/<version> <messagetype> <encryptionAlgorithmID>[:<ivValue>][ <keyHashAlgorithmID>:<keyHash>.<salt>]
 GNTP_INFO_LINE = re.compile(
-	'GNTP/(?P<version>\\d+\\.\\d+) (?P<messagetype>REGISTER|NOTIFY|SUBSCRIBE|\-OK|\-ERROR)' +
+	'GNTP/(?P<version>\\d+\\.\\d+) (?P<messagetype>REGISTER|NOTIFY|SUBSCRIBE|\\-OK|\\-ERROR)' +
 	' (?P<encryptionAlgorithmID>[A-Z0-9]+(:(?P<ivValue>[A-F0-9]+))?) ?' +
 	'((?P<keyHashAlgorithmID>[A-Z0-9]+):(?P<keyHash>[A-F0-9]+).(?P<salt>[A-F0-9]+))?\r\n',
 	re.IGNORECASE
 )
 
 GNTP_INFO_LINE_SHORT = re.compile(
-	'GNTP/(?P<version>\\d+\\.\\d+) (?P<messagetype>REGISTER|NOTIFY|SUBSCRIBE|\-OK|\-ERROR)',
+	'GNTP/(?P<version>\\d+\\.\\d+) (?P<messagetype>REGISTER|NOTIFY|SUBSCRIBE|\\-OK|\\-ERROR)',
 	re.IGNORECASE
 )
 
