@@ -30,7 +30,7 @@ GNTP_INFO_LINE_SHORT = re.compile(
 	re.IGNORECASE
 )
 
-GNTP_HEADER = re.compile('([\w-]+):(.+)')
+GNTP_HEADER = re.compile('([\\w-]+):(.+)')
 
 GNTP_EOL = gntp.shim.b('\r\n')
 GNTP_SEP = gntp.shim.b(': ')
