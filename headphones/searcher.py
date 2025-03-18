@@ -68,12 +68,9 @@ TORRENT_TO_MAGNET_SERVICES = [
     'https://www.seedpeer.me/torrent/%s'
 ]
 
-# Persistent Orpheus.network API object
-orpheusobj = None
 ruobj = None
-# Persistent RED API object
-redobj = None
-
+# Persistent Orpheus.network and RED API objects
+gazelleobjs = {}
 
 
 def fix_url(s, charset="utf-8"):
@@ -1330,7 +1327,7 @@ def verifyresult(title, artistterm, term, lossless):
                 dumbtoken = replace_all(token, dic)
                 if not has_token(title, dumbtoken):
                     logger.info(
-                        "Removed from results: %s (missing tokens: [%s, %s, %s])", 
+                        "Removed from results: %s (missing tokens: [%s, %s, %s])",
                         title, token, cleantoken, dumbtoken)
                     return False
 
@@ -1553,10 +1550,10 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                 if rulist:
                     resultlist.extend(rulist)
 
-    if headphones.CONFIG.ORPHEUS:
-        provider = "Orpheus.network"
-        providerurl = "https://orpheus.network/"
+    # RED, Orpheus.network and potentially other Gazelle API based trackers.
 
+    def _search_torrent_gazelle(provider, providerurl, username=None, password=None, apikey=None, try_use_fltoken=False):
+        global gazelleobjs
         bitrate = None
         bitrate_string = bitrate
 
@@ -1578,7 +1575,7 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                         bitrate_string = encoding_string
                 if bitrate_string not in gazelleencoding.ALL_ENCODINGS:
                     logger.info(
-                        "Your preferred bitrate is not one of the available Orpheus.network filters, so not using it as a search parameter.")
+                        f"Your preferred bitrate is not one of the available { provider } filters, so not using it as a search parameter.")
             maxsize = 10000000000
         elif headphones.CONFIG.PREFERRED_QUALITY == 1 or allow_lossless:  # Highest quality including lossless
             search_formats = [gazelleformat.FLAC, gazelleformat.MP3]
@@ -1587,64 +1584,75 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
             search_formats = [gazelleformat.MP3]
             maxsize = 300000000
 
-        if not orpheusobj or not orpheusobj.logged_in():
+        gazelleobj = gazelleobjs.get(provider, None)
+        if not gazelleobj or not gazelleobj.logged_in():
             try:
-                logger.info("Attempting to log in to Orpheus.network...")
-                orpheusobj = gazelleapi.GazelleAPI(username=headphones.CONFIG.ORPHEUS_USERNAME,
-                                                password=headphones.CONFIG.ORPHEUS_PASSWORD,
-                                                url=headphones.CONFIG.ORPHEUS_URL)
-                orpheusobj._login()
+                logger.info(f"Attempting to log in to {provider}...")
+                if apikey:
+                    gazelleobj = gazelleapi.GazelleAPI(apikey=apikey,
+                                                        url=providerurl)
+                elif username and password:
+                    gazelleobj = gazelleapi.GazelleAPI(username=username,
+                                                        password=password,
+                                                        url=providerurl)
+                else:
+                    raise(f"Neither apikey nor username/password provided for provider {provider}.")
+                gazelleobj._login()
             except Exception as e:
-                orpheusobj = None
-                logger.error("Orpheus.network credentials incorrect or site is down. Error: %s %s" % (
-                    e.__class__.__name__, str(e)))
+                gazelleobj = None
+                logger.error("%s credentials incorrect or site is down. Error: %s %s" % (
+                    provider, e.__class__.__name__, str(e)))
+            gazelleobjs[provider] = gazelleobj
 
-        if orpheusobj and orpheusobj.logged_in():
+        if gazelleobj and gazelleobj.logged_in():
             logger.info("Searching %s..." % provider)
             all_torrents = []
 
             album_type = ""
 
             # Specify release types to filter by
-            if album['Type'] == 'Album':
-                album_type = [gazellerelease_type.ALBUM]
-            if album['Type'] == 'Soundtrack':
-                album_type = [gazellerelease_type.SOUNDTRACK]
-            if album['Type'] == 'EP':
-                album_type = [gazellerelease_type.EP]
-            # No musicbrainz match for this type
-            # if album['Type'] == 'Anthology':
-            #   album_type = [gazellerelease_type.ANTHOLOGY]
-            if album['Type'] == 'Compilation':
-                album_type = [gazellerelease_type.COMPILATION]
-            if album['Type'] == 'DJ-mix':
-                album_type = [gazellerelease_type.DJ_MIX]
-            if album['Type'] == 'Single':
-                album_type = [gazellerelease_type.SINGLE]
-            if album['Type'] == 'Live':
-                album_type = [gazellerelease_type.LIVE_ALBUM]
-            if album['Type'] == 'Remix':
-                album_type = [gazellerelease_type.REMIX]
-            if album['Type'] == 'Bootleg':
-                album_type = [gazellerelease_type.BOOTLEG]
-            if album['Type'] == 'Interview':
-                album_type = [gazellerelease_type.INTERVIEW]
-            if album['Type'] == 'Mixtape/Street':
-                album_type = [gazellerelease_type.MIXTAPE]
-            if album['Type'] == 'Other':
-                album_type = [gazellerelease_type.UNKNOWN]
+            gazelle_release_type_mapping = {
+                'Album': [gazellerelease_type.ALBUM],
+                'Soundtrack': [gazellerelease_type.SOUNDTRACK],
+                'EP': [gazellerelease_type.EP],
+                # No musicbrainz match for this type
+                # 'Anthology': [gazellerelease_type.ANTHOLOGY],
+                'Compilation': [gazellerelease_type.COMPILATION],
+                'DJ-mix': [gazellerelease_type.DJ_MIX],
+                'Single': [gazellerelease_type.SINGLE],
+                'Live': [gazellerelease_type.LIVE_ALBUM],
+                'Remix': [gazellerelease_type.REMIX],
+                'Bootleg': [gazellerelease_type.BOOTLEG],
+                'Interview': [gazellerelease_type.INTERVIEW],
+                'Mixtape/Street': [gazellerelease_type.MIXTAPE],
+                'Other': [gazellerelease_type.UNKNOWN],
+            }
+
+            album_type = gazelle_release_type_mapping.get(
+                album['Type'],
+                gazellerelease_type.UNKNOWN
+            )
 
             for search_format in search_formats:
                 if usersearchterm:
                     all_torrents.extend(
-                        orpheusobj.search_torrents(searchstr=usersearchterm, format=search_format,
-                                                encoding=bitrate_string, releasetype=album_type)['results'])
+                        gazelleobj.search_torrents(
+                            searchstr=usersearchterm,
+                            format=search_format,
+                            encoding=bitrate_string,
+                            releasetype=album_type
+                        )['results']
+                    )
                 else:
-                    all_torrents.extend(orpheusobj.search_torrents(artistname=semi_clean_artist_term,
-                                                                groupname=semi_clean_album_term,
-                                                                format=search_format,
-                                                                encoding=bitrate_string,
-                                                                releasetype=album_type)['results'])
+                    all_torrents.extend(
+                        gazelleobj.search_torrents(
+                            artistname=semi_clean_artist_term,
+                            groupname=semi_clean_album_term,
+                            format=search_format,
+                            encoding=bitrate_string,
+                            releasetype=album_type)
+                        ['results']
+                    )
 
             # filter on format, size, and num seeders
             logger.info("Filtering torrents by format, maximum size, and minimum seeders...")
@@ -1674,124 +1682,54 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                 logger.info(
                     "New order: %s" % ", ".join(repr(torrent) for torrent in match_torrents))
 
+            results = []
             for torrent in match_torrents:
                 if not torrent.file_path:
                     torrent.group.update_group_data()  # will load the file_path for the individual torrents
-                resultlist.append(
+
+                use_fltoken = try_use_fltoken and torrent.can_use_token
+
+                results.append(
                     Result(
                         torrent.file_path,
                         torrent.size,
-                        orpheusobj.generate_torrent_link(torrent.id),
+                        gazelleobj.generate_torrent_link(torrent.id, use_fltoken),
                         provider,
                         'torrent',
                         True
                     )
                 )
+            return results
 
-    # Redacted - Using same logic as What.CD as it's also Gazelle, so should really make this into something reusable
+    if headphones.CONFIG.ORPHEUS:
+        provider = "Orpheus.network"
+        providerurl = "https://orpheus.network/"
+
+        resultlist.extend(
+            _search_torrent_gazelle(
+                provider,
+                providerurl,
+                username=headphones.CONFIG.ORPHEUS_USERNAME,
+                password=headphones.CONFIG.ORPHEUS_PASSWORD,
+                try_use_fltoken=False,
+            )
+        )
+
+
     if headphones.CONFIG.REDACTED:
         provider = "Redacted"
-        providerurl = "https://redacted.ch"
+        providerurl = "https://redacted.sh"
 
-        bitrate = None
-        bitrate_string = bitrate
-
-        if headphones.CONFIG.PREFERRED_QUALITY == 3 or losslessOnly:  # Lossless Only mode
-            search_formats = [gazelleformat.FLAC]
-            maxsize = 10000000000
-        elif headphones.CONFIG.PREFERRED_QUALITY == 2:  # Preferred quality mode
-            search_formats = [None]  # should return all
-            bitrate = headphones.CONFIG.PREFERRED_BITRATE
-            if bitrate:
-                if 225 <= int(bitrate) < 256:
-                    bitrate = 'V0'
-                elif 200 <= int(bitrate) < 225:
-                    bitrate = 'V1'
-                elif 175 <= int(bitrate) < 200:
-                    bitrate = 'V2'
-                for encoding_string in gazelleencoding.ALL_ENCODINGS:
-                    if re.search(bitrate, encoding_string, flags=re.I):
-                        bitrate_string = encoding_string
-                if bitrate_string not in gazelleencoding.ALL_ENCODINGS:
-                    logger.info(
-                        "Your preferred bitrate is not one of the available RED filters, so not using it as a search parameter.")
-            maxsize = 10000000000
-        elif headphones.CONFIG.PREFERRED_QUALITY == 1 or allow_lossless:  # Highest quality including lossless
-            search_formats = [gazelleformat.FLAC, gazelleformat.MP3]
-            maxsize = 10000000000
-        else:  # Highest quality excluding lossless
-            search_formats = [gazelleformat.MP3]
-            maxsize = 300000000
-
-        if not redobj or not redobj.logged_in():
-            try:
-                logger.info("Attempting to log in to Redacted...")
-                redobj = gazelleapi.GazelleAPI(apikey=headphones.CONFIG.REDACTED_APIKEY,
-                                                url=providerurl)
-                redobj._login()
-            except Exception as e:
-                redobj = None
-                logger.error("Redacted credentials incorrect or site is down. Error: %s %s" % (
-                    e.__class__.__name__, str(e)))
-
-        if redobj and redobj.logged_in():
-            logger.info("Searching %s..." % provider)
-            all_torrents = []
-            for search_format in search_formats:
-                if usersearchterm:
-                    all_torrents.extend(
-                        redobj.search_torrents(searchstr=usersearchterm, format=search_format,
-                                                encoding=bitrate_string)['results'])
-                else:
-                    all_torrents.extend(redobj.search_torrents(artistname=semi_clean_artist_term,
-                                                                groupname=semi_clean_album_term,
-                                                                format=search_format,
-                                                                encoding=bitrate_string)['results'])
-
-            # filter on format, size, and num seeders
-            logger.info("Filtering torrents by format, maximum size, and minimum seeders...")
-            match_torrents = [t for t in all_torrents if
-                              t.size <= maxsize and t.seeders >= minimumseeders]
-
-            logger.info(
-                "Remaining torrents: %s" % ", ".join(repr(torrent) for torrent in match_torrents))
-
-            # sort by times d/l'd
-            if not len(match_torrents):
-                logger.info("No results found from %s for %s after filtering" % (provider, term))
-            elif len(match_torrents) > 1:
-                logger.info("Found %d matching releases from %s for %s - %s after filtering" %
-                            (len(match_torrents), provider, artistterm, albumterm))
-                logger.info(
-                    "Sorting torrents by times snatched and preferred bitrate %s..." % bitrate_string)
-                match_torrents.sort(key=lambda x: int(x.snatched), reverse=True)
-                if gazelleformat.MP3 in search_formats:
-                    # sort by size after rounding to nearest 10MB...hacky, but will favor highest quality
-                    match_torrents.sort(key=lambda x: int(10 * round(x.size / 1024. / 1024. / 10.)),
-                                        reverse=True)
-                if search_formats and None not in search_formats:
-                    match_torrents.sort(
-                        key=lambda x: int(search_formats.index(x.format)))  # prefer lossless
-                #                if bitrate:
-                #                    match_torrents.sort(key=lambda x: re.match("mp3", x.getTorrentDetails(), flags=re.I), reverse=True)
-                #                    match_torrents.sort(key=lambda x: str(bitrate) in x.getTorrentFolderName(), reverse=True)
-                logger.info(
-                    "New order: %s" % ", ".join(repr(torrent) for torrent in match_torrents))
-
-            for torrent in match_torrents:
-                if not torrent.file_path:
-                    torrent.group.update_group_data()  # will load the file_path for the individual torrents
-                use_token = headphones.CONFIG.REDACTED_USE_FLTOKEN and torrent.can_use_token
-                resultlist.append(
-                    Result(
-                        torrent.file_path,
-                        torrent.size,
-                        redobj.generate_torrent_link(torrent.id, use_token),
-                        provider,
-                        'torrent',
-                        True
-                    )
-                )
+        resultlist.extend(
+            _search_torrent_gazelle(
+                provider,
+                providerurl,
+                username=headphones.CONFIG.REDACTED_USERNAME,
+                password=headphones.CONFIG.REDACTED_PASSWORD,
+                apikey=headphones.CONFIG.REDACTED_APIKEY,
+                try_use_fltoken=headphones.CONFIG.REDACTED_USE_FLTOKEN,
+            )
+        )
 
     # PIRATE BAY
 
