@@ -1662,25 +1662,22 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
             logger.info(
                 "Remaining torrents: %s" % ", ".join(repr(torrent) for torrent in match_torrents))
 
-            # sort by times d/l'd
+            # Sort by quality and seeders
             if not len(match_torrents):
                 logger.info("No results found from %s for %s after filtering" % (provider, term))
             elif len(match_torrents) > 1:
                 logger.info("Found %d matching releases from %s for %s - %s after filtering" %
                             (len(match_torrents), provider, artistterm, albumterm))
-                logger.info('Sorting torrents by number of seeders...')
-                match_torrents.sort(key=lambda x: int(x.seeders), reverse=True)
-                if gazelleformat.MP3 in search_formats:
-                    logger.info('Sorting torrents by seeders...')
-                    match_torrents.sort(key=lambda x: int(x.seeders), reverse=True)
                 if search_formats and None not in search_formats:
-                    match_torrents.sort(
-                        key=lambda x: int(search_formats.index(x.format)))  # prefer lossless
-                #                if bitrate:
-                #                    match_torrents.sort(key=lambda x: re.match("mp3", x.getTorrentDetails(), flags=re.I), reverse=True)
-                #                    match_torrents.sort(key=lambda x: str(bitrate) in x.getTorrentFolderName(), reverse=True)
+                    logger.info('Sorting torrents by format and number of seeders...')
+                    match_torrents.sort(key=lambda x: (search_formats.index(x.format), -int(x.seeders)))
+                else:
+                    logger.info('Sorting torrents by number of seeders...')
+                    match_torrents.sort(key=lambda x: int(x.seeders), reverse=True)
                 logger.info(
-                    "New order: %s" % ", ".join(repr(torrent) for torrent in match_torrents))
+                    "New order: %s" %
+                    ", ".join(repr(torrent) for torrent in match_torrents)
+                )
 
             results = []
             for torrent in match_torrents:
