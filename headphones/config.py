@@ -306,6 +306,7 @@ _CONFIG_DEFINITIONS = {
     'VERIFY_SSL_CERT': (bool_int, 'Advanced', 1),
     'WAIT_UNTIL_RELEASE_DATE': (int, 'General', 0),
     'REDACTED': (int, 'Redacted', 0),
+    'REDACTED_APIKEY': (str, 'Redacted', ''),
     'REDACTED_USERNAME': (str, 'Redacted', ''),
     'REDACTED_PASSWORD': (str, 'Redacted', ''),
     'REDACTED_RATIO': (str, 'Redacted', ''),

@@ -41,11 +41,12 @@ class GazelleAPI(object):
         'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3'}
 
 
-    def __init__(self, username=None, password=None, url=None):
+    def __init__(self, apikey=None, username=None, password=None, url=None):
         self.session = requests.session()
         self.session.headers = self.default_headers
         self.username = username
         self.password = password
+        self.apikey = apikey
         self.authkey = None
         self.passkey = None
         self.userid = None
@@ -94,14 +95,17 @@ class GazelleAPI(object):
 
         self.wait_for_rate_limit()
 
-        loginpage = self.site + 'login.php'
-        data = {'username': self.username,
-                'password': self.password,
-                'keeplogged': '1'}
-        r = self.session.post(loginpage, data=data, timeout=self.default_timeout, headers=self.default_headers)
-        self.past_request_timestamps.append(time.time())
-        if r.status_code != 200:
-            raise LoginException("Login returned status code %s" % r.status_code)
+        if self.apikey is not None:
+            self.session.headers["Authorization"] = self.apikey
+        else:
+            loginpage = self.site + 'login.php'
+            data = {'username': self.username,
+                    'password': self.password,
+                    'keeplogged': '1'}
+            r = self.session.post(loginpage, data=data, timeout=self.default_timeout, headers=self.default_headers)
+            self.past_request_timestamps.append(time.time())
+            if r.status_code != 200:
+                raise LoginException("Login returned status code %s" % r.status_code)
 
         try:
             accountinfo = self.request('index', autologin=False)

@@ -1242,6 +1242,7 @@ class WebInterface(object):
             "orpheus_ratio": headphones.CONFIG.ORPHEUS_RATIO,
             "orpheus_url": headphones.CONFIG.ORPHEUS_URL,
             "use_redacted": checked(headphones.CONFIG.REDACTED),
+            "redacted_apikey": headphones.CONFIG.REDACTED_APIKEY,
             "redacted_username": headphones.CONFIG.REDACTED_USERNAME,
             "redacted_password": headphones.CONFIG.REDACTED_PASSWORD,
             "redacted_ratio": headphones.CONFIG.REDACTED_RATIO,
