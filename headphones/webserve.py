@@ -1416,7 +1416,8 @@ class WebInterface(object):
             "bandcamp_dir": headphones.CONFIG.BANDCAMP_DIR,
             'soulseek_api_url': headphones.CONFIG.SOULSEEK_API_URL,
             'soulseek_api_key': headphones.CONFIG.SOULSEEK_API_KEY,
-            'use_soulseek': checked(headphones.CONFIG.SOULSEEK)
+            'use_soulseek': checked(headphones.CONFIG.SOULSEEK),
+            'maximum_bitrate': headphones.CONFIG.MAXIMUM_BITRATE
         }
 
         for k, v in config.items():
