@@ -545,11 +545,13 @@ class Cache(object):
                                 "url": thumb_url,
                                 "w": 300
                             }
+                            headers = {"User-Agent": "Headphones"}
                             artwork_thumb = request.request_content(
                                 url,
                                 params=params,
                                 timeout=20,
-                                whitelist_status_code=404
+                                whitelist_status_code=404,
+                                headers=headers
                             )
                         if artwork_thumb:
                             with open(thumb_path, 'wb') as f:

@@ -28,11 +28,34 @@ def getAlbumArt(albumid):
 
     # CAA
     logger.info("Searching for artwork at CAA")
-    artwork_path = 'https://coverartarchive.org/release-group/%s/front' % albumid
-    artwork = getartwork(artwork_path)
-    if artwork:
-        logger.info("Artwork found at CAA")
-        return artwork_path, artwork
+    #artwork_path = 'https://coverartarchive.org/release-group/%s/front' % albumid
+    artwork_path = 'https://coverartarchive.org/release-group/%s' % albumid
+
+    data = request.request_json(artwork_path, timeout=20, whitelist_status_code=404)
+
+    image_url = None
+    if data:
+        for item in data.get("images", []):
+            try:
+                if "Front" not in item["types"]:
+                    continue
+
+                # Use desired size
+                image_url = item["image"]
+                if headphones.CONFIG.ALBUM_ART_MAX_WIDTH:
+                    if isinstance(item.get("thumbnails"), dict):
+                        image_url = item["thumbnails"].get(
+                            headphones.CONFIG.ALBUM_ART_MAX_WIDTH, image_url
+                        )
+                break
+            except KeyError:
+                pass
+
+    if image_url:
+        artwork = getartwork(image_url)
+        if artwork:
+            logger.info("Artwork found at CAA")
+            return artwork_path, artwork
 
     # Amazon
     logger.info("Searching for artwork at Amazon")
@@ -162,12 +185,14 @@ def getartwork(artwork_path):
                         "url": artwork_path,
                         "w": maxwidth
                     }
+                    headers = {"User-Agent": "Headphones"}
                     r = request.request_response(
                         url,
                         params=params,
                         timeout=20,
                         stream=True,
-                        whitelist_status_code=404
+                        whitelist_status_code=404,
+                        headers=headers
                     )
                     if r:
                         for chunk in r.iter_content(chunk_size=1024):
