@@ -1,17 +1,18 @@
 <%inherit file="base.html"/>
 <%!
 	from headphones import helpers
-	from html import escape as html_escape 
+	from html import escape as html_escape
 %>
 
 <%def name="headerIncludes()">
 	<div id="subhead_container">
 		<div id="subhead_menu">
-			<a id="menu_link_delete" href="javascript:void(0)" onclick="doAjaxCall('clearhistory?type=all',$(this),'table')" data-success="All History cleared"><i class="fa fa-trash-o"></i> Clear All History</a>
-			<a id="menu_link_delete" href="javascript:void(0)" onclick="doAjaxCall('clearhistory?type=Processed',$(this),'table')" data-success="All Processed cleared"><i class="fa fa-trash-o"></i> Clear Processed</a>
-			<a id="menu_link_delete" href="javascript:void(0)" onclick="doAjaxCall('clearhistory?type=Unprocessed',$(this),'table')" data-success="All Unprocessed cleared"><i class="fa fa-trash-o"></i> Clear Unprocessed</a>
-			<a id="menu_link_delete" href="javascript:void(0)" onclick="doAjaxCall('clearhistory?type=Frozen',$(this),'table')" data-success="All Frozen cleared"><i class="fa fa-trash-o"></i> Clear Frozen</a>
-			<a id="menu_link_delete" href="javascript:void(0)" onclick="doAjaxCall('clearhistory?type=Snatched',$(this),'table')" data-success="All Snatched cleared"><i class="fa fa-trash-o"></i> Clear Snatched</a>
+			<%-- Changed IDs to classes for better structure and uniqueness --%>
+			<a class="menu_link_action" href="#" data-action="clearhistory" data-type="all" data-success="All History cleared"><i class="fa fa-trash-o"></i> Clear All History</a>
+			<a class="menu_link_action" href="#" data-action="clearhistory" data-type="Processed" data-success="All Processed cleared"><i class="fa fa-trash-o"></i> Clear Processed</a>
+			<a class="menu_link_action" href="#" data-action="clearhistory" data-type="Unprocessed" data-success="All Unprocessed cleared"><i class="fa fa-trash-o"></i> Clear Unprocessed</a>
+			<a class="menu_link_action" href="#" data-action="clearhistory" data-type="Frozen" data-success="All Frozen cleared"><i class="fa fa-trash-o"></i> Clear Frozen</a>
+			<a class="menu_link_action" href="#" data-action="clearhistory" data-type="Snatched" data-success="All Snatched cleared"><i class="fa fa-trash-o"></i> Clear Snatched</a>
 		</div>
 	</div>
 </%def>
@@ -45,30 +46,53 @@
             else:
                 grade = 'U'
 
-            fileid = 'unknown'
+            fileid_type = 'unknown'
             if item['URL'].find('nzb') != -1:
-                fileid = 'nzb'
+                fileid_type = 'nzb'
             if item['URL'].find('torrent') != -1:
-                fileid = 'torrent'
+                fileid_type = 'torrent'
             if item['URL'].find('magnet:') != -1:
-                fileid = 'torrent'
+                fileid_type = 'torrent'
             if item['URL'].find('rutracker') != -1:
-                fileid = 'torrent'
+                fileid_type = 'torrent'
             if item['URL'].find('codeshy') != -1:
-                fileid = 'nzb'
+                fileid_type = 'nzb'
             if item['URL'].find('bandcamp') != -1:
-                fileid = 'bandcamp'
+                fileid_type = 'bandcamp'
 
-            folder = 'Folder: ' + item['FolderName']
+            folder_title = 'Folder: ' + item['FolderName']
 
+            # Escape values that will be used in data attributes or HTML content
+            escaped_title = html_escape(item['Title'], quote=True)
+            escaped_date_added = html_escape(item['DateAdded'], quote=True)
         %>
 			<tr class="grade${grade}">
 				<td id="dateadded">${item['DateAdded']}</td>
-				<td id="filename">${html_escape(item['Title'], quote=True)} [<a href="${item['URL']}">${fileid}</a>]<a href="albumPage?AlbumID=${item['AlbumID']}">[album page]</a></td>
+				<td id="filename">${escaped_title} [<a href="${item['URL']}">${fileid_type}</a>]<a href="albumPage?AlbumID=${item['AlbumID']}">[album page]</a></td>
 				<td id="size">${helpers.bytes_to_mb(item['Size'])}</td>
-				<td title="${folder}" id="status">${item['Status']}</td>
-				<td id="action">[<a href="javascript:void(0)" onclick="doAjaxCall('queueAlbum?AlbumID=${item['AlbumID']}&redirect=history', $(this),'table')"  data-success="Retrying download of '${html_escape(item['Title'], quote=True)}'">retry</a>][<a href="javascript:void(0)" onclick="doAjaxCall('queueAlbum?AlbumID=${item['AlbumID']}&new=True&redirect=history',$(this),'table')"  data-success="Looking for a new version of '${html_escape(item['Title'], quote=True)}'">new</a>]</td>
-				<td id="delete"><a href="javascript:void(0)" onclick="doAjaxCall('clearhistory?date_added=${item['DateAdded']}&title=${html_escape(item['Title'], quote=True)}',$(this),'table')" data-success="${html_escape(item['Title'], quote=True)} cleared from history"><img src="interfaces/default/images/trashcan.png" height="18" width="18" id="trashcan" title="Clear this item from the history"></a>
+				<td title="${folder_title}" id="status">${item['Status']}</td>
+				<td id="action">
+                    <%-- Converted inline onclicks to data attributes --%>
+                    [<a href="#" class="action-link"
+                       data-action="queueAlbum"
+                       data-album-id="${item['AlbumID']}"
+                       data-redirect="history"
+                       data-success="Retrying download of '${escaped_title}'">retry</a>]
+                    [<a href="#" class="action-link"
+                       data-action="queueAlbum"
+                       data-album-id="${item['AlbumID']}"
+                       data-new="True"
+                       data-redirect="history"
+                       data-success="Looking for a new version of '${escaped_title}'">new</a>]
+                </td>
+				<td id="delete">
+                    <a href="#" class="clear-item-link"
+                       data-date-added="${escaped_date_added}"
+                       data-title="${escaped_title}"
+                       data-success="${escaped_title} cleared from history">
+                        <img src="interfaces/default/images/trashcan.png" class="icon-trashcan" alt="Clear this item from the history" />
+                    </a>
+                </td>
 			</tr>
 		%endfor
 		</tbody>
@@ -76,15 +100,29 @@
 </%def>
 
 <%def name="headIncludes()">
+	${parent.headIncludes()} <%-- Ensure parent head includes are kept --%>
 	<link rel="stylesheet" href="interfaces/default/css/data_table.css">
+	<style>
+		/* Example CSS to manage icon sizing centrally */
+		.icon-trashcan {
+			height: 18px; /* Or use '1em' for relative sizing */
+			width: 18px;  /* Or use 'auto' to maintain aspect ratio */
+			vertical-align: middle;
+			border: none; /* Remove default image border */
+		}
+	</style>
 </%def>
 
 <%def name="javascriptIncludes()">
+	${parent.javascriptIncludes()} <%-- Ensure parent javascript includes are kept --%>
 	<script src="js/libs/jquery.dataTables.min.js"></script>
 	<script>
-	function initThisPage() {
+	// Encapsulate page-specific logic in an object
+	var HistoryPage = HistoryPage || {};
+
+	HistoryPage.initDataTable = function() {
 		$('#history_table').dataTable({
-			"bDestroy": true,
+			"bDestroy": true, // Allows re-initialization if needed
 			"oLanguage": {
 				"sLengthMenu":"Show _MENU_ items per page",
 				"sEmptyTable": " ",
@@ -93,17 +131,89 @@
 				"sInfoFiltered":"(filtered from _MAX_ total items)"},
 			"iDisplayLength": 25,
 			"sPaginationType": "full_numbers",
-			"aaSorting": [],
+			"aaSorting": [], // No initial sorting
 			"fnDrawCallback": function (o) {
                 // Jump to top of page
                 $('html,body').scrollTop(0);
             }
 		});
-		resetFilters("history");
-	}
+	};
+
+	HistoryPage.initActions = function() {
+		// Event delegation for "Clear All History" type links in the header
+		$('#subhead_menu').on('click', '.menu_link_action', function(e) {
+			e.preventDefault();
+			var $this = $(this);
+			var action = $this.data('action'); // Should be 'clearhistory'
+			var type = $this.data('type'); // e.g., 'all', 'Processed'
+			var successMsg = $this.data('success');
+
+			var url = '/' + action + '?type=' + type;
+
+			if (typeof doAjaxCall === 'function') {
+				doAjaxCall(url, $this, 'table', successMsg);
+			} else {
+				console.error("doAjaxCall function is not defined. Cannot perform clear history action.");
+			}
+		});
+
+		// Event delegation for action links within the table (retry, new)
+		$('#history_table').on('click', '.action-link', function(e) {
+			e.preventDefault();
+			var $this = $(this);
+			var action = $this.data('action'); // e.g., 'queueAlbum'
+			var albumId = $this.data('album-id');
+			var redirect = $this.data('redirect'); // Should be 'history'
+			var isNew = $this.data('new'); // True/False for 'new' action
+			var successMsg = $this.data('success');
+
+			var url = '/' + action + '?AlbumID=' + albumId + '&redirect=' + redirect;
+			if (isNew) {
+				url += '&new=' + isNew;
+			}
+
+			if (typeof doAjaxCall === 'function') {
+				doAjaxCall(url, $this, 'table', successMsg);
+			} else {
+				console.error("doAjaxCall function is not defined. Cannot perform table action.");
+			}
+		});
+
+		// Event delegation for clearing individual history items
+		$('#history_table').on('click', '.clear-item-link', function(e) {
+			e.preventDefault();
+			var $this = $(this);
+			var dateAdded = $this.data('date-added');
+			var title = $this.data('title');
+			var successMsg = $this.data('success');
+
+			// Encode title to handle special characters in URL
+			var encodedTitle = encodeURIComponent(title);
+
+			var url = '/clearhistory?date_added=' + dateAdded + '&title=' + encodedTitle;
+
+			if (typeof doAjaxCall === 'function') {
+				doAjaxCall(url, $this, 'table', successMsg);
+				// Optionally, remove the row from the table after successful deletion
+				$this.closest('tr').fadeOut(500, function() {
+					$(this).remove();
+					// Re-draw DataTable if necessary to adjust pagination
+					$('#history_table').dataTable().fnDraw();
+				});
+			} else {
+				console.error("doAjaxCall function is not defined. Cannot clear individual history item.");
+			}
+		});
+	};
+
 	$(document).ready(function() {
-		initThisPage();
-		initActions();
+		HistoryPage.initDataTable();
+		HistoryPage.initActions(); // Initialize new event handlers
+		// Ensure global initActions from common.js is called if it handles other site-wide actions
+		if (typeof initActions === 'function') {
+		    initActions();
+		}
+		resetFilters("history"); // Assuming this is a global function from common.js
 	});
 	</script>
 </%def>
