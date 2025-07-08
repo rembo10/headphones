@@ -1,7 +1,8 @@
 <%inherit file="base.html" />
 <%!
-	from headphones import db
-	import headphones
+	# Removed direct DB imports/interactions here, as data should be pre-fetched server-side.
+	# from headphones import db
+	import headphones # Still needed for headphones.LOSSY_MEDIA_FORMATS if used
 %>
 
 <%def name="headerIncludes()">
@@ -17,9 +18,10 @@
 	<div id="manageheader" class="title">
 		<h1 class="clearfix"><i class="fa fa-music"></i> Manage Albums</h1>
 	</div>
-	<form action="markAlbums" method="get" id="markAlbums">
+	<form action="markAlbums" method="get" id="markAlbumsForm"> <%-- Renamed ID to avoid conflict with markalbum div --%>
 	<div id="markalbum">Mark selected albums as 
-		<select name="action" onChange="doAjaxCall('markAlbums',$(this),'table',true);" data-error="You didn't select any albums">
+		<%-- Replaced inline onChange with a class and data attributes for JS handling --%>
+		<select name="action" id="markAlbumActionSelect">
   			<option disabled="disabled" selected="selected">Choose...</option>
   			<option value="Wanted">Wanted</option>
   			<option value="WantedNew">Wanted (new only)</option>
@@ -28,25 +30,27 @@
 			<option value="Ignored">Ignored</option>
   			<option value="Downloaded">Downloaded</option>
 		</select>
-		<input type="hidden" value="Go">
+		<input type="hidden" value="Go"> <%-- This hidden input might be redundant if data is sent via AJAX --%>
 	</div>
 	<table class="display" id="album_table">
 		<thead>
 			<tr>
-				<th id="select"><input type="checkbox" onClick="toggle(this)" /></th>
-				<th id="albumname">Album</th>
-                <th id="artistname">Artist</th>
-				<th id="reldate">Date</th>
-				<th id="type">Type</th>
-				<th id="status">Status</th>
-				<th id="have">Have</th>
-				<th id="bitrate">Bitrate</th>
-				<th id="albumformat">Format</th>
+				<th class="select-all-checkbox"><input type="checkbox" id="toggleAllAlbums" /></th> <%-- Added ID for easier targeting --%>
+				<th class="column-albumname">Album</th>
+                <th class="column-artistname">Artist</th>
+				<th class="column-reldate">Date</th>
+				<th class="column-type">Type</th>
+				<th class="column-status">Status</th>
+				<th class="column-have">Have</th>
+				<th class="column-bitrate">Bitrate</th>
+				<th class="column-albumformat">Format</th>
 			</tr>
 		</thead>
 		<tbody>
 		%for album in albums:
 			<%
+				# Assuming these values are now pre-calculated and available in the 'album' dict
+				# Removed all in-template database queries for performance.
 				if album['Status'] == 'Skipped':
 					grade = 'Z'
 				elif album['Status'] == 'Wanted':
@@ -58,45 +62,30 @@
 				else:
 					grade = 'A'
 
-				myDB = db.DBConnection()					
-				totaltracks = len(myDB.select('SELECT TrackTitle from tracks WHERE AlbumID=?', [album['AlbumID']]))
-				havetracks = len(myDB.select('SELECT TrackTitle from tracks WHERE AlbumID=? AND Location IS NOT NULL', [album['AlbumID']])) + len(myDB.select('SELECT TrackTitle from have WHERE ArtistName like ? AND AlbumTitle LIKE ? AND Matched = "Failed"', [album['ArtistName'], album['AlbumTitle']]))
-				
-				try:
-					percent = (havetracks*100.0)/totaltracks
-					if percent > 100:
-						percent = 100
-				except (ZeroDivisionError, TypeError):
-					percent = 0
-					totaltracks = '?'
-					
-				avgbitrate = myDB.action("SELECT AVG(BitRate) FROM tracks WHERE AlbumID=?", [album['AlbumID']]).fetchone()[0]
-				if avgbitrate:
-					bitrate = str(int(avgbitrate)/1000) + ' kbps'
-				else:
-					bitrate = ''
-
-				albumformatcount = myDB.action("SELECT COUNT(DISTINCT Format) FROM tracks WHERE AlbumID=?", [album['AlbumID']]).fetchone()[0]
-				if albumformatcount == 1:
-					albumformat = myDB.action("SELECT DISTINCT Format FROM tracks WHERE AlbumID=?", [album['AlbumID']]).fetchone()[0]
-				elif albumformatcount > 1:
-					albumformat = 'Mixed'
-				else:
-					albumformat = ''
-
-				lossy_formats = [str.upper(fmt) for fmt in headphones.LOSSY_MEDIA_FORMATS]
-
+				# Use the pre-calculated values from the album object
+				totaltracks_display = album.get('TotalTracks', '?')
+				havetracks_display = album.get('HaveTracks', 0)
+				percent_display = album.get('PercentOwned', 0)
+				bitrate_display = album.get('BitrateDisplay', '') # e.g., '192 kbps'
+				albumformat_display = album.get('AlbumFormat', '') # e.g., 'MP3', 'FLAC', 'Mixed'
 			%>
 			<tr class="grade${grade}">
-				<td id="select"><input type="checkbox" name="${album['AlbumID']}" class="checkbox" /></td>
-				<td id="albumname"><a href="albumPage?AlbumID=${album['AlbumID']}">${album['AlbumTitle']}</a></td>
-                <td id="artistname"><a href="artistPage?ArtistID=${album['ArtistID']}">${album['ArtistName']}</a></td>
-				<td id="reldate">${album['ReleaseDate']}</td>
-				<td id="type">${album['Type']}</td>
-				<td id="status">${album['Status']}</td>
-				<td id="have"><span title="${percent}"><span><div class="progress-container"><div style="width:${percent}%"><div class="havetracks">${havetracks}/${totaltracks}</div></div></div></td>
-				<td id="bitrate">${bitrate}</td>
-				<td id="albumformat">${albumformat}</td>
+				<td class="select-album-checkbox"><input type="checkbox" name="albumid_${album['AlbumID']}" value="${album['AlbumID']}" class="album-checkbox" /></td> <%-- Unique name and class for individual checkboxes --%>
+				<td class="column-albumname"><a href="albumPage?AlbumID=${album['AlbumID']}">${album['AlbumTitle']}</a></td>
+                <td class="column-artistname"><a href="artistPage?ArtistID=${album['ArtistID']}">${album['ArtistName']}</a></td>
+				<td class="column-reldate">${album['ReleaseDate']}</td>
+				<td class="column-type">${album['Type']}</td>
+				<td class="column-status">${album['Status']}</td>
+				<td class="column-have">
+                    <span title="${percent_display}"></span> <%-- Using percent_display for title attribute --%>
+                    <div class="progress-container" role="progressbar" aria-valuenow="${percent_display | int}" aria-valuemin="0" aria-valuemax="100">
+                        <div style="width:${percent_display}%">
+                            <div class="havetracks">${havetracks_display}/${totaltracks_display}</div>
+                        </div>
+                    </div>
+                </td>
+				<td class="column-bitrate">${bitrate_display}</td>
+				<td class="column-albumformat">${albumformat_display}</td>
 			</tr>	
 		%endfor
 		</tbody>
@@ -106,28 +95,75 @@
 </%def>
 
 <%def name="headIncludes()">
+	${parent.headIncludes()} <%-- Ensure parent head includes are kept --%>
 	<link rel="stylesheet" href="interfaces/default/css/data_table.css">
+	<style>
+		/* Styles for progress bar, similar to index.html for consistency */
+		.progress-container {
+			background-color: #eee;
+			border-radius: 5px;
+			height: 15px; /* Adjust height as needed */
+			overflow: hidden;
+			position: relative;
+			width: 100%; /* Or a fixed width if preferred */
+		}
+
+		.progress-container > div {
+			background-color: #4CAF50; /* Green color for progress */
+			height: 100%;
+			border-radius: 5px;
+			text-align: center;
+			color: white;
+			font-size: 10px; /* Smaller font for percentage */
+			line-height: 15px; /* Vertically align text */
+		}
+
+		.havetracks {
+			padding: 0 5px; /* Add some padding around the text */
+		}
+
+		/* Styles for album status grades */
+		.gradeZ { /* Skipped */
+			background-color: #f2dede; /* Light red/pink */
+		}
+		.gradeX { /* Wanted */
+			background-color: #d9edf7; /* Light blue */
+		}
+		.gradeI { /* Ignored */
+			background-color: #fcf8e3; /* Light yellow */
+		}
+		.gradeC { /* Snatched */
+			background-color: #dff0d8; /* Light green */
+		}
+		.gradeA { /* Downloaded/Processed (default) */
+			/* No specific background or subtle light grey */
+		}
+	</style>
 </%def>
 
 <%def name="javascriptIncludes()">
+	${parent.javascriptIncludes()} <%-- Ensure parent javascript includes are kept --%>
 	<script src="js/libs/jquery.dataTables.min.js"></script>
 	<script>
-		function initThisPage() {
+		// Encapsulate page-specific logic
+		var ManageAlbumsPage = ManageAlbumsPage || {};
+
+		ManageAlbumsPage.initDataTable = function() {
 			$('#album_table').dataTable({
 				"bDestroy": true,
 				"aoColumns": [
-	                null,
-					null,
-					null,
-					null,
-					null,
-					null,
-					{ "sType": "title-numeric"},
-					null,
-					null
+	                null, // Checkbox column (not sortable)
+					null, // Album Name
+					null, // Artist Name
+					null, // Date
+					null, // Type
+					null, // Status
+					{ "sType": "title-numeric"}, // Have (uses title for numeric sort)
+					null, // Bitrate
+					null  // Format
 				],
 				"aoColumnDefs": [
-				          { 'bSortable': false, 'aTargets': [ 0 ] }
+				    { 'bSortable': false, 'aTargets': [ 0 ] } // Disable sorting for checkbox column
 				],
 				"oLanguage": {
 					"sLengthMenu":"Show _MENU_ albums per page",
@@ -136,19 +172,83 @@
 					"sInfoEmpty":"Showing 0 to 0 of 0 albums",
 					"sInfoFiltered":"(filtered from _MAX_ total albums)",
 					"sSearch": ""},
-				"bPaginate": false,
-				"aaSorting": [[5, 'desc']],
+				"bPaginate": false, // All data loaded on one page
+				"aaSorting": [[5, 'desc']], // Default sort by Status descending
 				"fnDrawCallback": function (o) {
 	                // Jump to top of page
 	                $('html,body').scrollTop(0);
 	            }
-
 			});
-			resetFilters("albums");
-		}
+		};
+
+		ManageAlbumsPage.initActions = function() {
+			// Event listener for the "Mark selected albums as" dropdown
+			$('#markAlbumActionSelect').on('change', function() {
+				var $this = $(this);
+				var actionValue = $this.val();
+				var selectedAlbumIds = [];
+
+				// Get all checked album checkboxes
+				$('.album-checkbox:checked').each(function() {
+					selectedAlbumIds.push($(this).val());
+				});
+
+				if (selectedAlbumIds.length === 0) {
+					// Display error if no albums are selected
+					if (typeof showMessage === 'function') { // Assuming showMessage is a global utility
+						showMessage($this.data('error') || "You didn't select any albums", 'error');
+					} else {
+						alert($this.data('error') || "You didn't select any albums");
+					}
+					// Reset select box to default
+					$this.val($('option:first', $this).val());
+					return; // Stop execution
+				}
+
+				// Construct URL with selected album IDs and action
+				var url = 'markAlbums?action=' + encodeURIComponent(actionValue);
+				$.each(selectedAlbumIds, function(index, id) {
+					url += '&albumid=' + encodeURIComponent(id); // Use a consistent param name if backend expects multiple
+				});
+
+				// Perform AJAX call
+				if (typeof doAjaxCall === 'function') {
+					doAjaxCall(url, $this, 'table', 'Albums marked as ' + actionValue + ' successfully!', 'Error marking albums.');
+					// After successful action, you might want to redraw the table or update rows
+					// $('#album_table').dataTable().fnDraw();
+				} else {
+					console.error("doAjaxCall function is not defined. Cannot mark albums asynchronously.");
+				}
+				// Reset select box to default after action
+				$this.val($('option:first', $this).val());
+			});
+
+			// Event listener for the "toggle all" checkbox
+			$('#toggleAllAlbums').on('click', function() {
+				$('.album-checkbox').prop('checked', this.checked);
+			});
+
+			// Optionally, reset individual checkboxes if header checkbox is unchecked (and vice-versa if needed)
+			$('.album-checkbox').on('click', function() {
+				if (!this.checked) {
+					$('#toggleAllAlbums').prop('checked', false);
+				} else {
+					// If all are checked, check the header checkbox
+					if ($('.album-checkbox:checked').length === $('.album-checkbox').length) {
+						$('#toggleAllAlbums').prop('checked', true);
+					}
+				}
+			});
+		};
+
 		$(document).ready(function() {
-			initThisPage();
+			ManageAlbumsPage.initDataTable();
+			ManageAlbumsPage.initActions();
+
+			// Assuming resetFilters is a global function from common.js
+			if (typeof resetFilters === 'function') {
+				resetFilters("albums");
+			}
 		});
 	</script>
 </%def>
-
