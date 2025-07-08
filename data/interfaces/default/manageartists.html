@@ -1,7 +1,5 @@
 <%inherit file="base.html" />
 
-
-
 <%def name="headerIncludes()">
 	<div id="subhead_container">
 			&nbsp;
@@ -15,9 +13,10 @@
 	<div id="manageheader" class="title">
 		<h1 class="clearfix"><i class="fa fa-music"></i> Manage Artists</h1>
 	</div>
-	<form action="markArtists" method="get" id="markArtists">
-	<div id="markalbum">
-		<select name="action" onChange="doAjaxCall('markArtists',$(this),'table',true);" data-error="You didn't select any artists">
+	<form action="markArtists" method="get" id="markArtistsForm"> <%-- Renamed ID to avoid conflict with markalbum div --%>
+	<div id="markartists_controls"> <%-- More descriptive ID for the controls div --%>
+		<%-- Replaced inline onChange with an ID for JS handling --%>
+		<select name="action" id="markArtistActionSelect">
   			<option disabled="disabled" selected="selected">Choose...</option>
   			<option value="pause">Pause</option>
   			<option value="resume">Resume</option>
@@ -25,17 +24,17 @@
   			<option value="delete">Delete</option>
 		</select>
 		selected artists
-		<input type="hidden" value="Go">
+		<input type="hidden" value="Go"> <%-- This hidden input might be redundant if data is sent via AJAX --%>
 	</div>
 	<table class="display" id="artist_table">
 		<thead>
 			<tr>
-				<th id="select"><input type="checkbox" onClick="toggle(this)" /></th>
-				<th id="albumart"></th>
-				<th id="name">Artist Name</th>
-				<th id="status">Status</th>
-				<th id="album">Latest Album</th>
-				<th id="lastupdated">Last Updated</th>
+				<th class="select-all-checkbox"><input type="checkbox" id="toggleAllArtists" /></th> <%-- Added ID for easier targeting --%>
+				<th class="column-albumart"></th> <%-- Changed ID to class for consistency and uniqueness --%>
+				<th class="column-name">Artist Name</th>
+				<th class="column-status">Status</th>
+				<th class="column-album">Latest Album</th>
+				<th class="column-lastupdated">Last Updated</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -48,6 +47,7 @@
 				else:
 					grade = 'Z'
 					
+				# Python logic for display formatting is fine here, as it's not doing DB queries.
 				if artist['ReleaseDate'] and artist['LatestAlbum']:
 					releasedate = artist['ReleaseDate']
 					albumdisplay = '<i>%s</i> (%s)' % (artist['LatestAlbum'], artist['ReleaseDate'])	
@@ -65,12 +65,17 @@
 					
 			%>
 			<tr class="grade${grade}">
-				<td id="select"><input type="checkbox" name="${artist['ArtistID']}" class="checkbox" /></td>
-				<td id="albumart"><div id="artistImg"><img class="albumArt" id="${artist['ArtistID']}" src="artwork/thumbs/artist/${artist['ArtistID']}" height="50" width="50"></div></td>
-				<td id="name"><span title="${artist['ArtistSortName']}"></span><a href="artistPage?ArtistID=${artist['ArtistID']}">${artist['ArtistName']}</a></td>
-				<td id="status">${artist['Status']}</td>	
-				<td id="album"><span title="${releasedate}"></span><a href="albumPage?AlbumID=${artist['AlbumID']}">${albumdisplay}</a></td>
-				<td id="lastupdated">${lastupdated}</td>
+				<td class="select-artist-checkbox"><input type="checkbox" name="artistid_${artist['ArtistID']}" value="${artist['ArtistID']}" class="artist-checkbox" /></td> <%-- Unique name and class for individual checkboxes --%>
+				<td class="column-albumart">
+                    <div class="artistImg-container">
+                        <%-- Using data-src for lazy loading with jquery.unveil.min.js and native loading="lazy" --%>
+                        <img class="albumArt-thumb" alt="Album art for ${artist['ArtistName']}" data-src="artwork/thumbs/artist/${artist['ArtistID']}" loading="lazy" />
+                    </div>
+                </td>
+				<td class="column-name"><span title="${artist['ArtistSortName']}"></span><a href="artistPage?ArtistID=${artist['ArtistID']}">${artist['ArtistName']}</a></td>
+				<td class="column-status">${artist['Status']}</td>	
+				<td class="column-album"><span title="${releasedate}"></span><a href="albumPage?AlbumID=${artist['AlbumID']}">${albumdisplay}</a></td>
+				<td class="column-lastupdated">${lastupdated}</td>
 			</tr>
 		%endfor
 		</tbody>
@@ -80,37 +85,142 @@
 </%def>
 
 <%def name="headIncludes()">
+	${parent.headIncludes()} <%-- Ensure parent head includes are kept --%>
 	<link rel="stylesheet" href="interfaces/default/css/data_table.css">
+	<style>
+		/* Basic CSS for album art thumbnail, consistent with index.html */
+		.albumArt-thumb {
+			height: 50px;
+			width: 50px;
+			object-fit: cover; /* Ensures image covers the area without distortion */
+			vertical-align: middle;
+		}
+
+		/* Styles for artist status grades */
+		.gradeX { /* Paused */
+			background-color: #f2dede; /* Light red/pink */
+		}
+		.gradeC { /* Loading */
+			background-color: #dff0d8; /* Light green */
+		}
+		.gradeZ { /* Others (e.g., Active) */
+			/* No specific background or subtle light grey */
+		}
+	</style>
 </%def>
 
 <%def name="javascriptIncludes()">
+	${parent.javascriptIncludes()} <%-- Ensure parent javascript includes are kept --%>
 	<script src="js/libs/jquery.dataTables.min.js"></script>
+    <script src="js/libs/jquery.unveil.min.js"></script> <%-- Added for lazy loading --%>
 	<script>
-		function initThisPage() {
+		// Encapsulate page-specific logic
+		var ManageArtistsPage = ManageArtistsPage || {};
+
+		ManageArtistsPage.initDataTable = function() {
 			$('#artist_table').dataTable({
 				"bDestroy": true,
 				"aoColumns": [
-					null,
-					null,
-					{ "sType": "title-string"},
-					null,
-					{ "sType": "title-string"},
-					null
+					null, // Checkbox column (not sortable)
+					null, // Album art (not sortable by default)
+					{ "sType": "title-string"}, // Artist Name (uses title for sort)
+					null, // Status
+					{ "sType": "title-string"}, // Latest Album (uses title for sort)
+					null  // Last Updated
+				],
+				"aoColumnDefs": [
+				    { 'bSortable': false, 'aTargets': [ 0, 1 ] } // Disable sorting for checkbox and album art columns
 				],
 				"oLanguage": {
 					"sSearch" : "",
 					"sEmptyTable": " "
 				},
-				"bStateSave": true,
-				"bPaginate": false
+				"bStateSave": true, // Retain table state across page loads
+				"bPaginate": false, // All data loaded on one page
+                "fnDrawCallback": function (o) {
+                    // Re-unveil images after each draw for lazy loading
+                    $("img.albumArt-thumb").unveil();
+                }
 			});
-			resetFilters("artists");
-		}
+		};
+
+		ManageArtistsPage.initActions = function() {
+			// Event listener for the "Mark selected artists" dropdown
+			$('#markArtistActionSelect').on('change', function() {
+				var $this = $(this);
+				var actionValue = $this.val();
+				var selectedArtistIds = [];
+
+				// Get all checked artist checkboxes
+				$('.artist-checkbox:checked').each(function() {
+					selectedArtistIds.push($(this).val());
+				});
+
+				if (selectedArtistIds.length === 0) {
+					// Display error if no artists are selected
+					if (typeof showMessage === 'function') { // Assuming showMessage is a global utility
+						showMessage($this.data('error') || "You didn't select any artists", 'error');
+					} else {
+						alert($this.data('error') || "You didn't select any artists");
+					}
+					// Reset select box to default
+					$this.val($('option:first', $this).val());
+					return; // Stop execution
+				}
+
+				// Construct URL with selected artist IDs and action
+				var url = 'markArtists?action=' + encodeURIComponent(actionValue);
+				$.each(selectedArtistIds, function(index, id) {
+					url += '&artistid=' + encodeURIComponent(id); // Use a consistent param name if backend expects multiple
+				});
+
+				// Perform AJAX call
+				if (typeof doAjaxCall === 'function') {
+					doAjaxCall(url, $this, 'table', 'Artists marked as ' + actionValue + ' successfully!', 'Error marking artists.');
+					// After successful action, you might want to redraw the table or update rows
+					// $('#artist_table').dataTable().fnDraw();
+				} else {
+					console.error("doAjaxCall function is not defined. Cannot mark artists asynchronously.");
+				}
+				// Reset select box to default after action
+				$this.val($('option:first', $this).val());
+			});
+
+			// Event listener for the "toggle all" checkbox
+			$('#toggleAllArtists').on('click', function() {
+				$('.artist-checkbox').prop('checked', this.checked);
+			});
+
+			// Optionally, update "toggle all" checkbox based on individual checkboxes
+			$(document).on('click', '.artist-checkbox', function() {
+				if (!this.checked) {
+					$('#toggleAllArtists').prop('checked', false);
+				} else {
+					// If all are checked, check the header checkbox
+					if ($('.artist-checkbox:checked').length === $('.artist-checkbox').length) {
+						$('#toggleAllArtists').prop('checked', true);
+					}
+				}
+			});
+		};
+
 		$(document).ready(function() {
-			initThisPage();
+			ManageArtistsPage.initDataTable();
+			ManageArtistsPage.initActions();
+
+			// Assuming resetFilters is a global function from common.js
+			if (typeof resetFilters === 'function') {
+				resetFilters("artists");
+			}
 		});
-		$(window).load(function(){
-			initFancybox();
+
+		// Call initFancybox if it's a global function that needs to run on window load
+		$(window).on('load', function(){
+			if (typeof initFancybox === 'function') {
+				initFancybox();
+			} else {
+				console.warn("initFancybox function is not defined.");
+			}
 		});
 	</script>
 </%def>
