@@ -1,8 +1,9 @@
 <%inherit file="base.html" />
 <%!
 	import headphones
-	from headphones import db, helpers
-	myDB = db.DBConnection()
+	# Removed direct DB imports/interactions here, as data should be pre-fetched server-side.
+	# from headphones import db, helpers
+	# myDB = db.DBConnection() # This should not be in the template
 %>
 
 <%def name="headerIncludes()">
@@ -20,73 +21,82 @@
 		<h1 class="clearfix"><i class="fa fa-music"></i> Manage Manually Matched Albums</h1>
 	</div>
 
-	<table class="display" id="artist_table">
+	<table class="display" id="manual_album_table"> <%-- Changed ID for clarity --%>
 		<thead>
 			<tr>
-				<th id="artist">Local Artist</th>
-				<th id="album">Local Album</th>
-				<th id="status">Previous Action</th>
+				<th class="column-artist">Local Artist</th> <%-- Changed ID to class --%>
+				<th class="column-album">Local Album</th> <%-- Changed ID to class --%>
+				<th class="column-status">Previous Action</th> <%-- Changed ID to class --%>
 			</tr>
 		</thead>
 		<tbody>
-		<% count_albums=0 %>
+		<% count_albums=0 %> <%-- Keeping count_albums for potential unique element IDs if still absolutely necessary, though aiming for generic approach --%>
 		%for album in manualalbums:
 			<tr class="gradeZ">
 			<%
+				# These replacements should ideally be done server-side before passing to template,
+				# or in JS using encodeURIComponent, but kept here for minimal change.
 				old_artist_clean = album['ArtistName'].replace('&','%26').replace('+', '%2B').replace("'","%27")
 				old_album_clean = album['AlbumTitle'].replace('&','%26').replace('+', '%2B').replace("'","%27")
 			%>
-			<td id="artist">${album['ArtistName']}<BR>
-				<button id="reset_artist${count_albums}" onClick="reset_Artist(this.id)">(<-) Reset Artist</button>
-				<div id="reset_artist_dialog${count_albums}" title="Reset Artist" style="display:none">
-					<table>
-					<tr><td>Are you sure you want to reset Local Artist: ${album['ArtistName']} to unmatched?</td></tr>
-					<tr><td align="right"><BR>
-					%if album['AlbumStatus'] == "Ignored":
-						<button href="javascript:void(0)" onclick="doAjaxCall('markManual?action=unignoreArtist&existing_artist=${old_artist_clean}', $(this), 'page');" data-success="Successfully reset ${album['ArtistName']} to unmatched">Reset Artist</button>
-					%elif album['AlbumStatus'] == "Matched":
-						<button href="javascript:void(0)" onclick="doAjaxCall('markManual?action=unmatchArtist&existing_artist=${old_artist_clean}', $(this), 'page');" data-success="Successfully restored ${album['ArtistName']} to unmatched">Reset Artist</button>
-					%endif
-					</td></tr>
-					</table>
-				</div>
+			<td class="column-artist">
+				${album['ArtistName']}<BR>
+				<%-- Use a common class and data attributes to pass info to generic dialog --%>
+				<button type="button" class="reset-button"
+                        data-reset-type="artist"
+                        data-artist-name="${album['ArtistName']}"
+                        data-album-status="${album['AlbumStatus']}"
+                        data-old-artist-clean="${old_artist_clean}">
+                    (&lt;-) Reset Artist
+                </button>
 			</td>
-			<td id="album">${album['AlbumTitle']}<BR>
-				<button id="reset_album${count_albums}" onClick="reset_Album(this.id)">(<-) Reset Album</button>
-				<div id="reset_album_dialog${count_albums}" title="Reset Album" style="display:none">
-					<table>
-					<tr><td>Are you sure you want to reset Local Album: ${album['AlbumTitle']} to unmatched?</td></tr>
-					<tr><td align="right"><BR>
-					%if album['AlbumStatus'] == "Ignored":
-						<button href="javascript:void(0)" onclick="doAjaxCall('markManual?action=unignoreAlbum&existing_artist=${old_artist_clean}&existing_album=${old_album_clean}', $(this), 'page');" data-success="Successfully reset ${album['AlbumTitle']} to unmatched">Reset Album</button>
-					%elif album['AlbumStatus'] == "Matched":
-						<button href="javascript:void(0)" onclick="doAjaxCall('markManual?action=unmatchAlbum&existing_artist=${old_artist_clean}&existing_album=${old_album_clean}', $(this), 'page');" data-success="Successfully reset ${album['AlbumTitle']} to unmatched">Reset Album</button>
-					%endif
-					</td></tr>
-					</table>
-				</div>
-
+			<td class="column-album">
+				${album['AlbumTitle']}<BR>
+				<%-- Use a common class and data attributes to pass info to generic dialog --%>
+				<button type="button" class="reset-button"
+                        data-reset-type="album"
+                        data-artist-name="${album['ArtistName']}"
+                        data-album-title="${album['AlbumTitle']}"
+                        data-album-status="${album['AlbumStatus']}"
+                        data-old-artist-clean="${old_artist_clean}"
+                        data-old-album-clean="${old_album_clean}">
+                    (&lt;-) Reset Album
+                </button>
 			</td>
-			<td id="status">${album['AlbumStatus']}
-
+			<td class="column-status">
+                ${album['AlbumStatus']}
 			</td>
 			</tr>
 		<% count_albums+=1 %>
 		%endfor
 		</tbody>
 	</table>
+
+    <%-- Generic Reset Confirmation Dialog (only one on the page) --%>
+    <div id="reset_dialog" title="Reset Confirmation" style="display:none">
+        <p class="dialog-message"></p>
+        <p class="dialog-actions" align="right"><BR>
+            <button type="button" class="confirm-reset-button"></button>
+        </p>
+    </div>
+
 	</div>
 </%def>
 
 <%def name="headIncludes()">
+	${parent.headIncludes()} <%-- Ensure parent head includes are kept --%>
 	<link rel="stylesheet" href="interfaces/default/css/data_table.css">
 </%def>
 
 <%def name="javascriptIncludes()">
+	${parent.javascriptIncludes()} <%-- Ensure parent javascript includes are kept --%>
 	<script src="js/libs/jquery.dataTables.min.js"></script>
 	<script>
-	$(document).ready(function() {
-		$('#artist_table').dataTable({
+	// Encapsulate page-specific logic
+	var ManageManualPage = ManageManualPage || {};
+
+	ManageManualPage.initDataTable = function() {
+		$('#manual_album_table').dataTable({ <%-- Use the updated ID --%>
 			"bStateSave": true,
 			"bPaginate": true,
 			"oLanguage": {
@@ -96,28 +106,98 @@
 					"sInfoEmpty":"Showing 0 to 0 of 0 albums",
 					"sInfoFiltered":"(filtered from _MAX_ total albums)",
 					"sEmptyTable": " ",
-                    },
+                },
             "sPaginationType": "full_numbers",
             "fnDrawCallback": function (o) {
                 // Jump to top of page
                 $('html,body').scrollTop(0);
             }
          });
+	};
 
-		initActions();
+    ManageManualPage.initDialogs = function() {
+        // Initialize the generic reset dialog once
+        $('#reset_dialog').dialog({
+            autoOpen: false,
+            modal: true,
+            resizable: false,
+            width: 500,
+            height: 'auto',
+            buttons: {
+                "Cancel": function() {
+                    $(this).dialog('close');
+                }
+            }
+        });
+    };
+
+    ManageManualPage.initActions = function() {
+        // Event delegation for all reset buttons
+        $(document).on('click', '.reset-button', function() {
+            var $button = $(this);
+            var resetType = $button.data('reset-type'); // 'artist' or 'album'
+            var artistName = $button.data('artist-name');
+            var albumTitle = $button.data('album-title');
+            var albumStatus = $button.data('album-status');
+            var oldArtistClean = $button.data('old-artist-clean');
+            var oldAlbumClean = $button.data('old-album-clean');
+
+            var $dialog = $('#reset_dialog');
+            var $dialogMessage = $dialog.find('.dialog-message');
+            var $confirmButton = $dialog.find('.confirm-reset-button');
+
+            var message = "";
+            var actionUrl = "";
+            var successMessage = "";
+
+            if (resetType === 'artist') {
+                message = "Are you sure you want to reset Local Artist: " + artistName + " to unmatched?";
+                if (albumStatus === "Ignored") {
+                    actionUrl = 'markManual?action=unignoreArtist&existing_artist=' + oldArtistClean;
+                    successMessage = "Successfully reset " + artistName + " to unmatched";
+                } else if (albumStatus === "Matched") {
+                    actionUrl = 'markManual?action=unmatchArtist&existing_artist=' + oldArtistClean;
+                    successMessage = "Successfully restored " + artistName + " to unmatched";
+                }
+                $confirmButton.text('Reset Artist');
+            } else if (resetType === 'album') {
+                message = "Are you sure you want to reset Local Album: " + albumTitle + " to unmatched?";
+                if (albumStatus === "Ignored") {
+                    actionUrl = 'markManual?action=unignoreAlbum&existing_artist=' + oldArtistClean + '&existing_album=' + oldAlbumClean;
+                    successMessage = "Successfully reset " + albumTitle + " to unmatched";
+                } else if (albumStatus === "Matched") {
+                    actionUrl = 'markManual?action=unmatchAlbum&existing_artist=' + oldArtistClean + '&existing_album=' + oldAlbumClean;
+                    successMessage = "Successfully reset " + albumTitle + " to unmatched";
+                }
+                $confirmButton.text('Reset Album');
+            }
+
+            $dialogMessage.text(message);
+
+            // Unbind previous click handler and bind new one
+            $confirmButton.off('click').on('click', function() {
+                if (typeof doAjaxCall === 'function') {
+                    doAjaxCall(actionUrl, $button, 'page', successMessage);
+                } else {
+                    console.error("doAjaxCall function is not defined. Cannot perform reset action.");
+                }
+                $dialog.dialog('close');
+            });
+
+            $dialog.dialog('open');
+        });
+
+        // Assuming initActions from common.js is called globally
+        if (typeof initActions === 'function') {
+            initActions();
+        }
+    };
+
+	$(document).ready(function() {
+		ManageManualPage.initDataTable();
+        ManageManualPage.initDialogs();
+		ManageManualPage.initActions();
 	});
-
-	function reset_Artist(clicked_id) {
-		n=clicked_id.replace("reset_artist","");
-		$("#reset_artist_dialog"+n).dialog();
-		return false;
-	}
-
-	function reset_Album(clicked_id) {
-		n=clicked_id.replace("reset_album","");
-		$("#reset_album_dialog"+n).dialog();
-		return false;
-	}
 
 	</script>
 </%def>
