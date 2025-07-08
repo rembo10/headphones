@@ -6,9 +6,11 @@
 <%def name="headerIncludes()">
 	<div id="subhead_container">
 		<div id="subhead_menu">
-			<a class="menu_link_edit" id="manage_albums" href="javascript:void(0)"><i class="fa fa-pencil"></i> Manage Albums</a>
-				<div id="dialog" title="Choose Album Filter" style="display:none" class="configtable">
+			<%-- Retained id="manage_albums" as it's a specific trigger for a dialog --%>
+			<a class="menu_link_edit" id="manage_albums" href="#"><i class="fa fa-pencil"></i> Manage Albums</a>
+				<div id="dialog-manage-albums" title="Choose Album Filter" style="display:none" class="configtable">
 					<div class="links">
+						<%-- Links within dialog changed to use data-status for filtering if AJAX is desired on manageAlbums page --%>
 						<a href="manageAlbums?Status=Downloaded"><i class="fa fa-check fa-fw"></i> Manage Downloaded Albums</a><br>
 						<a href="manageAlbums?Status=Skipped"><i class="fa fa-flag fa-fw"></i> Manage Skipped Albums</a><br>
 						<a href="manageAlbums?Status=Snatched"><i class="fa fa-cloud-download fa-fw"></i> </span>Manage Snatched Albums</a><br>
@@ -40,8 +42,9 @@
 			<li><a href="#tabs-4">Force Legacy</a></li>
 		</ul>
 		<div id="tabs-1" class="configtable">
-			<fieldset>
-				<form action="musicScan" method="GET" id="musicScan">
+			<%-- action="musicScan" method="GET" is fine for form submission if full page reload is intended --%>
+			<form action="musicScan" method="GET" id="musicScan">
+				<fieldset>
 					<legend>Scan Music Library</legend>
 					<p><strong>Where do you keep your music?</strong></p>
 					<p>You can put in any directory, and it will scan for audio files in that folder
@@ -52,25 +55,22 @@
 					</p>	
 					<br/>
 					<div class="row">
-								<label for="">Path to directory</label>
-					%if headphones.CONFIG.MUSIC_DIR:
-						<input type="text" value="${headphones.CONFIG.MUSIC_DIR}" name="path" size="70" />
-					%else:
-						<input type="text" value="Enter a Music Directory to scan" onfocus="if
-						(this.value==this.defaultValue) this.value='';" name="path" size="70" />
-					%endif
+						<label for="music_dir_path">Path to directory</label>
+						<%-- Using HTML5 placeholder attribute and proper ID --%>
+						<input type="text" id="music_dir_path" value="${headphones.CONFIG.MUSIC_DIR or ''}" name="path" size="70" placeholder="Enter a Music Directory to scan" />
 					</div>
 					<div class="row checkbox"> 
-					<input type="checkbox" name="libraryscan" id="libraryscan" value="1" ${checked(headphones.CONFIG.LIBRARYSCAN)}><label>Automatically scan library</label>
+						<input type="checkbox" name="libraryscan" id="libraryscan" value="1" ${checked(headphones.CONFIG.LIBRARYSCAN)}><label for="libraryscan">Automatically scan library</label>
 					</div>
 					<div class="row checkbox"> 
-					<input type="checkbox" name="autoadd" id="autoadd" value="1" ${checked(headphones.CONFIG.AUTO_ADD_ARTISTS)}><label>Auto-add new artists</label>
+						<input type="checkbox" name="autoadd" id="autoadd" value="1" ${checked(headphones.CONFIG.AUTO_ADD_ARTISTS)}><label for="autoadd">Auto-add new artists</label>
 					</div>
 								
 				</fieldset>
 				<br>
-				<input type="button" value="Save Changes and Scan" onclick="addScanAction();doAjaxCall('musicScan',$(this),'tabs',true);return false;" data-success="Changes saved. Library will be scanned">
-				<input type="button" value="Save Changes without Scanning Library" onclick="doAjaxCall('musicScan',$(this),'tabs',true);return false;" data-success="Changes Saved Successfully">
+				<%-- Buttons use classes and data attributes for AJAX --%>
+				<input type="button" class="ajax-button" data-action="musicScan" data-scan="1" data-success="Changes saved. Library will be scanned" value="Save Changes and Scan">
+				<input type="button" class="ajax-button" data-action="musicScan" data-success="Changes Saved Successfully" value="Save Changes without Scanning Library">
 			</form>
 		</div>
 
@@ -81,19 +81,15 @@
 			<p>Enter the username whose artists you want to import:</p>		
 			<br/>
 			<div class="row">
-				<label for="">Username</label>
-				<%
-					if headphones.CONFIG.LASTFM_USERNAME:
-						lastfmvalue = headphones.CONFIG.LASTFM_USERNAME
-					else:
-						lastfmvalue = ''
-				%>
-				<input type="text" value="${lastfmvalue}" placeholder="Last.fm username" onfocus="if
-				(this.value==this.defaultValue) this.value='';" name="username" id="username" size="18" />
-				<a href="javascript:void(0)" onclick="doAjaxCall('importLastFM?username=',$(this),'tabs');return false;" data-success="Last.fm username has been reset"><i class="fa fa-reply"></i> Reset username</a>
+				<label for="lastfm_username">Username</label>
+				<%-- Using HTML5 placeholder attribute --%>
+				<input type="text" id="lastfm_username" value="${headphones.CONFIG.LASTFM_USERNAME or ''}" placeholder="Last.fm username" name="username" size="18" />
+				<%-- Changed to use class and data attributes for AJAX --%>
+				<a href="#" class="ajax-link" data-action="importLastFM" data-reset="username" data-success="Last.fm username has been reset"><i class="fa fa-reply"></i> Reset username</a>
 			</div>
 			</fieldset>
-			<input type="button" value="Save changes" onclick="doAjaxCall('importLastFM',$(this),'tabs',true);return false;" data-success="Last.fm artists will be imported" data-error="Fill in a last.fm username"/>
+			<%-- Changed to use class and data attributes for AJAX --%>
+			<input type="button" class="ajax-button" data-action="importLastFM" data-success="Last.fm artists will be imported" data-error="Fill in a last.fm username" value="Save changes"/>
 		</form>
         <br/>
         <form action="importLastFMTag" method="GET" id="importLastFMTag">
@@ -102,16 +98,15 @@
             <p>Enter tag from which you want import top artists:</p>
             <br/>
             <div class="row">
-                <label>Tag</label>
-			    <input type="text" value="" onfocus="if
-                (this.value==this.defaultValue) this.value='';" name="tag" id="tag" size="18" />
+                <label for="lastfm_tag">Tag</label>
+			    <input type="text" id="lastfm_tag" value="" name="tag" size="18" placeholder="Enter tag"/>
                 <br/>
-                <label>Limit</label>
-			    <input type="text" value="50" onfocus="if
-			    (this.value==this.defaultValue) this.value='';" name="limit" id="limit" size="18" />
+                <label for="lastfm_limit">Limit</label>
+			    <input type="text" id="lastfm_limit" value="50" name="limit" size="18" placeholder="50"/>
             </div>
             </fieldset>
-            <input type="submit" />
+            <%-- Standard submit button for this form --%>
+            <input type="submit" value="Import Tag"/>
         </form>
     </div>
 
@@ -121,40 +116,43 @@
 		<fieldset>
 			<legend>Force Search</legend>
 			<div class="links">
-				<a href="javascript:void(0)" onclick="doAjaxCall('forceSearch',$(this))" data-success="Checking for wanted albums successful" data-error="Error checking wanted albums"><i class="fa fa-search fa-fw"></i> Force Check for Wanted Albums</a>
-				<a href="javascript:void(0)" onclick="doAjaxCall('forceUpdate',$(this))" data-success="Update active artists successful" data-error="Error forcing update artists"><i class="fa fa-heart fa-fw"></i> Force Update Active Artists [Fast]</a>
-				<a href="javascript:void(0)" onclick="doAjaxCall('checkGithub',$(this))" data-success="Checking for update successful" data-error="Error checking for update"><i class="fa fa-refresh fa-fw"></i> Check for Headphones Updates</a>
-				<a href="javascript:void(0)" id="delete_empty_artists"><i class="fa fa-trash-o fa-fw"></i> Delete empty Artists</a>
-					<div id="emptyartistdialog" title="Confirm Artist Deletion" style="display:none" class="configtable">
+				<%-- All links use classes and data attributes for AJAX --%>
+				<a href="#" class="ajax-link" data-action="forceSearch" data-success="Checking for wanted albums successful" data-error="Error checking wanted albums"><i class="fa fa-search fa-fw"></i> Force Check for Wanted Albums</a>
+				<a href="#" class="ajax-link" data-action="forceUpdate" data-success="Update active artists successful" data-error="Error forcing update artists"><i class="fa fa-heart fa-fw"></i> Force Update Active Artists [Fast]</a>
+				<a href="#" class="ajax-link" data-action="checkGithub" data-success="Checking for update successful" data-error="Error checking for update"><i class="fa fa-refresh fa-fw"></i> Check for Headphones Updates</a>
+				
+                <a href="#" class="open-dialog-trigger" data-dialog-id="dialog-empty-artists"><i class="fa fa-trash-o fa-fw"></i> Delete empty Artists</a>
+					<div id="dialog-empty-artists" title="Confirm Artist Deletion" style="display:none" class="configtable">
 					    %if emptyArtists:
 						<h3>The following artists will be deleted:</h3>
 						
 						%for emptyArtist in emptyArtists:
 							<p>${emptyArtist['ArtistName']}</p>
 						%endfor
-						<input type="button" value="Delete Empty Artists" onclick="doAjaxCall('deleteEmptyArtists',$(this))" data-success="Empty Artists deleted" data-error="Error deleting empty artists">
+						<%-- Button uses class and data attributes for AJAX --%>
+						<input type="button" class="ajax-button" data-action="deleteEmptyArtists" data-success="Empty Artists deleted" data-error="Error deleting empty artists" value="Delete Empty Artists">
 					    %else:
-					        No empty artists found.
+					        <p>No empty artists found.</p>
 					    %endif
 					</div>
 					<div id="post_process">
-					<a href="javascript:void(0)" class="btnOpenDialog"><i class="fa fa-wrench fa-fw"></i> Force Post-Process Albums in Download Folder</a>
+						<a href="#" class="open-dialog-trigger" data-dialog-id="dialog-post-process"><i class="fa fa-wrench fa-fw"></i> Force Post-Process Albums in Download Folder</a>
 					</div>
 			</div>
 		</fieldset>
 		<fieldset>
             <div class="row" id="post_process_alternate">
-                <label>Force Post-Process Albums in Alternate Folder</label>
-			    <input type="text" value="" name="dir" id="dir" size="50" />
-			    <input type="button" class="btnOpenDialog" value="Submit" />
+                <label for="alt_dir_path">Force Post-Process Albums in Alternate Folder</label>
+			    <input type="text" value="" name="dir" id="alt_dir_path" size="50" placeholder="Enter alternate directory" />
+			    <input type="button" class="open-dialog-trigger ajax-dialog-submit" data-dialog-id="dialog-post-process" data-input-id="alt_dir_path" data-input-param="dir" value="Submit" />
             </div>
         </fieldset>
 
         <fieldset>
             <div class="row" id="post_process_single">
-                <label>Post-Process Single Folder</label>
-			    <input type="text" value="" name="album_dir" id="album_dir" size="50" />
-			    <input type="button" class="btnOpenDialog" value="Submit" />
+                <label for="album_dir_path">Post-Process Single Folder</label>
+			    <input type="text" value="" name="album_dir" id="album_dir_path" size="50" placeholder="Enter album directory" />
+			    <input type="button" class="open-dialog-trigger ajax-dialog-submit" data-dialog-id="dialog-post-process" data-input-id="album_dir_path" data-input-param="album_dir" value="Submit" />
             </div>
         </fieldset>
 
@@ -166,89 +164,200 @@
 			<legend>Force Legacy</legend>
 				<p>Please note that these functions will take a significant amount of time to complete.</p>
 			<div class="links">
-				<a href="javascript:void(0)" onclick="doAjaxCall('forceFullUpdate',$(this))" data-success="Update active artists successful" data-error="Error forcing update artists"><i class="fa fa-heart fa-fw"></i> Force Update Active Artists [Comprehensive]</a>
+				<%-- All links use classes and data attributes for AJAX --%>
+				<a href="#" class="ajax-link" data-action="forceFullUpdate" data-success="Update active artists successful" data-error="Error forcing update artists"><i class="fa fa-heart fa-fw"></i> Force Update Active Artists [Comprehensive]</a>
 				<BR>
-				<a href="javascript:void(0)" onclick="doAjaxCall('forceScan',$(this))" data-success="Library scan successful" data-error="Error forcing library scan"><i class="fa fa-refresh fa-fw"></i> Force Re-scan Library [Comprehensive]</a>
+				<a href="#" class="ajax-link" data-action="forceScan" data-success="Library scan successful" data-error="Error forcing library scan"><i class="fa fa-refresh fa-fw"></i> Force Re-scan Library [Comprehensive]</a>
 				<BR>
 				<small>*Warning: If you choose [Force Re-scan Library], any manually ignored/matched artists/albums will be reset to "unmatched".</small>
 
 		</div>
 		</fieldset>
-		
 	</div>
-	<div id="dialog-confirm"></div>
+
+    <%-- Shared dialog for post-process confirmation --%>
+	<div id="dialog-post-process" title="Keep original folder(s)?" style="display:none">
+        <p>Do you want to keep the original folder(s) after post-processing? If you click no, the folders still might be kept depending on your global settings</p>
+    </div>
 
 </div>
 </%def>
 <%def name="javascriptIncludes()">
+	${parent.javascriptIncludes()} <%-- Ensure parent javascript includes are kept --%>
 	<script>
-		function addScanAction() {
-			$('#autoadd').append('<input type="hidden" name="scan" value=1 />');
-		};
+		// Encapsulate page-specific logic
+		var ManagePage = ManagePage || {};
 
-		function fnOpenNormalDialog(id) {
-			if (id === "post_process"){
-				var url = "forcePostProcess?"
-			}
-			if (id === "post_process_alternate"){
-				var dir = $('#dir').val();
-				var url = "forcePostProcess?dir=" + dir + "&"
-			}
-			if (id === "post_process_single"){
-				var dir = $('#album_dir').val();
-				var url = "forcePostProcess?album_dir=" + dir + "&"
-			}
-			var t = $('<a data-success="Post-Processor is being loaded" data-error="Error during Post-Processing">');
-		    $("#dialog-confirm").html("Do you want to keep the original folder(s) after post-processing? If you click no, the folders still might be kept depending on your global settings");
-
-		    // Define the Dialog and its properties.
-		    $("#dialog-confirm").dialog({
-		        resizable: false,
-		        modal: true,
-		        title: "Keep original folder(s)?",
-		        height: 170,
-		        width: 400,
-		        buttons: {
-		            "Yes": function () {
-		                $(this).dialog('close');
-		                doAjaxCall(url + "keep_original_folder=True", t);
-		            },
-		                "No": function () {
-		                $(this).dialog('close');
-		                doAjaxCall(url + "keep_original_folder=False", t);
-		            }
-		        }
-		    });
-		}
-
-		$('.btnOpenDialog').click(function(e){
-			e.preventDefault();
-			var parentId = $(this).closest('div').prop('id');
-			fnOpenNormalDialog(parentId);
-		});
-
-		function callback(value) {
-		    if (value) {
-		        alert("Confirmed");
-		    } else {
-		        alert("Rejected");
-		    }
-		}
-		
-		function initThisPage() {
-			$('#manage_albums').click(function() {
-				$('#dialog').dialog();
-				return false;
-			});
-			$('#delete_empty_artists').click(function() {
-				$('#emptyartistdialog').dialog();
-				return false;
-			});
+		ManagePage.init = function() {
+			// Initialize jQuery UI Tabs
 			jQuery( "#tabs" ).tabs();
-			initActions();
+
+			// Initialize jQuery UI Dialogs
+			$('#dialog-manage-albums').dialog({
+				autoOpen: false,
+				modal: true,
+				width: 450,
+				height: 'auto',
+				title: "Choose Album Filter"
+			});
+
+			$('#dialog-empty-artists').dialog({
+				autoOpen: false,
+				modal: true,
+				width: 500,
+				height: 'auto',
+				title: "Confirm Artist Deletion"
+			});
+
+			// Post-process confirmation dialog
+			$('#dialog-post-process').dialog({
+				autoOpen: false,
+				resizable: false,
+				modal: true,
+				height: 170,
+				width: 400,
+				title: "Keep original folder(s)?",
+				buttons: {
+					"Yes": function () {
+						var $dialog = $(this);
+						$dialog.dialog('close');
+						// Retrieve parameters stored on the trigger element
+						var $trigger = $dialog.data('triggerElement');
+						var url = $trigger.data('ajax-url') + "&keep_original_folder=True";
+						var successMsg = $trigger.data('success') || "Post-Processor is being loaded";
+						var errorMsg = $trigger.data('error') || "Error during Post-Processing";
+
+						if (typeof doAjaxCall === 'function') {
+							doAjaxCall(url, $trigger, 'tabs', successMsg, errorMsg);
+						} else {
+							console.error("doAjaxCall function is not defined. Cannot perform post-process action.");
+						}
+					},
+					"No": function () {
+						var $dialog = $(this);
+						$dialog.dialog('close');
+						// Retrieve parameters stored on the trigger element
+						var $trigger = $dialog.data('triggerElement');
+						var url = $trigger.data('ajax-url') + "&keep_original_folder=False";
+						var successMsg = $trigger.data('success') || "Post-Processor is being loaded";
+						var errorMsg = $trigger.data('error') || "Error during Post-Processing";
+
+						if (typeof doAjaxCall === 'function') {
+							doAjaxCall(url, $trigger, 'tabs', successMsg, errorMsg);
+						} else {
+							console.error("doAjaxCall function is not defined. Cannot perform post-process action.");
+						}
+					}
+				}
+			});
+
+			// Event delegation for opening dialogs
+			$(document).on('click', '.open-dialog-trigger', function(e) {
+				e.preventDefault();
+				var dialogId = $(this).data('dialog-id');
+				var $dialog = $('#' + dialogId);
+
+				// For post-process dialogs, build the base URL and store it
+				if (dialogId === 'dialog-post-process') {
+					var url = "forcePostProcess?";
+					var inputId = $(this).data('input-id');
+					var inputParam = $(this).data('input-param');
+					if (inputId && inputParam) {
+						var inputValue = $('#' + inputId).val();
+						if (inputValue) {
+							url += inputParam + "=" + encodeURIComponent(inputValue) + "&";
+						}
+					}
+					// Store the base URL and the triggering element on the dialog for use in buttons
+					$dialog.data('ajax-url', url);
+					$dialog.data('triggerElement', $(this));
+				}
+				$dialog.dialog('open');
+			});
+
+			// Event delegation for general AJAX buttons (Save Changes, Delete Empty Artists)
+			$(document).on('click', '.ajax-button', function(e) {
+				e.preventDefault();
+				var $this = $(this);
+				var action = $this.data('action'); // e.g., musicScan, deleteEmptyArtists
+				var successMsg = $this.data('success');
+				var errorMsg = $this.data('error');
+				var formId = $this.closest('form').attr('id');
+				var url = '/' + action;
+				var data = {};
+
+				// For form submissions, serialize the form data
+				if (formId) {
+					var formData = $('#' + formId).serializeArray();
+					$.each(formData, function() {
+						if (data[this.name]) {
+							if (!data[this.name].push) {
+								data[this.name] = [data[this.name]];
+							}
+							data[this.name].push(this.value || '');
+						} else {
+							data[this.name] = this.value || '';
+						}
+					});
+				}
+
+				// Add specific data attributes from the button if present
+				$.each($this.data(), function(key, value) {
+					// Exclude 'action', 'success', 'error', 'scan' (handled specifically)
+					if (key !== 'action' && key !== 'success' && key !== 'error' && key !== 'scan') {
+						data[key] = value;
+					}
+				});
+
+				// Special handling for 'scan' parameter for musicScan
+				if ($this.data('scan') === 1) {
+					data['scan'] = 1;
+				}
+
+				// Special handling for 'reset' parameter for importLastFM
+				if ($this.data('reset') === 'username') {
+					url += '?username='; // Append empty username to clear it
+					data = {}; // Clear other data if resetting
+				}
+
+				if (typeof doAjaxCall === 'function') {
+					// Assuming doAjaxCall takes URL, trigger, context, successMsg, errorMsg, and data
+					doAjaxCall(url, $this, 'tabs', successMsg, errorMsg, data);
+				} else {
+					console.error("doAjaxCall function is not defined. Cannot perform AJAX button action.");
+				}
+
+				// If it's a delete artists action, close the dialog
+				if (action === 'deleteEmptyArtists') {
+					$('#dialog-empty-artists').dialog('close');
+					// Optionally, refresh the list of empty artists if it's dynamic
+				}
+			});
+
+			// Event delegation for general AJAX links (Force Actions, Force Legacy, Reset Last.fm)
+			$(document).on('click', '.ajax-link', function(e) {
+				e.preventDefault();
+				var $this = $(this);
+				var action = $this.data('action');
+				var successMsg = $this.data('success');
+				var errorMsg = $this.data('error');
+				var url = '/' + action; // Base URL
+
+				if (typeof doAjaxCall === 'function') {
+					doAjaxCall(url, $this, null, successMsg, errorMsg); // No specific context needed like 'tabs' here unless doAjaxCall uses it.
+				} else {
+					console.error("doAjaxCall function is not defined. Cannot perform AJAX link action.");
+				}
+			});
+
+			// Call initActions if it's a global function that needs to run
+			if (typeof initActions === 'function') {
+				initActions();
+			}
 		};
+
 		$(document).ready(function() {
-			initThisPage();
+			ManagePage.init();
 		});
 	</script>
 </%def>
