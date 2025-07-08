@@ -1,13 +1,45 @@
 <%inherit file="base.html"/>
 
 <%def name="headIncludes()">
+    ${parent.headIncludes()} <%-- Ensure parent head includes are kept --%>
 	<meta http-equiv="refresh" content="${timer};url=index">
+    <style>
+        /* Basic styling for the shutdown message */
+        #shutdown-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh; /* Full viewport height */
+            text-align: center;
+            background-color: #f8f8f8; /* Light background */
+            color: #333;
+            font-family: sans-serif; /* A common, readable font */
+        }
+
+        #shutdown-message h1 {
+            font-size: 2.5em; /* Larger, more prominent text */
+            color: #555;
+        }
+
+        #shutdown-message i {
+            margin-right: 15px; /* Space between icon and text */
+            color: #4CAF50; /* A green color for success/active states */
+        }
+
+        /* If it's truly shutting down or restarting, maybe a different color */
+        #shutdown-message.restarting i {
+            color: #ff9800; /* Orange for restart */
+        }
+        #shutdown-message.shutting-down i {
+            color: #f44336; /* Red for shutdown */
+        }
+    </style>
 </%def>
 
 <%def name="body()">
-	<div class="table_wrapper">
-		<div id="shutdown">
-		<h1><i class="fa fa-refresh fa-spin"></i>  Headphones is ${message}</h1>
+	<div class="table_wrapper" id="shutdown-container"> <%-- Added a container for centering --%>
+		<div id="shutdown-message" class="${'restarting' if message == 'restarting' else 'shutting-down'}"> <%-- Added class for conditional styling --%>
+		    <h1><i class="fa fa-refresh fa-spin"></i>  Headphones is ${message}</h1>
 		</div>
 	</div>
 </%def>
