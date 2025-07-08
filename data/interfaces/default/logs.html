@@ -6,8 +6,9 @@
 <%def name="headerIncludes()">
     <div id="subhead_container">
         <div id="subhead_menu">
-            <a class="menu_link_edit" href="clearLogs"><i class="fa fa-trash-o"></i> Clear log</a>
-            <a class="menu_link_edit" href="toggleVerbose"><i class="fa fa-pencil"></i> Toggle Debug Log</a>
+            <%-- Changed href to # and added data-action for JS handling --%>
+            <a class="menu_link_action" href="#" data-action="clearLogs" data-success="Logs cleared successfully!"><i class="fa fa-trash-o"></i> Clear log</a>
+            <a class="menu_link_action" href="#" data-action="toggleVerbose" data-success="Log verbosity toggled!"><i class="fa fa-pencil"></i> Toggle Debug Log</a>
         </div>
     </div>
 </%def>
@@ -19,61 +20,81 @@
 	<table class="display" id="log_table">
 		<thead>
 			<tr>
-				<th id="timestamp">Timestamp</th>
-				<th id="level">Level</th>
-				<th id="message">Message</th>
+				<th class="column-timestamp">Timestamp</th>
+				<th class="column-level">Level</th>
+				<th class="column-message">Message</th>
 			</tr>
 		</thead>
 		<tbody>
 		</tbody>
 	</table>
 	<br>
-	<div align="center">Refresh rate:
-	<select id="refreshrate" onchange="setRefresh()">
-	<option value="0" selected="selected">No Refresh</option>
-	<option value="5">5 Seconds</option>
-	<option value="15">15 Seconds</option>
-	<option value="30">30 Seconds</option>
-	<option value="60">60 Seconds</option>
-	<option value="300">5 Minutes</option>
-	<option value="600">10 Minutes</option>
-	</select></div>
+	<div class="refresh-controls" align="center">
+        Refresh rate:
+        <select id="refreshrate"> <%-- Removed inline onchange --%>
+            <option value="0" selected="selected">No Refresh</option>
+            <option value="5">5 Seconds</option>
+            <option value="15">15 Seconds</option>
+            <option value="30">30 Seconds</option>
+            <option value="60">60 Seconds</option>
+            <option value="300">5 Minutes</option>
+            <option value="600">10 Minutes</option>
+        </select>
+    </div>
 </%def>
 
 <%def name="headIncludes()">
+	${parent.headIncludes()} <%-- Ensure parent head includes are kept --%>
 	<link rel="stylesheet" href="interfaces/default/css/data_table.css">
+	<style>
+		/* Example CSS for log levels */
+		.gradeX { /* For ERROR */
+			background-color: #fdd; /* Light red */
+		}
+		.gradeW { /* For WARNING */
+			background-color: #ffc; /* Light yellow */
+		}
+		.gradeZ { /* For INFO/DEBUG */
+			/* default background or light gray */
+		}
+	</style>
 </%def>
 
 <%def name="javascriptIncludes()">
+	${parent.javascriptIncludes()} <%-- Ensure parent javascript includes are kept --%>
 	<script src="js/libs/jquery.dataTables.min.js"></script>
 	<script>
-        $(document).ready(function() {
-            initActions();
+        // Encapsulate page-specific logic
+        var LogsPage = LogsPage || {};
 
-        	$('#log_table').dataTable( {
-        		"bProcessing": true,
+        LogsPage.timer = null; // To hold the interval timer ID
+
+        LogsPage.initDataTable = function() {
+            $('#log_table').dataTable( {
+                "bProcessing": true,
                 "bServerSide": true,
-        		"sAjaxSource": 'getLog',
+                "sAjaxSource": 'getLog',
                 "sPaginationType": "full_numbers",
-                "aaSorting": [[0, 'desc']],
+                "aaSorting": [[0, 'desc']], // Sort by timestamp descending
                 "iDisplayLength": 25,
-                "bStateSave": true,
+                "bStateSave": true, // Retain table state across page loads
                 "oLanguage": {
-                            "sSearch":"Filter:",
-        					"sLengthMenu":"Show _MENU_ lines per page",
-        					"sEmptyTable": "No log information available",
-        					"sInfo":"Showing _START_ to _END_ of _TOTAL_ lines",
-        					"sInfoEmpty":"Showing 0 to 0 of 0 lines",
-        					"sInfoFiltered":"(filtered from _MAX_ total lines)"},
+                    "sSearch":"Filter:",
+                    "sLengthMenu":"Show _MENU_ lines per page",
+                    "sEmptyTable": "No log information available",
+                    "sInfo":"Showing _START_ to _END_ of _TOTAL_ lines",
+                    "sInfoEmpty":"Showing 0 to 0 of 0 lines",
+                    "sInfoFiltered":"(filtered from _MAX_ total lines)"
+                },
                 "fnRowCallback": function (nRow, aData, iDisplayIndex, iDisplayIndexFull) {
+                    // aData[1] contains the 'Level' from the server
                     if (aData[1] === "ERROR") {
-                        $('td', nRow).closest('tr').addClass("gradeX");
+                        $(nRow).addClass("gradeX");
                     } else if (aData[1] === "WARNING") {
-                        $('td', nRow).closest('tr').addClass("gradeW");
+                        $(nRow).addClass("gradeW");
                     } else {
-                        $('td', nRow).closest('tr').addClass("gradeZ");
+                        $(nRow).addClass("gradeZ");
                     }
-
                     return nRow;
                 },
                 "fnDrawCallback": function (o) {
@@ -81,30 +102,76 @@
                     $('html,body').scrollTop(0);
                 },
                 "fnServerData": function ( sSource, aoData, fnCallback ) {
-        			/* Add some extra data to the sender */
-        			$.getJSON(sSource, aoData, function (json) {
-        				fnCallback(json)
-        			});
-        		}
-        	});
+                    // Custom function for fetching data, using $.getJSON
+                    $.getJSON(sSource, aoData, function (json) {
+                        fnCallback(json);
+                    }).fail(function(jqXHR, textStatus, errorThrown) {
+                        console.error("Error fetching log data:", textStatus, errorThrown);
+                        // Optional: Display an error message to the user
+                    });
+                }
+            });
+        };
+
+        LogsPage.setRefresh = function() {
+            var refreshrateSelect = document.getElementById('refreshrate');
+            if (refreshrateSelect != null) {
+                // Clear any existing timer
+                if (LogsPage.timer) {
+                    clearInterval(LogsPage.timer);
+                }
+
+                var refreshValue = parseInt(refreshrateSelect.value, 10);
+                if (refreshValue !== 0) {
+                    // Set a new interval to redraw the DataTable
+                    LogsPage.timer = setInterval(function() {
+                        $('#log_table').dataTable().fnDraw(false); // 'false' prevents resetting current page
+                    }, 1000 * refreshValue);
+                }
+            }
+        };
+
+        LogsPage.initActions = function() {
+            // Event listener for the refresh rate dropdown
+            $('#refreshrate').on('change', LogsPage.setRefresh);
+
+            // Event delegation for header action links
+            $('#subhead_menu').on('click', '.menu_link_action', function(e) {
+                e.preventDefault(); // Prevent default link behavior
+                var $this = $(this);
+                var action = $this.data('action'); // 'clearLogs' or 'toggleVerbose'
+                var successMsg = $this.data('success');
+
+                if (typeof doAjaxCall === 'function') {
+                    // Assuming doAjaxCall handles the AJAX request and success/error messages
+                    doAjaxCall('/' + action, $this, 'table', successMsg, function() {
+                        // Callback after successful AJAX call for specific actions
+                        if (action === 'clearLogs') {
+                            // Redraw table after clearing logs to show empty state or refreshed data
+                            $('#log_table').dataTable().fnDraw();
+                        }
+                        // No specific redraw needed for toggleVerbose unless it changes displayed logs
+                    });
+                } else {
+                    console.error("doAjaxCall function is not defined. Cannot perform log action.");
+                    // Fallback to direct navigation if AJAX utility is missing
+                    // window.location.href = '/' + action;
+                }
+            });
+        };
+
+
+        $(document).ready(function() {
+            LogsPage.initDataTable();
+            LogsPage.initActions(); // Initialize new event handlers
+
+            // Initial call to set refresh based on default selected option
+            LogsPage.setRefresh();
+
+            // Ensure global initActions from common.js is called if it handles other site-wide actions
+            if (typeof initActions === 'function') {
+                initActions();
+            }
         });
-	</script>
-	<script>
-		var timer;
-		function setRefresh()
-		{
-			refreshrate = document.getElementById('refreshrate');
-			if(refreshrate != null)
-			{
-				if(timer)
-				{
-					clearInterval(timer);
-				}
-				if(refreshrate.value != 0)
-				{
-					timer = setInterval("$('#log_table').dataTable().fnDraw()",1000*refreshrate.value);
-				}
-			}
-		}
 	</script>
 </%def>
