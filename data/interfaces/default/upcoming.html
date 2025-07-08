@@ -3,7 +3,10 @@
 <%def name="headerIncludes()">
 	<div id="subhead_container">
 		<div id="subhead_menu">
-			<a href="javascript:void(0)" id="menu_link_scan" onclick="doAjaxCall('forceSearch',$(this))" data-success="Checking for wanted albums successful" data-error="Error checking wanted albums"><i class="fa fa-search"></i> Force Check</a>
+			<%-- Changed inline onclick to a class and data attributes for JS handling --%>
+			<a href="#" id="menu_link_force_check" class="ajax-link" data-action="forceSearch" data-success="Checking for wanted albums successful" data-error="Error checking wanted albums">
+                <i class="fa fa-search"></i> Force Check
+            </a>
 		</div>
 	</div>
 </%def>
@@ -13,38 +16,44 @@
 	<div id="paddingheader">
 		<h1 class="clearfix"><i class="fa fa-heart"></i> Wanted Albums</h1>
 	</div>
-	<form action="markAlbums" method="get" id="markAlbums">
-	<div id="markalbum" style="top:0;">
+	<form action="markAlbums" method="get" id="markAlbumsForm"> <%-- Added ID to the form --%>
+	<div id="mark_albums_controls"> <%-- Unique and descriptive ID, moved inline style to CSS --%>
 		Mark selected albums as
-		<select name="action" onChange="doAjaxCall('markAlbums',$(this),'table',true);" data-error="You didn't select any albums">
+		<select name="action" id="markAlbumActionSelect"> <%-- Added ID --%>
 				<option disabled="disabled" selected="selected">Choose...</option>
 				<option value="Skipped">Skipped</option>
 				<option value="Ignored">Ignored</option>
 				<option value="Downloaded">Downloaded</option>
 		</select>
-		<input type="hidden" value="Go">
+        <%-- Replaced hidden input with a visible button if desired, or handle submit via JS --%>
+        <%-- For now, keep the JS-driven approach as close as possible to original logic --%>
 	</div>
 	<div class="table_wrapper" id="wanted_table_wrapper" >
 		<table class="display" id="wanted_table">
 		<thead>
 			<tr>
-				<th id="select"><input type="checkbox" onClick="toggle(this)" /></th>
-				<th id="albumart"></th>
-				<th id="artistname">Artist</th>
-				<th id="albumname">Album Name</th>
-				<th id="reldate">Release Date</th>
-				<th id="type">Type</th>
+				<th class="select-all-checkbox"><input type="checkbox" id="toggleAllWanted" /></th> <%-- Added ID for easier targeting --%>
+				<th class="column-albumart"></th>
+				<th class="column-artistname">Artist</th>
+				<th class="column-albumname">Album Name</th>
+				<th class="column-reldate">Release Date</th>
+				<th class="column-type">Type</th>
 			</tr>
 		</thead>
 		<tbody>
 		%for album in wanted:
 			<tr class="gradeZ">
-				<td id="select"><input type="checkbox" name="${album['AlbumID']}" class="checkbox" /></th>
-				<td id="albumart"><img title="${album['AlbumID']}" height="64" width="64" src="interfaces/default/images/no-cover-art.png" data-src="artwork/thumbs/album/${album['AlbumID']}"></td>
-				<td id="artistname"><a href="artistPage?ArtistID=${album['ArtistID']}">${album['ArtistName']}</a></td>
-				<td id="albumname"><a href="albumPage?AlbumID=${album['AlbumID']}">${album['AlbumTitle']}</a></td>
-				<td id="reldate">${album['ReleaseDate']}</td>
-				<td id="type">${album['Type']}</td>
+				<td class="select-checkbox"><input type="checkbox" name="album_ids" value="${album['AlbumID']}" class="wanted-album-checkbox" /></td> <%-- Changed name to album_ids, added class --%>
+				<td class="column-albumart">
+                    <img title="${album['AlbumID']}" height="64" width="64"
+                         data-src="artwork/thumbs/album/${album['AlbumID']}"
+                         src="interfaces/default/images/no-cover-art.png" <%-- Fallback src --%>
+                         alt="Cover art for ${album['AlbumTitle']}" loading="lazy">
+                </td>
+				<td class="column-artistname"><a href="artistPage?ArtistID=${album['ArtistID']}">${album['ArtistName']}</a></td>
+				<td class="column-albumname"><a href="albumPage?AlbumID=${album['AlbumID']}">${album['AlbumTitle']}</a></td>
+				<td class="column-reldate">${album['ReleaseDate']}</td>
+				<td class="column-type">${album['Type']}</td>
 			</tr>
 		%endfor
 		</tbody>
@@ -56,26 +65,31 @@
 		<h1 class="clearfix"><i class="fa fa-calendar"></i> Upcoming Albums</h1>
 	</div>
 	<div class="table_wrapper">
-		<table class="display_no_select" id="upcoming_table">
+		<table class="display_no_select" id="upcoming_table"> <%-- No changes here, but ensuring it gets DataTables init --%>
 		<thead>
 			<tr>
-				<th id="albumart"></th>
-				<th id="artistname">Artist</th>
-				<th id="albumname">Album Name</th>
-				<th id="reldate">Release Date</th>
-				<th id="type">Type</th>
-				<th id="status">Status</th>
+				<th class="column-albumart"></th>
+				<th class="column-artistname">Artist</th>
+				<th class="column-albumname">Album Name</th>
+				<th class="column-reldate">Release Date</th>
+				<th class="column-type">Type</th>
+				<th class="column-status">Status</th>
 			</tr>
 		</thead>
 		<tbody>
 		%for album in upcoming:
 			<tr class="gradeZ">
-				<td id="albumart"><img title="${album['AlbumID']}" height="64" width="64" data-src="artwork/thumbs/album/${album['AlbumID']}"></td>
-				<td id="artistname"><a href="artistPage?ArtistID=${album['ArtistID']}">${album['ArtistName']}</a></td>
-				<td id="albumname"><a href="albumPage?AlbumID=${album['AlbumID']}">${album['AlbumTitle']}</a></td>
-				<td id="reldate">${album['ReleaseDate']}</td>
-				<td id="type">${album['Type']}</td>
-				<td id="status">${album['Status']}</td>
+				<td class="column-albumart">
+                    <img title="${album['AlbumID']}" height="64" width="64"
+                         data-src="artwork/thumbs/album/${album['AlbumID']}"
+                         src="interfaces/default/images/no-cover-art.png" <%-- Fallback src --%>
+                         alt="Cover art for ${album['AlbumTitle']}" loading="lazy">
+                </td>
+				<td class="column-artistname"><a href="artistPage?ArtistID=${album['ArtistID']}">${album['ArtistName']}</a></td>
+				<td class="column-albumname"><a href="albumPage?AlbumID=${album['AlbumID']}">${album['AlbumTitle']}</a></td>
+				<td class="column-reldate">${album['ReleaseDate']}</td>
+				<td class="column-type">${album['Type']}</td>
+				<td class="column-status">${album['Status']}</td>
 			</tr>
 		%endfor
 		</tbody>
@@ -84,29 +98,154 @@
 </%def>
 
 <%def name="headIncludes()">
+	${parent.headIncludes()} <%-- Ensure parent head includes are kept --%>
 	<link rel="stylesheet" href="interfaces/default/css/data_table.css">
+    <style>
+        #mark_albums_controls {
+            position: relative; /* Adjust as per original 'top:0;' intent */
+            margin-bottom: 15px; /* Add some space below controls */
+        }
+        /* Style for album art thumbnails */
+        .column-albumart img {
+            width: 64px;
+            height: 64px;
+            object-fit: cover; /* Ensures image fills the space without distortion */
+            vertical-align: middle;
+        }
+    </style>
 </%def>
 
 <%def name="javascriptIncludes()">
+	${parent.javascriptIncludes()} <%-- Ensure parent javascript includes are kept --%>
 	<script src="js/libs/jquery.unveil.min.js"></script>
 	<script src="js/libs/jquery.dataTables.min.js"></script>
 	<script>
-		function initThisPage() {
-			$("img").unveil();
+		// Encapsulate page-specific logic
+		var UpcomingPage = UpcomingPage || {};
+
+		UpcomingPage.initDataTables = function() {
+			// Initialize Wanted Albums table
 			$('#wanted_table').dataTable({
 				"oLanguage": {
-					"sEmptyTable": " "
+					"sEmptyTable": "No wanted albums found" // More descriptive empty table message
 				},
 				"bDestroy": true,
 				"bFilter": false,
 				"bInfo": false,
-				"bPaginate": false
+				"bPaginate": false,
+                "aoColumnDefs": [
+			          { 'bSortable': false, 'aTargets': [ 0, 1 ] } // Disable sorting for checkbox and album art columns
+				],
+                "fnDrawCallback": function (o) {
+                    // Re-unveil images after each draw for lazy loading
+                    $("img[data-src]").unveil();
+                }
 			});
-			resetFilters("artists");
-			initActions();
-		}
+
+            // Initialize Upcoming Albums table
+            $('#upcoming_table').dataTable({
+				"oLanguage": {
+					"sEmptyTable": "No upcoming albums found" // More descriptive empty table message
+				},
+				"bDestroy": true,
+				"bFilter": false,
+				"bInfo": false,
+				"bPaginate": false,
+                "aoColumnDefs": [
+			          { 'bSortable': false, 'aTargets': [ 0 ] } // Disable sorting for album art column
+				],
+                "aaSorting": [[3, 'asc']], // Sort by Release Date ascending by default
+                "fnDrawCallback": function (o) {
+                    // Re-unveil images after each draw for lazy loading
+                    $("img[data-src]").unveil();
+                }
+			});
+		};
+
+        UpcomingPage.initActions = function() {
+            // Event listener for "Force Check" link
+            $('#menu_link_force_check').on('click', function(e) {
+                e.preventDefault();
+                var $this = $(this);
+                var actionUrl = $this.data('action'); // 'forceSearch'
+                var successMsg = $this.data('success');
+                var errorMsg = $this.data('error');
+
+                if (typeof doAjaxCall === 'function') {
+                    doAjaxCall(actionUrl, $this, 'page', successMsg, errorMsg);
+                } else {
+                    console.error("doAjaxCall function is not defined. Cannot force check.");
+                }
+            });
+
+            // Event listener for "Mark selected albums as" dropdown
+            $('#markAlbumActionSelect').on('change', function() {
+                var $this = $(this);
+                var action = $this.val();
+                var selectedAlbumIds = [];
+
+                $('.wanted-album-checkbox:checked').each(function() {
+                    selectedAlbumIds.push($(this).val());
+                });
+
+                if (selectedAlbumIds.length === 0) {
+                    if (typeof showMessage === 'function') {
+                        showMessage($this.data('error') || "You didn't select any albums", 'error');
+                    } else {
+                        alert($this.data('error') || "You didn't select any albums");
+                    }
+                    // Reset dropdown to "Choose..."
+                    $this.val('Choose...');
+                    return;
+                }
+
+                var url = $('#markAlbumsForm').attr('action') + '?action=' + encodeURIComponent(action);
+                $.each(selectedAlbumIds, function(index, id) {
+                    url += '&album_ids=' + encodeURIComponent(id); // Append selected album IDs
+                });
+
+                var successMsg = 'Albums successfully marked as ' + action;
+                var errorMsg = 'Error marking albums.';
+
+                if (typeof doAjaxCall === 'function') {
+                    doAjaxCall(url, $this, 'table', successMsg, errorMsg);
+                    // Reset dropdown after action
+                    $this.val('Choose...');
+                } else {
+                    console.error("doAjaxCall function is not defined. Cannot mark albums.");
+                }
+            });
+
+            // Event listener for the "toggle all" checkbox in Wanted Albums table
+            $('#toggleAllWanted').on('click', function() {
+                $('.wanted-album-checkbox').prop('checked', this.checked);
+            });
+
+            // Update "toggle all" checkbox based on individual checkboxes
+            $(document).on('click', '.wanted-album-checkbox', function() {
+                if (!this.checked) {
+                    $('#toggleAllWanted').prop('checked', false);
+                } else {
+                    if ($('.wanted-album-checkbox:checked').length === $('.wanted-album-checkbox').length) {
+                        $('#toggleAllWanted').prop('checked', true);
+                    }
+                }
+            });
+
+            // Assuming resetFilters and initActions are global functions from common.js
+            if (typeof resetFilters === 'function') {
+                resetFilters("artists"); // Or adjust based on context
+            }
+            if (typeof initActions === 'function') {
+                initActions();
+            }
+        };
+
 		$(document).ready(function() {
-			initThisPage();
+			UpcomingPage.initDataTables();
+            UpcomingPage.initActions();
+            // Initial unveil call for images
+            $("img[data-src]").unveil();
 		});
 	</script>
 </%def>
