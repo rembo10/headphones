@@ -6,7 +6,8 @@
 <%def name="headerIncludes()">
 	<div id="subhead_container">
 		<div id="subhead_menu">
-			<a id="menu_link_scan" onclick="doAjaxCall('musicScan?path=${headphones.CONFIG.MUSIC_DIR}&redirect=manageNew',$(this))" data-success="Music library is getting scanned">Scan Music Library</a>
+			<%-- Changed inline onclick to a class and data attributes for JS handling --%>
+			<a id="menu_link_scan" class="ajax-link" data-action="musicScan" data-path="${headphones.CONFIG.MUSIC_DIR}" data-redirect="manageNew" data-success="Music library is getting scanned" href="#">Scan Music Library</a>
 		</div>		
 	</div>	
 	<a href="manage" class="back">&laquo; Back to manage overview</a>
@@ -18,26 +19,28 @@
 	<div id="manageheader" class="title">
 		<h1 class="clearfix"><i class="fa fa-music"></i> Manage New Artists</h1>
 	</div>
-	<form action="addArtists" method="get">
-	<div id="markalbum">
-	    <select name="action">
+	<form action="addArtists" method="get" id="addArtistsForm"> <%-- Added ID to the form --%>
+	<div id="new_artists_controls"> <%-- Unique and descriptive ID --%>
+	    <select name="action" id="newArtistActionSelect">
         	<option value="add">(+) ADD Selected Artists</option>
         	<option value="ignore">(-) IGNORE Selected Artists</option>
        	</select>
-		<input type="submit" value="Go">
+		<%-- Changed input type="submit" to button with class for AJAX handling --%>
+		<button type="button" id="submitNewArtistAction" class="ajax-submit-button" data-form-id="addArtistsForm" data-action="addArtists" data-error="You didn't select any artists">Go</button>
 	</div>
 	<table class="display" id="artist_table">
 		<thead>
 			<tr>
-				<th id="select"><input type="checkbox" onClick="toggle(this)" /></th>
-				<th id="name">Artist Name</th>
+				<th class="select-all-checkbox"><input type="checkbox" id="toggleAllNewArtists" /></th> <%-- Added ID for easier targeting --%>
+				<th class="column-name">Artist Name</th> <%-- Changed ID to class --%>
 			</tr>
 		</thead>
 		<tbody>
 		%for artist in newartists:
 			<tr class="gradeZ">
-				<td id="select"><input type="checkbox" name="${artist['ArtistName']}" class="checkbox" /></td>
-				<td id="name">${artist['ArtistName']}</a></td>
+				<%-- Changed name attribute to a consistent 'artist_ids' and value to ArtistID for robust processing --%>
+				<td class="select-artist-checkbox"><input type="checkbox" name="artist_ids" value="${artist['ArtistID']}" class="new-artist-checkbox" /></td>
+				<td class="column-name">${artist['ArtistName']}</a></td>
 			</tr>
 		%endfor
 		</tbody>
@@ -47,22 +50,111 @@
 </%def>
 
 <%def name="headIncludes()">
+	${parent.headIncludes()} <%-- Ensure parent head includes are kept --%>
 	<link rel="stylesheet" href="interfaces/default/css/data_table.css">
 </%def>
 
 <%def name="javascriptIncludes()">
+	${parent.javascriptIncludes()} <%-- Ensure parent javascript includes are kept --%>
 	<script src="js/libs/jquery.dataTables.min.js"></script>
 	<script>
-	$(document).ready(function() {
+	// Encapsulate page-specific logic
+	var ManageNewArtistsPage = ManageNewArtistsPage || {};
+
+	ManageNewArtistsPage.initDataTable = function() {
 		$('#artist_table').dataTable({
-			"aaSorting": [[1, 'asc']],
+			"aaSorting": [[1, 'asc']], // Sort by Artist Name ascending
 			"bStateSave": false,
 			"bPaginate": false,
 			"oLanguage": {
-				"sSearch" : ""},
+				"sSearch" : "",
+				"sEmptyTable": "No new artist information available"
+            },
+            "fnDrawCallback": function (o) {
+                $('html,body').scrollTop(0); // Jump to top of page on draw
+            }
 		});
+	};
 
-		initActions();
+    ManageNewArtistsPage.initActions = function() {
+        // Event listener for the "Scan Music Library" link in the header
+        $(document).on('click', '#menu_link_scan', function(e) {
+            e.preventDefault();
+            var $this = $(this);
+            var path = $this.data('path');
+            var redirect = $this.data('redirect');
+            var successMsg = $this.data('success');
+            var url = $this.data('action') + '?path=' + encodeURIComponent(path) + '&redirect=' + encodeURIComponent(redirect);
+
+            if (typeof doAjaxCall === 'function') {
+                doAjaxCall(url, $this, null, successMsg); // 'null' for context if not affecting a specific tab/table
+            } else {
+                console.error("doAjaxCall function is not defined. Cannot scan music library.");
+            }
+        });
+
+        // Event listener for the "Go" button to add/ignore artists
+        $('#submitNewArtistAction').on('click', function(e) {
+            e.preventDefault();
+            var $this = $(this);
+            var action = $('#newArtistActionSelect').val();
+            var selectedArtistIds = [];
+
+            // Get all checked new artist checkboxes
+            $('.new-artist-checkbox:checked').each(function() {
+                selectedArtistIds.push($(this).val());
+            });
+
+            if (selectedArtistIds.length === 0) {
+                if (typeof showMessage === 'function') {
+                    showMessage($this.data('error') || "You didn't select any artists", 'error');
+                } else {
+                    alert($this.data('error') || "You didn't select any artists");
+                }
+                return;
+            }
+
+            var url = $this.data('action') + '?action=' + encodeURIComponent(action);
+            $.each(selectedArtistIds, function(index, id) {
+                url += '&artist_ids=' + encodeURIComponent(id); // Append selected artist IDs
+            });
+
+            var successMsg = 'Artists successfully ' + (action === 'add' ? 'added' : 'ignored');
+            var errorMsg = 'Error performing action on artists.';
+
+            if (typeof doAjaxCall === 'function') {
+                doAjaxCall(url, $this, 'table', successMsg, errorMsg);
+                // Optionally, refresh the table or remove processed rows after successful AJAX call
+            } else {
+                console.error("doAjaxCall function is not defined. Cannot add/ignore artists.");
+            }
+        });
+
+        // Event listener for the "toggle all" checkbox
+        $('#toggleAllNewArtists').on('click', function() {
+            $('.new-artist-checkbox').prop('checked', this.checked);
+        });
+
+        // Update "toggle all" checkbox based on individual checkboxes
+        $(document).on('click', '.new-artist-checkbox', function() {
+            if (!this.checked) {
+                $('#toggleAllNewArtists').prop('checked', false);
+            } else {
+                if ($('.new-artist-checkbox:checked').length === $('.new-artist-checkbox').length) {
+                    $('#toggleAllNewArtists').prop('checked', true);
+                }
+            }
+        });
+
+        // Assuming initActions from common.js is called globally
+        if (typeof initActions === 'function') {
+            initActions();
+        }
+    };
+
+	$(document).ready(function() {
+		ManageNewArtistsPage.initDataTable();
+		ManageNewArtistsPage.initActions();
 	});
 	</script>
 </%def>
