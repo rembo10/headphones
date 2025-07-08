@@ -8,31 +8,35 @@
 <%def name="headerIncludes()">
 	<div id="subhead_container">
 		<div id="subhead_menu">
-			<a id="menu_link_refresh" onclick="doSimpleAjaxCall('refreshArtist?ArtistID=${artist['ArtistID']}')" href="javascript:void(0)"><i class="fa fa-refresh"></i> Refresh Artist</a>
+			<a id="menu_link_refresh" href="#" class="artist-action" data-action="refreshArtist" data-artist-id="${artist['ArtistID']}" data-success-msg="${artist['ArtistName']} refreshed"><i class="fa fa-refresh"></i> Refresh Artist</a>
 			<a id="menu_link_delete" href="deleteArtist?ArtistID=${artist['ArtistID']}"><i class="fa fa-trash-o"></i> Delete Artist</a>
-			<a id="menu_link_scan" onclick="doAjaxCall('scanArtist?ArtistID=${artist['ArtistID']}', $(this)),'table'" href="javascript:void(0)" data-success="'${artist['ArtistName']}' was scanned"><i class="fa fa-refresh"></i> Scan Artist</a>
+			<a id="menu_link_scan" href="#" class="artist-action" data-action="scanArtist" data-artist-id="${artist['ArtistID']}" data-success-msg="'${artist['ArtistName']}' was scanned"><i class="fa fa-refresh"></i> Scan Artist</a>
+			
 			%if artist['Status'] == 'Paused':
-				<a id="menu_link_resume" href="javascript:void(0)" onclick="doAjaxCall('resumeArtist?ArtistID=${artist['ArtistID']}',$(this),true)" data-success="${artist['ArtistName']} resumed"><i class="fa fa-play"></i> Resume Artist</a>
+				<a id="menu_link_resume" href="#" class="artist-action" data-action="resumeArtist" data-artist-id="${artist['ArtistID']}" data-success-msg="${artist['ArtistName']} resumed"><i class="fa fa-play"></i> Resume Artist</a>
 			%else:
-				<a id="menu_link_pauze" href="javascript:void(0)" onclick="doAjaxCall('pauseArtist?ArtistID=${artist['ArtistID']}',$(this),true)" data-success="${artist['ArtistName']} paused"><i class="fa fa-pause"></i> Pause Artist</a>
+				<a id="menu_link_pauze" href="#" class="artist-action" data-action="pauseArtist" data-artist-id="${artist['ArtistID']}" data-success-msg="${artist['ArtistName']} paused"><i class="fa fa-pause"></i> Pause Artist</a>
 			%endif
+			
 			%if artist['IncludeExtras']:
-				<a id="menu_link_removeextra" href="javascript:void(0)" onclick="doAjaxCall('removeExtras?ArtistID=${artist['ArtistID']}&ArtistName=${artist['ArtistName']}',$(this),'submenu&table')" data-success="Extras removed for ${artist['ArtistName']}"><i class="fa fa-minus"></i> Remove Extras</a>
-				<a class="menu_link_edit" id="menu_link_modifyextra" href="javascript:void(0)"><i class="fa fa-pencil"></i> Modify Extras</a>
+				<a id="menu_link_removeextra" href="#" class="artist-action" data-action="removeExtras" data-artist-id="${artist['ArtistID']}" data-artist-name="${artist['ArtistName']}" data-success-msg="Extras removed for ${artist['ArtistName']}"><i class="fa fa-minus"></i> Remove Extras</a>
+				<a class="menu_link_edit dialog-trigger" id="menu_link_modifyextra" href="#" data-dialog-id="dialog"><i class="fa fa-pencil"></i> Modify Extras</a>
 			%else:
-				<a id="menu_link_getextra" href="javascript:void(0)"><i class="fa fa-plus"></i> Get Extras</a>
+				<a id="menu_link_getextra" href="#" class="dialog-trigger" data-dialog-id="dialog"><i class="fa fa-plus"></i> Get Extras</a>
 			%endif
-				<div id="dialog" title="Choose Which Extras to Fetch" style="display:none" class="configtable">
-					<form action="getExtras" method="get" class="form">
-						<input type="hidden" name="ArtistID" value="${artist['ArtistID']}">
-						<input type="hidden" name="newstyle" value="true">
-						%for extra in extras:
-							<input type="checkbox" id="${extra}" name="${extra}" value="1" ${extras[extra]} />${string.capwords(extra)}<br>
-						%endfor
-						<br>
-						<input id="submit" type="submit" value="Fetch Extras">
-					</form>
-				</div>
+			
+			<div id="dialog" title="Choose Which Extras to Fetch" style="display:none" class="configtable">
+				<form action="getExtras" method="get" id="getExtrasForm">
+					<input type="hidden" name="ArtistID" value="${artist['ArtistID']}">
+					<input type="hidden" name="newstyle" value="true">
+					%for extra in extras:
+						<input type="checkbox" id="extra_${extra}" name="${extra}" value="1" ${extras[extra]} />
+						<label for="extra_${extra}">${string.capwords(extra)}</label><br>
+					%endfor
+					<br>
+					<button type="submit">Fetch Extras</button>
+				</form>
+			</div>
 		</div>
 	</div>
 	<a href="home" class="back">&laquo; Back to overview</a>
@@ -41,7 +45,7 @@
 <%def name="body()">
 	<div id="artistheader" class="clearfix">
 		<div id="artistImg">
-			<img id="artistImage" class="albumArt" alt="" src="artwork/artist/${artist['ArtistID']}"/>
+			<img id="artistImage" class="albumArt" alt="${artist['ArtistName']} artist image" src="artwork/artist/${artist['ArtistID']}"/>
 		</div>
 		<h1 id="artistname">
 			<a href="http://musicbrainz.org/artist/${artist['ArtistID']}" id="artistnamelink">${artist['ArtistName']}</a>
@@ -49,10 +53,10 @@
 		<div id="artistBio"></div>
 	</div>
 	<ul id="artistCalendar" style="display:none;"></ul>
-	<form action="markAlbums" method="get" id="markAlbums">
+	<form action="markAlbums" method="get" id="markAlbumsForm">
 	<input type="hidden" name="ArtistID" value=${artist['ArtistID']}>
 	<div id="markalbum">Mark selected albums as
-		<select name="action" onChange="doAjaxCall('markAlbums',$(this),'table',true);" data-error="You didn't select any albums">
+		<select name="action" id="markAlbumsActionSelect">
   			<option disabled="disabled" selected="selected">Choose...</option>
   			<option value="Wanted">Wanted</option>
   			<option value="WantedNew">Wanted (new only)</option>
@@ -60,12 +64,12 @@
 			<option value="Ignored">Ignored</option>
   			<option value="Downloaded">Downloaded</option>
 		</select>
-		<input type="hidden" value="Go">
+		<button type="submit" style="display:none;"></button> <%-- Hidden submit to allow form submission via JS --%>
 	</div>
 	<table class="display" id="album_table">
 		<thead>
 			<tr>
-				<th id="select"><input type="checkbox" onClick="toggle(this)" /></th>
+				<th id="select"><input type="checkbox" class="select-all-checkbox" aria-label="Select all albums" /></th>
 				<th id="albumart"></th>
 				<th id="albumname">Name</th>
 				<th id="reldate">Date</th>
@@ -121,24 +125,24 @@
 
 			%>
 			<tr class="grade${grade}">
-				<td id="select"><input type="checkbox" name="${album['AlbumID']}" class="checkbox" /></td>
-				<td id="albumart"><img class="albumArtnostretch" id="${album['AlbumID']}" src="artwork/thumbs/album/${album['AlbumID']}" height="64" width="64"></td>
+				<td id="select"><input type="checkbox" name="${album['AlbumID']}" class="checkbox album-checkbox" /></td>
+				<td id="albumart"><img class="albumArtnostretch" id="thumb_${album['AlbumID']}" alt="${album['AlbumTitle']} thumbnail" src="artwork/thumbs/album/${album['AlbumID']}"></td>
 				<td id="albumname"><a href="albumPage?AlbumID=${album['AlbumID']}">${album['AlbumTitle']}</a></td>
 				<td id="reldate">${album['ReleaseDate']}</td>
 				<td id="type">${album['Type']}</td>
 				<td id="score">${album['CriticScore']}/${album['UserScore']}</td>
 				<td id="status">${album['Status']}
 				%if album['Status'] == 'Skipped' or album['Status'] == 'Ignored':
-					[<a href="javascript:void(0)" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}',$(this),'table')" data-success="'${album['AlbumTitle']}' added to Wanted list">want</a>]
+					[<a href="#" class="album-action-inline" data-action="queueAlbum" data-album-id="${album['AlbumID']}" data-artist-id="${album['ArtistID']}" data-success-msg="'${album['AlbumTitle']}' added to Wanted list">want</a>]
 				%elif (album['Status'] == 'Wanted' or album['Status'] == 'Wanted Lossless'):
-                    [<a href="javascript:void(0)" onclick="doAjaxCall('unqueueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}',$(this),'table')" data-success="'${album['AlbumTitle']}' skipped">skip</a>] [<a href="javascript:void(0)" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}', $(this),'table')" data-success="Trying to download'${album['AlbumTitle']}'" title="Search if available for download">search</a>]
+                    [<a href="#" class="album-action-inline" data-action="unqueueAlbum" data-album-id="${album['AlbumID']}" data-artist-id="${album['ArtistID']}" data-success-msg="'${album['AlbumTitle']}' skipped">skip</a>] [<a href="#" class="album-action-inline" data-action="queueAlbum" data-album-id="${album['AlbumID']}" data-artist-id="${album['ArtistID']}" data-success-msg="Trying to download'${album['AlbumTitle']}'" title="Search if available for download">search</a>]
 				%else:
-					[<a href="javascript:void(0)" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}', $(this),'table')" data-success="Retrying the same version of '${album['AlbumTitle']}'" title="Retry the same download again">retry</a>][<a href="javascript:void(0)" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True', $(this),'table')" title="Try a new download, skipping all previously tried nzbs"  data-success="Downloading new version for '${album['AlbumTitle']}'" data-success="Looking for a new version of '${album['AlbumTitle']}'">new</a>]
+					[<a href="#" class="album-action-inline" data-action="queueAlbum" data-album-id="${album['AlbumID']}" data-artist-id="${album['ArtistID']}" data-success-msg="Retrying the same version of '${album['AlbumTitle']}'" title="Retry the same download again">retry</a>][<a href="#" class="album-action-inline" data-action="queueAlbum" data-album-id="${album['AlbumID']}" data-artist-id="${album['ArtistID']}" data-new="True" title="Try a new download, skipping all previously tried nzbs"  data-success-msg="Looking for a new version of '${album['AlbumTitle']}'">new</a>]
 				%endif
 				%if albumformat in lossy_formats and album['Status'] == 'Skipped':
-					[<a id="wantlossless" href="javascript:void(0)" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&lossless=True', $(this),'table')" data-success="Lossless version of '${album['AlbumTitle']}' added to queue">want lossless</a>]
+					[<a id="wantlossless" href="#" class="album-action-inline" data-action="queueAlbum" data-album-id="${album['AlbumID']}" data-artist-id="${album['ArtistID']}" data-lossless="True" data-success-msg="Lossless version of '${album['AlbumTitle']}' added to queue">want lossless</a>]
 				%elif albumformat in lossy_formats and (album['Status'] == 'Snatched' or album['Status'] == 'Downloaded'):
-					[<a id="wantlossless" href="javascript:void(0)" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&lossless=True', $(this),'table')" data-success="Retrying the same lossless version of '${album['AlbumTitle']}'">retry lossless</a>]
+					[<a id="wantlossless" href="#" class="album-action-inline" data-action="queueAlbum" data-album-id="${album['AlbumID']}" data-artist-id="${album['ArtistID']}" data-lossless="True" data-success-msg="Retrying the same lossless version of '${album['AlbumTitle']}'">retry lossless</a>]
 				%endif
 				</td>
 				<td id="have"><span title="${percent}"><span><div class="progress-container"><div style="width:${percent}%"><div class="havetracks">${havetracks}/${totaltracks}</div></div></div></td>
@@ -152,177 +156,313 @@
 </%def>
 
 <%def name="headIncludes()">
+	${parent.headIncludes()} <%-- Ensure parent head includes are kept --%>
 	<link rel="stylesheet" href="interfaces/default/css/data_table.css">
 </%def>
 
 <%def name="javascriptIncludes()">
+	${parent.javascriptIncludes()} <%-- Ensure parent javascript includes are kept --%>
 	<script src="js/libs/jquery.dataTables.min.js"></script>
 
 	<script>
-	function getArtistBio() {
+	// Define a global object for page-specific functions to avoid polluting global scope directly
+	var ArtistPage = ArtistPage || {};
+
+	ArtistPage.getArtistBio = function() {
 		var id = "${artist['ArtistID']}";
 		var elem = $("#artistBio");
-		getInfo(elem,id,'artist');
-	}
+		// Assuming getInfo is defined in common.js
+		if (typeof getInfo === 'function') {
+		    getInfo(elem,id,'artist');
+		} else {
+		    console.warn("getInfo function not found. Artist bio might not be loaded.");
+		}
+	};
 
-	<%
-    if headphones.CONFIG.SONGKICK_FILTER_ENABLED:
-        songkick_filter_enabled = "true"
-    else:
-        songkick_filter_enabled = "false"
+	ArtistPage.initDialogs = function() {
+		// General handler for opening dialogs based on data-dialog-id
+		$(document).on('click', '.dialog-trigger', function(e) {
+			e.preventDefault();
+			var dialogId = $(this).data('dialog-id');
+			var $dialog = $('#' + dialogId);
 
-    if not headphones.CONFIG.SONGKICK_LOCATION:
-    	songkick_location = "none"
-    else:
-        songkick_location = headphones.CONFIG.SONGKICK_LOCATION
+			if ($dialog.length) {
+				$dialog.dialog({
+					width: 500,
+					maxHeight: 500,
+					modal: true // Added modal for better UX
+				});
+			}
+		});
 
-    if headphones.CONFIG.SONGKICK_ENABLED:
-        songkick_enabled = "true"
-    else:
-        songkick_enabled = "false"
+		// Submit handler for getExtrasForm
+		$('#getExtrasForm').on('submit', function(e) {
+			e.preventDefault();
+			var $this = $(this);
+			var action = $this.attr('action');
+			var formData = $this.serialize();
+			var artistID = $this.find('input[name="ArtistID"]').val(); // Get ArtistID
+			var successMsg = "Extras fetch initiated for " + "${artist['ArtistName']}"; // Dynamic success message
+			
+			if (typeof doAjaxCall === 'function') {
+				doAjaxCall(action + '?' + formData, $this, true, successMsg);
+			} else {
+				console.error("doAjaxCall function is not defined!");
+			}
+			$('#dialog').dialog("close");
+		});
+	};
 
-	%>
-	function getArtistsCalendar() {
+	ArtistPage.getArtistsCalendar = function() {
 		var template, calendarDomNode;
 
 		calendarDomNode = $("#artistCalendar");
-
 		template = '<li><a target="_blank" href="URI"><span class="sk-name">NAME</span><span class="sk-location">LOC</span></a></li>';
 
-		$.getJSON("https://api.songkick.com/api/3.0/artists/mbid:${artist['ArtistID']}/calendar.json?apikey=${headphones.CONFIG.SONGKICK_APIKEY}&jsoncallback=?",
+		// Python variables are injected directly into this JS block
+		var songkick_filter_enabled = ${'true' if headphones.CONFIG.SONGKICK_FILTER_ENABLED else 'false'};
+		var songkick_location = ${'"{}"'.format(headphones.CONFIG.SONGKICK_LOCATION) if headphones.CONFIG.SONGKICK_LOCATION else 'null'};
+		var songkick_enabled = ${'true' if headphones.CONFIG.SONGKICK_ENABLED else 'false'};
+		var songkick_apikey = "${headphones.CONFIG.SONGKICK_APIKEY}";
+
+		if (!songkick_enabled || !songkick_apikey) {
+			console.log("Songkick is not enabled or API key is missing.");
+			return;
+		}
+
+		$.getJSON("https://api.songkick.com/api/3.0/artists/mbid:${artist['ArtistID']}/calendar.json?apikey=" + songkick_apikey + "&jsoncallback=?",
 			function(data){
-				if (data['resultsPage'].totalEntries >= 1) {
-                    if (${songkick_filter_enabled}) {
-                        data.resultsPage.results.event = $.grep(data.resultsPage.results.event, function(element,index){
-                    	    return element.venue.metroArea.id == ${songkick_location};
+				if (data['resultsPage'] && data['resultsPage'].totalEntries >= 1 && data['resultsPage'].results && data['resultsPage'].results.event) {
+                    var events = data.resultsPage.results.event;
+                    if (songkick_filter_enabled && songkick_location) {
+                        events = $.grep(events, function(element,index){
+                    	    return element.venue && element.venue.metroArea && element.venue.metroArea.id == songkick_location;
                     	});
                     }
 
-                    if (data.resultsPage.results.event.length > 0) {
-						var tourDate;
-
+                    if (events.length > 0) {
 						calendarDomNode.show();
 						$("#artistImg").addClass('on-tour');
 
-						jQuery.each(data.resultsPage.results.event, function(i, event) {
-							tourDate = template;
-							tourDate = tourDate.replace('URI',event.uri);
-							tourDate = tourDate.replace('NAME',event.displayName);
-							tourDate = tourDate.replace('LOC',event.location.city);
-
+						$.each(events, function(i, event) {
+							var tourDate = template;
+							tourDate = tourDate.replace('URI', event.uri || '#');
+							tourDate = tourDate.replace('NAME', event.displayName || 'N/A');
+							tourDate = tourDate.replace('LOC', (event.location && event.location.city) ? event.location.city : 'N/A');
 							calendarDomNode.append(tourDate);
 						});
 
 						calendarDomNode.append('<li><img src="interfaces/default/images/songkick.png" alt="concerts by songkick" class="sk-logo" /></li>');
 
-						$(function() {
-						  $("#artistCalendar").each(function() {
+						// Handle "More..." button logic for calendar
+						calendarDomNode.each(function() {
 							$("li:gt(4)", this).hide(); /* :gt() is zero-indexed */
 							$("li:nth-child(5)", this).after("<br><li class='more'><a href='#'>More...</a></li>"); /* :nth-child() is one-indexed */
-						  });
-						  $("li.more").on("click", 'a', function() {
+						});
+						$("li.more").on("click", 'a', function(e) {
+							e.preventDefault(); // Prevent default link behavior
 							var li = $(this).parents("li:first");
 							li.parent().children().show();
 							li.remove();
-							return false;
-						  });
 						});
 					}
 				}
-			}
-		);
-	}
+			}).fail(function(jqXHR, textStatus, errorThrown) {
+                console.error("Songkick API call failed: ", textStatus, errorThrown);
+            });
+	};
 
-	var loadingMessage = false;
-	var spinner_active = false;
-	var loadingtext_active = false;
+	ArtistPage.loadingMessage = false;
+	ArtistPage.spinner_active = false;
+	ArtistPage.loadingtext_active = false;
+	ArtistPage.refreshInterval = null; // Initialize as null
 
-	function checkArtistStatus() {
+	ArtistPage.checkArtistStatus = function() {
 		$.getJSON("getArtistjson?ArtistID=${artist['ArtistID']}", function(data) {
-		    if (data['Status'] == "Loading"){
-				refreshTable();
+		    if (data['Status'] === "Loading"){
+				// Assuming refreshTable() is defined globally or in common.js and it updates the album_table
+				if (typeof refreshTable === 'function') {
+					refreshTable(); // Refresh the album table to show loading states if implemented there
+				}
+
 				$('#artistnamelink').text(data["ArtistName"]);
-				if (loadingMessage == false){
+				if (ArtistPage.loadingMessage === false){
 				    $("#ajaxMsg").after( "<div id='ajaxMsg2' class='ajaxMsg'></div>" );
-					showArtistMsg("Getting artist information");
-					loadingMessage = true;
+					if (typeof showArtistMsg === 'function') {
+						showArtistMsg("Getting artist information");
+					}
+					ArtistPage.loadingMessage = true;
 				}
-				if (spinner_active == false){
-					$('#artistname').prepend('<i class="fa fa-refresh fa-spin" id="artistnamespinner"></i>')
-					spinner_active = true;
+				if (ArtistPage.spinner_active === false){
+					$('#artistname').prepend('<i class="fa fa-refresh fa-spin" id="artistnamespinner"></i>');
+					ArtistPage.spinner_active = true;
 				}
-				if (loadingtext_active == false){
-					$('#artistname').append('<h3 id="loadingtext"><i>(Album information for this artist is currently being loaded)</i></h3>')
-					loadingtext_active = true;
+				if (ArtistPage.loadingtext_active === false){
+					$('#artistname').append('<h3 id="loadingtext"><i>(Album information for this artist is currently being loaded)</i></h3>');
+					ArtistPage.loadingtext_active = true;
 				}
+		    } else {
+				// Only reload if previously loading to avoid unnecessary refreshes
+				if (ArtistPage.spinner_active || ArtistPage.loadingtext_active || ArtistPage.loadingMessage) {
+					location.reload(); // Reload the page to show updated status once loading is complete
+				}
+		    	$('#artistnamespinner').remove();
+		    	$('#loadingtext').remove();
+		    	$('#ajaxMsg2').remove();
+		    	ArtistPage.spinner_active = false;
+		    	ArtistPage.loadingtext_active = false;
+		    	ArtistPage.loadingMessage = false;
 		    }
-		    else{
-		    	$('#artistnamespinner').remove()
-		    	$('#loadingtext').remove()
-		    	$('#ajaxMsg2').remove()
-		    	spinner_active = false
-		    	loadingtext_active = false
-		    	loadingMessage = false
-		    }
-		  });
-	}
+		  }).fail(function(jqXHR, textStatus, errorThrown) {
+                console.error("Error checking artist status: ", textStatus, errorThrown);
+            });
+	};
 
-	function initThisPage() {
-		$('#menu_link_getextra').click(function(event) {
-			$('#dialog').dialog();
-			event.preventDefault();
-		});
-		$('#menu_link_modifyextra').click(function(event) {
-			$('#dialog').dialog();
-			event.preventDefault();
-		});
-		$('#album_table').dataTable({
-			"bDestroy": true,
-			"aoColumns": [
-				null,
-				null,
-				null,
-				{ "sType": "date" },
-				null,
-				null,
-				null,
-				{ "sType": "title-numeric"},
-				null,
-				null
+	ArtistPage.initDataTables = function() {
+		$('#album_table').DataTable({
+			"destroy": true, // bDestroy -> destroy
+			"columns": [ // aoColumns -> columns
+				null, null, null,
+				{ "type": "date" }, // sType -> type
+				null, null, null,
+				{ "type": "title-numeric"},
+				null, null
 			],
-			"aoColumnDefs": [
-			          { 'bSortable': false, 'aTargets': [ 0,1 ] }
+			"columnDefs": [ // aoColumnDefs -> columnDefs
+			    { 'orderable': false, 'targets': [ 0, 1 ] } // bSortable -> orderable, aTargets -> targets
 			],
-			"bStateSave": true,
-			"oLanguage": {
-				"sLengthMenu":"Show _MENU_ albums per page",
-				"sEmptyTable": "No album information available",
-				"sInfo":"Showing _TOTAL_ albums",
-				"sInfoEmpty":"Showing 0 to 0 of 0 albums",
-				"sInfoFiltered":"(filtered from _MAX_ total albums)",
-				"sSearch": ""},
-			"bPaginate": false,
-			"aaSorting": [[4, 'asc'],[3,'desc']]
-
+			"stateSave": true, // bStateSave -> stateSave
+			"language": { // oLanguage -> language
+				"lengthMenu":"Show _MENU_ albums per page",
+				"emptyTable": "No album information available",
+				"info":"Showing _TOTAL_ albums",
+				"infoEmpty":"Showing 0 to 0 of 0 albums",
+				"infoFiltered":"(filtered from _MAX_ total albums)",
+				"search": "" // No need for "Search: " label if using custom icon
+			},
+			"paging": false, // bPaginate -> paging
+			"order": [[4, 'asc'],[3,'desc']] // aaSorting -> order
 		});
-		resetFilters("albums");
-		setTimeout(function(){
-			initFancybox();
-		},1500);
-	}
+		// Assuming resetFilters is defined globally or in common.js
+		if (typeof resetFilters === 'function') {
+			resetFilters("albums");
+		}
+	};
 
 	$(document).ready(function() {
-		initActions();
-		initThisPage();
-		getArtistBio();
-		if( ${songkick_enabled} ){
-      		getArtistsCalendar();
-    	}
-    	checkArtistStatus();
-    	setInterval(function(){
-    		checkArtistStatus();
-		}, 1500);
-	});
+		// Init common actions if they are not already handled in base.html document.ready
+		// if (typeof initActions === 'function') {
+		// 	initActions();
+		// }
 
+		ArtistPage.getArtistBio();
+		ArtistPage.initDialogs();
+		ArtistPage.initDataTables();
+
+		// Songkick Calendar
+		// The python config values are injected above, so they are available here.
+		if( ${'true' if headphones.CONFIG.SONGKICK_ENABLED else 'false'} ){
+      		ArtistPage.getArtistsCalendar();
+    	}
+
+		// Artist Status Polling
+    	ArtistPage.checkArtistStatus(); // Initial check
+    	ArtistPage.refreshInterval = setInterval(function(){
+    		ArtistPage.checkArtistStatus();
+		}, 3000); // Increased interval to 3 seconds, was 1.5s which is very frequent
+
+        // Event handler for artist actions in subhead_menu
+        $('#subhead_menu').on('click', '.artist-action', function(e) {
+            e.preventDefault();
+            var $this = $(this);
+            var action = $this.data('action');
+            var artistId = $this.data('artist-id');
+            var artistName = $this.data('artist-name'); // For removeExtras
+            var successMsg = $this.data('success-msg');
+
+            var url = action + '?ArtistID=' + artistId;
+            if (artistName) url += '&ArtistName=' + encodeURIComponent(artistName);
+
+            if (typeof doAjaxCall === 'function') {
+                doAjaxCall(url, $this, true, successMsg); // 'true' for refreshing content, if common.js supports it
+            } else if (typeof doSimpleAjaxCall === 'function' && action === 'refreshArtist') {
+				// Fallback for refreshArtist if doAjaxCall isn't what's expected for it
+				doSimpleAjaxCall(url);
+			} else {
+                console.error("doAjaxCall or doSimpleAjaxCall function is not defined!");
+            }
+        });
+
+        // Event handler for album actions within the table
+        // Delegated to #album_table body as these links are dynamically added
+        $('#album_table tbody').on('click', '.album-action-inline', function(e) {
+            e.preventDefault();
+            var $this = $(this);
+            var action = $this.data('action');
+            var albumId = $this.data('album-id');
+            var artistId = $this.data('artist-id');
+            var newStatus = $this.data('new'); // Boolean 'true' or 'false'
+            var lossless = $this.data('lossless'); // Boolean 'true' or 'false'
+            var successMsg = $this.data('success-msg');
+
+            var url = action + '?AlbumID=' + albumId + '&ArtistID=' + artistId;
+            if (newStatus !== undefined) url += '&new=' + newStatus;
+            if (lossless !== undefined) url += '&lossless=' + lossless;
+
+            if (typeof doAjaxCall === 'function') {
+                doAjaxCall(url, $this, 'table', successMsg); // 'table' for refreshing content, if common.js supports it
+            } else {
+                console.error("doAjaxCall function is not defined!");
+            }
+        });
+
+		// "Mark selected albums as" dropdown change
+		$('#markAlbumsActionSelect').on('change', function() {
+            var selectedAction = $(this).val();
+            if (selectedAction) {
+                // Manually trigger form submission with AJAX
+                var $form = $('#markAlbumsForm');
+                var formData = $form.serialize(); // Includes ArtistID and action
+
+                // Get selected album IDs
+                var selectedAlbumIDs = $('.album-checkbox:checked').map(function() {
+                    return $(this).attr('name'); // AlbumID is the name attribute
+                }).get();
+
+                if (selectedAlbumIDs.length === 0) {
+                    // Show error message as per original data-error
+                    if (typeof doAjaxCall === 'function') { // Assuming doAjaxCall can show errors
+                        doAjaxCall(null, $(this), null, null, 'You didn\'t select any albums');
+                    } else {
+                        alert('You didn\'t select any albums');
+                    }
+                    $(this).val('Choose...'); // Reset dropdown
+                    return;
+                }
+                
+                // Construct the URL for markAlbums action
+                var url = $form.attr('action') + '?' + formData;
+                // Add selected album IDs as a comma-separated list or multiple parameters
+                $.each(selectedAlbumIDs, function(index, id) {
+                    url += '&AlbumID=' + id; // Append each selected AlbumID
+                });
+                
+                // Assuming doAjaxCall is defined in common.js
+                if (typeof doAjaxCall === 'function') {
+                    // Using null for the element as it's a general form submission
+                    doAjaxCall(url, null, 'table', 'Albums marked successfully'); // 'table' for refreshing, success message
+                } else {
+                    console.error("doAjaxCall function is not defined!");
+                }
+                $(this).val('Choose...'); // Reset dropdown after action
+            }
+        });
+
+        // "Select all" checkbox functionality
+        $('.select-all-checkbox').on('change', function() {
+            $('.album-checkbox').prop('checked', $(this).prop('checked'));
+        });
+
+	});
 	</script>
 </%def>
