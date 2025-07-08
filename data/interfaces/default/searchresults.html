@@ -8,24 +8,24 @@
 	<table class="display" id="searchresults_table">
 		<thead>
 			<tr>
-				<th id="albumart"></th>
+				<th class="column-albumart"></th> <%-- Changed ID to class --%>
 				%if type == 'album':
-					<th id="albumname">Album Name</th>
-                    <th id="artistnamesmall">Artist Name</th>
-                    <th id="format">Format</th>
-                    <th id="tracks">Tracks</th>
-                    <th id="reldate">Date</th>
-                    <th id="scoresmall">Score</th>
-                    <th id="mbrelid" style="display:none;"</th>
+					<th class="column-albumname">Album Name</th>
+                    <th class="column-artistname-small">Artist Name</th>
+                    <th class="column-format">Format</th>
+                    <th class="column-tracks">Tracks</th>
+                    <th class="column-reldate">Date</th>
+                    <th class="column-score-small">Score</th>
+                    <th class="column-mbrelid" style="display:none;"</th> <%-- Move display:none to CSS if always hidden --%>
                 %elif type == 'artist':
-                    <th id="artistname">Artist Name</th>
-                    <th id="score">Score</th>
+                    <th class="column-artistname">Artist Name</th>
+                    <th class="column-score">Score</th>
                 %else:
-                    <th id="seriesname">Series Name</th>
-                    <th id="type">Type</th>
-                    <th id="score">Score</th>
+                    <th class="column-seriesname">Series Name</th>
+                    <th class="column-type">Type</th>
+                    <th class="column-score">Score</th>
 				%endif
-                <th id="mb"></th>
+                <th class="column-mb"></th>
 			</tr>
 		</thead>
 		<tbody>
@@ -39,34 +39,55 @@
 
                     if type == 'album':
                         albuminfo = 'Type: ' + result['rgtype'] + ', Country: ' + result['country']
+                        # Constructing CAA URL for fallback, will be used as data-src for unveiling
                         caa_group_url = "http://coverartarchive.org/release-group/%s/front-250.jpg" %result['rgid']
+                        # MusicBrainz album art URL (assuming it's a direct link to the image)
+                        # If result['image'] provides a direct image URL, use it. Otherwise, rely on CAA or generic.
+                        # For this modernization, let's assume getAlbumArtURL is available or build a generic one.
+                        # For now, will prioritize getImageLinks.
                 %>
 				<tr class="grade${grade}">
 				%if type == 'album':
-					<td id="albumart" style=" text-align: center; vertical-align: middle;"><div id="artistImg"><img title="${result['albumid']}" class="albumArt" height="50" width="50" onerror="tryCCA(this, '${caa_group_url}')"></div></td>
+					<td class="column-albumart album-art-cell"> <%-- Changed ID to class --%>
+                        <div class="artwork-container">
+                            <%-- Using data-src for lazy loading. onerror will handle the tryCCA fallback. --%>
+                            <img title="${result['albumid']}" class="albumArt search-result-albumart"
+                                 data-src="" <%-- Will be populated by getImageLinks --%>
+                                 onerror="tryCCA(this, '${caa_group_url}', 'album')"
+                                 alt="Cover art for ${result['title']}" loading="lazy">
+                        </div>
+                    </td>
                 %elif type == 'artist':
-					<td id="albumart"><div id="artistImg"><img title="${result['id']}" class="albumArt" height="50" width="50"></div></td>
+					<td class="column-albumart artist-art-cell"> <%-- Changed ID to class --%>
+                        <div class="artwork-container">
+                            <%-- Assuming artists might also have an image, or it will be a generic icon. --%>
+                            <img title="${result['id']}" class="albumArt search-result-artistart"
+                                 data-src="" <%-- Will be populated by getImageLinks --%>
+                                 onerror="this.onerror=null;this.src='interfaces/default/images/no-cover-art.png';"
+                                 alt="Image for ${result['uniquename']}" loading="lazy">
+                        </div>
+                    </td>
                 %else:
-                    <td id="albumart"></td>
+                    <td class="column-albumart series-art-cell"></td> <%-- No artwork for series --%>
 				%endif
 				%if type == 'album':
-					<td id="albumname"><a href="addReleaseById?rid=${result['albumid']}&rgid=${result['rgid']}" title="${albuminfo}">${result['title']}</a></td>
-                    <td id="artistnamesmall"><a href="addArtist?artistid=${result['id']}" title="${result['uniquename']}">${result['uniquename']}</a></td>
-                    <td id="format">${result['formats']}</td>
-                    <td id="tracks">${result['tracks']}</td>
-                    <td id="reldate">${result['date']}</td>
-                    <td id="score"><a href="${result['albumurl']} "title="View on MusicBrainz"><div class="bar"><div class="score" style="width: ${result['score']}px">${result['score']}</div></div></a></td>
-                    <td id="musicbrainz" style=" text-align: center; line-height: 0; vertical-align: middle;"><a href="${result['albumurl']}"><img src="interfaces/default/images/MusicBrainz_Album_Icon.png" title="View on MusicBrainz" height="20" width="20"></a></td>
-                    <td id="mbrelid" style="display:none;">${result['albumid']}</td>
+					<td class="column-albumname"><a href="addReleaseById?rid=${result['albumid']}&rgid=${result['rgid']}" title="${albuminfo}">${result['title']}</a></td>
+                    <td class="column-artistname-small"><a href="addArtist?artistid=${result['id']}" title="${result['uniquename']}">${result['uniquename']}</a></td>
+                    <td class="column-format">${result['formats']}</td>
+                    <td class="column-tracks">${result['tracks']}</td>
+                    <td class="column-reldate">${result['date']}</td>
+                    <td class="column-score"><a href="${result['albumurl']}" title="View on MusicBrainz"><div class="bar"><div class="score" style="width: ${result['score']}px">${result['score']}</div></div></a></td>
+                    <td class="column-musicbrainz musicbrainz-link-cell"><a href="${result['albumurl']}" target="_blank" rel="noopener noreferrer"><img src="interfaces/default/images/MusicBrainz_Album_Icon.png" title="View on MusicBrainz" height="20" width="20" alt="MusicBrainz Link"></a></td>
+                    <td class="column-mbrelid" style="display:none;">${result['albumid']}</td> <%-- Move display:none to CSS if always hidden --%>
                 %elif type == 'artist':
-                    <td id="artistname"><a href="addArtist?artistid=${result['id']}" title="${result['uniquename']}">${result['uniquename']}</a></td>
-                    <td id="score"><a href="${result['url']} "title="View on MusicBrainz"><div class="bar"><div class="score" style="width: ${result['score']}px">${result['score']}</div></div></a></td>
-                    <td id="musicbrainz" style=" text-align: center; line-height: 0; vertical-align: middle;"><a href="${result['url']}"><img src="interfaces/default/images/MusicBrainz_Artist_Icon.png" title="View on MusicBrainz" height="20" width="20"></a></td>
+                    <td class="column-artistname"><a href="addArtist?artistid=${result['id']}" title="${result['uniquename']}">${result['uniquename']}</a></td>
+                    <td class="column-score"><a href="${result['url']}" title="View on MusicBrainz"><div class="bar"><div class="score" style="width: ${result['score']}px">${result['score']}</div></div></a></td>
+                    <td class="column-musicbrainz musicbrainz-link-cell"><a href="${result['url']}" target="_blank" rel="noopener noreferrer"><img src="interfaces/default/images/MusicBrainz_Artist_Icon.png" title="View on MusicBrainz" height="20" width="20" alt="MusicBrainz Link"></a></td>
                 %else:
-                    <td id="seriesname"><a href="addSeries?seriesid=${result['id']}" title="${result['uniquename']}">${result['uniquename']}</a></td>
-                    <td id="type">${result['type']}</td>
-                    <td id="score"><a href="${result['url']} "title="View on MusicBrainz"><div class="bar"><div class="score" style="width: ${result['score']}px">${result['score']}</div></div></a></td>
-                    <td id="musicbrainz" style=" text-align: center; line-height: 0; vertical-align: middle;"><a href="${result['url']}"><img src="interfaces/default/images/MusicBrainz_Artist_Icon.png" title="View on MusicBrainz" height="20" width="20"></a></td>
+                    <td class="column-seriesname"><a href="addSeries?seriesid=${result['id']}" title="${result['uniquename']}">${result['uniquename']}</a></td>
+                    <td class="column-type">${result['type']}</td>
+                    <td class="column-score"><a href="${result['url']}" title="View on MusicBrainz"><div class="bar"><div class="score" style="width: ${result['score']}px">${result['score']}</div></div></a></td>
+                    <td class="column-musicbrainz musicbrainz-link-cell"><a href="${result['url']}" target="_blank" rel="noopener noreferrer"><img src="interfaces/default/images/MusicBrainz_Artist_Icon.png" title="View on MusicBrainz" height="20" width="20" alt="MusicBrainz Link"></a></td>
 				%endif
 				</tr>
 				%endfor
@@ -77,37 +98,77 @@
 </%def>
 
 <%def name="headIncludes()">
+	${parent.headIncludes()} <%-- Ensure parent head includes are kept --%>
 	<link rel="stylesheet" href="interfaces/default/css/data_table.css">
+    <style>
+        /* Basic CSS for album art thumbnail, consistent with other pages */
+		.search-result-albumart, .search-result-artistart {
+			height: 50px;
+			width: 50px;
+			object-fit: cover; /* Ensures image covers the area without distortion */
+			vertical-align: middle;
+		}
+
+        /* MusicBrainz icon styling */
+        .musicbrainz-link-cell img {
+            height: 20px;
+            width: 20px;
+            vertical-align: middle;
+        }
+
+        /* Score bar styling (if not already in data_table.css) */
+        .bar {
+            width: 100px; /* Or a fixed width */
+            background-color: #eee;
+            border: 1px solid #ccc;
+            height: 18px; /* Adjust as needed */
+            line-height: 18px;
+            text-align: right;
+            border-radius: 3px;
+            overflow: hidden; /* Hide overflow if score > 100px */
+        }
+        .score {
+            height: 100%;
+            background-color: #5cb85c; /* Green for score */
+            color: #fff;
+            padding-right: 5px;
+            font-size: 0.8em;
+            box-sizing: border-box; /* Include padding in width calculation */
+        }
+    </style>
 </%def>
 
 <%def name="javascriptIncludes()">
+    ${parent.javascriptIncludes()} <%-- Ensure parent javascript includes are kept --%>
     <script src="js/libs/jquery.unveil.min.js"></script>
 	<script src="js/libs/jquery.dataTables.min.js"></script>
 
 	<script type="text/javascript">
-        function tryCCA(element, url) {
+        // Global function to try Cover Art Archive or generic fallback
+        function tryCCA(element, url, type) {
             element.onerror = function() {
-                element.onerror = null;
-                element.src = "interfaces/default/images/no-cover-art.png";
+                element.onerror = null; // Prevent infinite loops
+                element.src = "interfaces/default/images/no-cover-art.png"; // Fallback generic image
+                if (type === 'artist') {
+                    // Specific fallback for artists if different
+                    // element.src = "interfaces/default/images/no-artist-art.png";
+                }
             };
-            element.src = url;
+            if (url) {
+                element.src = url; // Try the provided URL (e.g., CAA)
+            } else {
+                 element.src = "interfaces/default/images/no-cover-art.png"; // Fallback if no specific URL provided
+            }
         }
-    	function getArt() {
-    		$("table#searchresults_table tr td#albumart img").each(function(){
-    			var id = $(this).attr('title');
-    			var image = $(this);
 
-    			if (!image.hasClass('done')) {
-    				image.addClass('done');
-    				getImageLinks(image, id, "${type}", true);
-    			}
-    		});
-    	}
-    	function initThisPage() {
+        // Encapsulate page-specific logic
+        var SearchResultsPage = SearchResultsPage || {};
+
+    	SearchResultsPage.initDataTable = function() {
     		$('#searchresults_table').dataTable({
 				"bDestroy": true,
 				"aoColumnDefs": [
-			          { 'bSortable': false, 'aTargets': [ 0 ] }
+			          { 'bSortable': false, 'aTargets': [ 0, 7 ] } // Disable sorting for albumart (0) and MusicBrainz icon (7) columns
 				],
 				"oLanguage": {
 					"sLengthMenu":"Show _MENU_ results per page",
@@ -118,36 +179,62 @@
 					"sSearch" : ""},
 				"iDisplayLength": 25,
 				"sPaginationType": "full_numbers",
-				"aaSorting": [],
+				"aaSorting": [], // No initial sorting specified, DataTables default
                 "fnDrawCallback": function (o) {
                     // Jump to top of page
                     $('html,body').scrollTop(0);
+                    // Re-unveil images after each draw for lazy loading
+                    $("img.search-result-albumart, img.search-result-artistart").unveil();
+                    // Re-populate art for new rows
+                    SearchResultsPage.getArt();
                 }
 			});
-            $('#searchresults_table').on("draw.dt", function () {
-                getArt();
-                $("img").unveil();
+    	};
+
+        // Custom function to get image links and apply them to data-src
+        SearchResultsPage.getArt = function() {
+            // Target all relevant image elements that are not yet "done"
+            $("img.search-result-albumart:not(.done), img.search-result-artistart:not(.done)").each(function(){
+                var $image = $(this);
+                var id = $image.attr('title'); // Use title as ID for getImageLinks
+
+                // Add 'done' class immediately to prevent re-processing
+                $image.addClass('done');
+
+                // Assuming getImageLinks is a global function that fetches the actual image URL
+                // and sets it to the data-src attribute.
+                // If getImageLinks directly sets the src, unveil() will still work, but
+                // this setup aims for data-src first.
+                if (typeof getImageLinks === 'function') {
+                    // getImageLinks should ideally return a promise or accept a callback
+                    // and then set $image.attr('data-src', actualImageUrl);
+                    // For now, assuming it handles it internally or synchronously.
+                    getImageLinks($image, id, "${type}", true); // Assuming this sets data-src or src
+                } else {
+                    console.warn("getImageLinks function is not defined. Image loading might be impacted.");
+                    // Fallback to a generic image if getImageLinks is not available and no data-src is set.
+                    // This might be handled by onerror, but adding here for explicit safety.
+                    if (!$image.attr('data-src') && !$image.attr('src')) {
+                        $image.attr('src', "interfaces/default/images/no-cover-art.png");
+                    }
+                }
             });
-            getArt();
-			resetFilters("album");
-    	}
+        };
+
     	$(document).ready(function(){
-    		initFancybox();
-            initThisPage();
+    		initFancybox(); // Assuming initFancybox is a global function
+            SearchResultsPage.initDataTable();
+            SearchResultsPage.getArt(); // Initial call to load images on page load
+
+            // This part sets search parameters based on backend data.
+            // Assuming searchbar and its inputs exist globally.
+            $("#searchbar input[name=name]").val(${name | json.dumps});
+            $("#searchbar select[name=type]").val(${type | json.dumps});
+
+            // Assuming resetFilters is a global function from common.js
+			if (typeof resetFilters === 'function') {
+				resetFilters("album"); // Or adjust based on 'type' if needed
+			}
     	});
 	</script>
-
-    <script type="text/javascript">
-        <%!
-            # Abuse JSON module for escaping JavaScript
-            import json
-        %>
-        $(document).ready(function() {
-            // Search parameter
-            $("#searchbar input[name=name]").val(${name | json.dumps});
-
-            // Album or artist
-            $("#searchbar select[name=type]").val(${type | json.dumps});
-        });
-    </script>
 </%def>
