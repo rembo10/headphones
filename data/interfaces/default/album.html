@@ -5,7 +5,6 @@
 %>
 
 <%def name="headerIncludes()">
-
 	<div id="subhead_container">
 		<div id="back_to_previous_link">
 			<a href="artistPage?ArtistID=${album['ArtistID']}" class="back">&laquo; Back to ${album['ArtistName']}</a>
@@ -13,44 +12,47 @@
 		<div id="subhead_menu">
 
 			<a id="menu_link_delete" href="deleteAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}"><i class="fa fa-trash-o"></i> Delete Album</a>
+
 			%if album['Status'] == 'Skipped' or album['Status'] == 'Ignored':
-			<a id="menu_link_wanted" href="javascript:void(0)" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=False', $(this),true)" data-success="'${album['AlbumTitle']}' added to queue"><i class="fa fa-heart"></i> Mark Album as Wanted</a>
+			<a id="menu_link_wanted" href="#" class="album-action" data-action="queueAlbum" data-album-id="${album['AlbumID']}" data-artist-id="${album['ArtistID']}" data-new="False" data-success-msg="'${album['AlbumTitle']}' added to queue"><i class="fa fa-heart"></i> Mark Album as Wanted</a>
 			%elif album['Status'] == 'Wanted':
-			<a id="menu_link_check" href="javascript:void(0)" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True', $(this));" data-success="Forced checking successful"><i class="fa fa-search"></i> Force Check</a>
-			<a id="menu_link_skipped" href="javascript:void(0)" onclick="doAjaxCall('unqueueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}', $(this),true);" data-success="'${album['AlbumTitle']}' marked as Skipped"><i class="fa fa-step-forward"></i> Mark Album as Skipped</a>
+			<a id="menu_link_check" href="#" class="album-action" data-action="queueAlbum" data-album-id="${album['AlbumID']}" data-artist-id="${album['ArtistID']}" data-new="True" data-success-msg="Forced checking successful"><i class="fa fa-search"></i> Force Check</a>
+			<a id="menu_link_skipped" href="#" class="album-action" data-action="unqueueAlbum" data-album-id="${album['AlbumID']}" data-artist-id="${album['ArtistID']}" data-success-msg="'${album['AlbumTitle']}' marked as Skipped"><i class="fa fa-step-forward"></i> Mark Album as Skipped</a>
 			%else:
-			<a id="menu_link_retry" href="javascript:void(0)" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=False', $(this),true);" data-success="Retrying the same version of '${album['AlbumTitle']}'"><i class="fa fa-refresh"></i> Retry Download</a>
-			<a id="menu_link_new" href="javascript:void(0)" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}&new=True', $(this),true);" data-success="Looking for a new version of '${album['AlbumTitle']}'"><i class="fa fa-download"></i> Try New Version</a>
+			<a id="menu_link_retry" href="#" class="album-action" data-action="queueAlbum" data-album-id="${album['AlbumID']}" data-artist-id="${album['ArtistID']}" data-new="False" data-success-msg="Retrying the same version of '${album['AlbumTitle']}'"><i class="fa fa-refresh"></i> Retry Download</a>
+			<a id="menu_link_new" href="#" class="album-action" data-action="queueAlbum" data-album-id="${album['AlbumID']}" data-artist-id="${album['ArtistID']}" data-new="True" data-success-msg="Looking for a new version of '${album['AlbumTitle']}'"><i class="fa fa-download"></i> Try New Version</a>
 			%endif		
-			<a class="menu_link_edit" id="album_chooser" href="javascript:void(0)"><i class="fa fa-pencil"></i> Choose Alternate Release</a>
-				<div id="dialog" title="Choose an Alternate Release" style="display:none" class="configtable">
-					<div class="links">
-						<%
-							alternate_albums = myDB.select("SELECT * from allalbums WHERE AlbumID=? ORDER BY ReleaseDate ASC", [album['AlbumID']])
-						%>
-						%if not alternate_albums:
-							<p>No alternate releases found. Try refreshing the artist (if the artist is being refreshed, please wait until it's finished)</p>
-							<h2><a id="refresh_artist" onclick="doAjaxCall('refreshArtist?ArtistID=${album['ArtistID']}', $(this)), true" href="javascript:void(0)" data-success="'${album['ArtistName']}' is being refreshed">Refresh Artist</a></h2>
-						%else:
-							%for alternate_album in alternate_albums:
-								<%
-									track_count = len(myDB.select("SELECT * from alltracks WHERE ReleaseID=?", [alternate_album['ReleaseID']]))
-									mb_link = "http://musicbrainz.org/release/" + alternate_album['ReleaseID']
-									have_track_count = len(myDB.select("SELECT * from alltracks WHERE ReleaseID=? AND Location IS NOT NULL", [alternate_album['ReleaseID']]))
-									if alternate_album['AlbumID'] == alternate_album['ReleaseID']:
-										alternate_album_name = "Headphones Default Release (" + str(alternate_album['ReleaseDate']) + ") [" + str(have_track_count) + "/" + str(track_count) + " tracks]"
-									else:
-										alternate_album_name = alternate_album['AlbumTitle'] + " (" + alternate_album['ReleaseCountry'] + ", " + str(alternate_album['ReleaseDate']) + ", " + alternate_album['ReleaseFormat'] + ") [" + str(have_track_count) + "/" + str(track_count) + " tracks]"
-									
-								%>
-								<a href="javascript:void(0)" onclick="doAjaxCall('switchAlbum?AlbumID=${album['AlbumID']}&ReleaseID=${alternate_album['ReleaseID']}', $(this), 'table');" data-success="Switched release to: ${alternate_album_name}">${alternate_album_name}</a><a href="${mb_link}" target="_blank">MB</a><br>
-							%endfor
-						%endif
-					</div>
+
+			<a class="menu_link_edit dialog-trigger" id="album_chooser" href="#" data-dialog-id="dialog"><i class="fa fa-pencil"></i> Choose Alternate Release</a>
+			<div id="dialog" title="Choose an Alternate Release" style="display:none" class="configtable">
+				<div class="links">
+					<%
+						alternate_albums = myDB.select("SELECT * from allalbums WHERE AlbumID=? ORDER BY ReleaseDate ASC", [album['AlbumID']])
+					%>
+					%if not alternate_albums:
+						<p>No alternate releases found. Try refreshing the artist (if the artist is being refreshed, please wait until it's finished)</p>
+						<h2><a id="refresh_artist_btn" href="#" class="album-action" data-action="refreshArtist" data-artist-id="${album['ArtistID']}" data-success-msg="'${album['ArtistName']}' is being refreshed">Refresh Artist</a></h2>
+					%else:
+						%for alternate_album in alternate_albums:
+							<%
+								track_count = len(myDB.select("SELECT * from alltracks WHERE ReleaseID=?", [alternate_album['ReleaseID']]))
+								mb_link = "http://musicbrainz.org/release/" + alternate_album['ReleaseID']
+								have_track_count = len(myDB.select("SELECT * from alltracks WHERE ReleaseID=? AND Location IS NOT NULL", [alternate_album['ReleaseID']]))
+								if alternate_album['AlbumID'] == alternate_album['ReleaseID']:
+									alternate_album_name = "Headphones Default Release (" + str(alternate_album['ReleaseDate']) + ") [" + str(have_track_count) + "/" + str(track_count) + " tracks]"
+								else:
+									alternate_album_name = alternate_album['AlbumTitle'] + " (" + alternate_album['ReleaseCountry'] + ", " + str(alternate_album['ReleaseDate']) + ", " + alternate_album['ReleaseFormat'] + ") [" + str(have_track_count) + "/" + str(track_count) + " tracks]"
+								
+							%>
+							<a href="#" class="album-action alternate-release-switch" data-action="switchAlbum" data-album-id="${album['AlbumID']}" data-release-id="${alternate_album['ReleaseID']}" data-success-msg="Switched release to: ${alternate_album_name}">${alternate_album_name}</a><a href="${mb_link}" target="_blank" class="external-link">MB</a><br>
+						%endfor
+					%endif
 				</div>
-			<a class="menu_link_edit" id="edit_search_term" href="javascript:void(0)"><i class="fa fa-pencil"></i> Edit Search Term</a>
+			</div>
+
+			<a class="menu_link_edit dialog-trigger" id="edit_search_term" href="#" data-dialog-id="dialog2"><i class="fa fa-pencil"></i> Edit Search Term</a>
 			<div id="dialog2" title="Enter your own search term for this album" style="display:none" class="configtable">
-				<form action="editSearchTerm" method="GET" id="editSearchTerm">
+				<form action="editSearchTerm" method="GET" id="editSearchTermForm">
 					<input type="hidden" name="AlbumID" value="${album['AlbumID']}">
 					<div class="row">
 						<%
@@ -61,10 +63,11 @@
 						%>
 						<input type="text" value="${search_term}" name="SearchTerm" size="40" />
 					</div>
-					<input type="button" value="Save changes" onclick="doAjaxCall('editSearchTerm',$(this),'tabs',true);return false;" data-success="Search term updated"/>
+					<button type="submit" class="album-action-submit" data-action="editSearchTerm" data-success-msg="Search term updated">Save changes</button>
 				</form>
 			</div>
-			<a class="menu_link_edit" id="choose_specific_download" href="javascript:void(0)" onclick="getAvailableDownloads()"><i class="fa fa-search"></i> Choose Specific Download</a>
+
+			<a class="menu_link_edit dialog-trigger" id="choose_specific_download" href="#" data-dialog-id="choose_specific_download_dialog" data-action="getAvailableDownloads"><i class="fa fa-search"></i> Choose Specific Download</a>
 			<div id="choose_specific_download_dialog" title="Choose a specific download for this album" style="display:none" class="configtable">
 				<table class="display" id="downloads_table">
 					<thead>
@@ -88,7 +91,7 @@
 	<div class="table_wrapper">
 		<div id="albumheader" class="clearfix">
 			<div id="albumImg">
-				<img height="200" alt="" class="albumArt" src="artwork/album/${album['AlbumID']}">
+				<img alt="${album['AlbumTitle']} album art" class="albumArt" src="artwork/album/${album['AlbumID']}">
 			</div>
 
             <h1 id="albumname">
@@ -106,7 +109,6 @@
 					albumduration = helpers.convert_milliseconds(totalduration)
 				except:
 					albumduration = 'n/a'
-			
 			%>
 			<div class="albuminfo">
 				<div id="albumInfo"></div>
@@ -187,178 +189,290 @@
 </%def>
 
 <%def name="headIncludes()">
+	${parent.headIncludes()} <%-- Ensure parent head includes are kept --%>
 	<link rel="stylesheet" href="interfaces/default/css/data_table.css">
 </%def>
 
 <%def name="javascriptIncludes()">
+	${parent.javascriptIncludes()} <%-- Ensure parent javascript includes are kept --%>
 	<script src="js/libs/jquery.dataTables.min.js"></script>
 	<script>
-	function getAlbumInfo() {
+	// Define a global object for page-specific functions to avoid polluting global scope directly
+	var AlbumPage = AlbumPage || {};
+
+	AlbumPage.search_results = []; // Moved to page-specific scope
+
+	AlbumPage.getAlbumInfo = function() {
 		var id = "${album['AlbumID']}";
 		var elem = $("#albumInfo");
-		getInfo(elem,id,'album');
-	}
+		// Assuming getInfo is defined in common.js
+		if (typeof getInfo === 'function') {
+		    getInfo(elem,id,'album');
+		} else {
+		    console.warn("getInfo function not found. Album info might not be loaded.");
+		}
+	};
 
-	function initThisPage() {
-		$('#album_chooser').click(function() {
-			$('#dialog').dialog({
-				width: 500,
-				maxHeight: 500
-			});
-			return false;
-		});
-		$('#edit_search_term').click(function() {
-			$('#dialog2').dialog({
-				width: 500,
-				maxHeight: 500
-			});
-			return false;
-		});
-		$('#refresh_artist').click(function() {
-			$('#dialog').dialog("close");
-		});
-		initActions();
-		setTimeout(function(){
-			initFancybox();
-		}, 1000);
+	AlbumPage.initDialogs = function() {
+		// General handler for opening dialogs based on data-dialog-id
+		$(document).on('click', '.dialog-trigger', function(e) {
+			e.preventDefault();
+			var dialogId = $(this).data('dialog-id');
+			var $dialog = $('#' + dialogId);
 
-		$('#track_table').dataTable({
-			"aaSorting": [],
-			"bFilter": false,
-			"bInfo": false,
-			"bPaginate": false,
-			"bDestroy": true
+			if ($dialog.length) {
+				// Specific logic for choose_specific_download_dialog before opening
+				if (dialogId === 'choose_specific_download_dialog') {
+					AlbumPage.getAvailableDownloads();
+				} else {
+					$dialog.dialog({
+						width: 500,
+						maxHeight: 500,
+						// Add close event to clear dynamic content if any
+						close: function() {
+							if (dialogId === 'downloads_table_body') {
+								$('#downloads_table_body').empty(); // Clear table content on close
+								// Re-initialize DataTable if needed on next open, or destroy it here
+							}
+						}
+					});
+				}
+			}
+		});
+
+		// Specific handler for refreshing artist from alternate releases dialog
+		$(document).on('click', '#refresh_artist_btn', function(e) {
+			e.preventDefault();
+			var $this = $(this);
+			// Assuming doAjaxCall is defined in common.js
+			if (typeof doAjaxCall === 'function') {
+				doAjaxCall($this.data('action') + '?ArtistID=' + $this.data('artist-id'), $this, true, $this.data('success-msg'));
+			}
+			$('#dialog').dialog("close"); // Close dialog after action
 		});
 	};
 
-	function getAvailableDownloads() {
-		ShowSpinner();
-		$.getJSON("choose_specific_download?AlbumID=${album['AlbumID']}", function(data) {
-			loader.remove();
-			feedback.fadeOut();
-			search_results = data
+	AlbumPage.initDataTables = function() {
+		// Initialize track_table
+		$('#track_table').DataTable({ // Use .DataTable() for new versions of DataTables
+			"ordering": false, // aaSorting -> ordering
+			"searching": false, // bFilter -> searching
+			"info": false, // bInfo -> info
+			"paging": false, // bPaginate -> paging
+			"destroy": true // bDestroy -> destroy
+		});
+	};
+
+	AlbumPage.getAvailableDownloads = function() {
+		AlbumPage.ShowSpinner();
+		var albumId = "${album['AlbumID']}";
+		$.getJSON("choose_specific_download?AlbumID=" + albumId, function(data) {
+			AlbumPage.loader.remove(); // Assuming loader is attached to AlbumPage scope now
+			AlbumPage.feedback.fadeOut(); // Assuming feedback is attached to AlbumPage scope now
+			AlbumPage.search_results = data; // Store results
+
+			// Clear previous content
+			$('#downloads_table_body').empty(); 
+
 			for( var i = 0, len = data.length; i < len; i++ ) {
-    			$('#downloads_table_body').append('<tr><td id="title"><a href="javascript:void(0)" onclick="downloadSpecificRelease('+i+')">'+data[i].title+'</a></td><td id="size"><span title='+data[i].size+'></span>'+(data[i].size / (1024*1024)).toFixed(2)+' MB</td><td id="provider">'+data[i].provider+'</td><td id="kind">'+data[i].kind+'</td><td id="matches">'+data[i].matches+'</td></tr>');
+    			$('#downloads_table_body').append(
+					'<tr>' +
+						'<td id="title"><a href="#" class="download-specific-release-link" data-index="' + i + '">' + data[i].title + '</a></td>' +
+						'<td id="size"><span title="'+data[i].size+'"></span>' + (data[i].size / (1024*1024)).toFixed(2) + ' MB</td>' +
+						'<td id="provider">' + data[i].provider + '</td>' +
+						'<td id="kind">' + data[i].kind + '</td>' +
+						'<td id="matches">' + data[i].matches + '</td>' +
+					'</tr>'
+				);
     		}
-			$('#downloads_table').dataTable({
-				"aoColumns": [
-					null,
-					{"sType": "title-numeric"},
-					null,
-					null,
-					{"sType": "string"}
+			
+			// Destroy and re-initialize the DataTable for downloads
+			if ($.fn.DataTable.isDataTable('#downloads_table')) {
+                $('#downloads_table').DataTable().destroy();
+            }
+			$('#downloads_table').DataTable({
+				"columnDefs": [ // aoColumns -> columnDefs
+					{ "orderable": false, "targets": [0, 2, 3] }, // Disable ordering for Title, Provider, Kind
+					{ "type": "title-numeric", "targets": 1 }, // sType -> type
+					{ "type": "string", "targets": 4 }
 				],
-				"aaSorting": [[ 4, 'desc']],
-				"bFilter": false,
-				"bInfo": false,
-				"bPaginate": false,
-				"bDestroy": true
+				"order": [[ 4, 'desc']], // aaSorting -> order
+				"searching": false,
+				"info": false,
+				"paging": false,
+				"destroy": true // Important for re-initialization
 			});
+
     		$("#choose_specific_download_dialog").dialog({
     			width: "80%",
-    			maxHeight: 500
+    			maxHeight: 500,
+				modal: true // Added modal to make it more common practice
     		});
-    		return false;
 		});
-	}
+	};
 
-	function downloadSpecificRelease(i){
+	AlbumPage.downloadSpecificRelease = function(i){
+		var release = AlbumPage.search_results[i]; // Get from stored results
 
-		title = search_results[i].title
-		size = search_results[i].size
-		url = search_results[i].url
-		provider = search_results[i].provider
-		kind = search_results[i].kind
+		var url = "download_specific_release?AlbumID=${album['AlbumID']}" +
+                  "&title=" + encodeURIComponent(release.title) +
+                  "&size=" + release.size +
+                  "&url=" + encodeURIComponent(release.url) +
+                  "&provider=" + encodeURIComponent(release.provider) +
+                  "&kind=" + encodeURIComponent(release.kind);
 
-		ShowSpinner();
-		$.getJSON("download_specific_release?AlbumID=${album['AlbumID']}&title="+title+"&size="+size+"&url="+url+"&provider="+provider+"&kind=" + kind, function(data) {
-			loader.remove();
-			feedback.fadeOut();
-			refreshSubmenu();
+		AlbumPage.ShowSpinner();
+		$.getJSON(url, function(data) {
+			AlbumPage.loader.remove();
+			AlbumPage.feedback.fadeOut();
+			// Assuming refreshSubmenu is defined globally or in common.js
+			if (typeof refreshSubmenu === 'function') {
+				refreshSubmenu();
+			}
 			$("#choose_specific_download_dialog").dialog("close");
 		});
-	}
+	};
 
-	function ShowSpinner() {
-		feedback = $("#ajaxMsg");
-		update = $("#updatebar");
+	AlbumPage.ShowSpinner = function() {
+		AlbumPage.feedback = $("#ajaxMsg"); // Assign to AlbumPage scope
+		var update = $("#updatebar");
 		if ( update.is(":visible") ) {
 			var height = update.height() + 35;
-			feedback.css("bottom",height + "px");
+			AlbumPage.feedback.css("bottom",height + "px");
 		} else {
-			feedback.removeAttr("style");
+			AlbumPage.feedback.removeAttr("style");
 		}
-		loader = $("<i class='fa fa-refresh fa-spin'></i>");
-		feedback.prepend(loader);
-		feedback.fadeIn();
-	}
+		AlbumPage.loader = $("<i class='fa fa-refresh fa-spin'></i>"); // Assign to AlbumPage scope
+		AlbumPage.feedback.prepend(AlbumPage.loader);
+		AlbumPage.feedback.fadeIn();
+	};
 
-    var loadingMessage = false;
-    var spinner_active = false;
-    var loadingtext_active = false;
-    var refreshInterval;
-    var wasLoading = false;
-    var x = 0;
+    AlbumPage.loadingMessage = false;
+    AlbumPage.spinner_active = false;
+    AlbumPage.loadingtext_active = false;
+    AlbumPage.refreshInterval = null; // Initialize as null
+    AlbumPage.wasLoading = false;
+    AlbumPage.x = 0;
 
-    function checkAlbumStatus() {
+    AlbumPage.checkAlbumStatus = function() {
         $.getJSON("getAlbumjson?AlbumID=${album['AlbumID']}", function(data) {
-            if (data['Status'] == "Loading"){
-                wasLoading = true;
+            if (data['Status'] === "Loading"){
+                AlbumPage.wasLoading = true;
                 $('#albumnamelink').text(data["AlbumTitle"]);
                 $('#artistnamelink').text(data["ArtistName"]);
-                if (loadingMessage == false){
+                if (AlbumPage.loadingMessage === false){
                     $("#ajaxMsg").after( "<div id='ajaxMsg2' class='ajaxMsg'></div>" );
-                    showArtistMsg("Getting album information");
-                    loadingMessage = true;
+                    // Assuming showArtistMsg is defined globally or in common.js
+                    if (typeof showArtistMsg === 'function') {
+                        showArtistMsg("Getting album information");
+                    }
+                    AlbumPage.loadingMessage = true;
                 }
-                if (spinner_active == false){
-                    $('#albumname').prepend('<i class="fa fa-refresh fa-spin" id="albumnamespinner"></i>')
-                    spinner_active = true;
+                if (AlbumPage.spinner_active === false){
+                    $('#albumname').prepend('<i class="fa fa-refresh fa-spin" id="albumnamespinner"></i>');
+                    AlbumPage.spinner_active = true;
                 }
-                if (loadingtext_active == false){
-                    $('#albumname').append('<h3 id="loadingtext"><i>(Album information is currently being loaded)</i></h3>')
-                    loadingtext_active = true;
+                if (AlbumPage.loadingtext_active === false){
+                    $('#albumname').append('<h3 id="loadingtext"><i>(Album information is currently being loaded)</i></h3>');
+                    AlbumPage.loadingtext_active = true;
                 }
-            }
-            else{
-                if (++x === 10) {
-                    clearInterval(refreshInterval);
+            } else {
+                AlbumPage.x++;
+                if (AlbumPage.x === 10 || AlbumPage.wasLoading || $("#artistname").text().trim() === "Loading") { // Combined conditions
+                    if (AlbumPage.refreshInterval) { // Clear only if interval is set
+                        clearInterval(AlbumPage.refreshInterval);
+                    }
+                    location.reload(); // Reload the page to show updated status
                 }
-                var sts = $("#artistname").text().trim();
-                if (wasLoading == true || sts == "Loading"){
-                    location.reload();
-                $('#albumnamespinner').remove()
-                $('#loadingtext').remove()
-                $('#ajaxMsg2').remove()
-                spinner_active = false
-                loadingtext_active = false
-                loadingMessage = false
-                }
+                $('#albumnamespinner').remove();
+                $('#loadingtext').remove();
+                $('#ajaxMsg2').remove();
+                AlbumPage.spinner_active = false;
+                AlbumPage.loadingtext_active = false;
+                AlbumPage.loadingMessage = false;
             }
         });
-    }
+    };
 
+    // jQuery DataTables custom sorting
     jQuery.extend( jQuery.fn.dataTableExt.oSort, {
 		"title-numeric-pre": function ( a ) {
-			var x = a.match(/title="*(-?[0-9\.]+)/)[1];
-			return parseFloat( x );
+			// Ensure it handles cases where title attribute might be missing or different
+			var match = a.match(/title="*(-?[0-9\.]+)/);
+			return match ? parseFloat( match[1] ) : -Infinity; // Return a safe default
 		},
-
 		"title-numeric-asc": function ( a, b ) {
 			return ((a < b) ? -1 : ((a > b) ? 1 : 0));
 		},
-
         "title-numeric-desc": function ( a, b ) {
             return ((a < b) ? 1 : ((a > b) ? -1 : 0));
         }
-    } );
+    });
 
 	$(document).ready(function()	{
-		getAlbumInfo();
-		initThisPage();
-        checkAlbumStatus();
-        refreshInterval = setInterval(function(){
-            checkAlbumStatus();
+		AlbumPage.getAlbumInfo();
+		AlbumPage.initDialogs(); // Initialize dialog triggers
+		AlbumPage.initDataTables(); // Initialize DataTables
+		// Do not use initActions() here unless it's strictly needed and modernized itself.
+		// setTimeout for fancybox is likely not needed if elements are ready or use delegated events.
+		// If fancybox is for dynamic content, initialize it after content is loaded.
+		// initFancybox(); // Re-evaluate if this is still needed or how it's used.
+
+        // Event handler for album actions
+        // Delegated to #subhead_menu as these links are within it
+        $('#subhead_menu').on('click', '.album-action', function(e) {
+            e.preventDefault();
+            var $this = $(this);
+            var action = $this.data('action');
+            var albumId = $this.data('album-id');
+            var artistId = $this.data('artist-id');
+            var newStatus = $this.data('new'); // Boolean 'true' or 'false'
+            var releaseId = $this.data('release-id');
+            var successMsg = $this.data('success-msg');
+
+            var url = action + '?AlbumID=' + albumId;
+            if (artistId) url += '&ArtistID=' + artistId;
+            if (newStatus !== undefined) url += '&new=' + newStatus;
+            if (releaseId) url += '&ReleaseID=' + releaseId;
+
+            // Assuming doAjaxCall is defined globally or in common.js
+            if (typeof doAjaxCall === 'function') {
+                doAjaxCall(url, $this, true, successMsg);
+            } else {
+                console.error("doAjaxCall function is not defined!");
+            }
+        });
+
+        // Event handler for specific download links within the dialog
+        // Delegated to #downloads_table_body as these links are dynamically added
+        $('#downloads_table_body').on('click', '.download-specific-release-link', function(e) {
+            e.preventDefault();
+            var index = $(this).data('index');
+            AlbumPage.downloadSpecificRelease(index);
+        });
+
+        // Event handler for form submission within dialogs
+        // Delegated to the specific form's ID
+        $('#editSearchTermForm').on('submit', function(e) {
+            e.preventDefault(); // Prevent default form submission
+            var $this = $(this);
+            var action = $this.attr('action'); // Get action from form
+            var formData = $this.serialize(); // Serialize form data
+            var successMsg = $this.find('.album-action-submit').data('success-msg');
+
+            // Assuming doAjaxCall is defined globally or in common.js
+            if (typeof doAjaxCall === 'function') {
+                // Pass form data instead of element, specify 'form' type if common.js handles it
+                doAjaxCall(action + '?' + formData, $this.find('.album-action-submit'), true, successMsg);
+            }
+            $('#dialog2').dialog("close"); // Close dialog after submission
+        });
+
+
+        // Start checking album status periodically
+        AlbumPage.checkAlbumStatus();
+        AlbumPage.refreshInterval = setInterval(function(){
+            AlbumPage.checkAlbumStatus();
         }, 3000);
 	});
 
