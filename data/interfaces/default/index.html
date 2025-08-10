@@ -172,6 +172,180 @@
                     // Custom function for fetching data, using $.getJSON
                     $.getJSON( sSource, aoData, function (json) {
                         fnCallback(json);
+<%inherit file="base.html"/>
+<%!
+	from headphones import helpers
+%>
+
+<%def name="body()">
+	<table class="display" id="artist_table">
+		<thead>
+			<tr>
+				<th class="column-albumart"></th>
+				<th class="column-name">Artist Name</th>
+				<th class="column-status">Status</th>
+				<th class="column-album">Latest Release</th>
+				<th class="column-have">Have</th>
+			</tr>
+		</thead>
+		<tbody>
+		</tbody>
+	</table>
+</%def>
+
+<%def name="headIncludes()">
+	${parent.headIncludes()} 
+	<link rel="stylesheet" href="interfaces/default/css/data_table.css">
+	<style>
+		/* Basic CSS for album art thumbnail */
+		.albumArt-thumb {
+			height: 50px;
+			width: 50px;
+			object-fit: cover; /* Ensures image covers the area without distortion */
+			vertical-align: middle;
+		}
+
+		/* Styling for the progress bar */
+		.progress-container {
+			background-color: #eee;
+			border-radius: 5px;
+			height: 15px; /* Adjust height as needed */
+			overflow: hidden;
+			position: relative;
+			width: 100%; /* Or a fixed width if preferred */
+		}
+
+		.progress-container > div {
+			background-color: #4CAF50; /* Green color for progress */
+			height: 100%;
+			border-radius: 5px;
+			text-align: center;
+			color: white;
+			font-size: 10px; /* Smaller font for percentage */
+			line-height: 15px; /* Vertically align text */
+		}
+
+		.havetracks {
+			padding: 0 5px; /* Add some padding around the text */
+		}
+	</style>
+</%def>
+
+<%def name="javascriptIncludes()">
+    ${parent.javascriptIncludes()} 
+    <script src="js/libs/jquery.unveil.min.js"></script> 
+	<script src="js/libs/jquery.dataTables.min.js"></script>
+	<script>
+    	// Encapsulate page-specific logic
+        var IndexPage = IndexPage || {};
+
+    	IndexPage.initDataTable = function() {
+    		$('#artist_table').dataTable({
+    			"bDestroy": true,
+    			"aoColumnDefs": [
+                    {
+                        "bSortable": false,
+                        "aTargets": [0],
+                        "mData":"ArtistID",
+                        "mRender": function ( data, type, full ) {
+                            // Using a class for the image, and data-src for lazy loading
+                            // Added loading="lazy" for native lazy loading support where available
+                            return '<div class="artistImg-container"><img class="albumArt-thumb" alt="Album art for ' + full['ArtistName'] + '" data-src="artwork/thumbs/artist/' + data + '" loading="lazy" /></div>';
+                        }
+                    },
+                    {
+                       "aTargets":[1],
+                       "mDataProp":"ArtistSortName",
+                       "mRender":function (data,type,full) {
+                            // Using a class for the span, not an ID
+                            return '<span class="artist-sort-name" title="' + full['ArtistID'] + '"></span><a href="artistPage?ArtistID=' + full['ArtistID'] + '">' + full['ArtistName'] + '</a>'
+                        }
+                    },
+                    {
+                        "aTargets":[2],"mDataProp":"Status"
+                    },
+                    {
+                       "aTargets":[3],
+                       "mDataProp":"LatestAlbum",
+                       "mRender":function(data,type,full){
+                            var artist = full; // Renamed to avoid confusion with outer scope
+                            var releasedate = '';
+                            var albumdisplay = '<i>None</i>';
+                            var grade = 'gradeZ'; // Default grade
+
+                            if (artist['ReleaseDate']  && artist['LatestAlbum']) {
+                                releasedate = artist['ReleaseDate'];
+                                albumdisplay = '<i>' + artist['LatestAlbum'] + '</i> (' + artist['ReleaseDate'] + ')';
+                            } else if (artist['LatestAlbum']) {
+                                albumdisplay = '<i>' + artist['LatestAlbum'] + '</i>';
+                            }
+
+                            if (artist['ReleaseInFuture'] === 'True') {
+                                grade = 'gradeA';
+                            }
+                            // artist['Grade'] is used in fnRowCallback, ensure it's set in the data.
+                            // If this 'Grade' is only for client-side sorting/filtering, it's fine.
+                            // If it affects server-side logic, it should be handled there.
+                            full['Grade'] = grade; // Ensure grade is part of the row data for fnRowCallback
+
+                            // Using a class for the span, not an ID
+                            return '<span class="release-date-sort" title="' + releasedate + '"></span><a href="albumPage?AlbumID=' + full['AlbumID'] + '">' + albumdisplay + '</a>'
+                        }
+                   },
+                   {
+                       "aTargets":[4],
+                       "mDataProp":"HaveTracks",
+                       "mRender":function(data,type,full){
+                            var percent = 0;
+                            var totalTracksDisplay = '?';
+
+                            if (full['TotalTracks'] > 0) {
+                                percent = (full['HaveTracks']*100.0)/full['TotalTracks'];
+                                if (percent > 100) {
+                                    percent = 100;
+                                }
+                                totalTracksDisplay = full['TotalTracks'];
+                            }
+
+                            // Added ARIA attributes for accessibility
+                            return '<span class="have-tracks-sort" title="' + percent + '"></span>' +
+                                   '<div class="progress-container" role="progressbar" aria-valuenow="' + Math.round(percent) + '" aria-valuemin="0" aria-valuemax="100">' +
+                                       '<div style="width:' + percent + '%">' +
+                                           '<div class="havetracks">' + full['HaveTracks'] + '/' + totalTracksDisplay + '</div>' +
+                                       '</div>' +
+                                   '</div>';
+                        }
+                    },
+                ],
+    			"oLanguage": {
+    				"sSearch": "",
+                    "sLengthMenu":"Show _MENU_ artists per page",
+    				"sInfo":"Showing _START_ to _END_ of _TOTAL_ artists",
+    				"sInfoEmpty":"Showing 0 to 0 of 0 artists",
+    				"sInfoFiltered":"(filtered from _MAX_ total artists)",
+    				"sEmptyTable": " ",
+                },
+    			"bStateSave": true, // Retain table state across page loads
+    			"iDisplayLength": 50,
+    			"sPaginationType": "full_numbers",
+                "bProcessing": true, // Show processing indicator
+                "bServerSide": true, // Enable server-side processing
+                "sAjaxSource": 'getArtists.json', // API endpoint for data
+                "fnRowCallback": function(nRow, aData, iDisplayIndex, iDisplayIndexFull) {
+                    // Apply the 'Grade' class from aData to the table row
+                    $(nRow).addClass(aData['Grade']);
+
+                    // Removed setting duplicate IDs on child elements. Use classes if needed for styling.
+                    // For example:
+                    // $(nRow).find('td:eq(0)').addClass('albumart-cell');
+                    // $(nRow).find('td:eq(1)').addClass('name-cell');
+                    // etc.
+                    return nRow;
+                },
+                "fnServerData": function ( sSource, aoData, fnCallback ) {
+                    // Custom function for fetching data, using $.getJSON
+                    $.getJSON( sSource, aoData, function (json) {
+                        fnCallback(json);
                     }).fail(function(jqXHR, textStatus, errorThrown) {
                         console.error("Error fetching artist data:", textStatus, errorThrown);
                         // Provide user feedback if data loading fails
@@ -189,6 +363,39 @@
             // jQuery Unveil listener for new images added to the DOM after DataTables draw
             // This is handled in fnDrawCallback now for better integration with DataTables.
             // $('#artist_table').on("draw.dt", function () {
+            //     $("img.albumArt-thumb").unveil();
+            // });
+
+    		// Assuming resetFilters is a global function from common.js
+    		if (typeof resetFilters === 'function') {
+    		    resetFilters("artist or album");
+    		} else {
+    		    console.warn("resetFilters function is not defined.");
+    		}
+    	};
+
+    	$(document).ready(function() {
+    		IndexPage.initDataTable();
+    	});
+
+    	$(window).on('load', function(){
+    		// Ensure these functions exist and are necessary.
+            // If initFancybox or refreshLoadArtist are global, call them here.
+            // Otherwise, they should be encapsulated or refactored.
+            if (typeof initFancybox === 'function') {
+                initFancybox();
+            } else {
+                console.warn("initFancybox function is not defined.");
+            }
+            if (typeof refreshLoadArtist === 'function') {
+                refreshLoadArtist();
+            } else {
+                console.warn("refreshLoadArtist function is not defined.");
+            }
+    	});
+	</script>
+</%def>
+ // $('#artist_table').on("draw.dt", function () {
             //     $("img.albumArt-thumb").unveil();
             // });
 
