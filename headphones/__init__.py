@@ -225,7 +225,7 @@ def daemonize():
 
     # Make sure I can read my own files and shut out others
     prev = os.umask(0)  # @UndefinedVariable - only available in UNIX
-    os.umask(prev and int('077', 8))
+    os.umask(prev and int('007', 8))
 
     # Make the child a session-leader by detaching from the terminal
     try:
