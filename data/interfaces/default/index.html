@@ -12,6 +12,7 @@
 				<th id="status">Status</th>
 				<th id="album">Latest Release</th>
 				<th id="have">Have</th>
+				<th id="added">Added</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -101,6 +102,9 @@
                             return '<span title="' + percent + '"></span><div class="progress-container"><div style="width:' + percent + '%"><div class="havetracks">' + full['HaveTracks'] + '/' + full['TotalTracks'] + '</div></div></div>';
                         }
                     },
+                    {
+                        "aTargets":[5],"mDataProp":"DateAdded"
+                    },
                 ],
     			"oLanguage": {
     				"sSearch": "",
@@ -123,6 +127,7 @@
                     nRow.children[2].id = 'status'
                     nRow.children[3].id = 'album'
                     nRow.children[4].id = 'have'
+                    nRow.children[5].id = 'added'
                     return nRow;
                 },
                 "fnServerData": function ( sSource, aoData, fnCallback ) {

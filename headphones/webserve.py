@@ -1005,6 +1005,8 @@ class WebInterface(object):
             sortcolumn = 'ReleaseDate'
         elif iSortCol_0 == '4':
             sortbyhavepercent = True
+        elif iSortCol_0 == '5':
+            sortcolumn = 'DateAdded'
 
         if sSearch == "":
             query = 'SELECT * from artists order by %s COLLATE NOCASE %s' % (sortcolumn, sSortDir_0)
@@ -1037,6 +1039,7 @@ class WebInterface(object):
                    "ReleaseDate": "",
                    "ReleaseInFuture": "False",
                    "AlbumID": "",
+                   "DateAdded": artist["DateAdded"],
                    }
 
             if not row['HaveTracks']:

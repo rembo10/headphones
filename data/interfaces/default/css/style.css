@@ -1015,6 +1015,11 @@ div#artistheader h2 a {
   text-align: left;
   vertical-align: middle;
 }
+#artist_table td#added {
+  min-width: 100px;
+  text-align: left;
+  vertical-align: middle;
+}
 #markalbum {
   position: relative;
   top: 25px;
