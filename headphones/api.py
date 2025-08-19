@@ -28,7 +28,7 @@ cmd_list = ['getIndex', 'getArtist', 'getAlbum', 'getUpcoming', 'getWanted', 'ge
             'getVersion', 'checkGithub', 'shutdown', 'restart', 'update', 'getArtistArt',
             'getAlbumArt',
             'getArtistInfo', 'getAlbumInfo', 'getArtistThumb', 'getAlbumThumb', 'clearLogs',
-            'choose_specific_download', 'download_specific_release']
+            'choose_specific_download', 'download_specific_release','getAlbumFromSong']
 
 
 class Api(object):
@@ -492,3 +492,14 @@ class Api(object):
             album = myDB.action(
                 'SELECT * from albums WHERE AlbumID=?', [id]).fetchone()
             searcher.send_to_downloader(data, bestqual, album)
+
+    def _getAlbumFromSong(self, **kwargs):
+        if 'recordingId' not in kwargs:
+            self.data = 'Missing parameter: recordingId'
+            return
+        else:
+            recordingId = kwargs['recordingId']
+
+        tracks = self._dic_from_query(
+            'SELECT * from tracks WHERE TrackID =  "' + recordingId + '"')
+        self.data = tracks

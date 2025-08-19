@@ -109,3 +109,6 @@ Gives you a list of results from searcher.searchforalbum(). Basically runs a nor
 
 ### download_specific_release&id=albumid&title=$title&size=$size&url=$url&provider=$provider&kind=$kind
 Allows you to manually pass a choose_specific_download release back to searcher.send_to_downloader()
+
+### getAlbumFromSong&recordingId=$recordingId
+Search a song by MusicBrainz recordingId and return Album data
