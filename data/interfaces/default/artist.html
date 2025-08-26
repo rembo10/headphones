@@ -126,7 +126,17 @@
 				<td id="albumname"><a href="albumPage?AlbumID=${album['AlbumID']}">${album['AlbumTitle']}</a></td>
 				<td id="reldate">${album['ReleaseDate']}</td>
 				<td id="type">${album['Type']}</td>
-				<td id="score">${album['CriticScore']}/${album['UserScore']}</td>
+				<td id="score">
+				%if album['CriticScore'] != None and album['UserScore'] != None:
+					${album['CriticScore']}/${album['UserScore']}
+				%elif album['CriticScore'] != None:
+					${album['CriticScore']}
+				%elif album['UserScore'] != None:
+					${album['UserScore']}
+				%else:
+					
+				%endif
+				</td>
 				<td id="status">${album['Status']}
 				%if album['Status'] == 'Skipped' or album['Status'] == 'Ignored':
 					[<a href="javascript:void(0)" onclick="doAjaxCall('queueAlbum?AlbumID=${album['AlbumID']}&ArtistID=${album['ArtistID']}',$(this),'table')" data-success="'${album['AlbumTitle']}' added to Wanted list">want</a>]
