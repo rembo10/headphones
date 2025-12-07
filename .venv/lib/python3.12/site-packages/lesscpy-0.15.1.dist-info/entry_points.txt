@@ -1,0 +1,2 @@
+[console_scripts]
+lesscpy = lesscpy.scripts.compiler:run

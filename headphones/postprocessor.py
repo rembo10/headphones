@@ -23,13 +23,12 @@ import re
 import beets
 import headphones
 from beets import autotag
-from beets import config as beetsconfig
 from beets import logging as beetslogging
 from mediafile import MediaFile, FileTypeError, UnreadableFileError
 from beetsplug import lyrics as beetslyrics
 from headphones import notifiers, utorrent, transmission, deluge, qbittorrent, soulseek
 from headphones import db, albumart, librarysync
-from headphones import logger, helpers, mb, music_encoder
+from headphones import logger, helpers, mb, music_encoder, id3_fixer
 from headphones import metadata
 
 postprocessor_lock = threading.Lock()
@@ -505,11 +504,53 @@ def doPostProcessing(albumid, albumpath, release, tracks, downloaded_track_list,
     if headphones.CONFIG.FILE_PERMISSIONS_ENABLED:
         updateFilePermissions(albumpaths)
 
+    # Optionally run ID3 fixer to ensure MP3 tags are ID3v2.3
+    if getattr(headphones.CONFIG, 'RUN_ID3_FIXER', 0):
+        try:
+            logger.info('Running ID3 fixer on %s', ', '.join(albumpaths))
+            success, converted, message = id3_fixer.fix_library_id3_tags(albumpaths)
+            logger.info('ID3 fixer result: %s', message)
+        except Exception as e:
+            logger.exception('ID3 fixer failed: %s', e)
+
     myDB = db.DBConnection()
     myDB.action('UPDATE albums SET status = "Downloaded" WHERE AlbumID=?', [albumid])
     myDB.action(
         'UPDATE snatched SET status = "Processed" WHERE Status NOT LIKE "Seed%" and AlbumID=?',
         [albumid])
+    
+    # Check for duplicate tracks from different sources and log them
+    try:
+        from headphones import source_profile
+        
+        # Find duplicates for each track in this album
+        all_duplicates = {}
+        for track in tracks:
+            dups = source_profile.find_duplicate_tracks(
+                release['ArtistName'], release['AlbumTitle'], track['TrackTitle']
+            )
+            if len(dups) > 1:
+                logger.info(f"Found {len(dups)} copies of '{release['ArtistName']} - {track['TrackTitle']}' from different sources:")
+                for dup in dups:
+                    origin = dup.get('SourceOrigin', 'Unknown')
+                    score, quality = source_profile.get_file_quality_score(dup['Location'])
+                    logger.info(f"  - {dup['Location']} (source: {origin}, quality: {quality})")
+                all_duplicates[track['TrackTitle']] = dups
+        
+        # Handle duplicates if AUTO_DELETE_DUPLICATES is enabled
+        if headphones.CONFIG.AUTO_DELETE_DUPLICATES and all_duplicates:
+            logger.info("AUTO_DELETE_DUPLICATES is enabled. Processing duplicates...")
+            for track_title, dups in all_duplicates.items():
+                try:
+                    result = source_profile.handle_duplicate_tracks(dups, auto_delete=True)
+                    logger.info(f"Duplicate handling for '{track_title}': kept={result['kept']}, deleted={len(result['deleted'])}")
+                    if result['errors']:
+                        for err in result['errors']:
+                            logger.error(f"  Error: {err}")
+                except Exception as e:
+                    logger.error(f"Error handling duplicates for {track_title}: {e}")
+    except Exception as e:
+        logger.debug(f"Error checking for duplicates: {e}")
 
     # Check if torrent has finished seeding
     if headphones.CONFIG.TORRENT_DOWNLOADER != 0:
@@ -737,9 +778,22 @@ def renameNFO(albumpath):
 def moveFiles(albumpath, release, metadata_dict):
     logger.info(f"Moving files: `{albumpath}`")
 
+    from headphones import source_profile
+    
     md = metadata.album_metadata(albumpath, release, metadata_dict)
-    folder = helpers.pattern_substitute(
-        headphones.CONFIG.FOLDER_FORMAT.strip(), md, normalize=True)
+    
+    # Get folder format profile based on source origin
+    source_origin = None
+    if headphones.CONFIG.MUSIC_DIRS:
+        for music_dir in headphones.CONFIG.MUSIC_DIRS:
+            if albumpath.startswith(music_dir):
+                source_origin = music_dir
+                break
+    
+    profile = source_profile.get_folder_profile_for_source(source_origin)
+    folder_format = profile['folder_format'].strip()
+    
+    folder = helpers.pattern_substitute(folder_format, md, normalize=True)
 
     if headphones.CONFIG.FILE_UNDERSCORES:
         folder = folder.replace(' ', '_')

@@ -167,6 +167,13 @@ def initialize(config_file):
             dbcheck()
         except Exception as e:
             logger.error("Can't connect to the database: %s", e)
+        
+        # Run any pending database migrations
+        try:
+            from headphones import db_migrations
+            db_migrations.check_and_run_migrations()
+        except Exception as e:
+            logger.error("Error running database migrations: %s", e)
 
         # Get the currently installed version. Returns None, 'win32' or the git
         # hash.

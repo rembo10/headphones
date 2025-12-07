@@ -22,8 +22,6 @@ import random
 import urllib.request, urllib.parse, urllib.error
 import datetime
 import subprocess
-import unicodedata
-import urllib.parse
 from base64 import b16encode, b32decode
 from hashlib import sha1
 

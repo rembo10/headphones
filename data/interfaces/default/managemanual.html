@@ -23,9 +23,9 @@
 	<table class="display" id="artist_table">
 		<thead>
 			<tr>
-				<th id="artist">Local Artist</th>
-				<th id="album">Local Album</th>
-				<th id="status">Previous Action</th>
+				<th class="artist">Local Artist</th>
+				<th class="album">Local Album</th>
+				<th class="status">Previous Action</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -36,7 +36,7 @@
 				old_artist_clean = album['ArtistName'].replace('&','%26').replace('+', '%2B').replace("'","%27")
 				old_album_clean = album['AlbumTitle'].replace('&','%26').replace('+', '%2B').replace("'","%27")
 			%>
-			<td id="artist">${album['ArtistName']}<BR>
+			<td class="artist">${album['ArtistName']}<BR>
 				<button id="reset_artist${count_albums}" onClick="reset_Artist(this.id)">(<-) Reset Artist</button>
 				<div id="reset_artist_dialog${count_albums}" title="Reset Artist" style="display:none">
 					<table>
@@ -51,7 +51,7 @@
 					</table>
 				</div>
 			</td>
-			<td id="album">${album['AlbumTitle']}<BR>
+			<td class="album">${album['AlbumTitle']}<BR>
 				<button id="reset_album${count_albums}" onClick="reset_Album(this.id)">(<-) Reset Album</button>
 				<div id="reset_album_dialog${count_albums}" title="Reset Album" style="display:none">
 					<table>
@@ -67,7 +67,7 @@
 				</div>
 
 			</td>
-			<td id="status">${album['AlbumStatus']}
+			<td class="status">${album['AlbumStatus']}
 
 			</td>
 			</tr>

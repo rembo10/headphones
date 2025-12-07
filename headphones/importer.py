@@ -14,10 +14,59 @@
 #  along with Headphones.  If not, see <http://www.gnu.org/licenses/>.
 
 import time
+import os
 
 from headphones import logger, helpers, db, mb, lastfm, metacritic
 from mediafile import MediaFile
 import headphones
+import subprocess
+import shutil
+
+# --- SongRec-Rename integration ---
+_songrec_checked = False
+_songrec_available = False
+_songrec_cmd = None
+
+
+def _get_songrec_cmd():
+    """Get the songrec command from environment or config."""
+    global _songrec_cmd
+    if _songrec_cmd is None:
+        _songrec_cmd = os.environ.get("SONGREC_RENAME_CMD", headphones.CONFIG.SONGREC_CMD)
+    return _songrec_cmd
+
+
+def _ensure_songrec_available():
+    """Check if songrec-rename is in PATH; log once."""
+    global _songrec_checked, _songrec_available
+    if _songrec_checked:
+        return _songrec_available
+    _songrec_checked = True
+    cmd = _get_songrec_cmd()
+    _songrec_available = bool(shutil.which(cmd))
+    if not _songrec_available:
+        logger.warn(f"songrec-rename not found in PATH (cmd='{cmd}'); SongRec integration skipped")
+    return _songrec_available
+
+
+def run_songrec_rename(files):
+    """
+    Run SongRec-Rename on a list of files (or a single file).
+    files: list of file paths or a single file path
+    """
+    if not _ensure_songrec_available():
+        return
+    if not files:
+        return
+    if isinstance(files, str):
+        files = [files]
+    cmd = _get_songrec_cmd()
+    for f in files:
+        try:
+            subprocess.run([cmd, f], check=True)
+            logger.info(f"SongRec-Rename applied to {f} using {cmd}")
+        except Exception as e:
+            logger.error(f"SongRec-Rename failed for {f}: {e}")
 
 blacklisted_special_artist_names = ['[anonymous]', '[data]', '[no artist]',
                                     '[traditional]', '[unknown]', 'Various Artists']
@@ -64,6 +113,15 @@ def artistlist_to_mbids(artistlist, forced=False):
 
         if not results:
             logger.info('No results found for: %s' % artist)
+            # --- SongRec-Rename integration: run during scan if enabled ---
+            if headphones.CONFIG.SONGREC_SCAN:
+                # Try SongRec-Rename on files for this artist
+                myDB = db.DBConnection()
+                files = myDB.select('SELECT Location from have WHERE ArtistName like ? AND Location IS NOT NULL', [artist])
+                file_list = [row['Location'] for row in files if row['Location']]
+                if file_list:
+                    logger.info(f"Running SongRec-Rename on {len(file_list)} files for artist {artist} during scan")
+                    run_songrec_rename(file_list)
             continue
 
         try:
@@ -592,6 +650,15 @@ def finalize_update(artistid, artistname, errors=False):
 
     myDB.upsert("artists", newValueDict, controlValueDict)
 
+    # --- SongRec-Rename integration for unrecognized files ---
+    if headphones.CONFIG.SONGREC_UNRECOGNIZED:
+        # Récupérer les fichiers non reconnus
+        failed_tracks = myDB.select('SELECT Location from have WHERE ArtistName like ? AND Matched = "Failed" AND Location IS NOT NULL', [artistname])
+        failed_files = [row['Location'] for row in failed_tracks if row['Location']]
+        if failed_files:
+            logger.info(f"Running SongRec-Rename on {len(failed_files)} unrecognized files for artist {artistname}")
+            run_songrec_rename(failed_files)
+
 
 def addReleaseById(rid, rgid=None):
     myDB = db.DBConnection()
@@ -803,6 +870,15 @@ def updateFormat():
             newValueDict = {"Format": f.format}
             myDB.upsert("have", newValueDict, controlValueDict)
         logger.info('Finished finding media format for %s files' % len(havetracks))
+
+        # --- SongRec-Rename integration: run after scan/import ---
+        if headphones.CONFIG.SONGREC_POST:
+            # Récupérer tous les fichiers audio scannés
+            all_tracks = myDB.select('SELECT Location from have WHERE Location IS NOT NULL')
+            all_files = [row['Location'] for row in all_tracks if row['Location']]
+            if all_files:
+                logger.info(f"Running SongRec-Rename on {len(all_files)} files after scan/import")
+                run_songrec_rename(all_files)
 
 
 def getHybridRelease(fullreleaselist):

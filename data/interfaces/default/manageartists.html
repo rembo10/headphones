@@ -30,12 +30,12 @@
 	<table class="display" id="artist_table">
 		<thead>
 			<tr>
-				<th id="select"><input type="checkbox" onClick="toggle(this)" /></th>
-				<th id="albumart"></th>
-				<th id="name">Artist Name</th>
-				<th id="status">Status</th>
-				<th id="album">Latest Album</th>
-				<th id="lastupdated">Last Updated</th>
+				<th class="select"><input type="checkbox" onClick="toggle(this)" /></th>
+				<th class="albumart"></th>
+				<th class="name">Artist Name</th>
+				<th class="status">Status</th>
+				<th class="album">Latest Album</th>
+				<th class="lastupdated">Last Updated</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -65,12 +65,12 @@
 					
 			%>
 			<tr class="grade${grade}">
-				<td id="select"><input type="checkbox" name="${artist['ArtistID']}" class="checkbox" /></td>
-				<td id="albumart"><div id="artistImg"><img class="albumArt" id="${artist['ArtistID']}" src="artwork/thumbs/artist/${artist['ArtistID']}" height="50" width="50"></div></td>
-				<td id="name"><span title="${artist['ArtistSortName']}"></span><a href="artistPage?ArtistID=${artist['ArtistID']}">${artist['ArtistName']}</a></td>
-				<td id="status">${artist['Status']}</td>	
-				<td id="album"><span title="${releasedate}"></span><a href="albumPage?AlbumID=${artist['AlbumID']}">${albumdisplay}</a></td>
-				<td id="lastupdated">${lastupdated}</td>
+				<td class="select"><input type="checkbox" name="${artist['ArtistID']}" class="checkbox" /></td>
+				<td class="albumart"><div id="artistImg"><img class="albumArt" id="${artist['ArtistID']}" src="artwork/thumbs/artist/${artist['ArtistID']}" height="50" width="50"></div></td>
+				<td class="name"><span title="${artist['ArtistSortName']}"></span><a href="artistPage?ArtistID=${artist['ArtistID']}">${artist['ArtistName']}</a></td>
+				<td class="status">${artist['Status']}</td>	
+				<td class="album"><span title="${releasedate}"></span><a href="albumPage?AlbumID=${artist['AlbumID']}">${albumdisplay}</a></td>
+				<td class="lastupdated">${lastupdated}</td>
 			</tr>
 		%endfor
 		</tbody>

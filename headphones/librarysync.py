@@ -24,19 +24,27 @@ from headphones import db, logger, helpers, importer, lastfm
 # You can scan a single directory and append it to the current library by
 # specifying append=True, ArtistID and ArtistName.
 def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
-                cron=False, artistScan=False):
+                cron=False, artistScan=False, source_origin=None):
     if cron and not headphones.CONFIG.LIBRARYSCAN:
         return
 
     if not dir:
-        if not headphones.CONFIG.MUSIC_DIR:
+        if not headphones.CONFIG.MUSIC_DIR and not headphones.CONFIG.MUSIC_DIRS:
             logger.info(
                 "No music directory configured. Add it under "
                 "Manage -> Scan Music Library"
             )
             return
-        else:
+        elif headphones.CONFIG.MUSIC_DIR:
             dir = headphones.CONFIG.MUSIC_DIR
+        else:
+            # Scan all configured MUSIC_DIRS
+            for music_dir in headphones.CONFIG.MUSIC_DIRS:
+                if music_dir:
+                    libraryScan(dir=music_dir, append=True, ArtistID=ArtistID, 
+                               ArtistName=ArtistName, cron=False, artistScan=artistScan,
+                               source_origin=music_dir)
+            return
 
     if not os.path.isdir(dir):
         logger.warn(f"Cannot find music directory: {dir}")
@@ -46,6 +54,8 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
     new_artists = []
 
     logger.info(f"Scanning music directory: {dir}")
+    if source_origin:
+        logger.info(f"  Source origin: {source_origin}")
 
     if not append:
 
@@ -147,7 +157,8 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
                                 'TrackTitle': f.title,
                                 'BitRate': f.bitrate,
                                 'Format': f.format,
-                                'CleanName': CleanName
+                                'CleanName': CleanName,
+                                'SourceOrigin': source_origin
                                 }
 
                 # track_list.append(track_dict)

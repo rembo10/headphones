@@ -40,6 +40,11 @@ _CONFIG_DEFINITIONS = {
     # This is used in importer.py to determine how complete an album needs to
     # be - to be considered "downloaded". Percentage from 0-100
     'ALBUM_COMPLETION_PCT': (int, 'Advanced', 80),
+    # SongRec-Rename integration options
+    'SONGREC_SCAN': (bool_int, 'Advanced', 0),  # Run SongRec-Rename during scan
+    'SONGREC_POST': (bool_int, 'Advanced', 0),  # Run SongRec-Rename after scan/import
+    'SONGREC_UNRECOGNIZED': (bool_int, 'Advanced', 0),  # Only for unrecognized files
+    'SONGREC_CMD': (str, 'Advanced', 'songrec-rename'),  # Path/command for SongRec-Rename
     'API_ENABLED': (int, 'General', 0),
     'API_KEY': (str, 'General', ''),
     'ORPHEUS': (int, 'Orpheus.network', 0),
@@ -51,6 +56,7 @@ _CONFIG_DEFINITIONS = {
     'AUTOWANT_MANUALLY_ADDED': (int, 'General', 1),
     'AUTOWANT_UPCOMING': (int, 'General', 1),
     'AUTO_ADD_ARTISTS': (int, 'General', 1),
+    'AUTO_DELETE_DUPLICATES': (int, 'General', 0),
     'BITRATE': (int, 'General', 192),
     'BLACKHOLE': (int, 'General', 0),
     'BLACKHOLE_DIR': (path, 'General', ''),
@@ -121,6 +127,10 @@ _CONFIG_DEFINITIONS = {
     'FOLDER_FORMAT': (str, 'General', '$Artist/$Album [$Year]'),
     'FOLDER_PERMISSIONS_ENABLED': (bool_int, 'General', True),
     'FOLDER_PERMISSIONS': (str, 'General', '0755'),
+    'FOLDER_FORMAT_PROFILES': (list, 'General', []),
+    'ENABLE_FOLDER_PROFILES': (int, 'General', 0),
+    'FOLDER_FORMAT_PROFILES': (list, 'General', []),
+    'ENABLE_FOLDER_PROFILES': (int, 'General', 0),
     'FREEZE_DB': (int, 'General', 0),
     'GIT_BRANCH': (str, 'General', 'master'),
     'GIT_PATH': (path, 'General', ''),
@@ -147,6 +157,7 @@ _CONFIG_DEFINITIONS = {
     'IGNORED_FILES': (list, 'Advanced', []),    # path
     'INCLUDE_EXTRAS': (int, 'General', 0),
     'INTERFACE': (str, 'General', 'default'),
+    'TRASH_DIR': (path, 'General', ''),
     'JOIN_APIKEY': (str, 'Join', ''),
     'JOIN_DEVICEID': (str, 'Join', ''),
     'JOIN_ENABLED': (int, 'Join', 0),
@@ -172,6 +183,7 @@ _CONFIG_DEFINITIONS = {
     'MOVE_FILES': (int, 'General', 0),
     'MPC_ENABLED': (bool_int, 'MPC', False),
     'MUSIC_DIR': (path, 'General', ''),
+    'MUSIC_DIRS': (list, 'General', []),
     'MUSIC_ENCODER': (int, 'General', 0),
     'NEWZNAB': (int, 'Newznab', 0),
     'NEWZNAB_APIKEY': (str, 'Newznab', ''),
@@ -319,7 +331,8 @@ _CONFIG_DEFINITIONS = {
     'XBMC_USERNAME': (str, 'XBMC', ''),
     'XLDPROFILE': (str, 'General', ''),
     'BANDCAMP': (int, 'General', 0),
-    'BANDCAMP_DIR': (path, 'General', '')
+    'BANDCAMP_DIR': (path, 'General', ''),
+    'RUN_ID3_FIXER': (int, 'General', 0),
 }
 
 
@@ -341,7 +354,10 @@ class Config(object):
     def _define(self, name):
         key = name.upper()
         ini_key = name.lower()
-        definition = _CONFIG_DEFINITIONS[key]
+        try:
+            definition = _CONFIG_DEFINITIONS[key]
+        except KeyError:
+            raise AttributeError(f"Configuration key '{key}' not found in _CONFIG_DEFINITIONS")
         if len(definition) == 3:
             definition_type, section, default = definition
         elif len(definition) == 4:
@@ -450,8 +466,8 @@ class Config(object):
         Returns something from the ini unless it is a real property
         of the configuration object or is not all caps.
         """
-        if not re.match(r'[A-Z_]+$', name):
-            return super(Config, self).__getattr__(name)
+        if not re.match(r'[A-Z0-9_]+$', name):
+            raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
         else:
             return self.check_setting(name)
 
@@ -460,7 +476,7 @@ class Config(object):
         Maps all-caps properties to ini values unless they exist on the
         configuration object.
         """
-        if not re.match(r'[A-Z_]+$', name):
+        if not re.match(r'[A-Z0-9_]+$', name):
             super(Config, self).__setattr__(name, value)
             return value
         else:
@@ -473,8 +489,12 @@ class Config(object):
         Given a big bunch of key value pairs, apply them to the ini.
         """
         for name, value in list(kwargs.items()):
-            key, definition_type, section, ini_key, default = self._define(name)
-            self._config[section][ini_key] = str(value)
+            try:
+                key, definition_type, section, ini_key, default = self._define(name)
+                self._config[section][ini_key] = str(value)
+            except (KeyError, AttributeError) as e:
+                headphones.logger.debug("Skipping unknown configuration key: %s (%s)", name, e)
+                continue
 
     def _upgrade(self):
         """
