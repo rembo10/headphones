@@ -680,6 +680,16 @@ class WebInterface(object):
                               unmatchedalbums=unmatchedalbums)
 
     @cherrypy.expose
+    def scanDuplicates(self):
+        """Scan the library for duplicate tracks and delete them if AUTO_DELETE_DUPLICATES is enabled."""
+        try:
+            result = librarysync.scanLibraryForDuplicates()
+            return result
+        except Exception as e:
+            logger.error("Error during duplicate scan: %s", e)
+            return "Error during duplicate scan: %s" % e
+
+    @cherrypy.expose
     def markUnmatched(self, action=None, existing_artist=None, existing_album=None, new_artist=None,
                       new_album=None):
         myDB = db.DBConnection()
@@ -1488,7 +1498,8 @@ class WebInterface(object):
             "bandcamp_dir": headphones.CONFIG.BANDCAMP_DIR,
             'soulseek_api_url': headphones.CONFIG.SOULSEEK_API_URL,
             'soulseek_api_key': headphones.CONFIG.SOULSEEK_API_KEY,
-            'use_soulseek': checked(headphones.CONFIG.SOULSEEK)
+            'use_soulseek': checked(headphones.CONFIG.SOULSEEK),
+            "auto_delete_duplicates": checked(headphones.CONFIG.AUTO_DELETE_DUPLICATES)
         }
 
         for k, v in config.items():
@@ -1559,7 +1570,8 @@ class WebInterface(object):
             "mpc_enabled", "email_enabled", "email_ssl", "email_tls", "email_onsnatch",
             "customauth", "idtag", "deluge_paused",
             "join_enabled", "join_onsnatch", "use_bandcamp", "use_soulseek",
-            "songrec_scan", "songrec_post", "songrec_unrecognized"
+            "songrec_scan", "songrec_post", "songrec_unrecognized",
+            "auto_delete_duplicates"
         ]
         for checked_config in checked_configs:
             if checked_config not in kwargs:

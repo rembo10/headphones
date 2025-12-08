@@ -66,9 +66,9 @@
 				<td class="dateadded">${item['DateAdded']}</td>
 				<td class="filename">${html_escape(item['Title'], quote=True)} [<a href="${item['URL']}">${fileid}</a>]<a href="albumPage?AlbumID=${item['AlbumID']}">[album page]</a></td>
 				<td class="size">${helpers.bytes_to_mb(item['Size'])}</td>
-				<td title="${folder}" id="status">${item['Status']}</td>
+				<td title="${folder}" class="status">${item['Status']}</td>
 				<td class="action">[<a href="javascript:void(0)" onclick="doAjaxCall('queueAlbum?AlbumID=${item['AlbumID']}&redirect=history', $(this),'table')"  data-success="Retrying download of '${html_escape(item['Title'], quote=True)}'">retry</a>][<a href="javascript:void(0)" onclick="doAjaxCall('queueAlbum?AlbumID=${item['AlbumID']}&new=True&redirect=history',$(this),'table')"  data-success="Looking for a new version of '${html_escape(item['Title'], quote=True)}'">new</a>]</td>
-				<td class="delete"><a href="javascript:void(0)" onclick="doAjaxCall('clearhistory?date_added=${item['DateAdded']}&title=${html_escape(item['Title'], quote=True)}',$(this),'table')" data-success="${html_escape(item['Title'], quote=True)} cleared from history"><img src="interfaces/default/images/trashcan.png" height="18" width="18" id="trashcan" title="Clear this item from the history"></a>
+				<td class="delete"><a href="javascript:void(0)" onclick="doAjaxCall('clearhistory?date_added=${item['DateAdded']}&title=${html_escape(item['Title'], quote=True)}',$(this),'table')" data-success="${html_escape(item['Title'], quote=True)} cleared from history"><img src="interfaces/default/images/trashcan.png" height="18" width="18" class="trashcan" title="Clear this item from the history"></a>
 			</tr>
 		%endfor
 		</tbody>

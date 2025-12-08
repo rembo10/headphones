@@ -177,6 +177,34 @@ small,
   padding-right: 15px;
   width: 50%;
 }
+
+/* Download settings has three columns; ensure they share space and are vertically centered */
+.configtable[summary="Download Settings"] td {
+  width: 33.333%;
+  vertical-align: middle;
+  padding-right: 15px;
+}
+
+/* Center the fieldset content inside each column for Download Settings */
+.configtable[summary="Download Settings"] td > fieldset {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+/* Ensure inner rows keep their normal flow when using flex */
+.configtable[summary="Download Settings"] td > fieldset .row {
+  display: block;
+}
+
+/* Remove the left border/padding that was applied to last-child cells for the Download Settings table
+   This avoids an extra gutter on the right-most column (Soulseek) */
+.configtable[summary="Download Settings"] tr td:last-child {
+  border-left: none;
+  padding-left: 0;
+}
 .config legend {
   font-size: 16px;
   font-weight: 700;
@@ -198,6 +226,14 @@ small,
   -webkit-column-gap: 4em;
   -moz-column-gap: 4em;
   column-gap: 4em;
+}
+
+/* Ensure config tables span all CSS columns to avoid unexpected column flow */
+.config .tab .configtable {
+  -webkit-column-span: all;
+  column-span: all;
+  display: table;
+  width: 100%;
 }
 .config .tab .message {
   -webkit-column-span: all;
@@ -585,35 +621,37 @@ ul#nav li a:hover {
    Modern interface refresh
    ------------------------------------------------- */
 :root {
-  --bg: #f6f8fc;
-  --panel: #ffffff;
-  --panel-strong: #eef2f9;
-  --muted: #4a566f;
-  --text: #1b2333;
-  --accent: #7fb7f5;
-  --accent-strong: #5393d4;
-  --warn: #f6c343;
-  --border: #d9deea;
-  --shadow: 0 10px 30px rgba(15, 22, 43, 0.12);
-  --header-from: #2f3f61;
-  --header-to: #223350;
-  --header-border: #1a2842;
+  /* Light - Warm / Sépia (Theme C) */
+  --bg: #f3efe9;
+  --panel: #f7f4f0;
+  --panel-strong: #efeae5;
+  --muted: #6b5e50;
+  --text: #1b1f22;
+  --accent: #b79a7a;
+  --accent-strong: #9a7a59;
+  --warn: #e0a84f;
+  --border: #e3d7cc;
+  --shadow: 0 6px 14px rgba(10, 8, 6, 0.04);
+  --header-from: #4b3b2f;
+  --header-to: #3b2f25;
+  --header-border: #2b221a;
 }
 
 body.theme-dark {
-  --bg: #0f1116;
-  --panel: #161922;
-  --panel-strong: #1d212d;
-  --muted: #b7c2d6;
-  --text: #e6edf3;
-  --accent: #4dd0e1;
-  --accent-strong: #00b7c7;
-  --warn: #f6c343;
-  --border: #232838;
-  --shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
-  --header-from: #111827;
-  --header-to: #0d111a;
-  --header-border: #05080f;
+  /* Dark - Warm variant for Theme C */
+  --bg: #0d0b0a;
+  --panel: #141210;
+  --panel-strong: #1a1716;
+  --muted: #a89b8f;
+  --text: #efe9e3;
+  --accent: #b78f6a;
+  --accent-strong: #997355;
+  --warn: #e0a84f;
+  --border: #0f0d0c;
+  --shadow: 0 8px 20px rgba(0, 0, 0, 0.38);
+  --header-from: #2b241f;
+  --header-to: #1f1916;
+  --header-border: #0f0d0c;
 }
 
 body {
@@ -622,6 +660,16 @@ body {
   font-family: "Manrope", "Helvetica Neue", Arial, sans-serif;
   font-size: 14px;
   letter-spacing: 0.01em;
+}
+
+/* Improve footer/link contrast for accessibility */
+#info small a,
+#actions small a {
+  color: var(--text) !important;
+}
+#info small a:hover,
+#actions small a:hover {
+  color: var(--accent-strong) !important;
 }
 
 a {
@@ -874,7 +922,7 @@ table tr:nth-child(even) td {
 }
 table tr:hover td {
   background: var(--accent) !important;
-  color: var(--panel) !important;
+  color: var(--text) !important;
 }
 
 /* Disable hover effect on config table */
@@ -970,7 +1018,7 @@ header #subhead_container a {
 .historyRow:hover,
 .logRow:hover {
   background: var(--accent) !important;
-  color: var(--panel) !important;
+  color: var(--text) !important;
 }
 
 #updatebar {

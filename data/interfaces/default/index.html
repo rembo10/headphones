@@ -36,7 +36,7 @@
                         "aTargets": [0],
                         "mData":"ArtistID",
                         "mRender": function ( data, type, full ) {
-                            return '<div id="artistImg"><img class="albumArt" height="50" width="50" alt="" id="'+ data + '" data-src="artwork/thumbs/artist/' + data + '"/></div>';
+                            return '<div class="artistImg"><img class="albumArt" height="50" width="50" alt="" id="'+ data + '" data-src="artwork/thumbs/artist/' + data + '"/></div>';
                         }
                     },
                     {
@@ -118,11 +118,11 @@
                 "sAjaxSource": 'getArtists.json',
                 "fnRowCallback": function(nRow, aData, iDisplayIndex, iDisplayIndexFull) {
                     $('td', nRow).closest('tr').addClass(aData['Grade'])
-                    nRow.children[0].id = 'albumart';
-                    nRow.children[1].id = 'name';
-                    nRow.children[2].id = 'status'
-                    nRow.children[3].id = 'album'
-                    nRow.children[4].id = 'have'
+                    nRow.children[0].classList.add('albumart');
+                    nRow.children[1].classList.add('name');
+                    nRow.children[2].classList.add('status');
+                    nRow.children[3].classList.add('album');
+                    nRow.children[4].classList.add('have');
                     return nRow;
                 },
                 "fnServerData": function ( sSource, aoData, fnCallback ) {

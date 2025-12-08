@@ -1645,6 +1645,10 @@
                                     </label>
                                 </div>
                                 <div class="row checkbox left clearfix nopad">
+                                    <label><input type="checkbox" title="Automatically delete duplicate music files to trash during post-processing"
+                                           name="auto_delete_duplicates" value="1" ${config.get('auto_delete_duplicates','')} />Automatically delete duplicate music files to trash</label>
+                                </div>
+                                <div class="row checkbox left clearfix nopad">
                                     <label><input type="checkbox" title="Stop post-processing if no good metadata match found"
                                            name="do_not_process_unmatched" value="1" ${config['do_not_process_unmatched']} />Stop post-processing if no good metadata match found</label>
                                 </div>

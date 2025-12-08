@@ -54,7 +54,7 @@
 				<li><a href="manage">manage</a></li>
 				<li><a href="history">history</a></li>
 				<li><a href="logs">logs</a></li>
-				<li><a href="config" class="config"><i class="fa fa-gear fa-lg"></i></a></li>
+				<li><a href="config" class="config" aria-label="Settings"><i class="fa fa-gear fa-lg"></i></a></li>
 			</ul>
 			<div id="theme-switcher">
 				<button id="themeToggle" class="theme-toggle" type="button" aria-label="Toggle theme">
@@ -63,9 +63,9 @@
 			</div>
 			<div id="searchbar">
 				<form action="search" method="get">
-					<input type="text" value="" placeholder="Search" onfocus="if(this.value==this.defaultValue) this.value='';" name="name" />
+					<input id="search_input" type="text" value="" placeholder="Search" onfocus="if(this.value==this.defaultValue) this.value='';" name="name" aria-label="Search" />
 					<i class='fa fa-search mini-icon'></i>
-					<select name="type" id="search_type">
+					<select name="type" id="search_type" aria-label="Search type">
 						<option value="artist">Artist</option>
 						<option value="album">Album</option>
 						<option value="series">Series</option>
@@ -142,6 +142,33 @@
 	    });
 	  }
 	})();
+	</script>
+
+	<script>
+	// Ensure DataTables pagination anchors have explicit inline styles
+	// so contrast checks compute against their background reliably.
+	function enforcePaginationStyles() {
+		try {
+			var isDark = document.body.classList.contains('theme-dark');
+			var anchors = document.querySelectorAll('#artist_table_paginate a');
+			anchors.forEach(function(a){
+				a.style.background = getComputedStyle(document.documentElement).getPropertyValue('--panel-strong') || '#eee';
+				a.style.border = '1px solid ' + (getComputedStyle(document.documentElement).getPropertyValue('--border') || '#ddd');
+				if (isDark) {
+					a.style.color = getComputedStyle(document.documentElement).getPropertyValue('--panel') || '#fff';
+				} else {
+					a.style.color = '#090500';
+				}
+			});
+		} catch(e){ /* ignore errors */ }
+	}
+	document.addEventListener('DOMContentLoaded', function(){
+		// run once, and also try after a short delay to catch DataTables init
+		enforcePaginationStyles();
+		setTimeout(enforcePaginationStyles, 500);
+	});
+	// Also reapply after DataTables draws (works when tables are present)
+	document.addEventListener('draw.dt', enforcePaginationStyles);
 	</script>
 	<!-- This template is made by Elmar Kouwenhoven -->
 

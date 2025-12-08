@@ -66,7 +66,7 @@
 			%>
 			<tr class="grade${grade}">
 				<td class="select"><input type="checkbox" name="${artist['ArtistID']}" class="checkbox" /></td>
-				<td class="albumart"><div id="artistImg"><img class="albumArt" id="${artist['ArtistID']}" src="artwork/thumbs/artist/${artist['ArtistID']}" height="50" width="50"></div></td>
+				<td class="albumart"><div class="artistImg"><img class="albumArt" id="${artist['ArtistID']}" src="artwork/thumbs/artist/${artist['ArtistID']}" height="50" width="50"></div></td>
 				<td class="name"><span title="${artist['ArtistSortName']}"></span><a href="artistPage?ArtistID=${artist['ArtistID']}">${artist['ArtistName']}</a></td>
 				<td class="status">${artist['Status']}</td>	
 				<td class="album"><span title="${releasedate}"></span><a href="albumPage?AlbumID=${artist['AlbumID']}">${albumdisplay}</a></td>

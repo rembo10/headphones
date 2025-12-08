@@ -10,6 +10,11 @@ Utilities for managing folder format profiles and multi-source library organizat
 """
 
 import os
+try:
+    from send2trash import send2trash
+    HAS_SEND2TRASH = True
+except ImportError:
+    HAS_SEND2TRASH = False
 import headphones
 from headphones import logger
 
@@ -215,12 +220,16 @@ def handle_duplicate_tracks(duplicates, auto_delete=False, keep_location=None):
     if keep_location:
         keep = next((d for d in duplicates if d['Location'] == keep_location), None)
         if not keep:
-            result['errors'].append(f"Specified keep_location not found: {keep_location}")
+            msg = f"Specified keep_location not found: {keep_location}"
+            logger.error(msg)
+            result['errors'].append(msg)
             return result
     else:
         keep = get_best_duplicate(duplicates)
         if not keep:
-            result['errors'].append("Could not determine best duplicate (all unreadable?)")
+            msg = "Could not determine best duplicate (all unreadable?)"
+            logger.error(msg)
+            result['errors'].append(msg)
             return result
     
     result['kept'] = keep['Location']
@@ -232,21 +241,27 @@ def handle_duplicate_tracks(duplicates, auto_delete=False, keep_location=None):
         
         if not os.path.exists(dup['Location']):
             # Already deleted, just clean DB
+            logger.warning(f"Duplicate path missing on disk, cleaning DB entry: {dup['Location']}")
             myDB.action('DELETE FROM have WHERE Location=?', [dup['Location']])
             continue
         
         if auto_delete:
             try:
-                # Delete the file
-                os.remove(dup['Location'])
-                logger.info(f"Deleted duplicate: {dup['Location']}")
+                # Delete the file to trash if possible, else permanent delete
+                if HAS_SEND2TRASH:
+                    send2trash(dup['Location'])
+                    logger.info(f"Sent duplicate to trash: {dup['Location']}")
+                else:
+                    os.remove(dup['Location'])
+                    logger.info(f"Deleted duplicate: {dup['Location']}")
                 result['deleted'].append(dup['Location'])
                 
                 # Remove from database
                 myDB.action('DELETE FROM have WHERE Location=?', [dup['Location']])
             except Exception as e:
-                logger.error(f"Error deleting {dup['Location']}: {e}")
-                result['errors'].append(str(e))
+                err_msg = f"Error deleting {dup['Location']}: {e}"
+                logger.error(err_msg)
+                result['errors'].append(err_msg)
         else:
             # Just mark as orphaned in DB (safe, no file deletion)
             myDB.action(

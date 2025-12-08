@@ -44,22 +44,71 @@
 .dataTables_info {
 	width: 50%;
 	float: left;
-	font-weight: bold;
+.paginate_button,.paginate_active {
+    background: var(--panel-strong);
+    border-radius: 5px;
+    margin: 0 0 0 5px;
+    font-size: 15px;
+    padding: 2px 7px;
+	color: var(--text);
+    cursor: pointer;
 }
 
-.dataTables_paginate {
-	width: 44px;
-	* width: 50px;
-	float: right;
-	text-align: right;
+/* Ensure specific DataTables pagination controls meet contrast requirements */
+.paginate_button, .paginate_active { color: var(--text) !important; }
+
+/* Extra specificity for DataTables-generated anchors */
+/* Pagination colors follow theme variables so contrast is correct in both light and dark themes */
+#artist_table_paginate a,
+#artist_table_first,
+#artist_table_previous,
+#artist_table_next,
+#artist_table_last {
+	background: var(--panel-strong) !important;
+	border: 1px solid var(--border) !important;
+}
+#artist_table_paginate .paginate_active,
+#artist_table_paginate span a.paginate_active {
+	background-color: var(--accent-strong) !important;
+	color: var(--panel) !important;
 }
 
-/* Pagination nested */
-.paginate_disabled_previous, .paginate_enabled_previous, .paginate_disabled_next, .paginate_enabled_next {
-	height: 19px;
-	width: 19px;
-	margin-left: 3px;
-	float: left;
+/* Theme-specific text colors for pagination to guarantee contrast in both modes */
+body.theme-dark #artist_table_paginate a,
+body.theme-dark #artist_table_paginate a.paginate_button,
+body.theme-dark #artist_table_paginate a.paginate_active {
+	color: var(--panel) !important; /* light text on dark background */
+}
+
+body:not(.theme-dark) #artist_table_paginate a,
+body:not(.theme-dark) #artist_table_paginate a.paginate_button,
+body:not(.theme-dark) #artist_table_paginate a.paginate_active {
+	color: #090500 !important; /* dark text on light background */
+}
+
+/* Ensure the span wrapper doesn't interfere and anchors are block-level for stable contrast calc */
+#artist_table_paginate > span {
+	background: transparent !important;
+	padding: 0 4px !important;
+}
+#artist_table_paginate > span > a {
+	display: inline-block !important;
+	padding: 2px 8px !important;
+	background: var(--panel-strong) !important;
+	color: var(--text) !important;
+	border: 1px solid var(--border) !important;
+}
+#artist_table_paginate > span > a.paginate_active {
+	background: var(--accent-strong) !important;
+	color: var(--panel) !important;
+}
+.paginate_button:hover {
+    background-color: var(--panel);
+    color: var(--text);
+}
+.paginate_active {
+    background-color: var(--accent);
+    color: var(--panel);
 }
 
 .paginate_disabled_previous {
