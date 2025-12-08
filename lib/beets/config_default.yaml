@@ -18,10 +18,10 @@ ignore_hidden: yes
 import:
     # common options
     write: yes
-    copy: yes
-    move: no
-    timid: no
-    quiet: no
+    copy: no
+    move: yes
+    timid: yes
+    quiet: yes
     log:
     # other options
     default_action: apply

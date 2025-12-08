@@ -20,7 +20,9 @@ import cherrypy
 import headphones
 from headphones import logger
 from headphones.webserve import WebInterface
+from headphones.api_v2 import APIV2
 from headphones.helpers import create_https_certificates
+from headphones.websocket_plugin import setup_websocket, create_websocket_config
 
 
 def initialize(options):
@@ -98,6 +100,21 @@ def initialize(options):
         }
     }
 
+    # Add WebSocket configuration
+    ws_config = create_websocket_config()
+    if ws_config:
+        conf.update(ws_config)
+        logger.info("WebSocket endpoint configured at /ws")
+
+    # Add modern React frontend assets
+    modern_interface_path = os.path.join(headphones.PROG_DIR, 'data', 'interfaces', 'modern')
+    if os.path.exists(modern_interface_path):
+        logger.info("Modern React frontend detected at %s", modern_interface_path)
+        conf['/assets'] = {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': os.path.join(modern_interface_path, 'assets')
+        }
+
     if options['http_password']:
         logger.info("Web server authentication is enabled, username is '%s'",
                     options['http_username'])
@@ -110,8 +127,60 @@ def initialize(options):
             })
         })
         conf['/api'] = {'tools.auth_basic.on': False}
+        conf['/api/v2'] = {'tools.auth_basic.on': False}
 
+    # Mount legacy interface at /legacy for backward compatibility
+    legacy_conf = {
+        '/': {
+            'tools.staticdir.root': os.path.join(headphones.PROG_DIR, 'data'),
+        },
+        '/interfaces': {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': "interfaces"
+        },
+        '/images': {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': "images"
+        },
+        '/css': {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': "css"
+        },
+        '/js': {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': "js"
+        },
+    }
+    cherrypy.tree.mount(WebInterface(), '/legacy', config=legacy_conf)
+    
+    # Update main mount to use WebInterface with modern-native templates
+    # Add modern-native static files to main config
+    modern_native_path = os.path.join(headphones.PROG_DIR, 'data', 'interfaces', 'modern-native')
+    if os.path.exists(modern_native_path):
+        logger.info("Modern native interface detected at %s", modern_native_path)
+        conf['/modern-native'] = {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': modern_native_path
+        }
+    
+    # Mount main WebInterface at root (serves modern-native templates)
     cherrypy.tree.mount(WebInterface(), str(options['http_root']), config=conf)
+    
+    # Mount the modern API v2
+    cherrypy.tree.mount(APIV2(), str(options['http_root']) + '/api/v2', config={
+        '/': {
+            'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
+            'tools.response_headers.on': True,
+            'tools.response_headers.headers': [
+                ('Access-Control-Allow-Origin', '*'),
+                ('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS'),
+                ('Access-Control-Allow-Headers', 'Content-Type, Authorization'),
+            ],
+        }
+    })
+    
+    # Setup WebSocket plugin
+    setup_websocket(cherrypy)
 
     try:
         cherrypy.server.start()

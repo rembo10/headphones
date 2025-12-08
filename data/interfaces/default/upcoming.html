@@ -28,23 +28,23 @@
 		<table class="display" id="wanted_table">
 		<thead>
 			<tr>
-				<th id="select"><input type="checkbox" onClick="toggle(this)" /></th>
-				<th id="albumart"></th>
-				<th id="artistname">Artist</th>
-				<th id="albumname">Album Name</th>
-				<th id="reldate">Release Date</th>
-				<th id="type">Type</th>
+				<th class="select"><input type="checkbox" onClick="toggle(this)" /></th>
+				<th class="albumart"></th>
+				<th class="artistname">Artist</th>
+				<th class="albumname">Album Name</th>
+				<th class="reldate">Release Date</th>
+				<th class="type">Type</th>
 			</tr>
 		</thead>
 		<tbody>
 		%for album in wanted:
 			<tr class="gradeZ">
-				<td id="select"><input type="checkbox" name="${album['AlbumID']}" class="checkbox" /></th>
-				<td id="albumart"><img title="${album['AlbumID']}" height="64" width="64" src="interfaces/default/images/no-cover-art.png" data-src="artwork/thumbs/album/${album['AlbumID']}"></td>
-				<td id="artistname"><a href="artistPage?ArtistID=${album['ArtistID']}">${album['ArtistName']}</a></td>
-				<td id="albumname"><a href="albumPage?AlbumID=${album['AlbumID']}">${album['AlbumTitle']}</a></td>
-				<td id="reldate">${album['ReleaseDate']}</td>
-				<td id="type">${album['Type']}</td>
+				<td class="select"><input type="checkbox" name="${album['AlbumID']}" class="checkbox" /></th>
+				<td class="albumart"><img title="${album['AlbumID']}" height="64" width="64" src="interfaces/default/images/no-cover-art.png" data-src="artwork/thumbs/album/${album['AlbumID']}"></td>
+				<td class="artistname"><a href="artistPage?ArtistID=${album['ArtistID']}">${album['ArtistName']}</a></td>
+				<td class="albumname"><a href="albumPage?AlbumID=${album['AlbumID']}">${album['AlbumTitle']}</a></td>
+				<td class="reldate">${album['ReleaseDate']}</td>
+				<td class="type">${album['Type']}</td>
 			</tr>
 		%endfor
 		</tbody>
@@ -59,23 +59,23 @@
 		<table class="display_no_select" id="upcoming_table">
 		<thead>
 			<tr>
-				<th id="albumart"></th>
-				<th id="artistname">Artist</th>
-				<th id="albumname">Album Name</th>
-				<th id="reldate">Release Date</th>
-				<th id="type">Type</th>
-				<th id="status">Status</th>
+				<th class="albumart"></th>
+				<th class="artistname">Artist</th>
+				<th class="albumname">Album Name</th>
+				<th class="reldate">Release Date</th>
+				<th class="type">Type</th>
+				<th class="status">Status</th>
 			</tr>
 		</thead>
 		<tbody>
 		%for album in upcoming:
 			<tr class="gradeZ">
-				<td id="albumart"><img title="${album['AlbumID']}" height="64" width="64" data-src="artwork/thumbs/album/${album['AlbumID']}"></td>
-				<td id="artistname"><a href="artistPage?ArtistID=${album['ArtistID']}">${album['ArtistName']}</a></td>
-				<td id="albumname"><a href="albumPage?AlbumID=${album['AlbumID']}">${album['AlbumTitle']}</a></td>
-				<td id="reldate">${album['ReleaseDate']}</td>
-				<td id="type">${album['Type']}</td>
-				<td id="status">${album['Status']}</td>
+				<td class="albumart"><img title="${album['AlbumID']}" height="64" width="64" data-src="artwork/thumbs/album/${album['AlbumID']}"></td>
+				<td class="artistname"><a href="artistPage?ArtistID=${album['ArtistID']}">${album['ArtistName']}</a></td>
+				<td class="albumname"><a href="albumPage?AlbumID=${album['AlbumID']}">${album['AlbumTitle']}</a></td>
+				<td class="reldate">${album['ReleaseDate']}</td>
+				<td class="type">${album['Type']}</td>
+				<td class="status">${album['Status']}</td>
 			</tr>
 		%endfor
 		</tbody>

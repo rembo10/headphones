@@ -8,7 +8,7 @@
     <div id="subhead_container">
         <div id="subhead_menu">
             <a id="menu_link_shutdown" href="shutdown"><i class="fa fa-power-off"></i> Shut Down</a>
-            <a id="menu_link_shutdown" href="restart"><i class="fa fa-power-off"></i> Restart</a>
+            <a id="menu_link_restart" href="restart"><i class="fa fa-power-off"></i> Restart</a>
         </div>
     </div>
 </%def>
@@ -537,7 +537,7 @@
                                         <input class="hppass" type="password" value="${config['hppass'] | h}" size="20">
                                     </div>
                                     <div class="row">
-                                        <a href="https://headphones.codeshy.com/vip" id="vipserver" target="_blank">Don't have an account? Sign up!</a>
+                                        <a href="https://headphones.codeshy.com/vip" id="vipserver_signup" target="_blank">Don't have an account? Sign up!</a>
                                     </div>
                                 </div>
                             </fieldset>
@@ -557,7 +557,7 @@
                                             <input type="text" name="newznab_apikey" value="${config['newznab_apikey']}" size="36">
                                         </div>
                                         <div class="row checkbox">
-                                            <input id="newznab_enabled" type="checkbox" name="newznab_enabled" value="1" ${config['newznab_enabled']} /><label>Enabled</label>
+                                            <input id="newznab_enabled_1" type="checkbox" name="newznab_enabled" value="1" ${config['newznab_enabled']} /><label>Enabled</label>
                                         </div>
                                     </div>
                                     <%
@@ -580,10 +580,10 @@
                                                 <input type="text" name="newznab_api${newznab_number}" value="${newznab[1]}" size="36">
                                             </div>
                                             <div class="row checkbox">
-                                                <input id="newznab_enabled" type="checkbox" name="newznab_enabled${newznab_number}" value="1" ${newznab_enabled} /><label>Enabled</label>
+                                                <input id="newznab_enabled_${newznab_number}" type="checkbox" name="newznab_enabled${newznab_number}" value="1" ${newznab_enabled} /><label>Enabled</label>
                                             </div>
                                             <div class="row">
-                                                <input type="button" class="remove" id="newznab${newznab_number}" value="Remove ${newznab[0]}">
+                                                <input type="button" class="remove" id="newznab_remove_${newznab_number}" value="Remove ${newznab[0]}">
                                             </div>
                                         </div>
                                         <%
@@ -751,7 +751,7 @@
                                                 <input type="text" class="override-float" name="torznab_ratio" value="${config['torznab_ratio']}" size="10" title="Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove torrent when post processed and finished seeding.">
                                             </div>
                                             <div class="row checkbox">
-                                                <input id="torznab_enabled" type="checkbox" name="torznab_enabled" value="1" ${config['torznab_enabled']} /><label>Enabled</label>
+                                                <input id="torznab_enabled_1" type="checkbox" name="torznab_enabled" value="1" ${config['torznab_enabled']} /><label>Enabled</label>
                                             </div>
                                         </div>
                                         <%
@@ -778,10 +778,10 @@
                                                     <input type="text" class="override-float" name="torznab_ratio${torznab_number}" value="${torznab[2]}" size="10" title="Stop seeding when ratio met, 0 = unlimited. Scheduled job will remove torrent when post processed and finished seeding.">
                                                 </div>
                                                 <div class="row checkbox">
-                                                    <input id="torznab_enabled" type="checkbox" name="torznab_enabled${torznab_number}" value="1" ${torznab_enabled} /><label>Enabled</label>
+                                                    <input id="torznab_enabled_${torznab_number}" type="checkbox" name="torznab_enabled${torznab_number}" value="1" ${torznab_enabled} /><label>Enabled</label>
                                                 </div>
                                                 <div class="row">
-                                                    <input type="button" class="remove_torznab" id="torznab${torznab_number}" value="Remove ${torznab[0]}">
+                                                    <input type="button" class="remove_torznab" id="torznab_remove_${torznab_number}" value="Remove ${torznab[0]}">
                                                 </div>
                                             </div>
                                             <%
@@ -944,6 +944,13 @@
                                     <label>
                                         Embed album art in each file
                                         <input type="checkbox" name="embed_album_art" id="embed_album_art" value="1" ${config['embed_album_art']}>
+                                    </label>
+                                </div>
+
+                                <div class="row checkbox left clearfix nopad">
+                                    <label>
+                                        Convert MP3 tags to ID3v2.3 (for compatibility)
+                                        <input type="checkbox" name="run_id3_fixer" value="1" ${config['run_id3_fixer']}>
                                     </label>
                                 </div>
 
@@ -1541,7 +1548,6 @@
                                             <option value=48000 ${freq48000}>48.0 kHz</option>
                                         </select>
                                     </div>
-                                </fieldset>
 
                                 <fieldset>
                                     <legend>Advanced Encoding Options</legend>
@@ -1551,6 +1557,7 @@
                                         <small>Ignores all of the above options</small>
                                     </div>
                                 </fieldset>
+
                             </div>
 
                             <div id="xldproperties">
@@ -1568,6 +1575,23 @@
                                 <label>Path to Encoder</label>
                                 <input type="text" name="encoder_path" value="${config['encoder_path']}" size="43">
                             </div>
+
+                            </fieldset>
+
+                            <fieldset>
+                                <legend>SongRec-Rename</legend>
+                                <div class="row checkbox left clearfix nopad">
+                                    <label>Options</label>
+                                    <label class="inline"><input type="checkbox" name="songrec_scan" id="songrec_scan" value="1" ${config.get('songrec_scan','')} /> Run during scan</label>
+                                    <label class="inline"><input type="checkbox" name="songrec_post" id="songrec_post" value="1" ${config.get('songrec_post','')} /> Run after scan/import on all</label>
+                                    <label class="inline"><input type="checkbox" name="songrec_unrecognized" id="songrec_unrecognized" value="1" ${config.get('songrec_unrecognized','')} /> Run on unrecognized only</label>
+                                </div>
+                                <div class="row">
+                                    <label>Command / Path</label>
+                                    <input type="text" name="songrec_cmd" value="${config.get('songrec_cmd','songrec-rename')}" size="43">
+                                    <small>Override path if not in PATH. Env fallback: SONGREC_RENAME_CMD</small>
+                                </div>
+                            </fieldset>
                         </td>
                         <td>
                             <fieldset>
@@ -1621,6 +1645,10 @@
                                     </label>
                                 </div>
                                 <div class="row checkbox left clearfix nopad">
+                                    <label><input type="checkbox" title="Automatically delete duplicate music files to trash during post-processing"
+                                           name="auto_delete_duplicates" value="1" ${config.get('auto_delete_duplicates','')} />Automatically delete duplicate music files to trash</label>
+                                </div>
+                                <div class="row checkbox left clearfix nopad">
                                     <label><input type="checkbox" title="Stop post-processing if no good metadata match found"
                                            name="do_not_process_unmatched" value="1" ${config['do_not_process_unmatched']} />Stop post-processing if no good metadata match found</label>
                                 </div>
@@ -1628,6 +1656,11 @@
                                     <label title="Use ID3v2.3 instead of ID3v2.4">
                                         Tag using ID3v2.3 instead of ID3v2.4
                                         <input type="checkbox" name="idtag" value="1" ${config['idtag']}>
+                                    </label>
+                                </div>
+                                <div class="row checkbox left clearfix">
+                                    <label title="Run external ID3 fixer script (if present) after post-processing">
+                                        <input type="checkbox" name="run_id3_fixer" value="1" ${config['run_id3_fixer']} /> Run external ID3v2.3 fixer after post-processing
                                     </label>
                                 </div>
                                 <div class="row">
@@ -1754,7 +1787,7 @@
                                     </div>
                                     <div class="row">
                                         <label>Password</label><input type="password" class="hppass" name="hppass" value="${config['hppass'] | h}" size="20"><br>
-                                        <a href="https://headphones.codeshy.com/vip" id="vipserver" target="_blank">Get an Account!</a>
+                                        <a href="https://headphones.codeshy.com/vip" id="vipserver_account" target="_blank">Get an Account!</a>
                                     </div>
                                 </div>
                             </fieldset>

@@ -24,19 +24,27 @@ from headphones import db, logger, helpers, importer, lastfm
 # You can scan a single directory and append it to the current library by
 # specifying append=True, ArtistID and ArtistName.
 def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
-                cron=False, artistScan=False):
+                cron=False, artistScan=False, source_origin=None):
     if cron and not headphones.CONFIG.LIBRARYSCAN:
         return
 
     if not dir:
-        if not headphones.CONFIG.MUSIC_DIR:
+        if not headphones.CONFIG.MUSIC_DIR and not headphones.CONFIG.MUSIC_DIRS:
             logger.info(
                 "No music directory configured. Add it under "
                 "Manage -> Scan Music Library"
             )
             return
-        else:
+        elif headphones.CONFIG.MUSIC_DIR:
             dir = headphones.CONFIG.MUSIC_DIR
+        else:
+            # Scan all configured MUSIC_DIRS
+            for music_dir in headphones.CONFIG.MUSIC_DIRS:
+                if music_dir:
+                    libraryScan(dir=music_dir, append=True, ArtistID=ArtistID, 
+                               ArtistName=ArtistName, cron=False, artistScan=artistScan,
+                               source_origin=music_dir)
+            return
 
     if not os.path.isdir(dir):
         logger.warn(f"Cannot find music directory: {dir}")
@@ -46,6 +54,8 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
     new_artists = []
 
     logger.info(f"Scanning music directory: {dir}")
+    if source_origin:
+        logger.info(f"  Source origin: {source_origin}")
 
     if not append:
 
@@ -147,7 +157,8 @@ def libraryScan(dir=None, append=False, ArtistID=None, ArtistName=None,
                                 'TrackTitle': f.title,
                                 'BitRate': f.bitrate,
                                 'Format': f.format,
-                                'CleanName': CleanName
+                                'CleanName': CleanName,
+                                'SourceOrigin': source_origin
                                 }
 
                 # track_list.append(track_dict)
@@ -518,3 +529,77 @@ def update_album_status(AlbumID=None, ArtistID=None):
 
         myDB.action('UPDATE albums SET Status = ? WHERE AlbumID = ?', [new_album_status, album[0]])
         logger.info('Album: %s - %s. Status updated to %s' % (album[1], album[2], new_album_status))
+
+
+def scanLibraryForDuplicates():
+    """
+    Scan the entire library for duplicate tracks and handle them if AUTO_DELETE_DUPLICATES is enabled.
+    Returns a summary string.
+    """
+    from headphones import source_profile
+    
+    if not headphones.CONFIG.AUTO_DELETE_DUPLICATES:
+        return "AUTO_DELETE_DUPLICATES is disabled."
+    
+    logger.info("Scanning library for duplicate tracks...")
+    
+    myDB = db.DBConnection()
+    
+    # Get all tracks grouped by ArtistName, AlbumTitle, TrackTitle
+    duplicates_query = myDB.select(
+        'SELECT ArtistName, AlbumTitle, TrackTitle, COUNT(*) as count '
+        'FROM have '
+        'WHERE Location IS NOT NULL '
+        'GROUP BY ArtistName, AlbumTitle, TrackTitle '
+        'HAVING COUNT(*) > 1 '
+        'COLLATE NOCASE'
+    )
+    
+    if not duplicates_query:
+        logger.info("No duplicate tracks found in library.")
+        return "No duplicate tracks found in library."
+    
+    logger.info(f"Found {len(duplicates_query)} groups of duplicate tracks.")
+    
+    total_processed = 0
+    total_deleted = 0
+    total_errors = 0
+    
+    for dup_group in duplicates_query:
+        artist = dup_group['ArtistName']
+        album = dup_group['AlbumTitle']
+        title = dup_group['TrackTitle']
+        
+        # Get all tracks for this group
+        tracks = myDB.select(
+            'SELECT Location, SourceOrigin, TrackID FROM have '
+            'WHERE ArtistName = ? AND AlbumTitle = ? AND TrackTitle = ? AND Location IS NOT NULL '
+            'COLLATE NOCASE',
+            [artist, album, title]
+        )
+        
+        if len(tracks) < 2:
+            continue
+        
+        logger.info(f"Processing duplicates for '{artist} - {title}' ({len(tracks)} copies)")
+        
+        try:
+            result = source_profile.handle_duplicate_tracks(tracks, auto_delete=True)
+            total_processed += 1
+            total_deleted += len(result['deleted'])
+            
+            if result['errors']:
+                total_errors += len(result['errors'])
+                for err in result['errors']:
+                    logger.error(f"Error: {err}")
+                    
+        except Exception as e:
+            logger.error(f"Error processing duplicates for {artist} - {title}: {e}")
+            total_errors += 1
+    
+    summary = f"Duplicate scan complete. Processed {total_processed} groups, deleted {total_deleted} files."
+    if total_errors > 0:
+        summary += f" {total_errors} errors occurred."
+    
+    logger.info(summary)
+    return summary

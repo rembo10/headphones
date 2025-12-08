@@ -32,8 +32,8 @@
 	<table class="display" id="artist_table">
 		<thead>
 			<tr>
-				<th id="artist">Local Artist</th>
-				<th id="album">Local Album</th>
+				<th class="artist">Local Artist</th>
+				<th class="album">Local Album</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -46,7 +46,7 @@
 					old_artist_js = album['ArtistName'].replace("'","\\'").replace('"','\\"')
 					old_album_js = album['AlbumTitle'].replace("'","\\'").replace('"','\\"')
 				%>
-				<td id="artist">${album['ArtistName']}<BR>
+				<td class="artist">${album['ArtistName']}<BR>
 				<button id="ignore_artists${count_albums}" onClick="ignore_Artist(this.id)">(-) Ignore Artist</button>
 				<div id="ignore_artist_dialog${count_albums}" title="Ignore Artist" style="display:none">
 					<table>
@@ -72,7 +72,7 @@
 				</div>
 
 				</td>
-				<td id="album">${album['AlbumTitle']}<BR>
+				<td class="album">${album['AlbumTitle']}<BR>
 				<button id="ignore_albums${count_albums}" onClick="ignore_Album(this.id)">(-) Ignore Album</button>
 				<div id="ignore_album_dialog${count_albums}" title="Ignore Album" style="display:none">
 					<table>

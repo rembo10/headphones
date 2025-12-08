@@ -1,0 +1,8 @@
+# WebSocket Support for Headphones
+# Install with: pip install -r requirements-websocket.txt
+
+# WebSocket support for CherryPy
+ws4py>=0.5.1
+
+# Alternative: use cherrypy-websocket plugin
+# cherrypy-websocket>=0.1.1

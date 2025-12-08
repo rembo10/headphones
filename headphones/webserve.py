@@ -15,11 +15,10 @@
 
 # NZBGet support added by CurlyMo <curlymoo1@gmail.com> as a part of XBian - XBMC on the Raspberry Pi
 
-import json
 import os
-import random
 import re
 import secrets
+import shutil
 import sys
 import threading
 import time
@@ -58,25 +57,92 @@ from headphones.types import Result
 
 
 def serve_template(templatename, **kwargs):
-    interface_dir = os.path.join(str(headphones.PROG_DIR), 'data/interfaces/')
-    template_dir = os.path.join(str(interface_dir), headphones.CONFIG.INTERFACE)
+    # Resolve the templates directory even when PROG_DIR was not initialized
+    base_dir = headphones.PROG_DIR or os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+    interface_dir = os.path.join(str(base_dir), 'data', 'interfaces')
 
-    _hplookup = TemplateLookup(directories=[template_dir])
+    # Ensure bundled libraries are in path for template imports
+    lib_dir = os.path.join(base_dir, 'lib')
+    if lib_dir not in sys.path:
+        sys.path.insert(0, lib_dir)
+
+    configured = (headphones.CONFIG.INTERFACE or 'default').strip() or 'default'
+    template_dir = os.path.join(interface_dir, configured)
+    default_dir = os.path.join(interface_dir, 'default')
+
+    # Always search the configured interface first, then fall back to default
+    lookup_dirs = []
+    if os.path.isdir(template_dir):
+        lookup_dirs.append(template_dir)
+    if os.path.isdir(default_dir) and default_dir not in lookup_dirs:
+        lookup_dirs.append(default_dir)
+
+    # If nothing usable was found, fall back to the base interfaces dir to avoid crashes
+    if not lookup_dirs:
+        lookup_dirs = [interface_dir]
+
+    lookup_dirs = [os.path.abspath(d) for d in lookup_dirs]
+
+    # Prefer directories that actually contain the requested template
+    files_present = [d for d in lookup_dirs if os.path.isfile(os.path.join(d, templatename))]
+    if files_present:
+        # Put directories with the template first
+        lookup_dirs = files_present + [d for d in lookup_dirs if d not in files_present]
+
+    print("DEBUG: base_dir:", base_dir)
+    print("DEBUG: interface_dir:", interface_dir)
+    print("DEBUG: configured:", configured)
+    print("DEBUG: template_dir:", template_dir)
+    print("DEBUG: default_dir:", default_dir)
+    print("DEBUG: lookup_dirs:", lookup_dirs)
+    print("DEBUG: index.html exists in default:", os.path.isfile(os.path.join(default_dir, 'index.html')))
+    print("DEBUG: headphones.PROG_DIR:", headphones.PROG_DIR)
+    print("DEBUG: srcfile:", os.path.join(lookup_dirs[0], templatename))
+    print("DEBUG: os.path.isfile(srcfile):", os.path.isfile(os.path.join(lookup_dirs[0], templatename)))
+
+    try:
+        logger.debug("Rendering template '%s' from lookup dirs: %s", templatename, lookup_dirs)
+    except Exception:
+        pass  # avoid logging failures breaking rendering
+
+    _hplookup = TemplateLookup(directories=lookup_dirs, module_directory=None)
 
     try:
         template = _hplookup.get_template(templatename)
         return template.render(**kwargs)
-    except:
-        return exceptions.html_error_template().render()
+    except Exception:
+        # Try an explicit fallback to the default interface only
+        try:
+            fallback_dirs = [default_dir]
+            logger.warn("Retrying template '%s' with default interface only: %s", templatename, fallback_dirs)
+            fallback_lookup = TemplateLookup(directories=fallback_dirs, module_directory=None)
+            template = fallback_lookup.get_template(templatename)
+            return template.render(**kwargs)
+        except Exception:
+            try:
+                logger.error("Failed to render template '%s' using dirs %s (and fallback %s)",
+                             templatename, lookup_dirs, default_dir)
+            except Exception:
+                pass
+            # As a last resort, show the built-in Mako error page
+            return exceptions.html_error_template().render()
 
 
 class WebInterface(object):
     @cherrypy.expose
     def index(self):
-        raise cherrypy.HTTPRedirect("home")
+        # Use configured (default) interface templates
+        myDB = db.DBConnection()
+        artists = myDB.select('SELECT * from artists order by ArtistSortName COLLATE NOCASE')
+        return serve_template(templatename="index.html", title="Home", artists=artists)
 
     @cherrypy.expose
     def home(self):
+        # Redirect /home to root
+        raise cherrypy.HTTPRedirect("/")
+
+    @cherrypy.expose
+    def legacy_home(self):
         myDB = db.DBConnection()
         artists = myDB.select('SELECT * from artists order by ArtistSortName COLLATE NOCASE')
         return serve_template(templatename="index.html", title="Home", artists=artists)
@@ -612,6 +678,16 @@ class WebInterface(object):
 
         return serve_template(templatename="manageunmatched.html", title="Manage Unmatched Items",
                               unmatchedalbums=unmatchedalbums)
+
+    @cherrypy.expose
+    def scanDuplicates(self):
+        """Scan the library for duplicate tracks and delete them if AUTO_DELETE_DUPLICATES is enabled."""
+        try:
+            result = librarysync.scanLibraryForDuplicates()
+            return result
+        except Exception as e:
+            logger.error("Error during duplicate scan: %s", e)
+            return "Error during duplicate scan: %s" % e
 
     @cherrypy.expose
     def markUnmatched(self, action=None, existing_artist=None, existing_album=None, new_artist=None,
@@ -1265,6 +1341,7 @@ class WebInterface(object):
             "cue_split_shntool_path": headphones.CONFIG.CUE_SPLIT_SHNTOOL_PATH,
             "move_files": checked(headphones.CONFIG.MOVE_FILES),
             "rename_files": checked(headphones.CONFIG.RENAME_FILES),
+            "run_id3_fixer": checked(headphones.CONFIG.RUN_ID3_FIXER),
             "rename_single_disc_ignore": checked(headphones.CONFIG.RENAME_SINGLE_DISC_IGNORE),
             "correct_metadata": checked(headphones.CONFIG.CORRECT_METADATA),
             "cleanup_files": checked(headphones.CONFIG.CLEANUP_FILES),
@@ -1378,6 +1455,11 @@ class WebInterface(object):
             "customhost": headphones.CONFIG.CUSTOMHOST,
             "customport": headphones.CONFIG.CUSTOMPORT,
             "customsleep": headphones.CONFIG.CUSTOMSLEEP,
+                # SongRec-Rename options
+                "songrec_scan": checked(headphones.CONFIG.SONGREC_SCAN),
+                "songrec_post": checked(headphones.CONFIG.SONGREC_POST),
+                "songrec_unrecognized": checked(headphones.CONFIG.SONGREC_UNRECOGNIZED),
+            "songrec_cmd": headphones.CONFIG.SONGREC_CMD,
             "customauth": checked(headphones.CONFIG.CUSTOMAUTH),
             "customuser": headphones.CONFIG.CUSTOMUSER,
             "custompass": headphones.CONFIG.CUSTOMPASS,
@@ -1416,7 +1498,8 @@ class WebInterface(object):
             "bandcamp_dir": headphones.CONFIG.BANDCAMP_DIR,
             'soulseek_api_url': headphones.CONFIG.SOULSEEK_API_URL,
             'soulseek_api_key': headphones.CONFIG.SOULSEEK_API_KEY,
-            'use_soulseek': checked(headphones.CONFIG.SOULSEEK)
+            'use_soulseek': checked(headphones.CONFIG.SOULSEEK),
+            "auto_delete_duplicates": checked(headphones.CONFIG.AUTO_DELETE_DUPLICATES)
         }
 
         for k, v in config.items():
@@ -1456,6 +1539,7 @@ class WebInterface(object):
 
     @cherrypy.expose
     def configUpdate(self, **kwargs):
+        logger.info("configUpdate called with %d parameters", len(kwargs))
         # Handle the variable config options. Note - keys with False values aren't getting passed
 
         checked_configs = [
@@ -1465,6 +1549,7 @@ class WebInterface(object):
             "use_orpheus", "use_redacted", "redacted_use_fltoken", "preferred_bitrate_allow_lossless",
             "detect_bitrate", "ignore_clean_releases", "freeze_db", "cue_split", "move_files",
             "rename_files", "rename_single_disc_ignore", "correct_metadata", "cleanup_files",
+            "run_id3_fixer",
             "keep_nfo", "add_album_art", "embed_album_art", "embed_lyrics",
             "replace_existing_folders", "keep_original_folder", "file_underscores",
             "include_extras", "official_releases_only",
@@ -1484,7 +1569,9 @@ class WebInterface(object):
             "songkick_enabled", "songkick_filter_enabled",
             "mpc_enabled", "email_enabled", "email_ssl", "email_tls", "email_onsnatch",
             "customauth", "idtag", "deluge_paused",
-            "join_enabled", "join_onsnatch", "use_bandcamp", "use_soulseek"
+            "join_enabled", "join_onsnatch", "use_bandcamp", "use_soulseek",
+            "songrec_scan", "songrec_post", "songrec_unrecognized",
+            "auto_delete_duplicates"
         ]
         for checked_config in checked_configs:
             if checked_config not in kwargs:
@@ -1500,7 +1587,7 @@ class WebInterface(object):
             # TODO : HUGE crutch. It is all because there is no way to deal with options...
             try:
                 _conf = headphones.CONFIG._define(k)
-            except KeyError:
+            except (KeyError, AttributeError):
                 continue
             conftype = _conf[1]
 
@@ -1509,11 +1596,17 @@ class WebInterface(object):
                 if nv != v:
                     kwargs[k] = nv
 
-        # Check if encoderoutputformat is set multiple times
-        if len(kwargs['encoderoutputformat'][-1]) > 1:
-            kwargs['encoderoutputformat'] = kwargs['encoderoutputformat'][-1]
+        # Check if encoderoutputformat is set multiple times; be tolerant if not a list
+        enc_out = kwargs.get('encoderoutputformat', '')
+        if isinstance(enc_out, list):
+            if enc_out and len(enc_out[-1]) > 1:
+                kwargs['encoderoutputformat'] = enc_out[-1]
+            elif enc_out:
+                kwargs['encoderoutputformat'] = enc_out[0]
+            else:
+                kwargs['encoderoutputformat'] = ''
         else:
-            kwargs['encoderoutputformat'] = kwargs['encoderoutputformat'][0]
+            kwargs['encoderoutputformat'] = enc_out
 
         extra_newznabs = []
         for kwarg in [x for x in kwargs if x.startswith('newznab_host')]:
@@ -1573,14 +1666,23 @@ class WebInterface(object):
 
         headphones.CONFIG.EXTRAS = ','.join(str(n) for n in temp_extras_list)
 
+        logger.info("Clearing extra newznabs and torznabs")
         headphones.CONFIG.clear_extra_newznabs()
         headphones.CONFIG.clear_extra_torznabs()
 
-        headphones.CONFIG.process_kwargs(kwargs)
+        try:
+            logger.info("Processing configuration parameters")
+            headphones.CONFIG.process_kwargs(kwargs)
+            logger.info("Configuration parameters processed successfully")
+        except Exception as e:
+            logger.error("Error processing configuration parameters: %s", e, exc_info=True)
+            raise
 
+        logger.info("Adding %d extra newznabs", len(extra_newznabs))
         for extra_newznab in extra_newznabs:
             headphones.CONFIG.add_extra_newznab(extra_newznab)
 
+        logger.info("Adding %d extra torznabs", len(extra_torznabs))
         for extra_torznab in extra_torznabs:
             headphones.CONFIG.add_extra_torznab(extra_torznab)
 
@@ -1590,7 +1692,13 @@ class WebInterface(object):
             headphones.CONFIG.SEARCH_INTERVAL = 360
 
         # Write the config
-        headphones.CONFIG.write()
+        try:
+            logger.info("Writing configuration to file")
+            headphones.CONFIG.write()
+            logger.info("Configuration written successfully")
+        except Exception as e:
+            logger.error("Error writing configuration: %s", e, exc_info=True)
+            raise
 
         # Reconfigure scheduler
         headphones.initialize_scheduler()

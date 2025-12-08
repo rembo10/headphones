@@ -79,14 +79,14 @@ def multikeysort(items, columns):
 
 def checked(variable):
     if variable:
-        return 'Checked'
+        return 'checked'
     else:
         return ''
 
 
 def radio(variable, pos):
     if variable == pos:
-        return 'Checked'
+        return 'checked'
     else:
         return ''
 

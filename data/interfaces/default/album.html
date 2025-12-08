@@ -69,11 +69,11 @@
 				<table class="display" id="downloads_table">
 					<thead>
 						<tr>
-							<th id="title">Title</th>
-							<th id="size">Size</th>
-							<th id="provider">Provider</th>
-							<th id="kind">Kind</th>
-							<th id="matches" title="Matches quality and/or seed settings.">Matches</th>
+							<th class="title">Title</th>
+							<th class="size">Size</th>
+							<th class="provider">Provider</th>
+							<th class="kind">Kind</th>
+							<th class="matches" title="Matches quality and/or seed settings.">Matches</th>
 						</tr>
 					</thead>
 					<tbody id="downloads_table_body">
@@ -120,12 +120,12 @@
 			<table class="display" id="track_table">
 				<thead>
 					<tr>
-						<th id="number">#</th>
-						<th id="name">Track Title</th>
-						<th id="duration">Duration</th>
-						<th id="location">Local File</th>
-						<th id="bitrate">Bit Rate</th>
-						<th id="format">Format</th>
+						<th class="number">#</th>
+						<th class="name">Track Title</th>
+						<th class="duration">Duration</th>
+						<th class="location">Local File</th>
+						<th class="bitrate">Bit Rate</th>
+						<th class="format">Format</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -154,12 +154,12 @@
 							format = track['Format']
 					%>
 					<tr class="grade${grade}">
-						<td id="number">${track['TrackNumber']}</td>
-						<td id="name">${track['TrackTitle']}</td>
-						<td id="duration">${trackduration}</td>
-						<td id="location">${location}</td>
-						<td id="bitrate">${bitrate}</td>
-						<td id="format">${format}</td>
+						<td class="number">${track['TrackNumber']}</td>
+						<td class="name">${track['TrackTitle']}</td>
+						<td class="duration">${trackduration}</td>
+						<td class="location">${location}</td>
+						<td class="bitrate">${bitrate}</td>
+						<td class="format">${format}</td>
 					</tr>
 				%endfor
 				<%
@@ -171,12 +171,12 @@
 					 	duration = helpers.convert_seconds(float(track['TrackLength']))
 					 %>
 					<tr class="gradeC">
-						<td id="number">${track['TrackNumber']}</td>
-						<td id="name">${track['TrackTitle']}</td>
-						<td id="duration">${duration}</td>
-						<td id="location">${track['Location']}</td>
-						<td id="bitrate">${int(track['BitRate'])/1000} kbps</td>
-						<td id="format">${track['Format']}</td>
+						<td class="number">${track['TrackNumber']}</td>
+						<td class="name">${track['TrackTitle']}</td>
+						<td class="duration">${duration}</td>
+						<td class="location">${track['Location']}</td>
+						<td class="bitrate">${int(track['BitRate'])/1000} kbps</td>
+						<td class="format">${track['Format']}</td>
 					</tr>
 					%endfor
 				%endif
@@ -238,7 +238,7 @@
 			feedback.fadeOut();
 			search_results = data
 			for( var i = 0, len = data.length; i < len; i++ ) {
-    			$('#downloads_table_body').append('<tr><td id="title"><a href="javascript:void(0)" onclick="downloadSpecificRelease('+i+')">'+data[i].title+'</a></td><td id="size"><span title='+data[i].size+'></span>'+(data[i].size / (1024*1024)).toFixed(2)+' MB</td><td id="provider">'+data[i].provider+'</td><td id="kind">'+data[i].kind+'</td><td id="matches">'+data[i].matches+'</td></tr>');
+    			$('#downloads_table_body').append('<tr><td class="title"><a href="javascript:void(0)" onclick="downloadSpecificRelease('+i+')">'+data[i].title+'</a></td><td class="size"><span title='+data[i].size+'></span>'+(data[i].size / (1024*1024)).toFixed(2)+' MB</td><td class="provider">'+data[i].provider+'</td><td class="kind">'+data[i].kind+'</td><td class="matches">'+data[i].matches+'</td></tr>');
     		}
 			$('#downloads_table').dataTable({
 				"aoColumns": [

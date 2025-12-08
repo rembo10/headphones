@@ -38,13 +38,13 @@ CUE_HEADER = {
     'accurateripid': '^REM ACCURATERIPID (.+?)$'
 }
 
-CUE_TRACK = 'TRACK (\d\d) AUDIO$'
+CUE_TRACK = r'TRACK (\d\d) AUDIO$'
 
 CUE_TRACK_INFO = {
     'artist': 'PERFORMER (.+?)$',
     'title': 'TITLE (.+?)$',
     'isrc': 'ISRC (.+?)$',
-    'index': 'INDEX (\d\d) (.+?)$'
+    'index': r'INDEX (\d\d) (.+?)$'
 }
 
 ALBUM_META_FILE_NAME = 'album.dat'
@@ -208,7 +208,7 @@ class Directory:
 
         def identify_track_number(filename):
             if 'split-track' in filename:
-                search = re.search('split-track(\d\d)', filename)
+                search = re.search(r'split-track(\d\d)', filename)
                 if search:
                     n = int(search.group(1))
                     if n:
@@ -276,7 +276,7 @@ class File(object):
             raise ValueError('ext parameter error')
 
         if cmd:
-            content = content.replace(' ', '\ ')
+            content = content.replace(' ', r'\ ')
 
         return content
 
@@ -448,7 +448,7 @@ class MetaFile(File):
             parsed_line = re.search('^(.+?)\t(.+?)$', l)
             if parsed_line:
                 if parsed_line.group(1)[:5] == 'track':
-                    parsed_track = re.search('^track(\d\d)(.+?)$', parsed_line.group(1))
+                    parsed_track = re.search(r'^track(\d\d)(.+?)$', parsed_line.group(1))
                     if not parsed_track:
                         raise ValueError('Syntax error in album meta file')
                     if not content['tracks'][int(parsed_track.group(1))]:
@@ -521,7 +521,7 @@ class WaveFile(File):
         f_name = int_to_str(self.track_nr) + ' - ' + title + ext
 
         if cmd:
-            f_name = f_name.replace(' ', '\ ')
+            f_name = f_name.replace(' ', r'\ ')
 
         f_name = f_name.replace('!', '')
         f_name = f_name.replace('?', '')
