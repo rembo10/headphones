@@ -88,7 +88,15 @@ def _get_localzone_name():
         # DST is disabled, so don't return the timezone name,
         # instead return Etc/GMT+offset
 
-        tz = zoneinfo.ZoneInfo(timezone)
+        try:
+            tz = zoneinfo.ZoneInfo(timezone)
+        except ModuleNotFoundError as e:
+            if "tzdata" in str(e):
+                raise ModuleNotFoundError(
+                    "The tzdata package is required for timezone support on Windows with Python 3.9+. "
+                    "Please install it using: pip install tzdata"
+                ) from e
+            raise
         has_dst, std_offset, dst_offset = _get_dst_info(tz)
         if not has_dst:
             # The DST is turned off in the windows configuration,
@@ -126,7 +134,15 @@ def get_localzone() -> zoneinfo.ZoneInfo:
 
     global _cache_tz
     if _cache_tz is None:
-        _cache_tz = zoneinfo.ZoneInfo(get_localzone_name())
+        try:
+            _cache_tz = zoneinfo.ZoneInfo(get_localzone_name())
+        except ModuleNotFoundError as e:
+            if "tzdata" in str(e):
+                raise ModuleNotFoundError(
+                    "The tzdata package is required for timezone support on Windows with Python 3.9+. "
+                    "Please install it using: pip install tzdata"
+                ) from e
+            raise
 
     if not utils._tz_name_from_env():
         # If the timezone does NOT come from a TZ environment variable,
@@ -142,6 +158,14 @@ def reload_localzone() -> zoneinfo.ZoneInfo:
     global _cache_tz
     global _cache_tz_name
     _cache_tz_name = _get_localzone_name()
-    _cache_tz = zoneinfo.ZoneInfo(_cache_tz_name)
+    try:
+        _cache_tz = zoneinfo.ZoneInfo(_cache_tz_name)
+    except ModuleNotFoundError as e:
+        if "tzdata" in str(e):
+            raise ModuleNotFoundError(
+                "The tzdata package is required for timezone support on Windows with Python 3.9+. "
+                "Please install it using: pip install tzdata"
+            ) from e
+        raise
     utils.assert_tz_offset(_cache_tz, error=False)
     return _cache_tz
