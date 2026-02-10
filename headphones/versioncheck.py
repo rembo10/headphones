@@ -16,6 +16,7 @@
 import tarfile
 import platform
 import subprocess
+import shlex
 
 import re
 import os
@@ -25,7 +26,7 @@ from headphones import logger, version, request
 
 def runGit(args):
     if headphones.CONFIG.GIT_PATH:
-        git_locations = ['"' + headphones.CONFIG.GIT_PATH + '"']
+        git_locations = [headphones.CONFIG.GIT_PATH]
     else:
         git_locations = ['git']
 
@@ -35,23 +36,24 @@ def runGit(args):
     output = err = None
 
     for cur_git in git_locations:
-        cmd = cur_git + ' ' + args
+        # Split args into a list and build command array to prevent injection
+        cmd_list = [cur_git] + shlex.split(args)
+        cmd_str = ' '.join([shlex.quote(str(c)) for c in cmd_list])
 
         try:
-            logger.debug('Trying to execute: "' + cmd + '" with shell in ' + headphones.PROG_DIR)
-            p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                                 shell=True,
+            logger.debug('Trying to execute: "' + cmd_str + '" in ' + headphones.PROG_DIR)
+            p = subprocess.Popen(cmd_list, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                  cwd=headphones.PROG_DIR)
             output, err = p.communicate()
             output = output.decode('utf-8').strip()
 
             logger.debug('Git output: ' + output)
         except OSError as e:
-            logger.debug('Command failed: %s. Error: %s' % (cmd, e))
+            logger.debug('Command failed: %s. Error: %s' % (cmd_str, e))
             continue
 
         if 'not found' in output or "not recognized as an internal or external command" in output:
-            logger.debug('Unable to find git with command ' + cmd)
+            logger.debug('Unable to find git with command ' + cmd_str)
             output = None
         elif 'fatal:' in output or err:
             logger.error('Git returned bad info. Are you sure this is a git installation?')
