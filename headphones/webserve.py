@@ -1011,9 +1011,11 @@ class WebInterface(object):
             filtered = myDB.select(query)
             totalcount = len(filtered)
         else:
-            query = 'SELECT * from artists WHERE ArtistSortName LIKE "%' + sSearch + '%" OR LatestAlbum LIKE "%' + sSearch + '%"' + 'ORDER BY %s COLLATE NOCASE %s' % (
+            # Use parameterized query to prevent SQL injection
+            search_param = '%' + sSearch + '%'
+            query = 'SELECT * from artists WHERE ArtistSortName LIKE ? OR LatestAlbum LIKE ? ORDER BY %s COLLATE NOCASE %s' % (
                 sortcolumn, sSortDir_0)
-            filtered = myDB.select(query)
+            filtered = myDB.select(query, [search_param, search_param])
             totalcount = myDB.select('SELECT COUNT(*) from artists')[0][0]
 
         if sortbyhavepercent:
