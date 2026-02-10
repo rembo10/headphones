@@ -1479,8 +1479,9 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                     for item in items:
                         try:
                             title = item.title.get_text()
-                            if item.find("link"):
-                                url = item.find("link").next_sibling.strip()
+                            link_element = item.find("link")
+                            if link_element and link_element.next_sibling:
+                                url = link_element.next_sibling.strip()
                             else:
                                 url = item.find('enclosure').get('url')
                             seeders = int(item.find("torznab:attr", attrs={"name": "seeders"}).get('value'))
