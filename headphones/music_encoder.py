@@ -353,10 +353,11 @@ def command(encoder, musicSource, musicDest, albumPath, xldProfile):
     logger.info(f"Encoding {musicSource}")
     logger.debug(subprocess.list2cmdline(cmd))
 
-    process = subprocess.Popen(cmd, startupinfo=startupinfo,
-                               stdin=open(os.devnull, 'rb'), stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE, text=True)
-    stdout, stderr = process.communicate(headphones.CONFIG.ENCODER)
+    with open(os.devnull, 'rb') as devnull:
+        process = subprocess.Popen(cmd, startupinfo=startupinfo,
+                                   stdin=devnull, stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE, text=True)
+        stdout, stderr = process.communicate(headphones.CONFIG.ENCODER)
 
     # Error if return code not zero
     if process.returncode:

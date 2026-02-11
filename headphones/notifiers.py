@@ -1025,12 +1025,13 @@ class TELEGRAM(object):
         # Send image
         response = None
         if image:
-            image_file = {'photo': (image, open(image, "rb"))}
-            payload = {'chat_id': userid, 'parse_mode': "HTML", 'caption': status + message}
-            try:
-                response = requests.post(TELEGRAM_API % (token, "sendPhoto"), data=payload, files=image_file)
-            except Exception as e:
-                logger.info('Telegram notify failed: ' + str(e))
+            with open(image, "rb") as img_file:
+                image_file = {'photo': (image, img_file)}
+                payload = {'chat_id': userid, 'parse_mode': "HTML", 'caption': status + message}
+                try:
+                    response = requests.post(TELEGRAM_API % (token, "sendPhoto"), data=payload, files=image_file)
+                except Exception as e:
+                    logger.info('Telegram notify failed: ' + str(e))
         # Sent text
         else:
             payload = {'chat_id': userid, 'parse_mode': "HTML", 'text': status + message}
