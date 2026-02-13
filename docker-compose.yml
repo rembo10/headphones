@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  headphones:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: headphones
+    restart: unless-stopped
+    ports:
+      - "8181:8181"
+    volumes:
+      # Data directory for configuration and database
+      - headphones_data:/data
+      # Optional: mount your music library directory
+      # - /path/to/your/music:/music
+    environment:
+      # Set timezone
+      - TZ=UTC
+    # Optional: uncomment to set memory limits
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 512M
+
+volumes:
+  headphones_data:
+    driver: local
