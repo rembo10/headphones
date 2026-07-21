@@ -101,7 +101,7 @@ class TemplateLookup(TemplateCollection):
         some_template = lookup.get_template("/index.html")
 
     The :class:`.TemplateLookup` can also be given :class:`.Template` objects
-    programatically using :meth:`.put_string` or :meth:`.put_template`:
+    programmatically using :meth:`.put_string` or :meth:`.put_template`:
 
     .. sourcecode:: python
 
