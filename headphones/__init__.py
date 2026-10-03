@@ -361,7 +361,7 @@ def sig_handler(signum=None, frame=None):
 
 def dbcheck():
     logger.debug("SQLite Version: %s", sqlite3.sqlite_version)
-    logger.debug("DB-API Version: %s", sqlite3.version)
+    logger.debug("DB-API Level: %s", sqlite3.apilevel)
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
     c.execute(
