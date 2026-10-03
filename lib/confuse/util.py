@@ -5,7 +5,7 @@ import sys
 import argparse
 import optparse
 import platform
-import pkgutil
+import importlib.util
 
 
 PY3 = sys.version_info[0] == 3
@@ -118,24 +118,17 @@ def build_dict(obj, sep='', keep_none=False):
 # defaults.
 
 def find_package_path(name):
-    """Returns the path to the package containing the named module or
-    None if the path could not be identified (e.g., if
-    ``name == "__main__"``).
+    """Return the directory containing the named module, or None
+    if its filesystem path cannot be identified.
     """
-    # Based on get_root_path from Flask by Armin Ronacher.
-    loader = pkgutil.get_loader(name)
-    if loader is None or name == '__main__':
+    if name == '__main__':
         return None
 
-    if hasattr(loader, 'get_filename'):
-        filepath = loader.get_filename(name)
-    else:
-        # Fall back to importing the specified module.
-        __import__(name)
-        filepath = sys.modules[name].__file__
+    spec = importlib.util.find_spec(name)
+    if spec is None or not spec.has_location or spec.origin is None:
+        return None
 
-    return os.path.dirname(os.path.abspath(filepath))
-
+    return os.path.dirname(os.path.abspath(spec.origin))
 
 def xdg_config_dirs():
     """Returns a list of paths taken from the XDG_CONFIG_DIRS
