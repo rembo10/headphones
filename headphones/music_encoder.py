@@ -30,6 +30,30 @@ from . import getXldProfile
 
 
 def encode(albumPath):
+    # Snapshot the configuration the encoder workers need. A child process
+    # created by multiprocessing.Pool with the 'spawn' start method (the
+    # default on Windows) re-imports this module and does not inherit the
+    # globals Headphones.py installs at startup, so `headphones.CONFIG` is
+    # None inside the worker and every CONFIG lookup there raised
+    # "AttributeError: 'NoneType' object has no attribute 'ENCODER'".
+    # The snapshot is a dict of plain primitives, so it pickles cleanly and
+    # travels with each job instead of relying on process-global state.
+    encoder_config = {
+        'ENCODER': headphones.CONFIG.ENCODER,
+        'ENCODEROUTPUTFORMAT': headphones.CONFIG.ENCODEROUTPUTFORMAT,
+        'ENCODERLOSSLESS': headphones.CONFIG.ENCODERLOSSLESS,
+        'ENCODER_PATH': headphones.CONFIG.ENCODER_PATH,
+        'ENCODER_MULTICORE': headphones.CONFIG.ENCODER_MULTICORE,
+        'ENCODER_MULTICORE_COUNT': headphones.CONFIG.ENCODER_MULTICORE_COUNT,
+        'ADVANCEDENCODER': headphones.CONFIG.ADVANCEDENCODER,
+        'ENCODERVBRCBR': headphones.CONFIG.ENCODERVBRCBR,
+        'ENCODERQUALITY': headphones.CONFIG.ENCODERQUALITY,
+        'SAMPLINGFREQUENCY': headphones.CONFIG.SAMPLINGFREQUENCY,
+        'BITRATE': headphones.CONFIG.BITRATE,
+        'SYS_PLATFORM': headphones.SYS_PLATFORM,
+        'SYS_ENCODING': headphones.SYS_ENCODING,
+    }
+
     use_xld = headphones.CONFIG.ENCODER == 'xld'
 
     # Return if xld details not found
@@ -146,7 +170,8 @@ def encode(albumPath):
                     encode = True
         # encode
         if encode:
-            job = (encoder, music, musicTempFiles[i], albumPath, xldProfile)
+            job = (encoder, music, musicTempFiles[i], albumPath, xldProfile,
+                   encoder_config)
             jobs.append(job)
         else:
             musicFiles[i] = None
@@ -267,10 +292,15 @@ def command_map(args):
         return False
 
 
-def command(encoder, musicSource, musicDest, albumPath, xldProfile):
+def command(encoder, musicSource, musicDest, albumPath, xldProfile,
+            encoder_config):
     """
     Encode a given music file with a certain encoder. Returns True on success,
     or False otherwise.
+
+    `encoder_config` carries the settings snapshot taken by `encode()`, so
+    this function never reads the process-global `headphones.CONFIG`, which
+    is always None in a worker process spawned by `multiprocessing.Pool`.
     """
 
     startMusicTime = time.time()
@@ -286,72 +316,72 @@ def command(encoder, musicSource, musicDest, albumPath, xldProfile):
         cmd.extend([xldDestDir])
 
     # Lame
-    elif headphones.CONFIG.ENCODER == 'lame':
+    elif encoder_config['ENCODER'] == 'lame':
         cmd = [encoder]
         opts = []
-        if not headphones.CONFIG.ADVANCEDENCODER:
+        if not encoder_config['ADVANCEDENCODER']:
             opts.extend(['-h'])
-            if headphones.CONFIG.ENCODERVBRCBR == 'cbr':
-                opts.extend(['--resample', str(headphones.CONFIG.SAMPLINGFREQUENCY), '-b',
-                             str(headphones.CONFIG.BITRATE)])
-            elif headphones.CONFIG.ENCODERVBRCBR == 'vbr':
-                opts.extend(['-v', str(headphones.CONFIG.ENCODERQUALITY)])
+            if encoder_config['ENCODERVBRCBR'] == 'cbr':
+                opts.extend(['--resample', str(encoder_config['SAMPLINGFREQUENCY']), '-b',
+                             str(encoder_config['BITRATE'])])
+            elif encoder_config['ENCODERVBRCBR'] == 'vbr':
+                opts.extend(['-v', str(encoder_config['ENCODERQUALITY'])])
         else:
-            advanced = (headphones.CONFIG.ADVANCEDENCODER.split())
+            advanced = (encoder_config['ADVANCEDENCODER'].split())
             for tok in advanced:
-                opts.extend([tok.encode(headphones.SYS_ENCODING)])
+                opts.extend([tok.encode(encoder_config['SYS_ENCODING'])])
         opts.extend([musicSource])
         opts.extend([musicDest])
         cmd.extend(opts)
 
     # FFmpeg
-    elif headphones.CONFIG.ENCODER == 'ffmpeg':
+    elif encoder_config['ENCODER'] == 'ffmpeg':
         cmd = [encoder, '-i', musicSource]
         opts = []
-        if not headphones.CONFIG.ADVANCEDENCODER:
-            if headphones.CONFIG.ENCODEROUTPUTFORMAT == 'ogg':
+        if not encoder_config['ADVANCEDENCODER']:
+            if encoder_config['ENCODEROUTPUTFORMAT'] == 'ogg':
                 opts.extend(['-acodec', 'libvorbis'])
-            if headphones.CONFIG.ENCODEROUTPUTFORMAT == 'm4a':
+            if encoder_config['ENCODEROUTPUTFORMAT'] == 'm4a':
                 opts.extend(['-strict', 'experimental'])
-            if headphones.CONFIG.ENCODERVBRCBR == 'cbr':
-                opts.extend(['-ar', str(headphones.CONFIG.SAMPLINGFREQUENCY), '-ab',
-                             str(headphones.CONFIG.BITRATE) + 'k'])
-            elif headphones.CONFIG.ENCODERVBRCBR == 'vbr':
-                opts.extend(['-aq', str(headphones.CONFIG.ENCODERQUALITY)])
+            if encoder_config['ENCODERVBRCBR'] == 'cbr':
+                opts.extend(['-ar', str(encoder_config['SAMPLINGFREQUENCY']), '-ab',
+                             str(encoder_config['BITRATE']) + 'k'])
+            elif encoder_config['ENCODERVBRCBR'] == 'vbr':
+                opts.extend(['-aq', str(encoder_config['ENCODERQUALITY'])])
             opts.extend(['-y', '-ac', '2', '-vn'])
         else:
-            advanced = (headphones.CONFIG.ADVANCEDENCODER.split())
+            advanced = (encoder_config['ADVANCEDENCODER'].split())
             for tok in advanced:
-                opts.extend([tok.encode(headphones.SYS_ENCODING)])
+                opts.extend([tok.encode(encoder_config['SYS_ENCODING'])])
         opts.extend([musicDest])
         cmd.extend(opts)
 
     # Libav
-    elif headphones.CONFIG.ENCODER == "libav":
+    elif encoder_config['ENCODER'] == "libav":
         cmd = [encoder, '-i', musicSource]
         opts = []
-        if not headphones.CONFIG.ADVANCEDENCODER:
-            if headphones.CONFIG.ENCODEROUTPUTFORMAT == 'ogg':
+        if not encoder_config['ADVANCEDENCODER']:
+            if encoder_config['ENCODEROUTPUTFORMAT'] == 'ogg':
                 opts.extend(['-acodec', 'libvorbis'])
-            if headphones.CONFIG.ENCODEROUTPUTFORMAT == 'm4a':
+            if encoder_config['ENCODEROUTPUTFORMAT'] == 'm4a':
                 opts.extend(['-strict', 'experimental'])
-            if headphones.CONFIG.ENCODERVBRCBR == 'cbr':
-                opts.extend(['-ar', str(headphones.CONFIG.SAMPLINGFREQUENCY), '-ab',
-                             str(headphones.CONFIG.BITRATE) + 'k'])
-            elif headphones.CONFIG.ENCODERVBRCBR == 'vbr':
-                opts.extend(['-aq', str(headphones.CONFIG.ENCODERQUALITY)])
+            if encoder_config['ENCODERVBRCBR'] == 'cbr':
+                opts.extend(['-ar', str(encoder_config['SAMPLINGFREQUENCY']), '-ab',
+                             str(encoder_config['BITRATE']) + 'k'])
+            elif encoder_config['ENCODERVBRCBR'] == 'vbr':
+                opts.extend(['-aq', str(encoder_config['ENCODERQUALITY'])])
             opts.extend(['-y', '-ac', '2', '-vn'])
         else:
-            advanced = (headphones.CONFIG.ADVANCEDENCODER.split())
+            advanced = (encoder_config['ADVANCEDENCODER'].split())
             for tok in advanced:
-                opts.extend([tok.encode(headphones.SYS_ENCODING)])
+                opts.extend([tok.encode(encoder_config['SYS_ENCODING'])])
         opts.extend([musicDest])
         cmd.extend(opts)
 
     # Prevent Windows from opening a terminal window
     startupinfo = None
 
-    if headphones.SYS_PLATFORM == "win32":
+    if encoder_config['SYS_PLATFORM'] == "win32":
         startupinfo = subprocess.STARTUPINFO()
         try:
             startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
@@ -365,14 +395,17 @@ def command(encoder, musicSource, musicDest, albumPath, xldProfile):
     process = subprocess.Popen(cmd, startupinfo=startupinfo,
                                stdin=open(os.devnull, 'rb'), stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE, text=True)
-    stdout, stderr = process.communicate(headphones.CONFIG.ENCODER)
+    # The encoder reads nothing from stdin, so pass no input at all: the
+    # previous call `communicate(headphones.CONFIG.ENCODER)` sent the
+    # encoder's own name into the child's stdin as if it were input data.
+    stdout, stderr = process.communicate()
 
     # Error if return code not zero
     if process.returncode:
         logger.error(f"Encoding failed for {musicSource}")
         out = stdout or stderr
         outlast2lines = '\n'.join(out.splitlines()[-2:])
-        logger.error(f"{headphones.CONFIG.ENCODER} error details: {outlast2lines}")
+        logger.error(f"{encoder_config['ENCODER']} error details: {outlast2lines}")
         out = out.rstrip("\n")
         logger.debug(out)
         encoded = False
