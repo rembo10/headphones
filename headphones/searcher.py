@@ -1468,10 +1468,24 @@ def searchTorrent(album, new=False, losslessOnly=False, albumlength=None,
                     for item in items:
                         try:
                             title = item.title.get_text()
-                            if item.find("link"):
-                                url = item.find("link").next_sibling.strip()
+                            link_elem = item.find("link")
+                            enclosure_elem = item.find('enclosure')
+                            if link_elem is not None:
+                                # 1. Standard RSS: the URL is the text node following <link>
+                                url = link_elem.next_sibling.strip() if link_elem.next_sibling else None
+                                # 2. Atom-style: the URL is the <link> element's own text content
+                                if not url:
+                                    url = link_elem.get_text(strip=True)
+                                # 3. Torznab spec allows the URL to live in <enclosure url="...">
+                                if not url and enclosure_elem is not None:
+                                    url = enclosure_elem.get('url')
+                            elif enclosure_elem is not None:
+                                url = enclosure_elem.get('url')
                             else:
-                                url = item.find('enclosure').get('url')
+                                url = None
+                            if not url:
+                                logger.warning("Skipping %s, no link or enclosure URL found in feed item", title)
+                                continue
                             seeders = int(item.find("torznab:attr", attrs={"name": "seeders"}).get('value'))
                             if item.size:
                                 size = int(item.size.string)
