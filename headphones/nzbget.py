@@ -52,8 +52,7 @@ def sendNZB(nzb):
                 nzb.name + ".nzb")):
             logger.debug("Successfully connected to NZBget")
         else:
-            logger.info("Successfully connected to NZBget, but unable to send a message" % (
-                nzb.name + ".nzb"))
+            logger.info("Successfully connected to NZBget, but unable to send a message")
 
     except http.client.socket.error:
         logger.error(
