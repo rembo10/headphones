@@ -134,7 +134,7 @@ def read_torrent_name(torrent_file, default_name=None):
     if torrent_info:
         try:
             return torrent_info["info"]["name"]
-        except KeyError:
+        except KeyError as e:
             if default_name:
                 logger.warning("Couldn't get name from torrent file: %s. "
                                "Defaulting to '%s'", e, default_name)

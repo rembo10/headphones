@@ -185,7 +185,7 @@ def file_metadata(path, release, single_disc_ignore=False):
     try:
         f = MediaFile(path)
     except UnreadableFileError as ex:
-        logger.info(f"MediaFile couldn't parse {path}: {e}")
+        logger.info(f"MediaFile couldn't parse {path}: {ex}")
         return None, None
 
     res = MetadataDict()
